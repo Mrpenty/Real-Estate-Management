@@ -6,7 +6,7 @@ using System.Text;
 
 namespace RealEstateManagement.API.Extensions
 {
-    public static class AuthenticationExtensions
+    public static partial class AuthenticationExtensions
     {
         public static IServiceCollection AddAuthenticationServices(this IServiceCollection services, IConfiguration configuration)
         {

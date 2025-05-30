@@ -1,11 +1,6 @@
 ﻿using RealEstateManagement.Business.DTO;
 using RealEstateManagement.Data.Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace RealEstateManagement.Business.Repositories
 {
@@ -13,7 +8,7 @@ namespace RealEstateManagement.Business.Repositories
     {
         Task<TokenDTO> CreateJWTTokenAsync(ApplicationUser user, bool populateExp);
         Task<TokenDTO> RefreshJWTTokenAsync(TokenDTO tokenDTO);
-        //void SetTokenCookie(TokenDTO tokenDTO, HttpContext context);
-        //void DeleteTokenCookie(HttpContext context);
+        void SetTokenCookie(TokenDTO tokenDTO, HttpContext context);
+        void DeleteTokenCookie(HttpContext context);
     }
 }

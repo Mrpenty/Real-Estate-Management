@@ -10,8 +10,14 @@ public partial class ApplicationUserConfiguration : IEntityTypeConfiguration<App
         builder.Property(u => u.Role).HasMaxLength(20).IsRequired()
             .HasConversion<string>()
             .HasDefaultValue("renter");
+      //  builder.Property(u => u.PhoneNumber).HasMaxLength(11).IsRequired();
         builder.Property(u => u.IsVerified).HasDefaultValue(false);
         builder.Property(u => u.CreatedAt).HasDefaultValueSql("GETDATE()");
+        builder.Property(u => u.RefreshToken)
+           .IsRequired(false)
+           .HasMaxLength(500);
+        builder.Property(u => u.RefreshTokenExpiryTime)
+            .IsRequired(false);
 
         // Relationships
         builder.HasMany(u => u.Preferences)

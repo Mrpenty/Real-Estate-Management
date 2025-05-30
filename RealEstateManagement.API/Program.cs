@@ -15,7 +15,7 @@ builder.Services.AddAuthenticationServices(builder.Configuration);
 builder.Services.AddCorsServices(builder.Configuration, builder.Environment);
 builder.Services.AddSwaggerServices();
 builder.Services.AddHttpContextAccessor();
-
+builder.Services.AddDependencyInjectionServices();
 
 
 var app = builder.Build();

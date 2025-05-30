@@ -13,9 +13,12 @@ namespace RealEstateManagement.Data.Entity
     {
         public string Name { get; set; }
         public string Role { get; set; } // renter, landlord, admin
+       // public override string PhoneNumber { get; set; }
         public bool IsVerified { get; set; }
         public DateTime CreatedAt { get; set; }
 
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
         // Navigation properties
         public ICollection<UserPreference> Preferences { get; set; }
         public ICollection<Property> Properties { get; set; }

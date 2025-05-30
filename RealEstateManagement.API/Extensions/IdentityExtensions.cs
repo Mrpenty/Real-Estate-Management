@@ -9,6 +9,7 @@ namespace RealEstateManagement.API.Extensions
         {
             services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
             {
+                options.SignIn.RequireConfirmedAccount = false;
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 6;
                 options.Password.RequireNonAlphanumeric = true;
