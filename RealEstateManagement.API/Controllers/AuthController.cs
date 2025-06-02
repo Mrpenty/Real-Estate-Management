@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Business.DTO.AuthDTO;
 using RealEstateManagement.Business.Repositories;
+using RealEstateManagement.Business.Services.Auth;
 using RealEstateManagement.Data.Entity;
 
 namespace RealEstateManagement.API.Controllers
@@ -12,34 +13,72 @@ namespace RealEstateManagement.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly ITokenRepository _tokenRepository;
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ITokenRepository tokenRepository)
+     
+        private readonly IAuthService _authService;
+        private readonly ILogger<AuthController> _logger;
+
+        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IAuthService authService, ILogger<AuthController> logger)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _tokenRepository = tokenRepository;
+           
+            _authService = authService;
+            _logger = logger;
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> LoginAsync([FromBody] LoginDTO loginDTO)
         {
-            var user = await _userManager.FindByEmailAsync(request.LoginIdentifier) ??
-                       await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == request.LoginIdentifier);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            if (user == null)
-                return BadRequest("Invalid login identifier");
+            try
+            {
+                var response = await _authService.LoginAsync(loginDTO);
+                return Ok(response);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
+        [HttpPost("register")]
+        public async Task<IActionResult> RegisterAsync([FromBody] RegisterDTO registerDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: false);
-            if (!result.Succeeded)
-                return BadRequest("Invalid password");
+            try
+            {
+                var response = await _authService.RegisterAsync(registerDTO);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while registering.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
 
-            var token = await _tokenRepository.CreateJWTTokenAsync(user, true);
-
-            _tokenRepository.SetTokenCookie(token, HttpContext);
-
-            return Ok(token);
+        [HttpPost("logout")]
+        public async Task<IActionResult> LogoutAsync()
+        {
+            try
+            {
+                await _authService.LogoutAsync();
+                return Ok(new { Message = "Logged out successfully." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while logging out.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
         }
     }
 }

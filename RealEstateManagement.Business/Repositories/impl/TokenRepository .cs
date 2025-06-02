@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using RealEstateManagement.Business.DTO;
+using RealEstateManagement.Business.DTO.AuthDTO;
 using RealEstateManagement.Data.Entity;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

@@ -1,6 +1,7 @@
 ﻿using RealEstateManagement.Business.DTO;
 using RealEstateManagement.Data.Entity;
 using Microsoft.AspNetCore.Http;
+using RealEstateManagement.Business.DTO.AuthDTO;
 
 namespace RealEstateManagement.Business.Repositories
 {
