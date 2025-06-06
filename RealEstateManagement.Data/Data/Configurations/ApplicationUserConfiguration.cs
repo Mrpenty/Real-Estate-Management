@@ -10,7 +10,7 @@ public partial class ApplicationUserConfiguration : IEntityTypeConfiguration<App
         builder.Property(u => u.Role).HasMaxLength(20).IsRequired()
             .HasConversion<string>()
             .HasDefaultValue("renter");
-      //  builder.Property(u => u.PhoneNumber).HasMaxLength(11).IsRequired();
+        //  builder.Property(u => u.PhoneNumber).HasMaxLength(11).IsRequired();
         builder.Property(u => u.IsVerified).HasDefaultValue(false);
         builder.Property(u => u.CreatedAt).HasDefaultValueSql("GETDATE()");
         builder.Property(u => u.RefreshToken)
@@ -30,24 +30,27 @@ public partial class ApplicationUserConfiguration : IEntityTypeConfiguration<App
                .HasForeignKey(p => p.LandlordId)
                .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(u => u.Bookings)
-               .WithOne(b => b.Renter)
-               .HasForeignKey(b => b.RenterId)
-               .OnDelete(DeleteBehavior.NoAction);
+
 
         builder.HasMany(u => u.Reviews)
                .WithOne(r => r.Renter)
                .HasForeignKey(r => r.RenterId)
                .OnDelete(DeleteBehavior.NoAction);
 
-        builder.HasMany(u => u.MessagesAsRenter)
-               .WithOne(mt => mt.Renter)
-               .HasForeignKey(mt => mt.RenterId)
-               .OnDelete(DeleteBehavior.NoAction);
+        builder.HasMany(u => u.ConversationsAsRenter)
+               .WithOne(c => c.Renter)
+               .HasForeignKey(c => c.RenterId)
+               .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(u => u.MessagesAsLandlord)
-               .WithOne(mt => mt.Landlord)
-               .HasForeignKey(mt => mt.LandlordId)
-               .OnDelete(DeleteBehavior.NoAction);
+        builder.HasMany(u => u.ConversationsAsLandlord)
+               .WithOne(c => c.Landlord)
+               .HasForeignKey(c => c.LandlordId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(u => u.MessagesSent)
+               .WithOne(m => m.Sender)
+               .HasForeignKey(m => m.SenderId)
+               .OnDelete(DeleteBehavior.Restrict);
+
     }
 }

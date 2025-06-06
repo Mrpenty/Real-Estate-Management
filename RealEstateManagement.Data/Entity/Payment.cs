@@ -10,7 +10,6 @@
         public DateTime? PaidAt { get; set; }
         public int? TransactionId { get; set; }
 
-        public Contract Contract { get; set; }
         public Transaction Transaction { get; set; }
     }
 }
