@@ -3,7 +3,7 @@ using RealEstateManagement.Data.Entity;
 using Microsoft.AspNetCore.Http;
 using RealEstateManagement.Business.DTO.AuthDTO;
 
-namespace RealEstateManagement.Business.Repositories
+namespace RealEstateManagement.Business.Repositories.Token
 {
     public interface ITokenRepository
     {

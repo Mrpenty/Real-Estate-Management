@@ -12,11 +12,11 @@ using System.Security.Cryptography;
 using System.Text;
 
 
-namespace RealEstateManagement.Business.Repositories.impl
+namespace RealEstateManagement.Business.Repositories.Token
 {
     public class TokenRepository : ITokenRepository
     {
-         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly ILogger<TokenRepository> _logger;
 

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Business.DTO.AuthDTO;
-using RealEstateManagement.Business.Repositories;
+using RealEstateManagement.Business.Repositories.Token;
 using RealEstateManagement.Data.Entity;
 using System;
 using System.Collections.Generic;
