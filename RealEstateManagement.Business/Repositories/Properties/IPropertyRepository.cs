@@ -12,5 +12,6 @@ namespace RealEstateManagement.Business.Repositories.Properties
         Task<IEnumerable<Property>> GetAllAsync();
         Task<Property> GetPropertyByIdAsync(int id);
         Task<IEnumerable<Property>> FilterByPriceAsync(decimal minPrice, decimal maxPrice);
+        Task<IEnumerable<Property>> FilterByAreaAsync(decimal minArea, decimal maxArea);
     }
 }

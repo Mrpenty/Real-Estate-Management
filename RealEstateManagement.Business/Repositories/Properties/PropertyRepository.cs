@@ -17,7 +17,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
         {
             _context = context;
         }
-
+        //Lấy tất cả property
         public async Task<IEnumerable<Property>> GetAllAsync()
         {
             return await _context.Properties
@@ -28,6 +28,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
         }
+        //Lấy property theo Id
         public async Task<Property> GetPropertyByIdAsync(int id)
         {
             return await _context.Properties
@@ -37,6 +38,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
                     .ThenInclude(pa => pa.Amenity)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
+        //Sắp xếp theo giá
         public async Task<IEnumerable<Property>> FilterByPriceAsync(decimal minPrice, decimal maxPrice)
         {
             return await _context.Properties
@@ -44,7 +46,19 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities)
                     .ThenInclude(pa => pa.Amenity)
-                .Where(p=>p.Price >= minPrice && p.Price <= maxPrice)
+                .Where(p=>p.Price >= minPrice && p.Price <= maxPrice) // Dòng này sắp xếp theo giá
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+        }
+        //Sắp xếp theo diện tích
+        public async Task<IEnumerable<Property>> FilterByAreaAsync(decimal minArea, decimal maxArea)
+        {
+            return await _context.Properties
+                .Include(p => p.Images)
+                .Include (p => p.Landlord)
+                .Include(p=>p.PropertyAmenities)
+                    .ThenInclude(pa=>pa.Amenity)
+                .Where(p=>p.Area >= minArea && p.Area <=maxArea)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
         }

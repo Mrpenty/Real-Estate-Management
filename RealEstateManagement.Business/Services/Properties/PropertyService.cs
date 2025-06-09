@@ -94,5 +94,30 @@ namespace RealEstateManagement.Business.Services.Properties
                 Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>()
             });
         }
+        public async Task<IEnumerable<HomePropertyDTO>> FilterByAreaAsync(decimal minArea, decimal maxArea)
+        {
+            var p = await _repository.FilterByPriceAsync(minArea, maxArea);
+            if (p == null) return null;
+            return p.Select(p => new HomePropertyDTO
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Description = p.Description,
+                Type = p.Type,
+                Address = p.Address,
+                Area = p.Area,
+                Bedrooms = p.Bedrooms,
+                Price = p.Price,
+                Status = p.Status,
+                Location = p.Location,
+                CreatedAt = p.CreatedAt,
+                ViewsCount = p.ViewsCount,
+                PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
+                LandlordName = p.Landlord?.Name,
+                LandlordPhoneNumber = p.Landlord?.PhoneNumber,
+                LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
+                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>()
+            });
+        }
     }
 }

@@ -23,14 +23,12 @@ namespace RealEstateManagement.API.Controllers
                 var properties = await _propertyService.GetAllPropertiesAsync();
 
                 if (properties == null || !properties.Any())
-                    return NotFound("No properties found.");
+                    return NotFound("Không tìm thấy bất động sản nào");
 
                 return Ok(properties);
             }
             catch (Exception ex)
             {
-                // Ghi log nếu có hệ thống log (khuyên dùng)
-                // _logger.LogError(ex, "Failed to get homepage properties");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -40,7 +38,7 @@ namespace RealEstateManagement.API.Controllers
             var property = await _propertyService.GetPropertyByIdAsync(id);
             if (property == null)
             {
-                throw new KeyNotFoundException();
+                return NotFound("Không tìm thấy bất động sản nào");
             }
             return Ok(property);
         }
@@ -49,10 +47,33 @@ namespace RealEstateManagement.API.Controllers
         {
             try
             {
+                if (minPrice < 0 || maxPrice < 0 || minPrice > maxPrice)
+                    return BadRequest("Khoảng giá không hợp lệ.");
                 var properties = await _propertyService.FilterByPriceAsync(minPrice, maxPrice);
 
                 if (properties == null || !properties.Any())
-                    return NotFound("No properties found.");
+                    return NotFound("Không tìm thấy bất động sản nào trong khoảng giá.");
+
+                return Ok(properties);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        [HttpGet("filter-by-area")]
+        public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByArea(decimal minArea, decimal maxArea)
+        {
+            try
+            {
+                if (minArea < 0 || maxArea < 0 || minArea > maxArea)
+                {
+                    return BadRequest("Diện tích không hợp lệ.");
+                }
+                var properties = await _propertyService.FilterByAreaAsync(minArea, maxArea);
+
+                if (properties == null || !properties.Any())
+                    return NotFound("Không tìm thấy bất động sản nào");
 
                 return Ok(properties);
             }
