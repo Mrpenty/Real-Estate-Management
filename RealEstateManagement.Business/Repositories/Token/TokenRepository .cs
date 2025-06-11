@@ -135,15 +135,14 @@ namespace RealEstateManagement.Business.Repositories.Token
         private async Task<List<Claim>> GetClaims(ApplicationUser user)
         {
             var claims = new List<Claim>
-            {
-                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-                new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+        {
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
 
             var roles = await _userManager.GetRolesAsync(user);
-
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             return claims;
@@ -196,8 +195,8 @@ namespace RealEstateManagement.Business.Repositories.Token
             }
 
             return principal;
+            }
+
         }
 
-
     }
-}

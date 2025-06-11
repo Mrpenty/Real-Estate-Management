@@ -10,8 +10,13 @@ namespace RealEstateManagement.Business.Repositories.Properties
     public interface IPropertyRepository
     {
         Task<IEnumerable<Property>> GetAllAsync();
+        //Lấy 1 property theo id
         Task<Property> GetPropertyByIdAsync(int id);
         Task<IEnumerable<Property>> FilterByPriceAsync(decimal minPrice, decimal maxPrice);
         Task<IEnumerable<Property>> FilterByAreaAsync(decimal minArea, decimal maxArea);
+        //So sánh property (tối đa là 3)
+        Task<IEnumerable<Property>> ComparePropertiesAsync(List<int> ids);
+        //Lấy nhiều property để so sánh
+        Task<List<Property>> GetPropertiesByIdsAsync(List<int> ids);
     }
 }
