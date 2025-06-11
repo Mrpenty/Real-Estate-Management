@@ -62,5 +62,31 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
         }
+
+        //So sánh property
+        public async Task<IEnumerable<Property>> ComparePropertiesAsync(List<int> ids)
+        {
+            return await _context.Properties
+                .Where(p => ids.Contains(p.Id)) 
+                .Include(p => p.Images)
+                .Include(p => p.Landlord)
+                .Include(p => p.PropertyAmenities)
+                    .ThenInclude(pa => pa.Amenity)
+                //.OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+        }
+
+        //Lấy nhiều property để so sánh
+        public async Task<List<Property>> GetPropertiesByIdsAsync(List<int> ids)
+        {
+            return await _context.Properties
+                .Where(p => ids.Contains(p.Id))
+                .Include(p => p.Images)
+                .Include(p => p.Landlord)
+                .Include(p => p.Reviews)
+                .Include(p => p.PropertyAmenities)
+                    .ThenInclude(pa => pa.Amenity)
+                .ToListAsync();
+        }
     }
 }

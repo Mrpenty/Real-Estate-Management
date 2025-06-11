@@ -32,22 +32,19 @@ namespace RealEstateManagement.API.Extensions
 
                     options.Events = new JwtBearerEvents
                     {
-                        OnAuthenticationFailed = context =>
+                        OnMessageReceived = ctx =>
                         {
-                            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                            ctx.Request.Cookies.TryGetValue("accessToken", out var accessToken);
+                            if (!string.IsNullOrEmpty(accessToken))
                             {
-                                context.Response.Headers.Add("Token-Expired", "true");
+                                ctx.Token = accessToken;
                             }
-                            return Task.CompletedTask;
-                        },
-                        OnTokenValidated = context =>
-                        {
-                            // Custom logic after token validation if needed
+
                             return Task.CompletedTask;
                         }
-                    };  
+                    };
                 });
-           
+
             return services;
         }
     }
