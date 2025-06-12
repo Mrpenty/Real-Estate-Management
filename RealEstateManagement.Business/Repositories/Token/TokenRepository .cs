@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+
+﻿using Google.Apis.Auth;
+using Microsoft.AspNetCore.Http;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -135,12 +138,13 @@ namespace RealEstateManagement.Business.Repositories.Token
         private async Task<List<Claim>> GetClaims(ApplicationUser user)
         {
             var claims = new List<Claim>
-        {
-            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-            new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+            {
+                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+                new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
 
             var roles = await _userManager.GetRolesAsync(user);
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
@@ -195,8 +199,36 @@ namespace RealEstateManagement.Business.Repositories.Token
             }
 
             return principal;
-            }
 
         }
 
+        public async Task<GoogleJsonWebSignature.Payload> ValidateGoogleIdTokenAsync(string idToken)
+        {
+            try
+            {
+                var settings = new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { _configuration["Google:ClientId"] }
+                };
+                return await GoogleJsonWebSignature.ValidateAsync(idToken, settings);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to validate Google ID token.");
+                throw;
+            }
+        }
+
+        private string GenerateConfirmationCode()
+        {
+            var random = new Random();
+            return random.Next(100000, 999999).ToString(); 
+        }
+
+        string ITokenRepository.GenerateConfirmationCode()
+        {
+            return GenerateConfirmationCode();
+        }
     }
+}
+

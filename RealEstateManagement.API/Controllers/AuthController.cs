@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2.Flows;
+using Google.Apis.Util.Store;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,17 +15,20 @@ namespace RealEstateManagement.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    
     public class AuthController : ControllerBase
     {
      
         private readonly IAuthService _authService;
         private readonly ILogger<AuthController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IAuthService authService, ILogger<AuthController> logger)
+        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IAuthService authService, ILogger<AuthController> logger, IConfiguration configuration)
         {
-           
+
             _authService = authService;
             _logger = logger;
+            _configuration = configuration;
         }
 
         [HttpPost("login")]
@@ -80,5 +87,81 @@ namespace RealEstateManagement.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
+        [HttpPost("verify-otp")]
+        public async Task<IActionResult> VerifyOtpAsync([FromBody] VerifyOtpDTO verifyOtpDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var response = await _authService.VerifyOtpAsync(verifyOtpDTO.PhoneNumber, verifyOtpDTO.Otp);
+                if (!response.IsAuthSuccessful)
+                {
+                    return BadRequest(response.ErrorMessage);
+                }
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while verifying OTP.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpPost("google-login")]
+        [Authorize(Roles = "Renter")]
+        public async Task<IActionResult> GoogleLoginAsync([FromBody] GoogleLoginDTO googleLoginDTO)
+        {
+            if (!ModelState.IsValid || string.IsNullOrEmpty(googleLoginDTO.IdToken))
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var response = await _authService.GoogleLoginAsync(googleLoginDTO.IdToken);
+                if (response.IsAuthSuccessful)
+                {
+                    return Ok(response);
+                }
+                return BadRequest(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during Google login.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpPost("verify-email")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> VerifyEmailConfirmationAsync([FromBody] VerifyEmailDTO verifyEmailDTO)
+        {
+            if (!ModelState.IsValid || string.IsNullOrEmpty(verifyEmailDTO.Email) || string.IsNullOrEmpty(verifyEmailDTO.Code))
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var response = await _authService.VerifyEmailConfirmationAsync(verifyEmailDTO.Email, verifyEmailDTO.Code);
+                if (response.IsAuthSuccessful)
+                {
+                    return Ok(response);
+                }
+                return BadRequest(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while verifying email.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
+
+       
+
     }
 }

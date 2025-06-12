@@ -24,21 +24,21 @@ namespace RealEstateManagement.API.Extensions
                     Scheme = "Bearer"
                 });
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
-         {
-             {
-                 new OpenApiSecurityScheme
-                 {
-                     Reference = new OpenApiReference
-                     {
-                         Type=ReferenceType.SecurityScheme,
-                         Id="Bearer"
-                     }
-                 },
-                 Array.Empty<string>()
-             }
-         });
-
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type=ReferenceType.SecurityScheme,
+                            Id="Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
             });
+            
+        });
 
             return services;
         }

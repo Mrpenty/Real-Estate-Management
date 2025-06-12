@@ -1,7 +1,12 @@
 ﻿using RealEstateManagement.Business.Services.Auth;
+
+using RealEstateManagement.Business.Services.Mail;
+using RealEstateManagement.Business.Repositories.Token;
+
 using RealEstateManagement.Business.Repositories.Token;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Services.OwnerService;
+
 
 namespace RealEstateManagement.API.Extensions
 {
@@ -14,8 +19,15 @@ namespace RealEstateManagement.API.Extensions
 
             services.AddScoped<IAuthService, AuthService>();
 
+
+            services.AddScoped<IMailService, MailService>();
+
+            services.AddScoped<ISmsService, TwilioSmsService>();
+
+
             services.AddScoped<IPropertyPostRepository, PropertyPostRepository>();
             services.AddScoped<IPropertyPostService, PropertyPostService>();
+
 
 
             return services;
