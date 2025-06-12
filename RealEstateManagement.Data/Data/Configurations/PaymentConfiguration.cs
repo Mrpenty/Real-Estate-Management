@@ -14,10 +14,7 @@ public partial class ApplicationUserConfiguration
             builder.Property(p => p.Status).HasMaxLength(20).IsRequired()
                 .HasConversion<string>();
 
-            builder.HasOne(p => p.Contract)
-                   .WithMany(c => c.Payments)
-                   .HasForeignKey(p => p.ContractId)
-                   .OnDelete(DeleteBehavior.Cascade);
+
 
             builder.HasOne(p => p.Transaction)
                    .WithMany(t => t.Payments)

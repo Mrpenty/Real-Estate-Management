@@ -13,12 +13,11 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     public DbSet<PropertyAmenity> PropertyAmenities { get; set; }
     public DbSet<PropertyImage> PropertyImages { get; set; }
     public DbSet<PropertyPost> PropertyPosts { get; set; }
-    public DbSet<Booking> Bookings { get; set; }
-    public DbSet<Contract> Contracts { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<Conversation> Conversation { get; set; }
+    public DbSet<Message> Message { get; set; }
     public DbSet<Review> Reviews { get; set; }
-    public DbSet<MessageThread> MessageThreads { get; set; }
     public DbSet<UserPreferenceFavoriteProperties> UserPreferenceFavoriteProperties { get; set; } // Added
 
     public RentalDbContext(DbContextOptions<RentalDbContext> options) : base(options) { }
@@ -34,12 +33,14 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
         modelBuilder.ApplyConfiguration(new PropertyAmenityConfiguration());
         modelBuilder.ApplyConfiguration(new PropertyImageConfiguration());
         modelBuilder.ApplyConfiguration(new PropertyPostConfiguration());
-        modelBuilder.ApplyConfiguration(new BookingConfiguration());
-        modelBuilder.ApplyConfiguration(new ContractConfiguration());
         modelBuilder.ApplyConfiguration(new PaymentConfiguration());
         modelBuilder.ApplyConfiguration(new TransactionConfiguration());
         modelBuilder.ApplyConfiguration(new ReviewConfiguration());
-        modelBuilder.ApplyConfiguration(new MessageThreadConfiguration());
+        modelBuilder.ApplyConfiguration(new ConversationConfiguration());
+        modelBuilder.ApplyConfiguration(new MessageConfiguration());
+        modelBuilder.ApplyConfiguration(new InterestConfiguration());
+
+
 
         DataSeed.SeedData(modelBuilder);
     }

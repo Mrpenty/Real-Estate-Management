@@ -11,6 +11,7 @@
         public DateTime CreatedAt { get; set; }
 
         public ApplicationUser User { get; set; }
-        public ICollection<Property> FavoriteProperties { get; set; }
+        public Property Property { get; set; }
+        public ICollection<UserPreferenceFavoriteProperties> FavoriteProperties { get; set; }
     }
 }

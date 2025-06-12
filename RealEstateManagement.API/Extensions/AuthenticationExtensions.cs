@@ -6,7 +6,7 @@ using System.Text;
 
 namespace RealEstateManagement.API.Extensions
 {
-    public static class AuthenticationExtensions
+    public static partial class AuthenticationExtensions
     {
         public static IServiceCollection AddAuthenticationServices(this IServiceCollection services, IConfiguration configuration)
         {
@@ -16,7 +16,7 @@ namespace RealEstateManagement.API.Extensions
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-                .AddJwtBearer("Bearer", options =>
+                .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
@@ -27,27 +27,24 @@ namespace RealEstateManagement.API.Extensions
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
                         NameClaimType = JwtRegisteredClaimNames.Sub,
-                        RoleClaimType = "role"
+                        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     };
 
                     options.Events = new JwtBearerEvents
                     {
-                        OnAuthenticationFailed = context =>
+                        OnMessageReceived = ctx =>
                         {
-                            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+                            ctx.Request.Cookies.TryGetValue("accessToken", out var accessToken);
+                            if (!string.IsNullOrEmpty(accessToken))
                             {
-                                context.Response.Headers.Add("Token-Expired", "true");
+                                ctx.Token = accessToken;
                             }
-                            return Task.CompletedTask;
-                        },
-                        OnTokenValidated = context =>
-                        {
-                            // Custom logic after token validation if needed
+
                             return Task.CompletedTask;
                         }
-                    };  
+                    };
                 });
-           
+
             return services;
         }
     }

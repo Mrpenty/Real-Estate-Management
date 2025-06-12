@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.API.Extensions;
+using RealEstateManagement.API.Middleware;
+using RealEstateManagement.Business.Repositories.Properties;
+using RealEstateManagement.Business.Services.Properties;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,13 +18,14 @@ builder.Services.AddAuthenticationServices(builder.Configuration);
 builder.Services.AddCorsServices(builder.Configuration, builder.Environment);
 builder.Services.AddSwaggerServices();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddDependencyInjectionServices();
 
-
-
+builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
+builder.Services.AddScoped<IPropertyService, PropertyService>();
 var app = builder.Build();
 
 
-
+app.UseErrorHandlingMiddleware();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -9,25 +9,23 @@ using System.Threading.Tasks;
 
 namespace RealEstateManagement.Data.Data
 {
-   public class DataSeed
+    public class DataSeed
     {
         public static void SeedData(ModelBuilder modelBuilder)
         {
             SeedRoles(modelBuilder);
             SeedUsers(modelBuilder);
             SeedUserRoles(modelBuilder);
-            SeedUserPreferences(modelBuilder);
+            //  SeedUserPreferences(modelBuilder);
             SeedAmenities(modelBuilder);
             SeedProperties(modelBuilder);
             SeedPropertyAmenities(modelBuilder);
             SeedPropertyImages(modelBuilder);
             SeedPropertyPosts(modelBuilder);
-            SeedBookings(modelBuilder);
-            SeedContracts(modelBuilder);
+
             SeedPayments(modelBuilder);
             SeedTransactions(modelBuilder);
             SeedReviews(modelBuilder);
-            SeedMessageThreads(modelBuilder);
         }
 
         private static void SeedRoles(ModelBuilder modelBuilder)
@@ -49,6 +47,8 @@ namespace RealEstateManagement.Data.Data
                     UserName = "admin@example.com",
                     NormalizedUserName = "ADMIN@EXAMPLE.COM",
                     Email = "admin@example.com",
+                    PhoneNumber = "12345678910",
+                    SecurityStamp = Guid.NewGuid().ToString(),
                     NormalizedEmail = "ADMIN@EXAMPLE.COM",
                     PasswordHash = hasher.HashPassword(null, "Admin@123"),
                     Name = "Admin User",
@@ -62,6 +62,8 @@ namespace RealEstateManagement.Data.Data
                     UserName = "landlord@example.com",
                     NormalizedUserName = "LANDLORD@EXAMPLE.COM",
                     Email = "landlord@example.com",
+                    PhoneNumber = "02345678910",
+                    SecurityStamp = Guid.NewGuid().ToString(),
                     NormalizedEmail = "LANDLORD@EXAMPLE.COM",
                     PasswordHash = hasher.HashPassword(null, "Landlord@123"),
                     Name = "Landlord User",
@@ -75,6 +77,8 @@ namespace RealEstateManagement.Data.Data
                     UserName = "renter@example.com",
                     NormalizedUserName = "RENTER@EXAMPLE.COM",
                     Email = "renter@example.com",
+                    PhoneNumber = "03345678910",
+                    SecurityStamp = Guid.NewGuid().ToString(),
                     NormalizedEmail = "RENTER@EXAMPLE.COM",
                     PasswordHash = hasher.HashPassword(null, "Renter@123"),
                     Name = "Renter User",
@@ -88,6 +92,7 @@ namespace RealEstateManagement.Data.Data
                     UserName = "renter2@example.com",
                     NormalizedUserName = "RENTER2@EXAMPLE.COM",
                     Email = "renter2@example.com",
+                    SecurityStamp = Guid.NewGuid().ToString(),
                     NormalizedEmail = "RENTER2@EXAMPLE.COM",
                     PasswordHash = hasher.HashPassword(null, "Renter2@123"),
                     Name = "Renter User 2",
@@ -177,8 +182,7 @@ namespace RealEstateManagement.Data.Data
                     Status = "available",
                     IsPromoted = false,
                     Price = 5000000,
-                    MinPrice = 4000000,
-                    MaxPrice = 6000000,
+
                     IsVerified = true,
                     ViewsCount = 0,
                     Location = "10.7769,106.7009",
@@ -197,8 +201,7 @@ namespace RealEstateManagement.Data.Data
                     Status = "available",
                     IsPromoted = false,
                     Price = 2000000,
-                    MinPrice = 1500000,
-                    MaxPrice = 2500000,
+
                     IsVerified = true,
                     ViewsCount = 0,
                     Location = "10.8505,106.6737",
@@ -217,8 +220,7 @@ namespace RealEstateManagement.Data.Data
                     Status = "available",
                     IsPromoted = true,
                     Price = 8000000,
-                    MinPrice = 7000000,
-                    MaxPrice = 9000000,
+
                     IsVerified = true,
                     ViewsCount = 0,
                     Location = "10.7982,106.6582",
@@ -285,40 +287,8 @@ namespace RealEstateManagement.Data.Data
             );
         }
 
-        private static void SeedBookings(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Booking>().HasData(
-                new Booking
-                {
-                    Id = 1,
-                    RenterId = 3,
-                    PropertyId = 1,
-                    Message = "Interested in renting the apartment.",
-                    Status = "approved",
-                    StartDate = DateTime.Now.AddDays(1),
-                    EndDate = DateTime.Now.AddMonths(1),
-                    DepositStatus = "paid",
-                    CreatedAt = DateTime.Now
-                }
-            );
-        }
 
-        private static void SeedContracts(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Contract>().HasData(
-                new Contract
-                {
-                    Id = 1,
-                    BookingId = 1,
-                    StartDate = DateTime.Now.AddDays(1),
-                    EndDate = DateTime.Now.AddMonths(1),
-                    Deposit = 5000000,
-                    RentAmount = 5000000,
-                    Status = "active",
-                    CreatedAt = DateTime.Now
-                }
-            );
-        }
+
 
         private static void SeedPayments(ModelBuilder modelBuilder)
         {
@@ -367,46 +337,6 @@ namespace RealEstateManagement.Data.Data
             );
         }
 
-        private static void SeedMessageThreads(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<MessageThread>().HasData(
-                new MessageThread
-                {
-                    Id = 1,
-                    ThreadId = 1,
-                    RenterId = 3,
-                    LandlordId = 2,
-                    SenderId = 3,
-                    Content = "Is the apartment still available?",
-                    IsRead = false,
-                    NotificationSent = false,
-                    SentAt = DateTime.Now
-                },
-                new MessageThread
-                {
-                    Id = 2,
-                    ThreadId = 1,
-                    RenterId = 3,
-                    LandlordId = 2,
-                    SenderId = 2,
-                    Content = "Yes, it’s available. Would you like to book?",
-                    IsRead = false,
-                    NotificationSent = false,
-                    SentAt = DateTime.Now.AddMinutes(5)
-                },
-                new MessageThread
-                {
-                    Id = 3,
-                    ThreadId = 2,
-                    RenterId = 4,
-                    LandlordId = 2,
-                    SenderId = 4,
-                    Content = "Can I see the house in Tan Binh?",
-                    IsRead = false,
-                    NotificationSent = false,
-                    SentAt = DateTime.Now.AddHours(1)
-                }
-            );
-        }
+
     }
 }
