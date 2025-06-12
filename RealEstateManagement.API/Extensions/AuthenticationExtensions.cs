@@ -16,7 +16,7 @@ namespace RealEstateManagement.API.Extensions
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-                .AddJwtBearer("Bearer", options =>
+                .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
@@ -27,7 +27,6 @@ namespace RealEstateManagement.API.Extensions
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
                         NameClaimType = JwtRegisteredClaimNames.Sub,
-                        // RoleClaimType = "role"
                         RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     };
 
@@ -45,7 +44,7 @@ namespace RealEstateManagement.API.Extensions
                         }
                     };
                 });
-           
+
             return services;
         }
     }

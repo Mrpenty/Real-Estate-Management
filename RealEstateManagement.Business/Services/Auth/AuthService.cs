@@ -21,7 +21,7 @@ namespace RealEstateManagement.Business.Services.Auth
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ITokenRepository _tokenRepository;
         private readonly IMailService _mailService;
-        private readonly ISmsService _smsService; // Assuming you have an ISmsService for sending OTPs
+        private readonly ISmsService _smsService; 
         public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IHttpContextAccessor httpContextAccessor, ITokenRepository tokenRepository, IMailService mailService,ISmsService smsService )
         {
             _userManager = userManager;
@@ -29,7 +29,7 @@ namespace RealEstateManagement.Business.Services.Auth
             _httpContextAccessor = httpContextAccessor;
             _tokenRepository = tokenRepository;
             _mailService = mailService;
-            _smsService = smsService; // Injecting SMS service for OTP functionality
+            _smsService = smsService; 
         }
 
         public async Task<AuthMessDTO> LoginAsync(LoginDTO loginDTO)
@@ -62,7 +62,7 @@ namespace RealEstateManagement.Business.Services.Auth
 
         public async Task<AuthMessDTO> RegisterAsync(RegisterDTO registerDTO)
         {
-            // Check if phone number already exists
+            
             var existingUser = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == registerDTO.PhoneNumber);
             if (existingUser != null)
             {
@@ -72,12 +72,12 @@ namespace RealEstateManagement.Business.Services.Auth
             var user = new ApplicationUser
             {
                 Name = registerDTO.Name,
-                UserName = registerDTO.UserName, // Use phone number as username
+                UserName = registerDTO.UserName,
                 PhoneNumber = registerDTO.PhoneNumber,
                 NormalizedUserName = _userManager.NormalizeName(registerDTO.PhoneNumber),
-                NormalizedEmail = null, // Email is optional if not used
+                NormalizedEmail = null, 
                 SecurityStamp = Guid.NewGuid().ToString(),
-                IsVerified = false // Set to false until OTP is verified
+                IsVerified = false 
             };
 
             var createdUser = await _userManager.CreateAsync(user, registerDTO.Password);
@@ -95,13 +95,11 @@ namespace RealEstateManagement.Business.Services.Auth
                 return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = string.Join(", ", roleResult.Errors.Select(e => e.Description)) };
             }
 
-            // Generate and send OTP
             var confirmationCode = _tokenRepository.GenerateConfirmationCode();
             user.ConfirmationCode = confirmationCode;
             user.ConfirmationCodeExpiry = DateTime.Now.AddMinutes(5); 
             await _userManager.UpdateAsync(user);
 
-            // Assume ISmsService is injected to send OTP
             await _smsService.SendOtpAsync(user.PhoneNumber, confirmationCode);
 
             return new AuthMessDTO { IsAuthSuccessful = true, ErrorMessage = "Registration successful. An OTP has been sent to your phone for verification." };
@@ -128,7 +126,7 @@ namespace RealEstateManagement.Business.Services.Auth
             }
 
             user.PhoneNumberConfirmed = true;
-            user.ConfirmationCode = null; // Clear OTP after verification
+            user.ConfirmationCode = null; 
             user.ConfirmationCodeExpiry = null;
             await _userManager.UpdateAsync(user);
 
@@ -143,13 +141,13 @@ namespace RealEstateManagement.Business.Services.Auth
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
-                // Register new user
+               
                 user = new ApplicationUser
                 {
                     UserName = email,
                     Email = email,
                     Name = payload.Name ?? email.Split('@')[0],
-                    IsVerified = true, // Google email is pre-verified
+                    IsVerified = true, 
                     CreatedAt = DateTime.Now
                 };
                 var result = await _userManager.CreateAsync(user);
@@ -157,7 +155,7 @@ namespace RealEstateManagement.Business.Services.Auth
                 {
                     return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Registration failed" };
                 }
-                await _userManager.AddToRoleAsync(user, "User"); // Default role
+                await _userManager.AddToRoleAsync(user, "User"); 
             }
             else if (!user.IsVerified)
             {

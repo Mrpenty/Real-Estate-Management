@@ -1,5 +1,7 @@
+
 ﻿using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -143,6 +145,7 @@ namespace RealEstateManagement.Business.Repositories.Token
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
+
             var roles = await _userManager.GetRolesAsync(user);
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
@@ -196,6 +199,7 @@ namespace RealEstateManagement.Business.Repositories.Token
             }
 
             return principal;
+
         }
 
         public async Task<GoogleJsonWebSignature.Payload> ValidateGoogleIdTokenAsync(string idToken)
@@ -218,7 +222,7 @@ namespace RealEstateManagement.Business.Repositories.Token
         private string GenerateConfirmationCode()
         {
             var random = new Random();
-            return random.Next(100000, 999999).ToString(); // 6-digit code
+            return random.Next(100000, 999999).ToString(); 
         }
 
         string ITokenRepository.GenerateConfirmationCode()
@@ -227,3 +231,4 @@ namespace RealEstateManagement.Business.Repositories.Token
         }
     }
 }
+

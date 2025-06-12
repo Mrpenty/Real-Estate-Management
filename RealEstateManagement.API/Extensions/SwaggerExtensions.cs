@@ -53,9 +53,11 @@ namespace RealEstateManagement.API.Extensions
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Real Estate Management API V1");
                 });
             }
-           
+
 
             return app;
         }
     }
+
+
 }
