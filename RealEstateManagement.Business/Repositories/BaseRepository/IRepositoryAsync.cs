@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RealEstateManagement.Business.Repositories
+namespace RealEstateManagement.Business.Repositories.impl
 {
     public interface IRepositoryAsync<T> where T : class
     {

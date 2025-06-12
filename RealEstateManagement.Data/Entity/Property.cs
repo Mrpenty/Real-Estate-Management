@@ -25,5 +25,6 @@
         public ICollection<Conversation> Conversations { get; set; }
         public ICollection<PropertyAmenity> PropertyAmenities { get; set; }
         public ICollection<UserPreferenceFavoriteProperties> UserPreferences { get; set; } // Corrected type
+        public ICollection<PropertyPromotion> PropertyPromotions { get; set; } = new List<PropertyPromotion>();
     }
 }

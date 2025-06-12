@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Google.Apis.Auth;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -12,11 +13,11 @@ using System.Security.Cryptography;
 using System.Text;
 
 
-namespace RealEstateManagement.Business.Repositories.impl
+namespace RealEstateManagement.Business.Repositories.Token
 {
     public class TokenRepository : ITokenRepository
     {
-         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly ILogger<TokenRepository> _logger;
 
@@ -143,7 +144,6 @@ namespace RealEstateManagement.Business.Repositories.impl
             };
 
             var roles = await _userManager.GetRolesAsync(user);
-
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             return claims;
@@ -198,6 +198,32 @@ namespace RealEstateManagement.Business.Repositories.impl
             return principal;
         }
 
+        public async Task<GoogleJsonWebSignature.Payload> ValidateGoogleIdTokenAsync(string idToken)
+        {
+            try
+            {
+                var settings = new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { _configuration["Google:ClientId"] }
+                };
+                return await GoogleJsonWebSignature.ValidateAsync(idToken, settings);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to validate Google ID token.");
+                throw;
+            }
+        }
 
+        private string GenerateConfirmationCode()
+        {
+            var random = new Random();
+            return random.Next(100000, 999999).ToString(); // 6-digit code
+        }
+
+        string ITokenRepository.GenerateConfirmationCode()
+        {
+            return GenerateConfirmationCode();
+        }
     }
 }
