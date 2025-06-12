@@ -136,6 +136,7 @@ namespace RealEstateManagement.Business.Repositories.Token
         {
             var claims = new List<Claim>
         {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
@@ -176,6 +177,7 @@ namespace RealEstateManagement.Business.Repositories.Token
 
             var TokenValidationParameters = new TokenValidationParameters
             {
+
                 ValidateAudience = true,
                 ValidateIssuer = true,
                 ValidateIssuerSigningKey = true,

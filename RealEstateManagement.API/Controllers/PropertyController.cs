@@ -17,8 +17,8 @@ namespace RealEstateManagement.API.Controllers
             _propertyService = propertyService;
         }
 
-        [HttpGet("homepage-allproperty1")]
-        [Authorize(Roles = "Renter")]
+        [HttpGet("homepage-allproperty")]
+        [Authorize(Roles = "renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetHomepageProperties()
         {
             try
