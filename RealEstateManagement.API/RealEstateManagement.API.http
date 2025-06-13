@@ -1,4 +1,4 @@
-@RealEstateManagement.API_HostAddress = http://localhost:5258
+@RealEstateManagement_API_HostAddress = http://localhost:5258
 
 GET {{RealEstateManagement.API_HostAddress}}/weatherforecast/
 Accept: application/json

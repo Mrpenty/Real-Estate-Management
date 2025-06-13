@@ -118,16 +118,6 @@ namespace RealEstateManagement.Business.Repositories.Token
             context.Response.Cookies.Delete("refreshToken", cookieOptions);
         }
 
-
-
-
-
-
-
-
-
-
-
         private SigningCredentials GetSigningCreadentials()
         {
             var key = Encoding.UTF8.GetBytes(_configuration["JWT:Key"]);
@@ -138,12 +128,13 @@ namespace RealEstateManagement.Business.Repositories.Token
         private async Task<List<Claim>> GetClaims(ApplicationUser user)
         {
             var claims = new List<Claim>
-            {
-                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-                new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
 
 
             var roles = await _userManager.GetRolesAsync(user);
@@ -180,6 +171,7 @@ namespace RealEstateManagement.Business.Repositories.Token
 
             var TokenValidationParameters = new TokenValidationParameters
             {
+
                 ValidateAudience = true,
                 ValidateIssuer = true,
                 ValidateIssuerSigningKey = true,
