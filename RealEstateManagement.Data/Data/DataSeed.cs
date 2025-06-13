@@ -26,6 +26,8 @@ namespace RealEstateManagement.Data.Data
             SeedPayments(modelBuilder);
             SeedTransactions(modelBuilder);
             SeedReviews(modelBuilder);
+            SeedPackage(modelBuilder);
+            SeedPromotionProperty(modelBuilder);
         }
 
         private static void SeedRoles(ModelBuilder modelBuilder)
@@ -36,6 +38,84 @@ namespace RealEstateManagement.Data.Data
                 new IdentityRole<int> { Id = 3, Name = "Renter", NormalizedName = "RENTER" }
             );
         }
+
+        private static void SeedPackage(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<PromotionPackage>().HasData(
+                new PromotionPackage
+                {
+                    Id = 1,
+                    Name = "Basic Promotion",
+                    Description = "Basic promotion package for property listings.",
+                    Price = 1000000,
+                    DurationInDays = 30,
+                    Level = 1,
+                    CreatedAt = DateTime.Now,
+                    IsActive = true
+                },
+                new PromotionPackage
+                {
+                    Id = 2,
+                    Name = "Premium Promotion",
+                    Description = "Premium promotion package for property listings.",
+                    Price = 2000000,
+                    DurationInDays = 60,
+                    Level = 2,
+                    CreatedAt = DateTime.Now,
+                    IsActive = true
+                },
+                new PromotionPackage
+                {
+                    Id = 3,
+                    Name = "Ultimate Promotion",
+                    Description = "Ultimate promotion package for property listings.",
+                    Price = 3000000,
+                    DurationInDays = 90,
+                    Level = 3,
+                    CreatedAt = DateTime.Now,
+                    IsActive = true
+                }
+
+
+            );
+        }
+
+
+        private static void SeedPromotionProperty(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<PropertyPromotion>().HasData(
+                new PropertyPromotion
+                {
+                    Id = 1,
+                    PropertyId = 1, 
+                    PackageId = 1, 
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now.AddDays(30),
+                },
+                new PropertyPromotion
+                {
+                    Id = 2,
+                    PropertyId = 2, 
+                    PackageId = 2, 
+                    StartDate = DateTime.Now.AddDays(-1),
+                    EndDate = DateTime.Now.AddDays(29),
+                },
+                new PropertyPromotion
+                {
+                    Id = 3,
+                    PropertyId = 3, 
+                    PackageId = 3,
+                    StartDate = DateTime.Now.AddDays(-2),
+                    EndDate = DateTime.Now.AddDays(88),
+                 
+                }
+
+
+
+            );
+        }
+
+
 
         private static void SeedUsers(ModelBuilder modelBuilder)
         {
