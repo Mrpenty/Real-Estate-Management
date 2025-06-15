@@ -112,7 +112,6 @@ namespace RealEstateManagement.API.Controllers
         }
 
         [HttpPost("google-login")]
-        [Authorize(Roles = "Renter")]
         public async Task<IActionResult> GoogleLoginAsync([FromBody] GoogleLoginDTO googleLoginDTO)
         {
             if (!ModelState.IsValid || string.IsNullOrEmpty(googleLoginDTO.IdToken))
@@ -137,17 +136,16 @@ namespace RealEstateManagement.API.Controllers
         }
 
         [HttpPost("verify-email")]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> VerifyEmailConfirmationAsync([FromBody] VerifyEmailDTO verifyEmailDTO)
         {
-            if (!ModelState.IsValid || string.IsNullOrEmpty(verifyEmailDTO.Email) || string.IsNullOrEmpty(verifyEmailDTO.Code))
+            if (!ModelState.IsValid || string.IsNullOrEmpty(verifyEmailDTO.Email))
             {
                 return BadRequest(ModelState);
             }
 
             try
             {
-                var response = await _authService.VerifyEmailConfirmationAsync(verifyEmailDTO.Email, verifyEmailDTO.Code);
+                var response = await _authService.VerifyEmailConfirmationAsync(verifyEmailDTO.Email);
                 if (response.IsAuthSuccessful)
                 {
                     return Ok(response);
@@ -161,7 +159,29 @@ namespace RealEstateManagement.API.Controllers
             }
         }
 
-       
+        [HttpGet("google-oauth-callback")]
+        public async Task<IActionResult> GoogleOAuthCallback([FromQuery] string code)
+        {
+            
+            var redirectUriForGoogle = Url.ActionLink("GoogleOAuthCallback", "Auth", null, Request.Scheme);
 
+            try
+            {
+                var response = await _authService.HandleGoogleOAuthCallbackAsync(code, redirectUriForGoogle);
+                if (response.IsAuthSuccessful)
+                {
+                    return Redirect("https://localhost:7160/");
+                }
+                else
+                {
+                    return Redirect($"https://localhost:7160/Auth/Login?error={Uri.EscapeDataString(response.ErrorMessage)}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Google OAuth callback.");
+                return Redirect($"https://localhost:7160/Auth/Login?error={Uri.EscapeDataString("Google login failed: " + ex.Message)}");
+            }
+        }
     }
 }

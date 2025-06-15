@@ -6,13 +6,14 @@
         {
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowAllOrigins",
-                                       builder =>
-                                       {
-                                           builder.AllowAnyOrigin()
-                                                  .AllowAnyMethod()
-                                                  .AllowAnyHeader();
-                                       });
+                options.AddPolicy("DefaultCorsPolicy",
+                    builder =>
+                    {
+                        builder.WithOrigins("https://localhost:7160") 
+                               .AllowAnyMethod()
+                               .AllowAnyHeader()
+                               .AllowCredentials();
+                    });
             });
 
             return services;

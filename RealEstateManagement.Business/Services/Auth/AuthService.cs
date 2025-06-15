@@ -5,11 +5,12 @@ using RealEstateManagement.Business.DTO.AuthDTO;
 using RealEstateManagement.Business.Repositories.Token;
 using RealEstateManagement.Business.Services.Mail;
 using RealEstateManagement.Data.Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using Google.Apis.Auth.OAuth2.Flows;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using Google.Apis.Util.Store;
+using Google.Apis.Auth.OAuth2;
 
 namespace RealEstateManagement.Business.Services.Auth
 {
@@ -22,7 +23,9 @@ namespace RealEstateManagement.Business.Services.Auth
         private readonly ITokenRepository _tokenRepository;
         private readonly IMailService _mailService;
         private readonly ISmsService _smsService; 
-        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IHttpContextAccessor httpContextAccessor, ITokenRepository tokenRepository, IMailService mailService,ISmsService smsService )
+        private readonly ILogger<AuthService> _logger;
+        private readonly IConfiguration _configuration;
+        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IHttpContextAccessor httpContextAccessor, ITokenRepository tokenRepository, IMailService mailService,ISmsService smsService, ILogger<AuthService> logger, IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -30,6 +33,8 @@ namespace RealEstateManagement.Business.Services.Auth
             _tokenRepository = tokenRepository;
             _mailService = mailService;
             _smsService = smsService; 
+            _logger = logger;
+            _configuration = configuration;
         }
 
         public async Task<AuthMessDTO> LoginAsync(LoginDTO loginDTO)
@@ -141,13 +146,12 @@ namespace RealEstateManagement.Business.Services.Auth
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
-               
                 user = new ApplicationUser
                 {
                     UserName = email,
                     Email = email,
                     Name = payload.Name ?? email.Split('@')[0],
-                    IsVerified = true, 
+                    EmailConfirmed = false,
                     CreatedAt = DateTime.Now
                 };
                 var result = await _userManager.CreateAsync(user);
@@ -155,39 +159,90 @@ namespace RealEstateManagement.Business.Services.Auth
                 {
                     return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Registration failed" };
                 }
-                await _userManager.AddToRoleAsync(user, "User"); 
+                await _userManager.AddToRoleAsync(user, "Renter");
             }
-            else if (!user.IsVerified)
+
+            if (!user.EmailConfirmed)
             {
-                var confirmationCode = _tokenRepository.GenerateConfirmationCode();
-                user.ConfirmationCode = confirmationCode;
-                user.ConfirmationCodeExpiry = DateTime.Now.AddMinutes(1);
-                await _userManager.UpdateAsync(user);
-                await _mailService.SendEmailAsync(user.Email, "Email Confirmation", $"Your confirmation code is: {confirmationCode}. It expires in 1 minute.");
-                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Please verify your email with the code sent." };
+
+                var confirmationLink = $"https://localhost:7160/Auth/VerifyEmail?email={Uri.EscapeDataString(user.Email)}";
+                await _mailService.SendEmailAsync(
+                    user.Email,
+                    "Email Confirmation",
+                    $"Please confirm your email by clicking this link: {confirmationLink}"
+                );
+                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Please confirm your email. A confirmation link has been sent." };
             }
 
             var tokenDTO = await _tokenRepository.CreateJWTTokenAsync(user, true);
             _tokenRepository.SetTokenCookie(tokenDTO, _httpContextAccessor.HttpContext);
-            return new AuthMessDTO { IsAuthSuccessful = true, ErrorMessage = "Login successful" };
+            return new AuthMessDTO { IsAuthSuccessful = true, ErrorMessage = "Login successful", Token = tokenDTO.AccessToken };
         }
 
-        public async Task<AuthMessDTO> VerifyEmailConfirmationAsync(string email, string code)
+        public async Task<AuthMessDTO> HandleGoogleOAuthCallbackAsync(string code, string redirectUri)
+        {
+            try
+            {
+                var clientId = _configuration["Google:ClientId"];
+                var clientSecret = _configuration["Google:ClientSecret"];
+
+                _logger.LogInformation($"Google ClientId: {clientId}");
+                _logger.LogInformation($"Google ClientSecret: {clientSecret}");
+
+                if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
+                {
+                    _logger.LogError("Google ClientId or ClientSecret is null or empty.");
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Google client configuration missing." };
+                }
+
+                var flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
+                {
+                    ClientSecrets = new ClientSecrets
+                    {
+                        ClientId = clientId,
+                        ClientSecret = clientSecret
+                    },
+                    Scopes = new[] { "email", "profile" },
+                    DataStore = new FileDataStore("Google.Apis.Auth.MVC")
+                });
+
+                var token = await flow.ExchangeCodeForTokenAsync(
+                    "google_oauth_user_key", 
+                    code,
+                    redirectUri,
+                    CancellationToken.None);
+
+                if (token.IdToken == null)
+                {
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Failed to retrieve Google ID Token." };
+                }
+
+                return await GoogleLoginAsync(token.IdToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error handling Google OAuth callback.");
+                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Google authentication failed: " + ex.Message };
+            }
+        }
+
+        public async Task<AuthMessDTO> VerifyEmailConfirmationAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null || user.ConfirmationCode != code || user.ConfirmationCodeExpiry <= DateTime.Now)
+            if (user == null)
             {
-                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Invalid or expired confirmation code" };
+                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Invalid email" };
             }
 
+          
+
             user.EmailConfirmed = true;
-            user.ConfirmationCode = null;
-            user.ConfirmationCodeExpiry = null;
+           
             await _userManager.UpdateAsync(user);
 
             var tokenDTO = await _tokenRepository.CreateJWTTokenAsync(user, true);
             _tokenRepository.SetTokenCookie(tokenDTO, _httpContextAccessor.HttpContext);
-            return new AuthMessDTO { IsAuthSuccessful = true, ErrorMessage = "Email verified. Login successful" };
+            return new AuthMessDTO { IsAuthSuccessful = true, ErrorMessage = "Email verified. Login successful", Token = tokenDTO.AccessToken };
         }
 
 

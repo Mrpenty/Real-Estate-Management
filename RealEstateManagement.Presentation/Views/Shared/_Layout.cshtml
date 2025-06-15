@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - RealEstateManagement.Presentation</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/RealEstateManagement.Presentation.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">RealEstateManagement.Presentation</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav">
+                        <li class="nav-item" id="loginNavItem">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Login">Login</a>
+                        </li>
+                        <li class="nav-item" id="registerNavItem">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Register">Register</a>
+                        </li>
+                        <li class="nav-item" id="logoutNavItem" style="display: none;">
+                            <a class="nav-link text-dark" href="#" onclick="handleLogout(event)">Logout</a>
+                        </li>
+                        <li class="nav-item" id="userProfileNavItem" style="display: none;">
+                            <a class="nav-link text-dark" href="#" id="userProfileLink">Profile</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - RealEstateManagement.Presentation - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/authService.js"></script>
+    <script>
+        // Function to update navigation based on auth status
+        function updateNavigation() {
+            const isAuthenticated = authService.isAuthenticated();
+            const loginNavItem = document.getElementById('loginNavItem');
+            const registerNavItem = document.getElementById('registerNavItem');
+            const logoutNavItem = document.getElementById('logoutNavItem');
+            const userProfileNavItem = document.getElementById('userProfileNavItem');
+
+            if (isAuthenticated) {
+                loginNavItem.style.display = 'none';
+                registerNavItem.style.display = 'none';
+                logoutNavItem.style.display = 'block';
+                userProfileNavItem.style.display = 'block';
+            } else {
+                loginNavItem.style.display = 'block';
+                registerNavItem.style.display = 'block';
+                logoutNavItem.style.display = 'none';
+                userProfileNavItem.style.display = 'none';
+            }
+        }
+
+        // Handle logout
+        async function handleLogout(event) {
+            event.preventDefault();
+            try {
+                await authService.logout();
+                updateNavigation();
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout failed:', error);
+                alert('Logout failed. Please try again.');
+            }
+        }
+
+        // Update navigation when page loads
+        document.addEventListener('DOMContentLoaded', updateNavigation);
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

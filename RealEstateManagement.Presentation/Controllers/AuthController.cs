@@ -1,0 +1,40 @@
+using Microsoft.AspNetCore.Mvc;
+
+namespace RealEstateManagement.Presentation.Controllers
+{
+    public class AuthController : Controller
+    {
+        public IActionResult Login()
+        {
+            // Check if user is already authenticated
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View();
+        }
+
+        public IActionResult Register()
+        {
+            // Check if user is already authenticated
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            return View();
+        }
+
+        public IActionResult Logout()
+        {
+            // The actual logout is handled by the API through the authService.js
+            return RedirectToAction("Login");
+        }
+
+        [HttpGet]
+        public IActionResult VerifyEmail()
+        {
+            // This action will serve the VerifyEmail.cshtml view
+            return View();
+        }
+    }
+} 

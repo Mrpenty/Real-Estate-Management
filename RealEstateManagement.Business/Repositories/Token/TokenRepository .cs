@@ -1,4 +1,3 @@
-
 ﻿using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http;
 
@@ -84,7 +83,7 @@ namespace RealEstateManagement.Business.Repositories.Token
                     new CookieOptions
                     {
                         Expires = DateTimeOffset.UtcNow.AddDays(5),
-                        HttpOnly = true,
+                        HttpOnly = false,
                         IsEssential = true,
                         Secure = false,
                         SameSite = SameSiteMode.Lax

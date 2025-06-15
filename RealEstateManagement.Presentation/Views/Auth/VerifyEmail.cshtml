@@ -1,0 +1,30 @@
+@{
+    ViewBag.Title = "Email Confirmation";
+    var email = Context.Request.Query["email"];
+}
+<div id="confirmation-message" class="mt-10 text-center text-lg font-semibold"></div>
+@section Scripts {
+<script>
+    (async function() {
+        const email = '@email';
+        if (!email) {
+            document.getElementById('confirmation-message').textContent = 'Invalid confirmation link.';
+            return;
+        }
+        try {
+            // Using authService.verifyEmail to ensure the correct API_BASE_URL is used
+            const data = await authService.verifyEmail(email);
+            
+            if (data.isAuthSuccessful) {
+                document.getElementById('confirmation-message').textContent = 'Email confirmed! You are now logged in.';
+                setTimeout(() => window.location.href = '/', 2000);
+            } else {
+                document.getElementById('confirmation-message').textContent = data.errorMessage || 'Confirmation failed.';
+            }
+        } catch (error) {
+            console.error('Verify email error:', error);
+            document.getElementById('confirmation-message').textContent = error.message || 'Confirmation failed due to network error.';
+        }
+    })();
+</script>
+} 
