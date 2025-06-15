@@ -1,4 +1,4 @@
-﻿const API_BASE_URL = 'https://localhost:7031/api/Auth';
+const API_BASE_URL = 'https://localhost:7031/api/Auth';
 
 const authService = {
     // Phone number utilities

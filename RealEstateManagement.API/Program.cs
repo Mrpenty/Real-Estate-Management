@@ -30,6 +30,9 @@ app.UseErrorHandlingMiddleware();
 
 app.UseCorsPolicy(app.Environment);
 
+// Add CORS before other middleware
+app.UseCorsPolicy(app.Environment);
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
