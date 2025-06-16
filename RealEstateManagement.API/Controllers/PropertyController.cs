@@ -17,8 +17,8 @@ namespace RealEstateManagement.API.Controllers
             _propertyService = propertyService;
         }
 
-        [HttpGet("homepage-allproperty1")]
-        [Authorize(Roles = "Renter")]
+        [HttpGet("homepage-allproperty")]
+        //[Authorize(Roles = "renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetHomepageProperties()
         {
             try
@@ -91,9 +91,18 @@ namespace RealEstateManagement.API.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        //Filter nâng cao
+        [HttpPost("filter-advanced")]
+        public async Task<IActionResult> FilterAdvanced([FromBody] PropertyFilterDTO filter)
+        {
+
+            var result = await _propertyService.FilterAdvancedAsync(filter);
+            return Ok(result);
+        }
+
         //So sánh các property với nhau (tối đa là 3)
         [HttpPost("compare")]
-        //[Authorize(Roles = "renter")]
+        [Authorize(Roles = "renter")]
         public async Task<ActionResult<List<ComparePropertyDTO>>> CompareProperties([FromBody] List<int> ids)
         {
             if (ids == null || !ids.Any())

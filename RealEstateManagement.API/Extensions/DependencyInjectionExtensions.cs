@@ -6,6 +6,10 @@ using RealEstateManagement.Business.Repositories.Token;
 using RealEstateManagement.Business.Repositories.Token;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Services.OwnerService;
+using RealEstateManagement.Business.Repositories.Properties;
+using RealEstateManagement.Business.Services.Properties;
+using RealEstateManagement.Business.Services.FavortiteProperties;
+using RealEstateManagement.Business.Repositories.FavoriteProperties;
 
 
 namespace RealEstateManagement.API.Extensions
@@ -24,11 +28,14 @@ namespace RealEstateManagement.API.Extensions
 
             services.AddScoped<ISmsService, TwilioSmsService>();
 
-
             services.AddScoped<IPropertyPostRepository, PropertyPostRepository>();
             services.AddScoped<IPropertyPostService, PropertyPostService>();
 
+            services.AddScoped<IPropertyRepository, PropertyRepository>();
+            services.AddScoped<IPropertyService, PropertyService>();
 
+            services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
+            services.AddScoped<IUserPreferenceService, UserPreferenceService>();
 
             return services;
             }
