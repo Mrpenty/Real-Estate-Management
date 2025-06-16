@@ -8,6 +8,6 @@ namespace RealEstateManagement.Business.Repositories.FavoriteProperties
 {
     public interface IUserPreferenceRepository
     {
-        Task<bool> AddFavoritePropertyAsync(int userId, int propertyId);
+        //Task<bool> AddFavoritePropertyAsync(int userId, int propertyId);
     }
 }

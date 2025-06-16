@@ -16,9 +16,9 @@ namespace RealEstateManagement.Business.Services.FavortiteProperties
             _repository = repository;
         }
 
-        public async Task<bool> AddFavoritePropertyAsync(int userId, int propertyId)
-        {
-            return await _repository.AddFavoritePropertyAsync(userId, propertyId);
-        }
+        //public async Task<bool> AddFavoritePropertyAsync(int userId, int propertyId)
+        //{
+        //    return await _repository.AddFavoritePropertyAsync(userId, propertyId);
+        //}
     }
 }
