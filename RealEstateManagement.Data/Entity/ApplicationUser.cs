@@ -13,7 +13,6 @@ namespace RealEstateManagement.Data.Entity
     {
         public string Name { get; set; }
         public string Role { get; set; } // renter, landlord, admin
-       // public override string PhoneNumber { get; set; }
 
         public string? ProfilePictureUrl { get; set; }
         public bool IsVerified { get; set; }
@@ -24,7 +23,6 @@ namespace RealEstateManagement.Data.Entity
 
         public string? ConfirmationCode { get; set; }
         public DateTime? ConfirmationCodeExpiry { get; set; }
-        // Navigation properties
         public ICollection<UserPreference> Preferences { get; set; }
         public ICollection<Property> Properties { get; set; }
         public ICollection<Review> Reviews { get; set; }

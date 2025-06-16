@@ -111,6 +111,25 @@ namespace RealEstateManagement.API.Controllers
             }
         }
 
+
+        [HttpPost("resend-otp")]
+        public async Task<IActionResult> ResendOtp([FromBody] ResendOtpRequest request)
+        {
+            if (string.IsNullOrEmpty(request.PhoneNumber))
+            {
+                return BadRequest(new { success = false, message = "Phone number is required" });
+            }
+
+            var result = await _authService.ResendOtpAsync(request.PhoneNumber);
+
+            if (result.IsAuthSuccessful)
+            {
+                return Ok(new { success = true, message = result.ErrorMessage });
+            }
+
+            return BadRequest(new { success = false, message = result.ErrorMessage });
+        }
+
         [HttpPost("google-login")]
         public async Task<IActionResult> GoogleLoginAsync([FromBody] GoogleLoginDTO googleLoginDTO)
         {

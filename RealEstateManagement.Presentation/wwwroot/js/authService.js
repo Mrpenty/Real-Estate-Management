@@ -1,14 +1,33 @@
-// Auth Service for handling authentication API calls
-const API_BASE_URL = 'https://localhost:7031/api/Auth';
+﻿const API_BASE_URL = 'https://localhost:7031/api/Auth';
 
 const authService = {
-    // Login
-    async login(loginData) {
+    // Phone number utilities
+    formatPhoneForDisplay(phone) {
+        if (!phone) return '';
+        return phone.startsWith('+84') ? '0' + phone.substring(3) : phone;
+    },
+
+    formatPhoneForAPI(phone) {
+        if (!phone) return '';
+        if (phone.startsWith('0') && phone.length === 10) {
+            return '+84' + phone.substring(1);
+        }
+        return phone;
+    },
+
+    validatePhoneNumber(phone) {
+        if (!phone) return false;
+        return (phone.startsWith('0') && phone.length === 10) || 
+               (phone.startsWith('+84') && phone.length === 12);
+    },
+
+    // Authentication methods
+    async login(phone, password) {
         try {
-            // Validate phone number format
-            if (!loginData.phoneNumber || !/^[0-9]{11}$/.test(loginData.phoneNumber)) {
-                throw new Error('Please enter a valid 11-digit phone number');
-            }
+            console.log('Login attempt with phone:', phone);
+            
+            const apiPhone = this.formatPhoneForAPI(phone);
+            console.log('Formatted phone for API:', apiPhone);
 
             const response = await fetch(`${API_BASE_URL}/login`, {
                 method: 'POST',
@@ -17,55 +36,54 @@ const authService = {
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    loginIdentifier: loginData.phoneNumber,
-                    password: loginData.password
+                    loginIdentifier: apiPhone,
+                    password: password
                 })
             });
 
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Server returned an invalid response format');
-            }
-
+            console.log('Login response status:', response.status);
             const data = await response.json();
+            console.log('Login response data:', data);
 
             if (!response.ok) {
                 throw new Error(data.message || data.errorMessage || 'Login failed');
             }
 
-            // Store the token in localStorage
             if (data.token) {
+                console.log('Storing token in localStorage');
                 localStorage.setItem('authToken', data.token);
+                this.updateNavigation();
             }
             return data;
         } catch (error) {
             console.error('Login error:', error);
-            if (error.name === 'SyntaxError') {
-                throw new Error('Server returned an invalid response. Please try again later.');
-            }
             throw error;
         }
     },
 
-    // Register
     async register(registerData) {
         try {
+            console.log('Register attempt with data:', registerData);
+            
+            const apiPhone = this.formatPhoneForAPI(registerData.phoneNumber);
+            console.log('Formatted phone for API:', apiPhone);
+
             const response = await fetch(`${API_BASE_URL}/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify(registerData)
+                body: JSON.stringify({
+                    name: registerData.name,
+                    email: registerData.email,
+                    phoneNumber: apiPhone,
+                    password: registerData.password
+                })
             });
 
-            // Handle non-JSON responses
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Server returned an invalid response format');
-            }
-
             const data = await response.json();
+            console.log('Register response:', data);
 
             if (!response.ok) {
                 throw new Error(data.message || data.errorMessage || 'Registration failed');
@@ -74,67 +92,30 @@ const authService = {
             return data;
         } catch (error) {
             console.error('Registration error:', error);
-            if (error.name === 'SyntaxError') {
-                throw new Error('Server returned an invalid response. Please try again later.');
-            }
             throw error;
         }
     },
 
-    // Logout
-    async logout() {
+    async verifyOTP(phone, otp) {
         try {
-            const token = localStorage.getItem('authToken');
-            const response = await fetch(`${API_BASE_URL}/logout`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
-                }
-            });
-
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Server returned an invalid response format');
-            }
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || data.errorMessage || 'Logout failed');
-            }
-
-            localStorage.removeItem('authToken');
-            return data;
-        } catch (error) {
-            console.error('Logout error:', error);
-            if (error.name === 'SyntaxError') {
-                throw new Error('Server returned an invalid response. Please try again later.');
-            }
-            throw error;
-        }
-    },
-
-    // Verify OTP
-    async verifyOtp(phoneNumber, otp) {
-        try {
+            console.log('Verify OTP attempt:', { phone, otp });
+            
             const response = await fetch(`${API_BASE_URL}/verify-otp`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
-                body: JSON.stringify({ phoneNumber, otp })
+                body: JSON.stringify({ phoneNumber: phone, otp })
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'OTP verification failed');
+            const data = await response.json();
+            console.log('Verify OTP response:', data);
+
+            if (!response.ok || !data.isAuthSuccessful) {
+                throw new Error(data.errorMessage || 'OTP verification failed');
             }
 
-            const data = await response.json();
-            if (data.token) {
-                localStorage.setItem('authToken', data.token);
-            }
             return data;
         } catch (error) {
             console.error('OTP verification error:', error);
@@ -142,29 +123,132 @@ const authService = {
         }
     },
 
-    // Verify Email
+    async resendOTP(phone) {
+        try {
+            console.log('Resend OTP attempt for phone:', phone);
+            
+            const response = await fetch(`${API_BASE_URL}/resend-otp`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ phoneNumber: phone })
+            });
+
+            const data = await response.json();
+            console.log('Resend OTP response:', data);
+
+            if (!response.ok) {
+                throw new Error(data.message || data.errorMessage || 'Failed to resend OTP');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Resend OTP error:', error);
+            throw error;
+        }
+    },
+
+    async logout() {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                await fetch(`${API_BASE_URL}/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Logout API error:', error);
+        } finally {
+            localStorage.removeItem('authToken');
+            this.updateNavigation();
+            return { success: true };
+        }
+    },
+
+    isAuthenticated() {
+        const token = localStorage.getItem('authToken');
+        console.log('Checking authentication, token exists:', !!token);
+        
+        if (!token) return false;
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const isExpired = payload.exp * 1000 < Date.now();
+            console.log('Token payload:', payload);
+            console.log('Token expired:', isExpired);
+            
+            if (isExpired) {
+                console.log('Token is expired, removing from localStorage');
+                localStorage.removeItem('authToken');
+                this.updateNavigation();
+                return false;
+            }
+            return true;
+        } catch (e) {
+            console.error('Error parsing token:', e);
+            localStorage.removeItem('authToken');
+            this.updateNavigation();
+            return false;
+        }
+    },
+
+    getAuthToken() {
+        return localStorage.getItem('authToken');
+    },
+
+    updateNavigation() {
+        console.log('Updating navigation');
+        const isAuthenticated = this.isAuthenticated();
+        console.log('Is authenticated:', isAuthenticated);
+
+        const loginNavItem = document.getElementById('loginNavItem');
+        const registerNavItem = document.getElementById('registerNavItem');
+        const logoutNavItem = document.getElementById('logoutNavItem');
+
+        if (loginNavItem) {
+            console.log('Login nav item visibility:', !isAuthenticated);
+            loginNavItem.style.display = isAuthenticated ? 'none' : 'block';
+        }
+        if (registerNavItem) {
+            console.log('Register nav item visibility:', !isAuthenticated);
+            registerNavItem.style.display = isAuthenticated ? 'none' : 'block';
+        }
+        if (logoutNavItem) {
+            console.log('Logout nav item visibility:', isAuthenticated);
+            logoutNavItem.style.display = isAuthenticated ? 'block' : 'none';
+        }
+    },
+
     async verifyEmail(email) {
         try {
+            console.log('Verify email attempt:', email);
+            
             const response = await fetch(`${API_BASE_URL}/verify-email`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json' 
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ email })
             });
 
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Server returned an invalid response format or no content.');
-            }
-
             const data = await response.json();
+            console.log('Verify email response:', data);
 
             if (!response.ok) {
-                throw new Error(data.message || data.errorMessage || 'Email verification failed');
+                throw new Error(data.errorMessage || 'Email verification failed');
             }
 
+            if (data.token) {
+                localStorage.setItem('authToken', data.token);
+                this.updateNavigation();
+            }
             return data;
         } catch (error) {
             console.error('Email verification error:', error);
@@ -172,25 +256,29 @@ const authService = {
         }
     },
 
-    // Google Login
     async googleLogin(idToken) {
         try {
+            console.log('Google login attempt');
+            
             const response = await fetch(`${API_BASE_URL}/google-login`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ idToken })
             });
 
+            const data = await response.json();
+            console.log('Google login response:', data);
+
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Google login failed');
+                throw new Error(data.errorMessage || 'Google login failed');
             }
 
-            const data = await response.json();
             if (data.token) {
                 localStorage.setItem('authToken', data.token);
+                this.updateNavigation();
             }
             return data;
         } catch (error) {
@@ -198,17 +286,13 @@ const authService = {
             throw error;
         }
     },
-
-    // Check if user is authenticated
-    isAuthenticated() {
-        return !!localStorage.getItem('authToken');
-    },
-
-    // Get auth token
-    getAuthToken() {
-        return localStorage.getItem('authToken');
-    }
 };
 
 // Export the service
-window.authService = authService; 
+window.authService = authService;
+
+// Initialize navigation on page load
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Page loaded, initializing navigation');
+    authService.updateNavigation();
+}); 

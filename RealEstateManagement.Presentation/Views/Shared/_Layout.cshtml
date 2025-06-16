@@ -3,6 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>@ViewData["Title"] - RealEstateManagement.Presentation</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -61,7 +64,6 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/authService.js"></script>
     <script>
-        // Function to update navigation based on auth status
         function updateNavigation() {
             const isAuthenticated = authService.isAuthenticated();
             const loginNavItem = document.getElementById('loginNavItem');
@@ -82,7 +84,6 @@
             }
         }
 
-        // Handle logout
         async function handleLogout(event) {
             event.preventDefault();
             try {
@@ -95,7 +96,6 @@
             }
         }
 
-        // Update navigation when page loads
         document.addEventListener('DOMContentLoaded', updateNavigation);
     </script>
     @await RenderSectionAsync("Scripts", required: false)

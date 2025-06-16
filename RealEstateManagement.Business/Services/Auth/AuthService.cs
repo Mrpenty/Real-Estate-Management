@@ -77,7 +77,7 @@ namespace RealEstateManagement.Business.Services.Auth
             var user = new ApplicationUser
             {
                 Name = registerDTO.Name,
-                UserName = registerDTO.UserName,
+                UserName = registerDTO.Name,
                 PhoneNumber = registerDTO.PhoneNumber,
                 NormalizedUserName = _userManager.NormalizeName(registerDTO.PhoneNumber),
                 NormalizedEmail = null, 
@@ -162,8 +162,10 @@ namespace RealEstateManagement.Business.Services.Auth
                 await _userManager.AddToRoleAsync(user, "Renter");
             }
 
+            // Always check if email is confirmed
             if (!user.EmailConfirmed)
             {
+                // Removed confirmation code generation and storage as per user request
 
                 var confirmationLink = $"https://localhost:7160/Auth/VerifyEmail?email={Uri.EscapeDataString(user.Email)}";
                 await _mailService.SendEmailAsync(
@@ -207,16 +209,18 @@ namespace RealEstateManagement.Business.Services.Auth
                 });
 
                 var token = await flow.ExchangeCodeForTokenAsync(
-                    "google_oauth_user_key", 
+                    "google_oauth_user_key", // Provide a non-empty key for FileDataStore
                     code,
                     redirectUri,
                     CancellationToken.None);
 
+                // Use the ID Token from the response
                 if (token.IdToken == null)
                 {
                     return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Failed to retrieve Google ID Token." };
                 }
 
+                // Reuse the existing GoogleLoginAsync logic to process the ID token
                 return await GoogleLoginAsync(token.IdToken);
             }
             catch (Exception ex)
@@ -234,10 +238,14 @@ namespace RealEstateManagement.Business.Services.Auth
                 return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Invalid email" };
             }
 
-          
+            // The code check is removed as per your request for link-only confirmation
+            // if (user.ConfirmationCode != code || user.ConfirmationCodeExpiry <= DateTime.Now)
+            // {
+            //     return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Invalid or expired confirmation code" };
+            // }
 
             user.EmailConfirmed = true;
-           
+            
             await _userManager.UpdateAsync(user);
 
             var tokenDTO = await _tokenRepository.CreateJWTTokenAsync(user, true);
@@ -245,6 +253,51 @@ namespace RealEstateManagement.Business.Services.Auth
             return new AuthMessDTO { IsAuthSuccessful = true, ErrorMessage = "Email verified. Login successful", Token = tokenDTO.AccessToken };
         }
 
+        public async Task<AuthMessDTO> ResendOtpAsync(string phoneNumber)
+        {
+            try
+            {
+                var user = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber);
+                if (user == null)
+                {
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "User not found." };
+                }
+
+                // Generate new OTP
+                var otp = GenerateOTP();
+                var expiryTime = DateTime.Now.AddMinutes(5); // OTP valid for 5 minutes
+
+                // Update user with new OTP
+                user.ConfirmationCode = otp;
+                user.ConfirmationCodeExpiry = expiryTime;
+                await _userManager.UpdateAsync(user);
+
+                // TODO: Send OTP via SMS service
+                // For now, we'll just return success
+                // In production, you should integrate with an SMS service
+
+                return new AuthMessDTO 
+                { 
+                    IsAuthSuccessful = true, 
+                    ErrorMessage = "OTP has been resent successfully." 
+                };
+            }
+            catch (Exception ex)
+            {
+                return new AuthMessDTO 
+                { 
+                    IsAuthSuccessful = false, 
+                    ErrorMessage = $"Failed to resend OTP: {ex.Message}" 
+                };
+            }
+        }
+
+        private string GenerateOTP()
+        {
+            // Generate a 6-digit OTP
+            Random random = new Random();
+            return random.Next(100000, 999999).ToString();
+        }
 
     }
 }

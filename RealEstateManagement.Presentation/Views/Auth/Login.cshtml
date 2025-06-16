@@ -11,10 +11,10 @@
         <label class="block mb-2 text-sm font-medium text-gray-700" for="phoneNumber">Số điện thoại</label>
         <div class="mb-4">
             <input type="tel" id="phoneNumber" name="phoneNumber" 
-                   pattern="[0-9]{11}" placeholder="Số điện thoại" 
+                   placeholder="Số điện thoại" 
                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm input-bootstrap" 
                    required />
-            <div class="text-xs text-gray-500 mt-1">Vui lòng nhập số điện thoại 11 số</div>
+            <div class="text-xs text-gray-500 mt-1">Vui lòng nhập số điện thoại bắt đầu bằng 0 và có 10 chữ số</div>
         </div>
 
         <label class="block mb-2 text-sm font-medium text-gray-700" for="password">Mật khẩu</label>
@@ -67,45 +67,43 @@
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const phoneNumber = document.getElementById('phoneNumber').value;
+            let phone = document.getElementById('phoneNumber').value.trim();
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('errorMessage');
             
             // Validate phone number format
-            if (!/^[0-9]{11}$/.test(phoneNumber)) {
-                errorMessage.textContent = 'Vui lòng nhập số điện thoại 11 số';
-                errorMessage.classList.remove('hidden');
+            if (!authService.validatePhoneNumber(phone)) {
+                errorMessage.textContent = 'Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số';
+                errorMessage.style.display = 'block';
                 return;
             }
-            
+
             try {
-                const response = await authService.login({
-                    phoneNumber: phoneNumber,
-                    password: password
-                });
-                
-                // Login successful
-                if (response.isAuthSuccessful) {
-                    // Redirect to home page or dashboard
+                const data = await authService.login(phone, password);
+                if (data.isAuthSuccessful) {
                     window.location.href = '/';
                 } else {
-                    errorMessage.textContent = response.errorMessage || 'Đăng nhập thất bại';
-                    errorMessage.classList.remove('hidden');
+                    errorMessage.textContent = data.errorMessage || 'Đăng nhập thất bại';
+                    errorMessage.style.display = 'block';
                 }
             } catch (error) {
-                errorMessage.textContent = error.message;
-                errorMessage.classList.remove('hidden');
+                console.error('Login error:', error);
+                errorMessage.textContent = error.message || 'Có lỗi xảy ra khi đăng nhập';
+                errorMessage.style.display = 'block';
             }
         });
 
-        // Add input validation for phone number
         document.getElementById('phoneNumber').addEventListener('input', function(e) {
-            // Remove any non-digit characters
-            this.value = this.value.replace(/\D/g, '');
-            // Limit to 11 digits
-            if (this.value.length > 11) {
-                this.value = this.value.slice(0, 11);
+            let value = e.target.value.trim();
+            // Remove any non-digit characters except leading 0
+            value = value.replace(/[^\d]/g, '');
+            if (value.length > 0 && !value.startsWith('0')) {
+                value = '0' + value;
             }
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            e.target.value = value;
         });
 
         function handleGoogleLogin() {

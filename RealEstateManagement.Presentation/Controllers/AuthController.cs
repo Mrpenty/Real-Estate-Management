@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace RealEstateManagement.Presentation.Controllers
 {
@@ -24,6 +25,16 @@ namespace RealEstateManagement.Presentation.Controllers
             return View();
         }
 
+        [HttpGet]
+        public IActionResult VerifyOTP(string phone)
+        {
+            if (string.IsNullOrEmpty(phone))
+            {
+                return RedirectToAction("Register");
+            }
+            return View();
+        }
+
         public IActionResult Logout()
         {
             // The actual logout is handled by the API through the authService.js
@@ -36,5 +47,8 @@ namespace RealEstateManagement.Presentation.Controllers
             // This action will serve the VerifyEmail.cshtml view
             return View();
         }
+
     }
+
+   
 } 

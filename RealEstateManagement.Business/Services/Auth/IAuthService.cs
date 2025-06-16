@@ -17,5 +17,6 @@ namespace RealEstateManagement.Business.Services.Auth
         Task<AuthMessDTO> GoogleLoginAsync(string idToken);
         Task<AuthMessDTO> HandleGoogleOAuthCallbackAsync(string code, string redirectUri);
         Task<AuthMessDTO> VerifyEmailConfirmationAsync(string email);
+        Task<AuthMessDTO> ResendOtpAsync(string phoneNumber);
     }
 }

@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>@ViewBag.Title - SREM.AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
@@ -57,7 +60,7 @@
         @RenderBody()
     </div>
 
-    <script src="~/js/Auth/authService.js"></script>
+    <script src="~/js/authService.js"></script>
     <script>
         // Function to get a cookie by name
         function getCookie(name) {
@@ -67,14 +70,12 @@
             return null;
         }
 
-        // Check for accessToken cookie on page load
-        // If found, store it in localStorage and optionally remove the cookie
+     
         document.addEventListener('DOMContentLoaded', () => {
             const accessToken = getCookie('accessToken');
             if (accessToken && !localStorage.getItem('authToken')) {
                 localStorage.setItem('authToken', accessToken);
-                // Optionally, remove the cookie after storing in localStorage
-                // document.cookie = 'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+               
             }
         });
     </script>
