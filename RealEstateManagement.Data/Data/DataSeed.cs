@@ -259,7 +259,7 @@ namespace RealEstateManagement.Data.Data
                     Id = 1,
                     PropertyId = 1,
                     LandlordId = 2,
-                    Status = "approved",
+                    Status = PropertyPost.PropertyPostStatus.Approved,
                     CreatedAt = DateTime.Now,
                     VerifiedAt = DateTime.Now,
                     VerifiedBy = 1 // Admin verified
@@ -269,7 +269,7 @@ namespace RealEstateManagement.Data.Data
                     Id = 2,
                     PropertyId = 2,
                     LandlordId = 2,
-                    Status = "approved",
+                    Status = PropertyPost.PropertyPostStatus.Approved,
                     CreatedAt = DateTime.Now.AddDays(-1),
                     VerifiedAt = DateTime.Now.AddDays(-1),
                     VerifiedBy = 1
@@ -279,7 +279,7 @@ namespace RealEstateManagement.Data.Data
                     Id = 3,
                     PropertyId = 3,
                     LandlordId = 2,
-                    Status = "approved",
+                    Status = PropertyPost.PropertyPostStatus.Approved,
                     CreatedAt = DateTime.Now.AddDays(-2),
                     VerifiedAt = DateTime.Now.AddDays(-2),
                     VerifiedBy = 1

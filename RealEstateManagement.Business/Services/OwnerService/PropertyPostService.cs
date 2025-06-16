@@ -20,6 +20,17 @@ namespace RealEstateManagement.Business.Services.OwnerService
 
         public async Task<int> CreatePropertyPostAsync(PropertyCreateRequestDto dto, int landlordId)
         {
+            // 1. Kiểm tra dữ liệu bắt buộc
+            if (string.IsNullOrWhiteSpace(dto.Title) || string.IsNullOrWhiteSpace(dto.Address))
+                throw new ArgumentException("Tiêu đề và địa chỉ không được để trống.");
+
+            if (dto.Area <= 0 || dto.Price <= 0)
+                throw new ArgumentException("Diện tích và giá phải lớn hơn 0.");
+
+            if (dto.AmenityIds == null || !dto.AmenityIds.Any())
+                throw new ArgumentException("Vui lòng chọn ít nhất một tiện nghi.");
+
+            // 2. Khởi tạo đối tượng Property
             var property = new Property
             {
                 Title = dto.Title,
@@ -36,15 +47,18 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 CreatedAt = DateTime.UtcNow
             };
 
+            // 3. Khởi tạo bài đăng (post)
             var post = new PropertyPost
             {
                 LandlordId = landlordId,
-                Status = "pending",
+                Status = PropertyPost.PropertyPostStatus.Draft, // ban đầu là bản nháp
                 CreatedAt = DateTime.UtcNow
             };
 
+            // 4. Gọi Repository để lưu vào cơ sở dữ liệu
             return await _repository.CreatePropertyPostAsync(property, post, dto.AmenityIds);
         }
+
     }
 
 }

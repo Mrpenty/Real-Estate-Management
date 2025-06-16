@@ -2,6 +2,7 @@
 using RealEstateManagement.Business.Repositories.Token;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Services.OwnerService;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace RealEstateManagement.API.Extensions
 {
@@ -16,8 +17,10 @@ namespace RealEstateManagement.API.Extensions
 
             services.AddScoped<IPropertyPostRepository, PropertyPostRepository>();
             services.AddScoped<IPropertyPostService, PropertyPostService>();
-
-
+            services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
+            services.AddScoped<IPropertyImageService, PropertyImageService>();
+            services.AddScoped<IRentalContractRepository, RentalContractRepository>();
+            services.AddScoped<IRentalContractService, RentalContractService>();
             return services;
             }
         }
