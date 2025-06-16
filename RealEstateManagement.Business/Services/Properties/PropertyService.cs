@@ -37,7 +37,11 @@ namespace RealEstateManagement.Business.Services.Properties
                 LandlordName = p.Landlord?.Name,
                 LandlordPhoneNumber = p.Landlord?.PhoneNumber,
                 LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
-                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>()
+                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                PromotionPackageName = p.PropertyPromotions?
+                                        .OrderByDescending(pp => pp.PromotionPackage.Level)
+                                        .Select(pp => pp.PromotionPackage.Name)
+                                        .FirstOrDefault()
             });
         }
         public async Task<PropertyDetailDTO> GetPropertyByIdAsync(int id)
@@ -66,7 +70,11 @@ namespace RealEstateManagement.Business.Services.Properties
                 LandlordName = p.Landlord?.Name,
                 LandlordPhoneNumber = p.Landlord?.PhoneNumber,
                 LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
-                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>()
+                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                PromotionPackageName = p.PropertyPromotions?
+                                        .OrderByDescending(pp => pp.PromotionPackage.Level)
+                                        .Select(pp => pp.PromotionPackage.Name)
+                                        .FirstOrDefault()
             };
         }
         public async Task<IEnumerable<HomePropertyDTO>> FilterByPriceAsync(decimal minPrice, decimal maxPrice)
@@ -91,7 +99,11 @@ namespace RealEstateManagement.Business.Services.Properties
                 LandlordName = p.Landlord?.Name,
                 LandlordPhoneNumber = p.Landlord?.PhoneNumber,
                 LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
-                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>()
+                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                PromotionPackageName = p.PropertyPromotions?
+                                        .OrderByDescending(pp => pp.PromotionPackage.Level)
+                                        .Select(pp => pp.PromotionPackage.Name)
+                                        .FirstOrDefault()
             });
         }
         public async Task<IEnumerable<HomePropertyDTO>> FilterByAreaAsync(decimal minArea, decimal maxArea)
@@ -116,7 +128,11 @@ namespace RealEstateManagement.Business.Services.Properties
                 LandlordName = p.Landlord?.Name,
                 LandlordPhoneNumber = p.Landlord?.PhoneNumber,
                 LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
-                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>()
+                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                PromotionPackageName = p.PropertyPromotions?
+                                        .OrderByDescending(pp => pp.PromotionPackage.Level)
+                                        .Select(pp => pp.PromotionPackage.Name)
+                                        .FirstOrDefault()
             });
         }
         public async Task<List<PropertyDetailDTO>> GetPropertiesByIdsAsync(List<int> ids)
@@ -146,6 +162,35 @@ namespace RealEstateManagement.Business.Services.Properties
             }).ToList();
         }
 
+        public async Task<IEnumerable<HomePropertyDTO>> FilterAdvancedAsync(PropertyFilterDTO filter)
+        {
+            var p = await _repository.FilterAdvancedAsync(filter);
+            if (p == null) return null;
+            return p.Select(p => new HomePropertyDTO
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Description = p.Description,
+                Type = p.Type,
+                Address = p.Address,
+                Area = p.Area,
+                Bedrooms = p.Bedrooms,
+                Price = p.Price,
+                Status = p.Status,
+                Location = p.Location,
+                CreatedAt = p.CreatedAt,
+                ViewsCount = p.ViewsCount,
+                PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
+                LandlordName = p.Landlord?.Name,
+                LandlordPhoneNumber = p.Landlord?.PhoneNumber,
+                LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
+                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                PromotionPackageName = p.PropertyPromotions?
+                                        .OrderByDescending(pp => pp.PromotionPackage.Level)
+                                        .Select(pp => pp.PromotionPackage.Name)
+                                        .FirstOrDefault()
+            });
+        }
 
         public async Task<IEnumerable<ComparePropertyDTO>> ComparePropertiesAsync(List<int> ids)
         {
