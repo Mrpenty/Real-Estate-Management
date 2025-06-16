@@ -19,6 +19,14 @@ public partial class ApplicationUserConfiguration : IEntityTypeConfiguration<App
         builder.Property(u => u.RefreshTokenExpiryTime)
             .IsRequired(false);
 
+        builder.Property(u => u.UserName)
+        .HasMaxLength(256) 
+        .IsRequired(false); 
+
+        builder.Property(u => u.NormalizedUserName)
+            .HasMaxLength(256) 
+            .IsRequired(false); 
+
         // Relationships
         builder.HasMany(u => u.Preferences)
                .WithOne(up => up.User)

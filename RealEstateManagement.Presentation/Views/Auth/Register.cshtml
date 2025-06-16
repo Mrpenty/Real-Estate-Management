@@ -1,0 +1,121 @@
+@{
+    Layout = "~/Views/Auth/_AuthLayout.cshtml";
+    ViewBag.Title = "Đăng kí";
+}
+
+<div class="w-full p-10 bg-white/80 rounded-l-none rounded-3xl">
+    <h2 class="text-lg text-gray-600">Chào mừng đến <span class="text-yellow-500 font-semibold">SREM.AI</span></h2>
+    <h1 class="text-3xl font-bold mt-1 mb-6">Đăng kí</h1>
+
+    <form id="registerForm">
+        <label class="block mb-2 text-sm font-medium text-gray-700" for="fullname">Họ và tên</label>
+        <div class="mb-4">
+            <input type="text" id="fullname" name="fullname" placeholder="Họ và tên" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm input-bootstrap" required />
+        </div>
+
+        <label class="block mb-2 text-sm font-medium text-gray-700" for="email">Email</label>
+        <div class="mb-4">
+            <input type="email" id="email" name="email" placeholder="Email" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm input-bootstrap" />
+        </div>
+
+        <label class="block mb-2 text-sm font-medium text-gray-700" for="phone">Số điện thoại</label>
+        <div class="mb-4">
+            <input type="text" id="phone" name="phone" placeholder="Số điện thoại (VD: 0945767510)" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm input-bootstrap" required />
+        </div>
+
+        <label class="block mb-2 text-sm font-medium text-gray-700" for="password">Mật khẩu</label>
+        <div class="mb-4">
+            <input type="password" id="password" name="password" placeholder="Mật khẩu" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm input-bootstrap" required />
+        </div>
+
+        <label class="block mb-2 text-sm font-medium text-gray-700" for="confirmPassword">Xác nhận mật khẩu</label>
+        <div class="mb-4">
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Xác nhận mật khẩu" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm input-bootstrap" required />
+        </div>
+
+        <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-full mb-6 transition">
+            Đăng ký
+        </button>
+
+        <div class="my-4">
+            Bằng việc nhấn nút tiếp tục, bạn đã đồng ý với
+            <a href="#" style="color:black;text-decoration:underline;font-weight:bold">Điều khoản sử dụng</a> và
+            <a href="#" style="color:black;text-decoration:underline;font-weight:bold">Chính sách bảo mật</a> của chúng tôi.
+        </div>
+
+        <p class="text-sm text-center text-gray-600">
+            Đã có tài khoản? <a href="/Account/Login" class="text-orange-500 font-medium hover:underline">Đăng Nhập Ngay</a>
+        </p>
+        <p class="text-sm text-center text-gray-600 mt-2">
+            <a href="/" class="text-orange-500 font-medium hover:underline">Về trang chủ</a>
+        </p>
+    </form>
+
+    <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;"></div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const fullname = document.getElementById('fullname').value;
+            const email = document.getElementById('email').value;
+            let phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            console.log('Original phone input:', phone);
+
+            // Kiểm tra mật khẩu khớp nhau
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Mật khẩu không khớp';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Format phone number
+            if (phone.startsWith('0') && phone.length === 10) {
+                phone = '+84' + phone.substring(1);
+                console.log('Converted phone from 0 to +84:', phone);
+            } else if (!phone.startsWith('+84') || phone.length !== 12) {
+                console.log('Phone validation failed:', { 
+                    phone: phone,
+                    startsWithPlus84: phone.startsWith('+84'),
+                    length: phone.length
+                });
+                errorMessage.textContent = 'Số điện thoại phải bắt đầu bằng +84 và có 10 chữ số';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            console.log('Final phone for API:', phone);
+
+            try {
+                const data = await authService.register({
+                    name: fullname,
+                    email: email,
+                    phoneNumber: phone,
+                    password: password
+                });
+
+                console.log('Register response:', data);
+
+                if (data.isAuthSuccessful) {
+                    // Use a custom encoding to preserve the + sign
+                    const encodedPhone = phone.replace('+', '%2B');
+                    console.log('Encoded phone for URL:', encodedPhone);
+                    window.location.href = `/Auth/VerifyOTP?phone=${encodedPhone}`;
+                } else {
+                    errorMessage.textContent = data.errorMessage || 'Đăng ký thất bại';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Register error:', error);
+                errorMessage.textContent = error.message || 'Có lỗi xảy ra khi đăng ký';
+                errorMessage.style.display = 'block';
+            }
+        });
+    </script>
+}
