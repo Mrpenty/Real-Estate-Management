@@ -1,0 +1,196 @@
+@{
+    Layout = "~/Views/Auth/_AuthLayout.cshtml";
+    ViewBag.Title = "Xác thực số điện thoại";
+}
+
+<div class="w-full p-10 bg-white/80 rounded-l-none rounded-3xl">
+    <h2 class="text-lg text-gray-600">Xác thực số điện thoại</h2>
+    <h1 class="text-3xl font-bold mt-1 mb-6">Nhập mã OTP</h1>
+
+    <div class="mb-4 text-sm text-gray-600">
+        Mã xác thực đã được gửi đến số điện thoại <span id="phoneNumber" class="font-semibold"></span>
+    </div>
+
+    <div id="successAlert" class="alert alert-success d-none" role="alert"></div>
+    <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
+
+    <form id="verifyOTPForm">
+        <div class="mb-6">
+            <div class="flex justify-between gap-2">
+                <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-gray-300 rounded-md input-bootstrap otp-input" required />
+                <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-gray-300 rounded-md input-bootstrap otp-input" required />
+                <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-gray-300 rounded-md input-bootstrap otp-input" required />
+                <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-gray-300 rounded-md input-bootstrap otp-input" required />
+                <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-gray-300 rounded-md input-bootstrap otp-input" required />
+                <input type="text" maxlength="1" class="w-12 h-12 text-center text-xl border border-gray-300 rounded-md input-bootstrap otp-input" required />
+            </div>
+        </div>
+
+        <div class="mb-6 text-center">
+            <span id="timer" class="text-sm text-gray-600">Gửi lại mã sau: <span class="font-semibold">60</span>s</span>
+            <button type="button" id="resendButton" class="hidden text-sm text-orange-500 font-medium hover:underline" onclick="resendOTP()">
+                Gửi lại mã
+            </button>
+        </div>
+
+        <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-full mb-6 transition">
+            Xác nhận
+        </button>
+
+        <p class="text-sm text-center text-gray-600">
+            <a href="/Auth/Register" class="text-orange-500 font-medium hover:underline">Quay lại đăng ký</a>
+        </p>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Get phone number from URL parameter and decode it
+        const urlParams = new URLSearchParams(window.location.search);
+        let phone = urlParams.get('phone') || '';
+        
+        // Decode the phone number and ensure it has the + sign
+        phone = decodeURIComponent(phone).trim();
+        if (phone.startsWith('%2B')) {
+            phone = '+' + phone.substring(3);
+        } else if (!phone.startsWith('+')) {
+            phone = '+' + phone;
+        }
+        
+        console.log('Original phone from URL:', phone);
+
+        // Format phone number for display
+        const displayPhone = authService.formatPhoneForDisplay(phone);
+        document.getElementById('phoneNumber').textContent = displayPhone;
+
+        console.log('Display phone:', displayPhone);
+        console.log('API phone:', phone);
+
+        // Handle OTP input
+        const otpInputs = document.querySelectorAll('.otp-input');
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1 && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text').slice(0, 6);
+                if (/^\d+$/.test(pastedData)) {
+                    pastedData.split('').forEach((digit, i) => {
+                        if (otpInputs[i]) otpInputs[i].value = digit;
+                    });
+                    if (otpInputs[pastedData.length]) otpInputs[pastedData.length].focus();
+                }
+            });
+        });
+
+        // Timer functionality
+        let timeLeft = 60;
+        const timerElement = document.getElementById('timer');
+        const resendButton = document.getElementById('resendButton');
+
+        function updateTimer() {
+            if (timeLeft > 0) {
+                timerElement.innerHTML = `Gửi lại mã sau: <span class="font-semibold">${timeLeft}</span>s`;
+                timeLeft--;
+                setTimeout(updateTimer, 1000);
+            } else {
+                timerElement.classList.add('hidden');
+                resendButton.classList.remove('hidden');
+            }
+        }
+
+        async function resendOTP() {
+            try {
+                if (!authService.validatePhoneNumber(phone)) {
+                    showError('Số điện thoại không hợp lệ');
+                    return;
+                }
+
+                const data = await authService.resendOTP(phone);
+                if (data.success) {
+                    timeLeft = 60;
+                    timerElement.classList.remove('hidden');
+                    resendButton.classList.add('hidden');
+                    updateTimer();
+                    otpInputs.forEach(input => input.value = '');
+                    otpInputs[0].focus();
+                    Swal.fire({
+                        title: 'Đã gửi lại mã!',
+                        text: 'Vui lòng kiểm tra điện thoại của bạn',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    showError(data.message || 'Không thể gửi lại mã OTP');
+                }
+            } catch (error) {
+                console.error('Resend OTP error:', error);
+                showError(error.message || 'Có lỗi xảy ra khi gửi lại mã OTP');
+            }
+        }
+
+        updateTimer();
+
+        document.getElementById('verifyOTPForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const otp = Array.from(otpInputs).map(input => input.value).join('');
+            
+            // Validate OTP format
+            if (otp.length !== 6 || !/^\d+$/.test(otp)) {
+                const errorAlert = document.getElementById('errorAlert');
+                errorAlert.textContent = 'Vui lòng nhập mã OTP 6 chữ số';
+                errorAlert.classList.remove('d-none');
+                return;
+            }
+
+            try {
+                const data = await authService.verifyOTP(phone, otp);
+                
+                if (data.isAuthSuccessful) {
+                    // Hiển thị thông báo thành công
+                    const successAlert = document.getElementById('successAlert');
+                    successAlert.textContent = data.errorMessage || 'OTP verified successfully';
+                    successAlert.classList.remove('d-none');
+                    
+                    // Ẩn form và error alert
+                    document.getElementById('verifyOTPForm').classList.add('d-none');
+                    document.getElementById('errorAlert').classList.add('d-none');
+                    
+                    // Chuyển hướng sau 2 giây
+                    setTimeout(() => {
+                        window.location.href = '/Auth/Login';
+                    }, 2000);
+                } else {
+                    const errorAlert = document.getElementById('errorAlert');
+                    errorAlert.textContent = data.errorMessage || 'OTP verification failed';
+                    errorAlert.classList.remove('d-none');
+                }
+            } catch (error) {
+                console.error('Verify OTP error:', error);
+                const errorAlert = document.getElementById('errorAlert');
+                errorAlert.textContent = error.message;
+                errorAlert.classList.remove('d-none');
+            }
+        });
+
+        function showError(message) {
+            console.log('Showing error:', message);
+            const errorAlert = document.getElementById('errorAlert');
+            errorAlert.textContent = message;
+            errorAlert.style.display = 'block';
+        }
+    </script>
+}

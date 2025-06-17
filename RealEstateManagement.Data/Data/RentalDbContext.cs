@@ -23,6 +23,9 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     public DbSet<Review> Reviews { get; set; }
     public DbSet<UserPreferenceFavoriteProperties> UserPreferenceFavoriteProperties { get; set; } // Added
 
+    public DbSet <PromotionPackage> promotionPackages { get; set; }
+    public DbSet<PropertyPromotion> PropertyPromotions { get; set; } 
+
     public RentalDbContext(DbContextOptions<RentalDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -43,8 +46,7 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
         modelBuilder.ApplyConfiguration(new MessageConfiguration());
         modelBuilder.ApplyConfiguration(new InterestConfiguration());
         modelBuilder.ApplyConfiguration(new RentalContractConfiguration());
-
-
+        modelBuilder.ApplyConfiguration(new PropertyPromotionConfiguration());
         DataSeed.SeedData(modelBuilder);
     }
 }
