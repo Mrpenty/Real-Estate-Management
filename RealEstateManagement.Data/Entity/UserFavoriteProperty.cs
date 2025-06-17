@@ -1,11 +1,12 @@
 ﻿namespace RealEstateManagement.Data.Entity
 {
-    public class UserPreferenceFavoriteProperties
+    public class UserFavoriteProperty
     {
-        public int UserPreferenceId { get; set; }
+        public int UserId { get; set; }           // Liên kết với ApplicationUser
         public int PropertyId { get; set; }
         public DateTime CreatedAt { get; set; }
-        public UserPreference UserPreference { get; set; }
+
+        public ApplicationUser User { get; set; }
         public Property Property { get; set; }
     }
 }

@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstateManagement.API", "RealEstateManagement.API\RealEstateManagement.API.csproj", "{24B0D11A-CE29-4A1B-B76D-E1F5E0731848}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstateManagement.API", "RealEstateManagement.API\RealEstateManagement.API.csproj", "{24B0D11A-CE29-4A1B-B76D-E1F5E0731848}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstateManagement.Business", "RealEstateManagement.Business\RealEstateManagement.Business.csproj", "{3AE26CCD-834E-4E46-85D7-94B11D723EDD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstateManagement.Business", "RealEstateManagement.Business\RealEstateManagement.Business.csproj", "{3AE26CCD-834E-4E46-85D7-94B11D723EDD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstateManagement.Data", "RealEstateManagement.Data\RealEstateManagement.Data.csproj", "{3AF612DE-3351-4F9F-B719-7CBB2E6414DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstateManagement.Data", "RealEstateManagement.Data\RealEstateManagement.Data.csproj", "{3AF612DE-3351-4F9F-B719-7CBB2E6414DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -31,6 +31,7 @@ namespace RealEstateManagement.Data.Entity
 
         public ICollection<Conversation> ConversationsAsRenter { get; set; }
         public ICollection<Conversation> ConversationsAsLandlord { get; set; }
+        public ICollection<UserFavoriteProperty> FavoriteProperties { get; set; }
         public ICollection<Message> MessagesSent { get; set; }
 
     }

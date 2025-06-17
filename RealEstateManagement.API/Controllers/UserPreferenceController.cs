@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Services.Auth;
-using RealEstateManagement.Business.Services.FavortiteProperties;
 using RealEstateManagement.Business.Services.Properties;
 using RealEstateManagement.Data.Entity;
 using System.IdentityModel.Tokens.Jwt;
@@ -17,35 +16,12 @@ namespace RealEstateManagement.API.Controllers
     [ApiController]
     public class UserPreferenceController : ControllerBase
     {
-        private readonly IUserPreferenceService _userPreferenceService;
         //private readonly IAuthService _authService;
         private readonly UserManager<ApplicationUser> _userManager;
-        public UserPreferenceController(IUserPreferenceService userPreferenceService, UserManager<ApplicationUser> userManager)
+        public UserPreferenceController(UserManager<ApplicationUser> userManager)
         {
-            _userPreferenceService = userPreferenceService;
+
             _userManager = userManager;
-        }
-        [HttpPost("add")]
-        public async Task<IActionResult> AddFavoriteProperty([FromBody] FavoritePropertyDTO dto)
-        {
-            try
-            {
-                var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                var handler = new JwtSecurityTokenHandler();
-                var token = handler.ReadJwtToken(accessToken);
-                var userId = Int32.Parse(token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value);
-                //var result = await _userPreferenceService.AddFavoritePropertyAsync(userId, dto.PropertyId);
-
-                //if (!result)
-                //    return BadRequest("Bất động sản đã tồn tại trong danh sách yêu thích.");
-
-                return Ok("Đã thêm vào danh sách yêu thích.");
-            }
-            catch (Exception ex)
-            {
-                var message = ex.InnerException?.Message ?? ex.Message;
-                return StatusCode(500, $"Đã xảy ra lỗi: {message}");
-            }
         }
         [HttpGet("get-user-info")]
         public IActionResult GetUserInfoFromToken()

@@ -16,16 +16,10 @@ public partial class ApplicationUserConfiguration
 
             // Relationships
             builder.HasOne(up => up.User)
-                    .WithMany(u => u.Preferences)
-                    .HasForeignKey(up => up.UserId)
-                    .OnDelete(DeleteBehavior.NoAction);
-
-            builder.HasMany(up => up.FavoriteProperties)
-                   .WithOne(ufp => ufp.UserPreference)
-                   .HasForeignKey(ufp => ufp.UserPreferenceId)
+                   .WithMany(u => u.Preferences)
+                   .HasForeignKey(up => up.UserId)
                    .OnDelete(DeleteBehavior.NoAction);
 
-            // Add index for better query performance
             builder.HasIndex(up => up.UserId);
         }
     }

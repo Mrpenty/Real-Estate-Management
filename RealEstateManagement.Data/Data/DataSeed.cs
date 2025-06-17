@@ -232,7 +232,7 @@ namespace RealEstateManagement.Data.Data
             );
 
             // Seed UserPreferenceFavoriteProperties
-            modelBuilder.Entity<UserPreferenceFavoriteProperties>().HasData(
+            modelBuilder.Entity<UserFavoriteProperty>().HasData(
                 new { UserPreferenceId = 1, PropertyId = 1 }, // Renter favors District 1 apartment
                 new { UserPreferenceId = 1, PropertyId = 2 }, // Renter favors Go Vap room
                 new { UserPreferenceId = 3, PropertyId = 3 }  // Renter 2 favors Tan Binh house

@@ -1,4 +1,5 @@
-﻿using RealEstateManagement.Business.DTO.Properties;
+﻿using Microsoft.AspNetCore.Mvc;
+using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Data.Entity;
 using System;
 using System.Collections.Generic;
@@ -13,12 +14,13 @@ namespace RealEstateManagement.Business.Repositories.Properties
         Task<IEnumerable<Property>> GetAllAsync();
         //Lấy 1 property theo id
         Task<Property> GetPropertyByIdAsync(int id);
-        Task<IEnumerable<Property>> FilterByPriceAsync(decimal minPrice, decimal maxPrice);
-        Task<IEnumerable<Property>> FilterByAreaAsync(decimal minArea, decimal maxArea);
+        Task<IEnumerable<Property>> FilterByPriceAsync([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice);
+        Task<IEnumerable<Property>> FilterByAreaAsync([FromQuery] decimal? minArea, [FromQuery] decimal? maxArea);
         //Sắp xếp nâng cao
         Task<IEnumerable<Property>> FilterAdvancedAsync(PropertyFilterDTO filter);
         //So sánh property (tối đa là 3)
         Task<IEnumerable<Property>> ComparePropertiesAsync(List<int> ids);
+        Task<bool> AddFavoritePropertyAsync(int userId, int propertyId);
         //Lấy nhiều property để so sánh
         Task<List<Property>> GetPropertiesByIdsAsync(List<int> ids);
     }

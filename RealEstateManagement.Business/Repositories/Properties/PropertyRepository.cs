@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Data.Entity;
 using System;
@@ -52,7 +53,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
         //Sắp xếp theo giá
-        public async Task<IEnumerable<Property>> FilterByPriceAsync(decimal minPrice, decimal maxPrice)
+        public async Task<IEnumerable<Property>> FilterByPriceAsync([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice)
         {
             return await _context.Properties
                 .Include(p => p.Images)
@@ -76,7 +77,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .ToListAsync();
         }
         //Sắp xếp theo diện tích
-        public async Task<IEnumerable<Property>> FilterByAreaAsync(decimal minArea, decimal maxArea)
+        public async Task<IEnumerable<Property>> FilterByAreaAsync([FromQuery] decimal? minArea, [FromQuery] decimal? maxArea)
         {
             return await _context.Properties
                 .Include(p => p.Images)
@@ -85,7 +86,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
                     .ThenInclude(pa => pa.Amenity)
                 .Include(p => p.PropertyPromotions)
                     .ThenInclude(pp => pp.PromotionPackage)
-                .Where(p => p.Area >= minArea && p.Price <= maxArea)
+                .Where(p => p.Area >= minArea && p.Area <= maxArea)
                 .Select(p => new
                 {
                     Property = p,
@@ -177,5 +178,34 @@ namespace RealEstateManagement.Business.Repositories.Properties
                     .ThenInclude(pa => pa.Amenity)
                 .ToListAsync();
         }
+        public async Task<bool> AddFavoritePropertyAsync(int userId, int propertyId)
+        {
+            // Kiểm tra User có tồn tại không
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return false;
+
+            // Kiểm tra Property có tồn tại không
+            var property = await _context.Properties.FindAsync(propertyId);
+            if (property == null) return false;
+
+            // Kiểm tra đã tồn tại chưa
+            var exists = await _context.UserFavoriteProperties
+                .AnyAsync(fp => fp.UserId == userId && fp.PropertyId == propertyId);
+            if (exists) return false;
+
+            // Thêm mới
+            var favorite = new UserFavoriteProperty
+            {
+                UserId = userId,
+                PropertyId = propertyId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.UserFavoriteProperties.Add(favorite);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
     }
 }

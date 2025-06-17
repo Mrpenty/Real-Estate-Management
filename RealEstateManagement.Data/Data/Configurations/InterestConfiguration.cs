@@ -4,27 +4,31 @@ using RealEstateManagement.Data.Entity;
 
 public partial class ApplicationUserConfiguration
 {
-    public class InterestConfiguration : IEntityTypeConfiguration<UserPreferenceFavoriteProperties>
+    public class InterestConfiguration : IEntityTypeConfiguration<UserFavoriteProperty>
     {
-        public void Configure(EntityTypeBuilder<UserPreferenceFavoriteProperties> builder)
+        public void Configure(EntityTypeBuilder<UserFavoriteProperty> builder)
         {
-            builder.HasKey(ufp => new { ufp.UserPreferenceId, ufp.PropertyId });
+            // Composite key
+            builder.HasKey(ufp => new { ufp.UserId, ufp.PropertyId });
 
-            builder.Property(ufp => ufp.CreatedAt).HasDefaultValueSql("GETDATE()");
+            // Default value for CreatedAt
+            builder.Property(ufp => ufp.CreatedAt)
+                   .HasDefaultValueSql("GETDATE()");
 
-            // Relationships
-            builder.HasOne(ufp => ufp.UserPreference)
-                   .WithMany(up => up.FavoriteProperties)
-                   .HasForeignKey(ufp => ufp.UserPreferenceId)
+            // Relationship to User
+            builder.HasOne(ufp => ufp.User)
+                   .WithMany(u => u.FavoriteProperties)
+                   .HasForeignKey(ufp => ufp.UserId)
                    .OnDelete(DeleteBehavior.NoAction);
 
+            // Relationship to Property
             builder.HasOne(ufp => ufp.Property)
-                   .WithMany(p => p.UserPreferences)
+                   .WithMany(p => p.FavoritedByUsers)
                    .HasForeignKey(ufp => ufp.PropertyId)
                    .OnDelete(DeleteBehavior.NoAction);
 
-            // Index for better query performance
-            builder.HasIndex(ufp => new { ufp.UserPreferenceId, ufp.PropertyId });
+            // Index for fast lookup
+            builder.HasIndex(ufp => new { ufp.UserId, ufp.PropertyId });
         }
     }
 }

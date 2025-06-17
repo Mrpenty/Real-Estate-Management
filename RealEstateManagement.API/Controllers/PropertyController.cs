@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Services.Properties;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace RealEstateManagement.API.Controllers
 {
@@ -18,7 +20,7 @@ namespace RealEstateManagement.API.Controllers
         }
 
         [HttpGet("homepage-allproperty")]
-        //[Authorize(Roles = "renter")]
+        [Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetHomepageProperties()
         {
             try
@@ -37,7 +39,7 @@ namespace RealEstateManagement.API.Controllers
         }
         //Lấy property theo id
         [HttpGet("{id}")]
-        [Authorize(Roles = "renter")]
+        [Authorize(Roles = "Renter")]
         public async Task<ActionResult> GetPropertyById(int id)
         {
             var property = await _propertyService.GetPropertyByIdAsync(id);
@@ -49,9 +51,11 @@ namespace RealEstateManagement.API.Controllers
         }
         // Sắp xếp theo price
         [HttpGet("filter-by-price")]
-        [Authorize(Roles = "renter")]
-        public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByPrice(decimal minPrice, decimal maxPrice)
+        [Authorize(Roles = "Renter")]
+        public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByPrice([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice)
         {
+            if (!minPrice.HasValue || !maxPrice.HasValue)
+                return BadRequest("Bạn phải nhập cả minPrice và maxPrice.");
             try
             {
                 if (minPrice < 0 || maxPrice < 0 || minPrice > maxPrice)
@@ -70,9 +74,11 @@ namespace RealEstateManagement.API.Controllers
         }
         //Sắp xếp theo diện tích
         [HttpGet("filter-by-area")]
-        [Authorize(Roles = "renter")]
-        public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByArea(decimal minArea, decimal maxArea)
+        [Authorize(Roles = "Renter")]
+        public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByArea([FromQuery] decimal? minArea, [FromQuery] decimal? maxArea)
         {
+            if (!minArea.HasValue || !maxArea.HasValue)
+                return BadRequest("Bạn phải nhập cả minArea và maxArea.");
             try
             {
                 if (minArea < 0 || maxArea < 0 || minArea > maxArea)
@@ -102,7 +108,7 @@ namespace RealEstateManagement.API.Controllers
 
         //So sánh các property với nhau (tối đa là 3)
         [HttpPost("compare")]
-        [Authorize(Roles = "renter")]
+        [Authorize(Roles = "Renter")]
         public async Task<ActionResult<List<ComparePropertyDTO>>> CompareProperties([FromBody] List<int> ids)
         {
             if (ids == null || !ids.Any())
@@ -140,6 +146,24 @@ namespace RealEstateManagement.API.Controllers
             {
                 return StatusCode(500, $"Đã xảy ra lỗi: {ex.Message}");
             }
+        }
+        [HttpPost("add-favorite")]
+        //[Authorize(Roles = "Renter")]
+        public async Task<IActionResult> AddToFavorite([FromBody] FavoritePropertyDTO dto)
+        {
+            var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(accessToken);
+            var userIdClaim = token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized("Đăng nhập trước khi thêm vào danh sách yêu thích");
+            //var userIdClaim = int.Parse(User.FindFirst("id").Value);
+            var result = await _propertyService.AddToFavoriteAsync(userId, dto.PropertyId);
+            if (!result)
+                return BadRequest("Đã có trong danh sách yêu thích hoặc dữ liệu không hợp lệ.");
+
+            return Ok("Đã thêm vào danh sách yêu thích.");
+
         }
     }
 }

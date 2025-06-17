@@ -55,10 +55,6 @@ public partial class ApplicationUserConfiguration
                    .HasForeignKey("PropertyId")
                    .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(p => p.UserPreferences)
-                   .WithOne(ufp => ufp.Property)
-                   .HasForeignKey(ufp => ufp.PropertyId)
-                   .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }
