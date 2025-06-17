@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace RealEstateManagement.Business.Services.User
 {
@@ -12,5 +13,6 @@ namespace RealEstateManagement.Business.Services.User
     {
         Task<ViewProfileDto> GetProfileAsync(int userId);
         Task<IdentityResult> UpdateProfileAsync(int userId, UpdateProfileDto model);
+        Task<ProfilePictureUploadResult> UploadProfilePictureAsync(int userId, IFormFile file);
     }
 }

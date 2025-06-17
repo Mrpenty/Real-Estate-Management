@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Services.Properties;
+using Microsoft.Extensions.Logging;
 
 namespace RealEstateManagement.API.Controllers
 {
@@ -11,16 +12,21 @@ namespace RealEstateManagement.API.Controllers
     public class PropertyController : ControllerBase
     {
         private readonly IPropertyService _propertyService;
+        private readonly ILogger<PropertyController> _logger;
 
-        public PropertyController(IPropertyService propertyService)
+        public PropertyController(IPropertyService propertyService, ILogger<PropertyController> logger)
         {
             _propertyService = propertyService;
+            _logger = logger;
         }
+
+        
 
         [HttpGet("homepage-allproperty1")]
         [Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetHomepageProperties()
         {
+            _logger.LogInformation("GetHomepageProperties: Request received");
             try
             {
                 var properties = await _propertyService.GetAllPropertiesAsync();
@@ -32,24 +38,32 @@ namespace RealEstateManagement.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "GetHomepageProperties: Error occurred");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
         //Lấy property theo id
         [HttpGet("{id}")]
-        [Authorize(Roles = "renter")]
+        [Authorize(Roles = "Renter")]
         public async Task<ActionResult> GetPropertyById(int id)
         {
+            _logger.LogInformation("GetPropertyById: Request received for property ID {PropertyId}", id);
+            _logger.LogInformation("GetPropertyById: User claims - {Claims}", 
+                string.Join(", ", User.Claims.Select(c => $"{c.Type}: {c.Value}")));
+            
             var property = await _propertyService.GetPropertyByIdAsync(id);
             if (property == null)
             {
+                _logger.LogWarning("GetPropertyById: Property with ID {PropertyId} not found", id);
                 return NotFound("Không tìm thấy bất động sản nào");
             }
+            
+            _logger.LogInformation("GetPropertyById: Property with ID {PropertyId} found successfully", id);
             return Ok(property);
         }
         // Sắp xếp theo price
         [HttpGet("filter-by-price")]
-        [Authorize(Roles = "renter")]
+        [Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByPrice(decimal minPrice, decimal maxPrice)
         {
             try
@@ -70,7 +84,7 @@ namespace RealEstateManagement.API.Controllers
         }
         //Sắp xếp theo diện tích
         [HttpGet("filter-by-area")]
-        [Authorize(Roles = "renter")]
+        [Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByArea(decimal minArea, decimal maxArea)
         {
             try

@@ -32,8 +32,12 @@ namespace RealEstateManagement.Business.Repositories.Token
 
         public async Task<TokenDTO> CreateJWTTokenAsync(ApplicationUser user, bool populateExp)
         {
+            
             var signingCredentials = GetSigningCreadentials();
+            
             var claims = await GetClaims(user);
+           
+            
             var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
 
             var refreshToken = GenerateRefreshToken();
@@ -47,7 +51,6 @@ namespace RealEstateManagement.Business.Repositories.Token
             }
 
             await _userManager.UpdateAsync(user);
-
 
             return new TokenDTO
             {
@@ -129,7 +132,7 @@ namespace RealEstateManagement.Business.Repositories.Token
 
         private SigningCredentials GetSigningCreadentials()
         {
-            var key = Encoding.UTF8.GetBytes(_configuration["JWT:Key"]);
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
             var signingKey = new SymmetricSecurityKey(key);
             return new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
         }
@@ -145,7 +148,6 @@ namespace RealEstateManagement.Business.Repositories.Token
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-
             var roles = await _userManager.GetRolesAsync(user);
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
@@ -153,11 +155,15 @@ namespace RealEstateManagement.Business.Repositories.Token
         }
         private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
         {
+            var issuer = _configuration["Jwt:Issuer"];
+            var audience = _configuration["Jwt:Audience"];
+            var expiryMinutes = _configuration["Jwt:ExpiryMinutes"];
+            
             var tokenOptions = new JwtSecurityToken(
-                issuer: _configuration["JWT:Issuer"],
-                audience: _configuration["JWT:Audience"],
+                issuer: issuer,
+                audience: audience,
                 claims: claims,
-                expires: DateTime.Now.AddDays(Convert.ToDouble(_configuration["JWT:ExpiryMinutes"])),
+                expires: DateTime.Now.AddDays(Convert.ToDouble(expiryMinutes)),
                 signingCredentials: signingCredentials
             );
 
@@ -176,7 +182,7 @@ namespace RealEstateManagement.Business.Repositories.Token
 
         private ClaimsPrincipal GetClaimsPrincipalFromExpiredToken(string token)
         {
-            var jwtSettings = _configuration.GetSection("JWT");
+            var jwtSettings = _configuration.GetSection("Jwt");
 
             var TokenValidationParameters = new TokenValidationParameters
             {
@@ -214,7 +220,6 @@ namespace RealEstateManagement.Business.Repositories.Token
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to validate Google ID token.");
                 throw;
             }
         }
