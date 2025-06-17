@@ -10,6 +10,10 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
     public interface IPropertyPostRepository
     {
         Task<int> CreatePropertyPostAsync(Property property, PropertyPost post, List<int> amenityIds);
+
+        Task<PropertyPost> GetByPropertyIdAsync(int propertyId);
+        Task UpdateAsync(PropertyPost post);
+
     }
 
 }

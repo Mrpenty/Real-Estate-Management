@@ -1,4 +1,6 @@
-using Google.Apis.Auth;
+
+﻿using Google.Apis.Auth;
+
 using Microsoft.AspNetCore.Http;
 
 using Microsoft.AspNetCore.Identity;
@@ -141,13 +143,17 @@ namespace RealEstateManagement.Business.Repositories.Token
         {
 
             var claims = new List<Claim>
-            {
-                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-                new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email ?? ""),
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new("id", user.Id.ToString())
+        };
+
 
             _logger.LogInformation("GetClaims: Basic claims added for user {UserId}", user.Id);
 

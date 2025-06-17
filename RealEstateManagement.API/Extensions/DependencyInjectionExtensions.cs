@@ -1,14 +1,10 @@
 ﻿using RealEstateManagement.Business.Services.Auth;
-
 using RealEstateManagement.Business.Services.Mail;
-using RealEstateManagement.Business.Repositories.Token;
-
 using RealEstateManagement.Business.Repositories.Token;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Business.Services.Properties;
-
 
 
 namespace RealEstateManagement.API.Extensions
@@ -29,10 +25,12 @@ namespace RealEstateManagement.API.Extensions
 
             services.AddScoped<IPropertyPostRepository, PropertyPostRepository>();
             services.AddScoped<IPropertyPostService, PropertyPostService>();
-
+            services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
+            services.AddScoped<IPropertyImageService, PropertyImageService>();
+            services.AddScoped<IRentalContractRepository, RentalContractRepository>();
+            services.AddScoped<IRentalContractService, RentalContractService>();
             services.AddScoped<IPropertyRepository, PropertyRepository>();
             services.AddScoped<IPropertyService, PropertyService>();
-
 
             return services;
             }

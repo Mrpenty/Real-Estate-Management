@@ -1,4 +1,5 @@
-﻿using RealEstateManagement.Data.Entity;
+﻿using Microsoft.EntityFrameworkCore;
+using RealEstateManagement.Data.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +36,18 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
 
             await _context.SaveChangesAsync();
             return post.Id;
+        }
+
+        public async Task<PropertyPost> GetByPropertyIdAsync(int propertyId)
+        {
+            return await _context.PropertyPosts
+                .FirstOrDefaultAsync(p => p.PropertyId == propertyId);
+        }
+
+        public async Task UpdateAsync(PropertyPost post)
+        {
+            _context.PropertyPosts.Update(post);
+            await _context.SaveChangesAsync();
         }
     }
 

@@ -4,12 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Data.Data;
 using RealEstateManagement.Data.Entity;
 using static ApplicationUserConfiguration;
+using RealEstateManagement.Data.Data.Configurations;
 
 public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
 {
     public DbSet<UserPreference> UserPreferences { get; set; }
     public DbSet<Property> Properties { get; set; }
     public DbSet<Amenity> Amenities { get; set; }
+    public DbSet<RentalContract> RentalContracts { get; set; }
+
     public DbSet<PropertyAmenity> PropertyAmenities { get; set; }
     public DbSet<PropertyImage> PropertyImages { get; set; }
     public DbSet<PropertyPost> PropertyPosts { get; set; }
@@ -42,10 +45,8 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
         modelBuilder.ApplyConfiguration(new ConversationConfiguration());
         modelBuilder.ApplyConfiguration(new MessageConfiguration());
         modelBuilder.ApplyConfiguration(new InterestConfiguration());
+        modelBuilder.ApplyConfiguration(new RentalContractConfiguration());
         modelBuilder.ApplyConfiguration(new PropertyPromotionConfiguration());
-
-
-
         DataSeed.SeedData(modelBuilder);
     }
 }

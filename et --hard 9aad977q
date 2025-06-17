@@ -1,0 +1,17 @@
+[33m9aad977[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mrecover-branch[m[33m)[m Update FE login, google auth
+[33m4c2782f[m Quick update
+[33m30a8414[m[33m ([m[1;31morigin/master[m[33m, [m[1;32mmaster[m[33m)[m Merge pull request #2 from Mrpenty/DongVT/Login
+[33mfdb202e[m[33m ([m[1;31morigin/DongVT/Login[m[33m)[m Merge branch 'master' into DongVT/Login
+[33m8ce7a9d[m[33m ([m[1;32mDongVT/Login[m[33m)[m Update database, mail serivce
+[33m0e593e8[m[33m ([m[1;31morigin/TriDM/OwnerProperty[m[33m)[m Merge pull request #1 from Mrpenty/KhanhDV/HomePage1
+[33mb66e5f6[m[33m ([m[1;31morigin/KhanhDV/HomePage1[m[33m, [m[1;32mKhanhDV/HomePage1[m[33m)[m Fix conflict and resolve duplicate PropertyService.cs issue
+[33mdef78e6[m Merge remote-tracking branch 'origin/KhanhDV/HomePage1' into KhanhDV/HomePage1
+[33m6f9c453[m Add property by Owner
+[33m4461eba[m Thêm Compare Property
+[33me4c1bb0[m Them filterbyArea
+[33m84a3567[m Them middleware, HomePage API
+[33m4050501[m Update database
+[33m7279afd[m[33m ([m[1;31morigin/KhanhDV/HomePage[m[33m)[m Quick update
+[33ma792992[m Update login with token
+[33mcd845fd[m Add project files.
+[33m344f9c2[m Add .gitattributes and .gitignore.

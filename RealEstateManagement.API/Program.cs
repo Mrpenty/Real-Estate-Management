@@ -61,11 +61,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Add CORS before other middleware
+app.UseCorsPolicy(app.Environment);
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.UseCorsPolicy(app.Environment);
 app.UseSwaggerServices(app.Environment);
 app.Run();
