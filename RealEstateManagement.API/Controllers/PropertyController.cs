@@ -20,8 +20,6 @@ namespace RealEstateManagement.API.Controllers
             _logger = logger;
         }
 
-        
-
         [HttpGet("homepage-allproperty1")]
         [Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetHomepageProperties()
@@ -58,7 +56,7 @@ namespace RealEstateManagement.API.Controllers
                 return NotFound("Không tìm thấy bất động sản nào");
             }
             
-            _logger.LogInformation("GetPropertyById: Property with ID {PropertyId} found successfully", id);
+          
             return Ok(property);
         }
         // Sắp xếp theo price
@@ -105,9 +103,18 @@ namespace RealEstateManagement.API.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        //Filter nâng cao
+        [HttpPost("filter-advanced")]
+        public async Task<IActionResult> FilterAdvanced([FromBody] PropertyFilterDTO filter)
+        {
+
+            var result = await _propertyService.FilterAdvancedAsync(filter);
+            return Ok(result);
+        }
+
         //So sánh các property với nhau (tối đa là 3)
         [HttpPost("compare")]
-        //[Authorize(Roles = "renter")]
+        [Authorize(Roles = "renter")]
         public async Task<ActionResult<List<ComparePropertyDTO>>> CompareProperties([FromBody] List<int> ids)
         {
             if (ids == null || !ids.Any())

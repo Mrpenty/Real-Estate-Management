@@ -25,6 +25,7 @@ namespace RealEstateManagement.Business.DTO.Properties
         public string LandlordPhoneNumber { get; set; }
         public string LandlordProfilePictureUrl { get; set; }
         public DateTime LandlordCreatedAt { get; set; }
+        public string PromotionPackageName { get; set; }
         public List<string> Amenities { get; set; }
         public List<string> ImageUrls { get; set; }
     }

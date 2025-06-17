@@ -120,16 +120,6 @@ namespace RealEstateManagement.Business.Repositories.Token
             context.Response.Cookies.Delete("refreshToken", cookieOptions);
         }
 
-
-
-
-
-
-
-
-
-
-
         private SigningCredentials GetSigningCreadentials()
         {
             var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
@@ -139,9 +129,7 @@ namespace RealEstateManagement.Business.Repositories.Token
 
         private async Task<List<Claim>> GetClaims(ApplicationUser user)
         {
-            var claims = new List<Claim>
-            {
-                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            var claims = new List<Claim>            {
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
                 new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
@@ -186,6 +174,7 @@ namespace RealEstateManagement.Business.Repositories.Token
 
             var TokenValidationParameters = new TokenValidationParameters
             {
+
                 ValidateAudience = true,
                 ValidateIssuer = true,
                 ValidateIssuerSigningKey = true,

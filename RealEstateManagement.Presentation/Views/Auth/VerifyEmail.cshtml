@@ -12,7 +12,6 @@
             return;
         }
         try {
-            // Using authService.verifyEmail to ensure the correct API_BASE_URL is used
             const data = await authService.verifyEmail(email);
             
             if (data.isAuthSuccessful) {

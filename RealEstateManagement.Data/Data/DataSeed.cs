@@ -150,8 +150,11 @@ namespace RealEstateManagement.Data.Data
                     PasswordHash = hasher.HashPassword(null, "Landlord@123"),
                     Name = "Landlord User",
                     Role = "landlord",
+                    ProfilePictureUrl = "https://th.bing.com/th/id/R.63d31ac6257157ef079f31bb32e342df?rik=63%2bkafQNo5seHg&pid=ImgRaw&r=0",
                     IsVerified = true,
                     CreatedAt = DateTime.Now
+                    //03345678910
+
                 },
                 new ApplicationUser
                 {
