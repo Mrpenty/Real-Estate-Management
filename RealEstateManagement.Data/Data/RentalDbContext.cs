@@ -21,7 +21,7 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     public DbSet<Conversation> Conversation { get; set; }
     public DbSet<Message> Message { get; set; }
     public DbSet<Review> Reviews { get; set; }
-    public DbSet<UserPreferenceFavoriteProperties> UserPreferenceFavoriteProperties { get; set; } // Added
+    public DbSet<UserFavoriteProperty> UserFavoriteProperties { get; set; }
 
     public DbSet <PromotionPackage> promotionPackages { get; set; }
     public DbSet<PropertyPromotion> PropertyPromotions { get; set; } 

@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public int UserId { get; set; }
+
         public string Location { get; set; }
         public decimal? PriceRangeMin { get; set; }
         public decimal? PriceRangeMax { get; set; }
@@ -11,7 +12,5 @@
         public DateTime CreatedAt { get; set; }
 
         public ApplicationUser User { get; set; }
-        public Property Property { get; set; }
-        public ICollection<UserPreferenceFavoriteProperties> FavoriteProperties { get; set; }
     }
 }

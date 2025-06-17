@@ -1,4 +1,5 @@
-﻿using RealEstateManagement.Business.DTO.Properties;
+﻿using Microsoft.AspNetCore.Mvc;
+using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Repositories.Properties;
 using System;
 using System.Collections.Generic;
@@ -77,7 +78,7 @@ namespace RealEstateManagement.Business.Services.Properties
                                         .FirstOrDefault()
             };
         }
-        public async Task<IEnumerable<HomePropertyDTO>> FilterByPriceAsync(decimal minPrice, decimal maxPrice)
+        public async Task<IEnumerable<HomePropertyDTO>> FilterByPriceAsync([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice)
         {
             var p = await _repository.FilterByPriceAsync(minPrice, maxPrice);
             if (p == null) return null;
@@ -106,7 +107,7 @@ namespace RealEstateManagement.Business.Services.Properties
                                         .FirstOrDefault()
             });
         }
-        public async Task<IEnumerable<HomePropertyDTO>> FilterByAreaAsync(decimal minArea, decimal maxArea)
+        public async Task<IEnumerable<HomePropertyDTO>> FilterByAreaAsync([FromQuery] decimal? minArea, [FromQuery] decimal? maxArea)
         {
             var p = await _repository.FilterByPriceAsync(minArea, maxArea);
             if (p == null) return null;
@@ -164,6 +165,7 @@ namespace RealEstateManagement.Business.Services.Properties
 
         public async Task<IEnumerable<HomePropertyDTO>> FilterAdvancedAsync(PropertyFilterDTO filter)
         {
+
             var p = await _repository.FilterAdvancedAsync(filter);
             if (p == null) return null;
             return p.Select(p => new HomePropertyDTO
@@ -249,6 +251,10 @@ namespace RealEstateManagement.Business.Services.Properties
                 IsMostReviewed = p.Reviews.Count == mostReviewed
 
             }).ToList();
+        }
+        public async Task<bool> AddToFavoriteAsync(int userId, int propertyId)
+        {
+            return await _repository.AddFavoritePropertyAsync(userId, propertyId);
         }
     }
 }

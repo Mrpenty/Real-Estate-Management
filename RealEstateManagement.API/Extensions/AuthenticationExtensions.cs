@@ -27,22 +27,66 @@ namespace RealEstateManagement.API.Extensions
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
                         NameClaimType = JwtRegisteredClaimNames.Sub,
-                        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
-
+                        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     };
 
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = ctx =>
                         {
-                            ctx.Request.Cookies.TryGetValue("accessToken", out var accessToken);
-                            if (!string.IsNullOrEmpty(accessToken))
+                            var logger = ctx.HttpContext.RequestServices.GetService<ILogger<JwtBearerEvents>>();
+                            logger?.LogInformation("OnMessageReceived: Starting token extraction");
+
+                            var authHeader = ctx.Request.Headers["Authorization"].FirstOrDefault();
+                            logger?.LogInformation("OnMessageReceived: Authorization header: {AuthHeader}",
+                                authHeader != null ? authHeader.Substring(0, Math.Min(50, authHeader.Length)) + "..." : "null");
+
+                            if (!string.IsNullOrEmpty(authHeader))
                             {
-                                ctx.Token = accessToken;
+                                var prefix = authHeader.Length >= 7 ? authHeader.Substring(0, 7) : authHeader;
+                                logger?.LogInformation("OnMessageReceived: Authorization header prefix: '{Prefix}'", prefix);
+                            }
+
+                            if (!string.IsNullOrEmpty(authHeader))
+                            {
+                                string token;
+
+                                if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    token = authHeader.Substring("Bearer ".Length).Trim();
+                                    logger?.LogInformation("OnMessageReceived: Token extracted from Authorization header with Bearer prefix");
+                                }
+                                else
+                                {
+                                    token = authHeader.Trim();
+                                    logger?.LogInformation("OnMessageReceived: Token extracted from Authorization header (raw token, no Bearer prefix)");
+                                }
+
+                                if (!string.IsNullOrEmpty(token))
+                                {
+                                    ctx.Token = token;
+                                    logger?.LogInformation("OnMessageReceived: Token set successfully");
+                                }
+                                else
+                                {
+                                    logger?.LogWarning("OnMessageReceived: Token is empty after extraction");
+                                    ctx.NoResult();
+                                }
+                            }
+                            else
+                            {
+                                logger?.LogWarning("OnMessageReceived: No Authorization header found");
+                                ctx.NoResult();
                             }
 
                             return Task.CompletedTask;
-                        }
+                        },
+
+
+
+
+
+
                     };
                 });
 
@@ -50,4 +94,3 @@ namespace RealEstateManagement.API.Extensions
         }
     }
 }
-    
