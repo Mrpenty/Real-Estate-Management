@@ -109,7 +109,7 @@ namespace RealEstateManagement.Business.Services.Properties
         }
         public async Task<IEnumerable<HomePropertyDTO>> FilterByAreaAsync([FromQuery] decimal? minArea, [FromQuery] decimal? maxArea)
         {
-            var p = await _repository.FilterByPriceAsync(minArea, maxArea);
+            var p = await _repository.FilterByAreaAsync(minArea, maxArea);
             if (p == null) return null;
             return p.Select(p => new HomePropertyDTO
             {
@@ -165,10 +165,8 @@ namespace RealEstateManagement.Business.Services.Properties
 
         public async Task<IEnumerable<HomePropertyDTO>> FilterAdvancedAsync(PropertyFilterDTO filter)
         {
-
-            var p = await _repository.FilterAdvancedAsync(filter);
-            if (p == null) return null;
-            return p.Select(p => new HomePropertyDTO
+            var properties = await _repository.FilterAdvancedAsync(filter);
+            return properties.Select(p => new HomePropertyDTO
             {
                 Id = p.Id,
                 Title = p.Title,
@@ -188,11 +186,12 @@ namespace RealEstateManagement.Business.Services.Properties
                 LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
                 Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
                 PromotionPackageName = p.PropertyPromotions?
-                                        .OrderByDescending(pp => pp.PromotionPackage.Level)
-                                        .Select(pp => pp.PromotionPackage.Name)
-                                        .FirstOrDefault()
+                    .OrderByDescending(pp => pp.PromotionPackage.Level)
+                    .Select(pp => pp.PromotionPackage.Name)
+                    .FirstOrDefault()
             });
         }
+
 
         public async Task<IEnumerable<ComparePropertyDTO>> ComparePropertiesAsync(List<int> ids)
         {

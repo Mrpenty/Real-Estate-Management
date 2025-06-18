@@ -15,7 +15,7 @@
         public Property Property { get; set; }
         public ApplicationUser Landlord { get; set; }
         public ApplicationUser VerifiedByUser { get; set; }
-
+        public RentalContract RentalContract { get; set; }  // 👈 thêm navigation property
         public enum PropertyPostStatus
         {
             Draft = 0,
