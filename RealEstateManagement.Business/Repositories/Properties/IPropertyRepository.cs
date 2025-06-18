@@ -15,7 +15,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
         //Lấy 1 property theo id
         Task<Property> GetPropertyByIdAsync(int id);
         Task<IEnumerable<Property>> FilterByPriceAsync([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice);
-        Task<IEnumerable<Property>> FilterByAreaAsync([FromQuery] decimal? minArea, [FromQuery] decimal? maxArea);
+        Task<IEnumerable<Property>> FilterByAreaAsync(decimal? minArea, decimal? maxArea);
         //Sắp xếp nâng cao
         Task<IEnumerable<Property>> FilterAdvancedAsync(PropertyFilterDTO filter);
         //So sánh property (tối đa là 3)
