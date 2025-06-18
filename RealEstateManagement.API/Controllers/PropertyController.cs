@@ -165,5 +165,26 @@ namespace RealEstateManagement.API.Controllers
             return Ok("Đã thêm vào danh sách yêu thích.");
 
         }
+
+        // GET: api/PropertySearch/search?query=apartment
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string keyword)
+        {
+            var results = await _propertyService.SearchAsync(keyword);
+            return Ok(results);
+        }
+        [HttpPost("index")]
+        public async Task<IActionResult> IndexProperty([FromBody] PropertySearchDTO dto)
+        {
+            var result = await _propertyService.IndexPropertyAsync(dto);
+            return result ? Ok("Indexed successfully") : StatusCode(500, "Index failed");
+        }
+
+        [HttpPost("index/bulk")]
+        public async Task<IActionResult> BulkIndex()
+        {
+            await _propertyService.BulkIndexPropertiesAsync();
+            return Ok("Bulk indexing completed");
+        }
     }
 }

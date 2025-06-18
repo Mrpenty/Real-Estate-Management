@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.DTO.Properties;
+using RealEstateManagement.Data.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,10 @@ namespace RealEstateManagement.Business.Services.Properties
         Task<IEnumerable<ComparePropertyDTO>> ComparePropertiesAsync(List<int> ids);
         Task<bool> AddToFavoriteAsync(int userId, int propertyId);
         Task<List<PropertyDetailDTO>> GetPropertiesByIdsAsync(List<int> ids);
+        //Elasticsearch
+        Task<bool> IndexPropertyAsync(PropertySearchDTO dto);
+        Task BulkIndexPropertiesAsync();
+        Task<IEnumerable<HomePropertyDTO>> SearchAsync(string keyword);
 
     }
 }

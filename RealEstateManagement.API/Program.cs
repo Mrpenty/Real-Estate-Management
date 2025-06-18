@@ -36,12 +36,14 @@ builder.Services.AddAuthenticationServices(builder.Configuration);
 
 
 builder.Services.AddCorsServices(builder.Configuration, builder.Environment);
-
+//Elasticsearch
+builder.Services.AddElasticsearch(builder.Configuration);
 
 builder.Services.AddSwaggerServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDependencyInjectionServices();
 var app = builder.Build();
+
 //app.UseCors("CorsPolicy");
 
 //app.UseRouting();

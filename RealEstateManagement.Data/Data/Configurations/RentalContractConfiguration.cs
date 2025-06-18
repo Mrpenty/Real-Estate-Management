@@ -11,7 +11,7 @@ namespace RealEstateManagement.Data.Data.Configurations
             builder.HasKey(rc => rc.Id);
 
             builder.HasOne(rc => rc.PropertyPost)
-                .WithOne()
+                .WithOne(pp => pp.RentalContract)
                 .HasForeignKey<RentalContract>(rc => rc.PropertyPostId)
                 .OnDelete(DeleteBehavior.Cascade);
 
