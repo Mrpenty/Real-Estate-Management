@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Repositories.Properties;
+using RealEstateManagement.Data.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,6 +49,8 @@ namespace RealEstateManagement.Business.Services.Properties
         public async Task<PropertyDetailDTO> GetPropertyByIdAsync(int id)
         {
             var p = await _repository.GetPropertyByIdAsync(id);
+            var rentalContract = p.Posts
+                .FirstOrDefault(pp => pp.RentalContract != null)?.RentalContract;
             if (p == null)
             {
                 throw new KeyNotFoundException($"Property with ID = {id} not found.");
@@ -75,7 +78,17 @@ namespace RealEstateManagement.Business.Services.Properties
                 PromotionPackageName = p.PropertyPromotions?
                                         .OrderByDescending(pp => pp.PromotionPackage.Level)
                                         .Select(pp => pp.PromotionPackage.Name)
-                                        .FirstOrDefault()
+                                        .FirstOrDefault(),
+
+                // Mapping thêm thông tin hợp đồng
+                ContractDeposit = rentalContract?.DepositAmount,
+                ContractMonthlyRent = rentalContract?.MonthlyRent,
+                ContractDurationMonths = rentalContract?.ContractDurationMonths,
+                ContractStartDate = rentalContract?.StartDate,
+                ContractEndDate = rentalContract?.EndDate,
+                ContractStatus = rentalContract?.Status.ToString(),
+                ContractPaymentMethod = rentalContract?.PaymentMethod,
+                ContractContactInfo = rentalContract?.ContactInfo
             };
         }
         public async Task<IEnumerable<HomePropertyDTO>> FilterByPriceAsync([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice)

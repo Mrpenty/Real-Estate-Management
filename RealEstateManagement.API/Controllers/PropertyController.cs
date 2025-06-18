@@ -39,7 +39,7 @@ namespace RealEstateManagement.API.Controllers
         }
         //Lấy property theo id
         [HttpGet("{id}")]
-        [Authorize(Roles = "Renter")]
+        //[Authorize(Roles = "Renter")]
         public async Task<ActionResult> GetPropertyById(int id)
         {
             var property = await _propertyService.GetPropertyByIdAsync(id);

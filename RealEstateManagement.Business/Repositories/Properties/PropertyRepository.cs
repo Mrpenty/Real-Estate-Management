@@ -50,6 +50,8 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities)
                     .ThenInclude(pa => pa.Amenity)
+                .Include(p=>p.Posts)
+                    .ThenInclude(Pa=>Pa.RentalContract)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
         //Sắp xếp theo giá
