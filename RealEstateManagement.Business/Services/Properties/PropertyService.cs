@@ -1,5 +1,7 @@
-﻿using RealEstateManagement.Business.DTO.Properties;
+﻿using Microsoft.AspNetCore.Mvc;
+using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Repositories.Properties;
+using RealEstateManagement.Data.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,6 +49,8 @@ namespace RealEstateManagement.Business.Services.Properties
         public async Task<PropertyDetailDTO> GetPropertyByIdAsync(int id)
         {
             var p = await _repository.GetPropertyByIdAsync(id);
+            var rentalContract = p.Posts
+                .FirstOrDefault(pp => pp.RentalContract != null)?.RentalContract;
             if (p == null)
             {
                 throw new KeyNotFoundException($"Property with ID = {id} not found.");
@@ -74,10 +78,20 @@ namespace RealEstateManagement.Business.Services.Properties
                 PromotionPackageName = p.PropertyPromotions?
                                         .OrderByDescending(pp => pp.PromotionPackage.Level)
                                         .Select(pp => pp.PromotionPackage.Name)
-                                        .FirstOrDefault()
+                                        .FirstOrDefault(),
+
+                // Mapping thêm thông tin hợp đồng
+                ContractDeposit = rentalContract?.DepositAmount,
+                ContractMonthlyRent = rentalContract?.MonthlyRent,
+                ContractDurationMonths = rentalContract?.ContractDurationMonths,
+                ContractStartDate = rentalContract?.StartDate,
+                ContractEndDate = rentalContract?.EndDate,
+                ContractStatus = rentalContract?.Status.ToString(),
+                ContractPaymentMethod = rentalContract?.PaymentMethod,
+                ContractContactInfo = rentalContract?.ContactInfo
             };
         }
-        public async Task<IEnumerable<HomePropertyDTO>> FilterByPriceAsync(decimal minPrice, decimal maxPrice)
+        public async Task<IEnumerable<HomePropertyDTO>> FilterByPriceAsync([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice)
         {
             var p = await _repository.FilterByPriceAsync(minPrice, maxPrice);
             if (p == null) return null;
@@ -106,9 +120,9 @@ namespace RealEstateManagement.Business.Services.Properties
                                         .FirstOrDefault()
             });
         }
-        public async Task<IEnumerable<HomePropertyDTO>> FilterByAreaAsync(decimal minArea, decimal maxArea)
+        public async Task<IEnumerable<HomePropertyDTO>> FilterByAreaAsync([FromQuery] decimal? minArea, [FromQuery] decimal? maxArea)
         {
-            var p = await _repository.FilterByPriceAsync(minArea, maxArea);
+            var p = await _repository.FilterByAreaAsync(minArea, maxArea);
             if (p == null) return null;
             return p.Select(p => new HomePropertyDTO
             {
@@ -164,9 +178,8 @@ namespace RealEstateManagement.Business.Services.Properties
 
         public async Task<IEnumerable<HomePropertyDTO>> FilterAdvancedAsync(PropertyFilterDTO filter)
         {
-            var p = await _repository.FilterAdvancedAsync(filter);
-            if (p == null) return null;
-            return p.Select(p => new HomePropertyDTO
+            var properties = await _repository.FilterAdvancedAsync(filter);
+            return properties.Select(p => new HomePropertyDTO
             {
                 Id = p.Id,
                 Title = p.Title,
@@ -186,11 +199,12 @@ namespace RealEstateManagement.Business.Services.Properties
                 LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
                 Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
                 PromotionPackageName = p.PropertyPromotions?
-                                        .OrderByDescending(pp => pp.PromotionPackage.Level)
-                                        .Select(pp => pp.PromotionPackage.Name)
-                                        .FirstOrDefault()
+                    .OrderByDescending(pp => pp.PromotionPackage.Level)
+                    .Select(pp => pp.PromotionPackage.Name)
+                    .FirstOrDefault()
             });
         }
+
 
         public async Task<IEnumerable<ComparePropertyDTO>> ComparePropertiesAsync(List<int> ids)
         {
@@ -249,6 +263,10 @@ namespace RealEstateManagement.Business.Services.Properties
                 IsMostReviewed = p.Reviews.Count == mostReviewed
 
             }).ToList();
+        }
+        public async Task<bool> AddToFavoriteAsync(int userId, int propertyId)
+        {
+            return await _repository.AddFavoritePropertyAsync(userId, propertyId);
         }
     }
 }

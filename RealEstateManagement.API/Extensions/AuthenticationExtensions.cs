@@ -27,8 +27,7 @@ namespace RealEstateManagement.API.Extensions
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
                         NameClaimType = JwtRegisteredClaimNames.Sub,
-                        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
-
+                        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                     };
 
                     options.Events = new JwtBearerEvents
@@ -37,6 +36,7 @@ namespace RealEstateManagement.API.Extensions
                         {
                             var logger = ctx.HttpContext.RequestServices.GetService<ILogger<JwtBearerEvents>>();
                             logger?.LogInformation("OnMessageReceived: Starting token extraction");
+
                             
                             var authHeader = ctx.Request.Headers["Authorization"].FirstOrDefault();
                             logger?.LogInformation("OnMessageReceived: Authorization header: {AuthHeader}", 
@@ -76,6 +76,7 @@ namespace RealEstateManagement.API.Extensions
                             }
                             else
                             {
+
                                 logger?.LogWarning("OnMessageReceived: No Authorization header found");
                                 ctx.NoResult();
                             }
@@ -83,15 +84,13 @@ namespace RealEstateManagement.API.Extensions
                             return Task.CompletedTask;
                         },
 
-                        
 
-                       
-
-                       
                     };
                 });
 
             return services;
         }
     }
+
 }
+

@@ -28,5 +28,14 @@ namespace RealEstateManagement.Business.DTO.Properties
         public string PromotionPackageName { get; set; }
         public List<string> Amenities { get; set; }
         public List<string> ImageUrls { get; set; }
+        // Contract Details
+        public decimal? ContractDeposit { get; set; }
+        public decimal? ContractMonthlyRent { get; set; }
+        public int? ContractDurationMonths { get; set; }
+        public DateTime? ContractStartDate { get; set; }
+        public DateTime? ContractEndDate { get; set; }
+        public string ContractStatus { get; set; }
+        public string ContractPaymentMethod { get; set; }
+        public string ContractContactInfo { get; set; }
     }
 }

@@ -15,7 +15,7 @@ namespace RealEstateManagement.Business.DTO.Properties
         public decimal? MinArea { get; set; }
         public decimal? MaxArea { get; set; }
         public string? Location { get; set; }
-        public List<int>? AmenityIds { get; set; }
+        public List<string>? AmenityName { get; set; }
         public string? PropertyType { get; set; }
         public bool? IsVerified { get; set; }
         public string? SearchKeyword { get; set; }

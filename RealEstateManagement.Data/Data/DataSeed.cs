@@ -235,7 +235,7 @@ namespace RealEstateManagement.Data.Data
             );
 
             // Seed UserPreferenceFavoriteProperties
-            modelBuilder.Entity<UserPreferenceFavoriteProperties>().HasData(
+            modelBuilder.Entity<UserFavoriteProperty>().HasData(
                 new { UserPreferenceId = 1, PropertyId = 1 }, // Renter favors District 1 apartment
                 new { UserPreferenceId = 1, PropertyId = 2 }, // Renter favors Go Vap room
                 new { UserPreferenceId = 3, PropertyId = 3 }  // Renter 2 favors Tan Binh house
@@ -345,7 +345,7 @@ namespace RealEstateManagement.Data.Data
                     Id = 1,
                     PropertyId = 1,
                     LandlordId = 2,
-                    Status = "approved",
+                    Status = PropertyPost.PropertyPostStatus.Approved,
                     CreatedAt = DateTime.Now,
                     VerifiedAt = DateTime.Now,
                     VerifiedBy = 1 // Admin verified
@@ -355,7 +355,7 @@ namespace RealEstateManagement.Data.Data
                     Id = 2,
                     PropertyId = 2,
                     LandlordId = 2,
-                    Status = "approved",
+                    Status = PropertyPost.PropertyPostStatus.Approved,
                     CreatedAt = DateTime.Now.AddDays(-1),
                     VerifiedAt = DateTime.Now.AddDays(-1),
                     VerifiedBy = 1
@@ -365,7 +365,7 @@ namespace RealEstateManagement.Data.Data
                     Id = 3,
                     PropertyId = 3,
                     LandlordId = 2,
-                    Status = "approved",
+                    Status = PropertyPost.PropertyPostStatus.Approved,
                     CreatedAt = DateTime.Now.AddDays(-2),
                     VerifiedAt = DateTime.Now.AddDays(-2),
                     VerifiedBy = 1
@@ -422,6 +422,43 @@ namespace RealEstateManagement.Data.Data
                 }
             );
         }
+        private static void SeedRentalContracts(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<RentalContract>().HasData(
+                new RentalContract
+                {
+                    Id = 1,
+                    PropertyPostId = 1,
+                    LandlordId = 2,     
+                    RenterId = 3,       
+                    DepositAmount = 2000000,
+                    MonthlyRent = 5000000,
+                    ContractDurationMonths = 12,
+                    StartDate = new DateTime(2025, 7, 1),
+                    PaymentMethod = "Bank Transfer",
+                    ContactInfo = "renter@example.com | 03345678910",
+                    Status = RentalContract.ContractStatus.Confirmed,
+                    CreatedAt = DateTime.Now,
+                    ConfirmedAt = DateTime.Now
+                },
+                new RentalContract
+                {
+                    Id = 2,
+                    PropertyPostId = 2,
+                    LandlordId = 2,
+                    RenterId = 4,
+                    DepositAmount = 1500000,
+                    MonthlyRent = 2000000,
+                    ContractDurationMonths = 6,
+                    StartDate = new DateTime(2025, 8, 1),
+                    PaymentMethod = "Momo",
+                    ContactInfo = "renter2@example.com | 0322222222",
+                    Status = RentalContract.ContractStatus.Pending,
+                    CreatedAt = DateTime.Now
+                }
+            );
+        }
+
 
 
     }
