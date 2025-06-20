@@ -21,7 +21,7 @@ namespace RealEstateManagement.Business.DTO.Properties
         public int Bedrooms { get; set; }
         //public int Bathrooms { get; set; } // nếu có
 
-        public string Address { get; set; }
+        public int AddressId { get; set; }
         public string Location { get; set; }
 
         public List<string> Amenities { get; set; }

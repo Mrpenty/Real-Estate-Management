@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Services.Auth;
 using RealEstateManagement.Business.Services.Properties;
-using RealEstateManagement.Data.Entity;
+using RealEstateManagement.Data.Entity.User;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 

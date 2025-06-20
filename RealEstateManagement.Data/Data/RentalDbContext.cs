@@ -5,17 +5,27 @@ using RealEstateManagement.Data.Data;
 using RealEstateManagement.Data.Entity;
 using static ApplicationUserConfiguration;
 using RealEstateManagement.Data.Data.Configurations;
+using RealEstateManagement.Data.Entity.AddressEnity;
+using RealEstateManagement.Data.Entity.User;
+using RealEstateManagement.Data.Entity.PropertyEntity;
+using RealEstateManagement.Data.Entity.Payment;
+using RealEstateManagement.Data.Entity.Messages;
 
 public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
 {
+    // DbSets for Identity
     public DbSet<UserPreference> UserPreferences { get; set; }
+
+    // DbSets for Property Management
     public DbSet<Property> Properties { get; set; }
     public DbSet<Amenity> Amenities { get; set; }
     public DbSet<RentalContract> RentalContracts { get; set; }
-
     public DbSet<PropertyAmenity> PropertyAmenities { get; set; }
     public DbSet<PropertyImage> PropertyImages { get; set; }
     public DbSet<PropertyPost> PropertyPosts { get; set; }
+
+
+    // DbSets for Functionality
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<Conversation> Conversation { get; set; }
@@ -24,7 +34,14 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     public DbSet<UserFavoriteProperty> UserFavoriteProperties { get; set; }
 
     public DbSet <PromotionPackage> promotionPackages { get; set; }
-    public DbSet<PropertyPromotion> PropertyPromotions { get; set; } 
+    public DbSet<PropertyPromotion> PropertyPromotions { get; set; }
+
+
+    // DbSets for Address and Location
+    public DbSet<Address> Addresses { get; set; }
+    public DbSet<Province> Provinces { get; set; }
+    public DbSet<Ward> Wards { get; set; }
+    public DbSet<Street> Streets { get; set; }
 
     public RentalDbContext(DbContextOptions<RentalDbContext> options) : base(options) { }
 
@@ -32,13 +49,19 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     {
         base.OnModelCreating(modelBuilder);
 
+        // Configure Identity
         modelBuilder.ApplyConfiguration(new ApplicationUserConfiguration());
         modelBuilder.ApplyConfiguration(new UserPreferenceConfiguration());
+
+        // Configure property entities
         modelBuilder.ApplyConfiguration(new PropertyConfiguration());
         modelBuilder.ApplyConfiguration(new AmenityConfiguration());
         modelBuilder.ApplyConfiguration(new PropertyAmenityConfiguration());
         modelBuilder.ApplyConfiguration(new PropertyImageConfiguration());
         modelBuilder.ApplyConfiguration(new PropertyPostConfiguration());
+        modelBuilder.ApplyConfiguration(new AddressConfiguration());
+
+        // Configure function entities
         modelBuilder.ApplyConfiguration(new PaymentConfiguration());
         modelBuilder.ApplyConfiguration(new TransactionConfiguration());
         modelBuilder.ApplyConfiguration(new ReviewConfiguration());
@@ -47,6 +70,8 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
         modelBuilder.ApplyConfiguration(new InterestConfiguration());
         modelBuilder.ApplyConfiguration(new RentalContractConfiguration());
         modelBuilder.ApplyConfiguration(new PropertyPromotionConfiguration());
-        DataSeed.SeedData(modelBuilder);
+        modelBuilder.ApplyConfiguration(new PromotionPackageConfiguration());
+
+        MainDataSeed.SeedData(modelBuilder);
     }
 }

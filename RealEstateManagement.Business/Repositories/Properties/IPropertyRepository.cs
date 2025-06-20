@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.DTO.Properties;
-using RealEstateManagement.Data.Entity;
+using RealEstateManagement.Data.Entity.PropertyEntity;
 using System;
 using System.Collections.Generic;
 using System.Linq;

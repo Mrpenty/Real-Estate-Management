@@ -1,4 +1,6 @@
-﻿namespace RealEstateManagement.Data.Entity
+﻿using RealEstateManagement.Data.Entity.PropertyEntity;
+
+namespace RealEstateManagement.Data.Entity
 {
     public class Amenity
     {

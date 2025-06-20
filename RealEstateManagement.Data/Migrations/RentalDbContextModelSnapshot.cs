@@ -196,6 +196,357 @@ namespace RealEstateManagement.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.AddressEnity.Address", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DetailedAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProvinceId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StreetId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("WardId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProvinceId");
+
+                    b.HasIndex("StreetId");
+
+                    b.HasIndex("WardId");
+
+                    b.ToTable("Addresses");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DetailedAddress = "123",
+                            PropertyId = 1,
+                            ProvinceId = 1,
+                            StreetId = 1,
+                            WardId = 2
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DetailedAddress = "456",
+                            PropertyId = 2,
+                            ProvinceId = 1,
+                            StreetId = 2,
+                            WardId = 3
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DetailedAddress = "789",
+                            PropertyId = 3,
+                            ProvinceId = 1,
+                            StreetId = 3,
+                            WardId = 4
+                        });
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.AddressEnity.Province", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Provinces");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Ho Chi Minh City"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Hanoi"
+                        });
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.AddressEnity.Street", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("WardId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WardId");
+
+                    b.ToTable("Streets");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Nguyen Hue",
+                            WardId = 2
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Le Van Tho",
+                            WardId = 3
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Ly Thuong Kiet",
+                            WardId = 4
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Hai Ba Trung",
+                            WardId = 5
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Pasteur",
+                            WardId = 6
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Quang Trung",
+                            WardId = 7
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "An Phu",
+                            WardId = 8
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Dinh Bo Linh",
+                            WardId = 9
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "Phan Dinh Phung",
+                            WardId = 10
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "Hang Dao",
+                            WardId = 11
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Name = "Hoang Dieu",
+                            WardId = 12
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Name = "Le Duan",
+                            WardId = 13
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Name = "Chua Boc",
+                            WardId = 14
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Name = "Nguyen Van Huyen",
+                            WardId = 15
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Name = "Thanh Nien",
+                            WardId = 16
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Name = "Nguyen Khoai",
+                            WardId = 17
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Name = "Pham Van Dong",
+                            WardId = 18
+                        });
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.AddressEnity.Ward", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProvinceId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProvinceId");
+
+                    b.ToTable("Wards");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Ben Nghe",
+                            ProvinceId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Nguyen Hue",
+                            ProvinceId = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Ward 10",
+                            ProvinceId = 1
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Ward 4",
+                            ProvinceId = 1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Tan Dinh",
+                            ProvinceId = 1
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Da Kao",
+                            ProvinceId = 1
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Thao Dien",
+                            ProvinceId = 1
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "An Phu",
+                            ProvinceId = 1
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "Binh Thanh",
+                            ProvinceId = 1
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "Phu Nhuan",
+                            ProvinceId = 1
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Name = "Hoan Kiem",
+                            ProvinceId = 2
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Name = "Ba Dinh",
+                            ProvinceId = 2
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Name = "Hai Ba Trung",
+                            ProvinceId = 2
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Name = "Dong Da",
+                            ProvinceId = 2
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Name = "Cau Giay",
+                            ProvinceId = 2
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Name = "Tay Ho",
+                            ProvinceId = 2
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Name = "Long Bien",
+                            ProvinceId = 2
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Name = "Nam Tu Liem",
+                            ProvinceId = 2
+                        });
+                });
+
             modelBuilder.Entity("RealEstateManagement.Data.Entity.Amenity", b =>
                 {
                     b.Property<int>("Id")
@@ -245,7 +596,780 @@ namespace RealEstateManagement.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.ApplicationUser", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.Messages.Conversation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LandlordId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RenterId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LandlordId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("RenterId");
+
+                    b.ToTable("Conversation");
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.Messages.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ConversationId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotificationSent")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("SentAt");
+
+                    b.ToTable("Message");
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.Payment.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ContractId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int?>("TransactionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TransactionId");
+
+                    b.ToTable("Payments");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Amount = 5000000m,
+                            ContractId = 1,
+                            PaidAt = new DateTime(2025, 6, 20, 13, 17, 22, 30, DateTimeKind.Local).AddTicks(7910),
+                            PaymentMethod = "Momo",
+                            Status = "completed",
+                            TransactionId = 1
+                        });
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.Payment.PromotionPackage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("DurationInDays")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("promotionPackages");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2025, 6, 20, 13, 17, 22, 31, DateTimeKind.Local).AddTicks(1268),
+                            Description = "Basic promotion package for property listings.",
+                            DurationInDays = 30,
+                            IsActive = true,
+                            Level = 1,
+                            Name = "Basic Promotion",
+                            Price = 1000000m
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2025, 6, 20, 13, 17, 22, 31, DateTimeKind.Local).AddTicks(1271),
+                            Description = "Premium promotion package for property listings.",
+                            DurationInDays = 60,
+                            IsActive = true,
+                            Level = 2,
+                            Name = "Premium Promotion",
+                            Price = 2000000m
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2025, 6, 20, 13, 17, 22, 31, DateTimeKind.Local).AddTicks(1273),
+                            Description = "Ultimate promotion package for property listings.",
+                            DurationInDays = 90,
+                            IsActive = true,
+                            Level = 3,
+                            Name = "Ultimate Promotion",
+                            Price = 3000000m
+                        });
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.Payment.Transaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TransactionType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Transactions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Amount = 5000000m,
+                            CreatedAt = new DateTime(2025, 6, 20, 13, 17, 22, 31, DateTimeKind.Local).AddTicks(1145),
+                            Description = "Deposit for apartment in District 1",
+                            TransactionType = "deposit",
+                            UserId = 3
+                        });
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyEntity.Property", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AddressId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Area")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int>("Bedrooms")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsPromoted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsVerified")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("LandlordId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("ViewsCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AddressId")
+                        .IsUnique();
+
+                    b.HasIndex("LandlordId");
+
+                    b.ToTable("Properties");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AddressId = 1,
+                            Area = 50.5m,
+                            Bedrooms = 2,
+                            CreatedAt = new DateTime(2025, 6, 20, 13, 17, 22, 30, DateTimeKind.Local).AddTicks(7592),
+                            Description = "Modern apartment with 2 bedrooms in the heart of HCMC.",
+                            IsPromoted = false,
+                            IsVerified = true,
+                            LandlordId = 2,
+                            Location = "10.7769,106.7009",
+                            Price = 5000000m,
+                            Status = "available",
+                            Title = "2BR Apartment in District 1",
+                            Type = "apartment",
+                            ViewsCount = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AddressId = 2,
+                            Area = 20.0m,
+                            Bedrooms = 1,
+                            CreatedAt = new DateTime(2025, 6, 19, 13, 17, 22, 30, DateTimeKind.Local).AddTicks(7597),
+                            Description = "Cozy shared room for students.",
+                            IsPromoted = false,
+                            IsVerified = true,
+                            LandlordId = 2,
+                            Location = "10.8505,106.6737",
+                            Price = 2000000m,
+                            Status = "available",
+                            Title = "Shared Room in Go Vap",
+                            Type = "room",
+                            ViewsCount = 0
+                        },
+                        new
+                        {
+                            Id = 3,
+                            AddressId = 3,
+                            Area = 80.0m,
+                            Bedrooms = 3,
+                            CreatedAt = new DateTime(2025, 6, 18, 13, 17, 22, 30, DateTimeKind.Local).AddTicks(7600),
+                            Description = "Spacious house with 3 bedrooms.",
+                            IsPromoted = true,
+                            IsVerified = true,
+                            LandlordId = 2,
+                            Location = "10.7982,106.6582",
+                            Price = 8000000m,
+                            Status = "available",
+                            Title = "3BR House in Tan Binh",
+                            Type = "house",
+                            ViewsCount = 0
+                        });
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyEntity.PropertyAmenity", b =>
+                {
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AmenityId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PropertyId", "AmenityId");
+
+                    b.HasIndex("AmenityId");
+
+                    b.ToTable("PropertyAmenities");
+
+                    b.HasData(
+                        new
+                        {
+                            PropertyId = 1,
+                            AmenityId = 1
+                        },
+                        new
+                        {
+                            PropertyId = 1,
+                            AmenityId = 2
+                        },
+                        new
+                        {
+                            PropertyId = 1,
+                            AmenityId = 3
+                        },
+                        new
+                        {
+                            PropertyId = 2,
+                            AmenityId = 2
+                        },
+                        new
+                        {
+                            PropertyId = 3,
+                            AmenityId = 1
+                        },
+                        new
+                        {
+                            PropertyId = 3,
+                            AmenityId = 4
+                        });
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyEntity.PropertyImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsPrimary")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyId");
+
+                    b.ToTable("PropertyImages");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            IsPrimary = true,
+                            Order = 1,
+                            PropertyId = 1,
+                            Url = "https://example.com/apartment1.jpg"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            IsPrimary = false,
+                            Order = 2,
+                            PropertyId = 1,
+                            Url = "https://example.com/apartment2.jpg"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            IsPrimary = true,
+                            Order = 1,
+                            PropertyId = 2,
+                            Url = "https://example.com/room1.jpg"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            IsPrimary = true,
+                            Order = 1,
+                            PropertyId = 3,
+                            Url = "https://example.com/house1.jpg"
+                        });
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyEntity.PropertyPost", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("ArchiveDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<int>("LandlordId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("VerifiedBy")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LandlordId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("VerifiedBy");
+
+                    b.ToTable("PropertyPosts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2025, 6, 20, 13, 17, 22, 30, DateTimeKind.Local).AddTicks(7866),
+                            LandlordId = 2,
+                            PropertyId = 1,
+                            Status = "Approved",
+                            VerifiedAt = new DateTime(2025, 6, 20, 13, 17, 22, 30, DateTimeKind.Local).AddTicks(7867),
+                            VerifiedBy = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2025, 6, 19, 13, 17, 22, 30, DateTimeKind.Local).AddTicks(7872),
+                            LandlordId = 2,
+                            PropertyId = 2,
+                            Status = "Approved",
+                            VerifiedAt = new DateTime(2025, 6, 19, 13, 17, 22, 30, DateTimeKind.Local).AddTicks(7874),
+                            VerifiedBy = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2025, 6, 18, 13, 17, 22, 30, DateTimeKind.Local).AddTicks(7875),
+                            LandlordId = 2,
+                            PropertyId = 3,
+                            Status = "Approved",
+                            VerifiedAt = new DateTime(2025, 6, 18, 13, 17, 22, 30, DateTimeKind.Local).AddTicks(7876),
+                            VerifiedBy = 1
+                        });
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyEntity.PropertyPromotion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PackageId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PackageId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.ToTable("PropertyPromotions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            EndDate = new DateTime(2025, 7, 20, 13, 17, 22, 31, DateTimeKind.Local).AddTicks(1305),
+                            PackageId = 1,
+                            PropertyId = 1,
+                            StartDate = new DateTime(2025, 6, 20, 13, 17, 22, 31, DateTimeKind.Local).AddTicks(1304)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            EndDate = new DateTime(2025, 7, 19, 13, 17, 22, 31, DateTimeKind.Local).AddTicks(1307),
+                            PackageId = 2,
+                            PropertyId = 2,
+                            StartDate = new DateTime(2025, 6, 19, 13, 17, 22, 31, DateTimeKind.Local).AddTicks(1307)
+                        },
+                        new
+                        {
+                            Id = 3,
+                            EndDate = new DateTime(2025, 9, 16, 13, 17, 22, 31, DateTimeKind.Local).AddTicks(1309),
+                            PackageId = 3,
+                            PropertyId = 3,
+                            StartDate = new DateTime(2025, 6, 18, 13, 17, 22, 31, DateTimeKind.Local).AddTicks(1308)
+                        });
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.RentalContract", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("ConfirmedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ContactInfo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("ContractDurationMonths")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("DepositAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("LandlordId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("MonthlyRent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("PropertyPostId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RenterId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LandlordId");
+
+                    b.HasIndex("PropertyPostId")
+                        .IsUnique();
+
+                    b.HasIndex("RenterId");
+
+                    b.ToTable("RentalContracts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ConfirmedAt = new DateTime(2025, 6, 20, 13, 17, 22, 31, DateTimeKind.Local).AddTicks(1381),
+                            ContactInfo = "renter@example.com | 03345678910",
+                            ContractDurationMonths = 12,
+                            CreatedAt = new DateTime(2025, 6, 20, 13, 17, 22, 31, DateTimeKind.Local).AddTicks(1356),
+                            DepositAmount = 2000000m,
+                            LandlordId = 2,
+                            MonthlyRent = 5000000m,
+                            PaymentMethod = "Bank Transfer",
+                            PropertyPostId = 1,
+                            RenterId = 3,
+                            StartDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ContactInfo = "renter2@example.com | 0322222222",
+                            ContractDurationMonths = 6,
+                            CreatedAt = new DateTime(2025, 6, 20, 13, 17, 22, 31, DateTimeKind.Local).AddTicks(1385),
+                            DepositAmount = 1500000m,
+                            LandlordId = 2,
+                            MonthlyRent = 2000000m,
+                            PaymentMethod = "Momo",
+                            PropertyPostId = 2,
+                            RenterId = 4,
+                            StartDate = new DateTime(2025, 8, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Status = 0
+                        });
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.Review", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<bool>("IsApproved")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RenterId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("RenterId");
+
+                    b.ToTable("Reviews", t =>
+                        {
+                            t.HasCheckConstraint("CK_Review_Rating_Range", "Rating BETWEEN 1 AND 5");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Comment = "Great location and clean apartment!",
+                            CreatedAt = new DateTime(2025, 6, 19, 13, 17, 22, 31, DateTimeKind.Local).AddTicks(1229),
+                            IsApproved = true,
+                            PropertyId = 1,
+                            Rating = 4,
+                            RenterId = 3
+                        });
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.User.ApplicationUser", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -355,8 +1479,8 @@ namespace RealEstateManagement.Data.Migrations
                         {
                             Id = 1,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "d1e8d527-ff13-4950-8500-b3321cf87953",
-                            CreatedAt = new DateTime(2025, 6, 18, 13, 18, 35, 404, DateTimeKind.Local).AddTicks(7222),
+                            ConcurrencyStamp = "8fa41f46-6e23-4ea5-b4bb-60eab5651d6d",
+                            CreatedAt = new DateTime(2025, 6, 20, 13, 17, 21, 847, DateTimeKind.Local).AddTicks(2701),
                             Email = "admin@example.com",
                             EmailConfirmed = false,
                             IsVerified = true,
@@ -364,11 +1488,11 @@ namespace RealEstateManagement.Data.Migrations
                             Name = "Admin User",
                             NormalizedEmail = "ADMIN@EXAMPLE.COM",
                             NormalizedUserName = "ADMIN@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEHNkvtbOabtLTUHR0sTkkGZigH5lFFQxBFppfcin98r9rItCKD9Dg4k2WN/Z4bytiA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEDWquDAh8LprxXe74mQaxY7YKefT6rp3TbeSyR9S7g3EQd+nauzpwdYNsNHrb9ftPg==",
                             PhoneNumber = "12345678910",
                             PhoneNumberConfirmed = true,
                             Role = "admin",
-                            SecurityStamp = "c310a2a6-dd4f-4a32-89a5-7939159f8dc6",
+                            SecurityStamp = "76b91521-6345-4214-845b-270726aec8a5",
                             TwoFactorEnabled = false,
                             UserName = "admin@example.com"
                         },
@@ -376,8 +1500,8 @@ namespace RealEstateManagement.Data.Migrations
                         {
                             Id = 2,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "4648da0b-d0a8-4fe5-bdee-24ec40249e6d",
-                            CreatedAt = new DateTime(2025, 6, 18, 13, 18, 35, 460, DateTimeKind.Local).AddTicks(5975),
+                            ConcurrencyStamp = "a7b00fa3-b067-41d3-a803-b537c0675861",
+                            CreatedAt = new DateTime(2025, 6, 20, 13, 17, 21, 908, DateTimeKind.Local).AddTicks(2922),
                             Email = "landlord@example.com",
                             EmailConfirmed = false,
                             IsVerified = true,
@@ -385,12 +1509,12 @@ namespace RealEstateManagement.Data.Migrations
                             Name = "Landlord User",
                             NormalizedEmail = "LANDLORD@EXAMPLE.COM",
                             NormalizedUserName = "LANDLORD@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEIsEGd/UDbTrlSG9UtF8duQsLNu+FfXAcnVJaFNW8TuTFEvkXc7xwn0vgOLxdB42Zg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIgK4lkVFzdympA3DnYmNuxcyKeKmzLpc4WsbMHkKQE6j9nw84m0pfZF4NFQlVF2/g==",
                             PhoneNumber = "02345678910",
                             PhoneNumberConfirmed = true,
                             ProfilePictureUrl = "https://th.bing.com/th/id/R.63d31ac6257157ef079f31bb32e342df?rik=63%2bkafQNo5seHg&pid=ImgRaw&r=0",
                             Role = "landlord",
-                            SecurityStamp = "e3f52398-b98d-49b9-a877-61e4dc3c1f9e",
+                            SecurityStamp = "fb16e249-555a-4f25-9370-154abeea76e8",
                             TwoFactorEnabled = false,
                             UserName = "landlord@example.com"
                         },
@@ -398,8 +1522,8 @@ namespace RealEstateManagement.Data.Migrations
                         {
                             Id = 3,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "3947427b-25d9-42e8-83fc-e2863f690e1f",
-                            CreatedAt = new DateTime(2025, 6, 18, 13, 18, 35, 516, DateTimeKind.Local).AddTicks(7541),
+                            ConcurrencyStamp = "cc1aff9a-1191-446f-abb2-d3f3e13acd58",
+                            CreatedAt = new DateTime(2025, 6, 20, 13, 17, 21, 969, DateTimeKind.Local).AddTicks(5107),
                             Email = "renter@example.com",
                             EmailConfirmed = false,
                             IsVerified = true,
@@ -407,11 +1531,11 @@ namespace RealEstateManagement.Data.Migrations
                             Name = "Renter User",
                             NormalizedEmail = "RENTER@EXAMPLE.COM",
                             NormalizedUserName = "RENTER@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEISB1LfG3K9AcuPUT6Y3rC/7T1iyL7Md4tPRifw9SD2Vj2BjwogYXzXuUtxQk055Zg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEO9ACCCVBUmj588oDnlWp1hWPXvwBsitBx7v7K5FRTv9r2v4zd1/5dL0zKzNl7y2Fg==",
                             PhoneNumber = "03345678910",
                             PhoneNumberConfirmed = true,
                             Role = "renter",
-                            SecurityStamp = "cb3cbc2c-3fe3-4eba-b074-f5776d4c7eff",
+                            SecurityStamp = "dadd51ea-fd8c-449f-b058-b19e0dfcfde6",
                             TwoFactorEnabled = false,
                             UserName = "renter@example.com"
                         },
@@ -419,8 +1543,8 @@ namespace RealEstateManagement.Data.Migrations
                         {
                             Id = 4,
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "ee9514db-3821-4795-b50e-116bda96771b",
-                            CreatedAt = new DateTime(2025, 6, 17, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(7028),
+                            ConcurrencyStamp = "79128b50-5400-4b8c-80d8-8de9404c4c3e",
+                            CreatedAt = new DateTime(2025, 6, 19, 13, 17, 22, 30, DateTimeKind.Local).AddTicks(6626),
                             Email = "renter2@example.com",
                             EmailConfirmed = false,
                             IsVerified = true,
@@ -428,748 +1552,16 @@ namespace RealEstateManagement.Data.Migrations
                             Name = "Renter User 2",
                             NormalizedEmail = "RENTER2@EXAMPLE.COM",
                             NormalizedUserName = "RENTER2@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEG/U2wp5cHc0L4TWxb8EW36yBHtY2HnRDSPhPPoYjYdGycX8xB5lvAbGFJF3b0a8OA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIxUWH2eemh+914qPkvAk+hVng69Iu81B9KDhH4TvLbedb0W7Ubh+Tnefy9cenDSTA==",
                             PhoneNumberConfirmed = false,
                             Role = "renter",
-                            SecurityStamp = "5111a63a-0ed5-40de-9bf9-4fbc88e8c304",
+                            SecurityStamp = "2cce8fcd-5eda-4c9b-b3fb-7c042f1ea7ea",
                             TwoFactorEnabled = false,
                             UserName = "renter2@example.com"
                         });
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.Conversation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("LandlordId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PropertyId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RenterId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LandlordId");
-
-                    b.HasIndex("PropertyId");
-
-                    b.HasIndex("RenterId");
-
-                    b.ToTable("Conversation");
-                });
-
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.Message", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ConversationId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("NotificationSent")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("SenderId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ConversationId");
-
-                    b.HasIndex("SenderId");
-
-                    b.HasIndex("SentAt");
-
-                    b.ToTable("Message");
-                });
-
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.Payment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("ContractId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int?>("TransactionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TransactionId");
-
-                    b.ToTable("Payments");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Amount = 5000000m,
-                            ContractId = 1,
-                            PaidAt = new DateTime(2025, 6, 18, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8336),
-                            PaymentMethod = "Momo",
-                            Status = "completed",
-                            TransactionId = 1
-                        });
-                });
-
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.PromotionPackage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DurationInDays")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Level")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("promotionPackages");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2025, 6, 18, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8519),
-                            Description = "Basic promotion package for property listings.",
-                            DurationInDays = 30,
-                            IsActive = true,
-                            Level = 1,
-                            Name = "Basic Promotion",
-                            Price = 1000000m
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedAt = new DateTime(2025, 6, 18, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8521),
-                            Description = "Premium promotion package for property listings.",
-                            DurationInDays = 60,
-                            IsActive = true,
-                            Level = 2,
-                            Name = "Premium Promotion",
-                            Price = 2000000m
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedAt = new DateTime(2025, 6, 18, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8523),
-                            Description = "Ultimate promotion package for property listings.",
-                            DurationInDays = 90,
-                            IsActive = true,
-                            Level = 3,
-                            Name = "Ultimate Promotion",
-                            Price = 3000000m
-                        });
-                });
-
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.Property", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("Area")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<int>("Bedrooms")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsPromoted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("IsVerified")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<int>("LandlordId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int>("ViewsCount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LandlordId");
-
-                    b.ToTable("Properties");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Address = "123 Nguyen Hue, District 1, HCMC",
-                            Area = 50.5m,
-                            Bedrooms = 2,
-                            CreatedAt = new DateTime(2025, 6, 18, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(7987),
-                            Description = "Modern apartment with 2 bedrooms in the heart of HCMC.",
-                            IsPromoted = false,
-                            IsVerified = true,
-                            LandlordId = 2,
-                            Location = "10.7769,106.7009",
-                            Price = 5000000m,
-                            Status = "available",
-                            Title = "2BR Apartment in District 1",
-                            Type = "apartment",
-                            ViewsCount = 0
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Address = "456 Le Van Tho, Go Vap, HCMC",
-                            Area = 20.0m,
-                            Bedrooms = 1,
-                            CreatedAt = new DateTime(2025, 6, 17, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(7991),
-                            Description = "Cozy shared room for students.",
-                            IsPromoted = false,
-                            IsVerified = true,
-                            LandlordId = 2,
-                            Location = "10.8505,106.6737",
-                            Price = 2000000m,
-                            Status = "available",
-                            Title = "Shared Room in Go Vap",
-                            Type = "room",
-                            ViewsCount = 0
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Address = "789 Ly Thuong Kiet, Tan Binh, HCMC",
-                            Area = 80.0m,
-                            Bedrooms = 3,
-                            CreatedAt = new DateTime(2025, 6, 16, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(7997),
-                            Description = "Spacious house with 3 bedrooms.",
-                            IsPromoted = true,
-                            IsVerified = true,
-                            LandlordId = 2,
-                            Location = "10.7982,106.6582",
-                            Price = 8000000m,
-                            Status = "available",
-                            Title = "3BR House in Tan Binh",
-                            Type = "house",
-                            ViewsCount = 0
-                        });
-                });
-
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyAmenity", b =>
-                {
-                    b.Property<int>("PropertyId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("AmenityId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PropertyId", "AmenityId");
-
-                    b.HasIndex("AmenityId");
-
-                    b.ToTable("PropertyAmenities");
-
-                    b.HasData(
-                        new
-                        {
-                            PropertyId = 1,
-                            AmenityId = 1
-                        },
-                        new
-                        {
-                            PropertyId = 1,
-                            AmenityId = 2
-                        },
-                        new
-                        {
-                            PropertyId = 1,
-                            AmenityId = 3
-                        },
-                        new
-                        {
-                            PropertyId = 2,
-                            AmenityId = 2
-                        },
-                        new
-                        {
-                            PropertyId = 3,
-                            AmenityId = 1
-                        },
-                        new
-                        {
-                            PropertyId = 3,
-                            AmenityId = 4
-                        });
-                });
-
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsPrimary")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PropertyId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PropertyId");
-
-                    b.ToTable("PropertyImages");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            IsPrimary = true,
-                            Order = 1,
-                            PropertyId = 1,
-                            Url = "https://example.com/apartment1.jpg"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            IsPrimary = false,
-                            Order = 2,
-                            PropertyId = 1,
-                            Url = "https://example.com/apartment2.jpg"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            IsPrimary = true,
-                            Order = 1,
-                            PropertyId = 2,
-                            Url = "https://example.com/room1.jpg"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            IsPrimary = true,
-                            Order = 1,
-                            PropertyId = 3,
-                            Url = "https://example.com/house1.jpg"
-                        });
-                });
-
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyPost", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("ArchiveDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<int>("LandlordId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PropertyId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("VerifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("VerifiedBy")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LandlordId");
-
-                    b.HasIndex("PropertyId");
-
-                    b.HasIndex("VerifiedBy");
-
-                    b.ToTable("PropertyPosts");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2025, 6, 18, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8292),
-                            LandlordId = 2,
-                            PropertyId = 1,
-                            Status = "Approved",
-                            VerifiedAt = new DateTime(2025, 6, 18, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8293),
-                            VerifiedBy = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedAt = new DateTime(2025, 6, 17, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8297),
-                            LandlordId = 2,
-                            PropertyId = 2,
-                            Status = "Approved",
-                            VerifiedAt = new DateTime(2025, 6, 17, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8298),
-                            VerifiedBy = 1
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedAt = new DateTime(2025, 6, 16, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8300),
-                            LandlordId = 2,
-                            PropertyId = 3,
-                            Status = "Approved",
-                            VerifiedAt = new DateTime(2025, 6, 16, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8300),
-                            VerifiedBy = 1
-                        });
-                });
-
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyPromotion", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PackageId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PropertyId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PackageId");
-
-                    b.HasIndex("PropertyId");
-
-                    b.ToTable("PropertyPromotions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            EndDate = new DateTime(2025, 7, 18, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8560),
-                            PackageId = 1,
-                            PropertyId = 1,
-                            StartDate = new DateTime(2025, 6, 18, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8559)
-                        },
-                        new
-                        {
-                            Id = 2,
-                            EndDate = new DateTime(2025, 7, 17, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8562),
-                            PackageId = 2,
-                            PropertyId = 2,
-                            StartDate = new DateTime(2025, 6, 17, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8561)
-                        },
-                        new
-                        {
-                            Id = 3,
-                            EndDate = new DateTime(2025, 9, 14, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8564),
-                            PackageId = 3,
-                            PropertyId = 3,
-                            StartDate = new DateTime(2025, 6, 16, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8563)
-                        });
-                });
-
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.RentalContract", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("ConfirmedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ContactInfo")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<int>("ContractDurationMonths")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("DepositAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("LandlordId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("MonthlyRent")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("PropertyPostId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RenterId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LandlordId");
-
-                    b.HasIndex("PropertyPostId")
-                        .IsUnique();
-
-                    b.HasIndex("RenterId");
-
-                    b.ToTable("RentalContracts");
-                });
-
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.Review", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<bool>("IsApproved")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<int>("PropertyId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RenterId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PropertyId");
-
-                    b.HasIndex("RenterId");
-
-                    b.ToTable("Reviews", t =>
-                        {
-                            t.HasCheckConstraint("CK_Review_Rating_Range", "Rating BETWEEN 1 AND 5");
-                        });
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Comment = "Great location and clean apartment!",
-                            CreatedAt = new DateTime(2025, 6, 17, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8433),
-                            IsApproved = true,
-                            PropertyId = 1,
-                            Rating = 4,
-                            RenterId = 3
-                        });
-                });
-
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.Transaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("TransactionType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Transactions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Amount = 5000000m,
-                            CreatedAt = new DateTime(2025, 6, 18, 13, 18, 35, 571, DateTimeKind.Local).AddTicks(8393),
-                            Description = "Deposit for apartment in District 1",
-                            TransactionType = "deposit",
-                            UserId = 3
-                        });
-                });
-
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.UserFavoriteProperty", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.User.UserFavoriteProperty", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -1189,9 +1581,26 @@ namespace RealEstateManagement.Data.Migrations
                     b.HasIndex("UserId", "PropertyId");
 
                     b.ToTable("UserFavoriteProperties");
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = 1,
+                            PropertyId = 1
+                        },
+                        new
+                        {
+                            UserId = 1,
+                            PropertyId = 2
+                        },
+                        new
+                        {
+                            UserId = 3,
+                            PropertyId = 3
+                        });
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.UserPreference", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.User.UserPreference", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1228,6 +1637,38 @@ namespace RealEstateManagement.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserPreferences");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Amenities = "WiFi,Parking",
+                            CreatedAt = new DateTime(2025, 6, 20, 13, 17, 22, 30, DateTimeKind.Local).AddTicks(7379),
+                            Location = "District 1",
+                            PriceRangeMax = 6000000m,
+                            PriceRangeMin = 3000000m,
+                            UserId = 3
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Amenities = "WiFi",
+                            CreatedAt = new DateTime(2025, 6, 18, 13, 17, 22, 30, DateTimeKind.Local).AddTicks(7382),
+                            Location = "Go Vap",
+                            PriceRangeMax = 3000000m,
+                            PriceRangeMin = 1500000m,
+                            UserId = 3
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Amenities = "AC",
+                            CreatedAt = new DateTime(2025, 6, 19, 13, 17, 22, 30, DateTimeKind.Local).AddTicks(7386),
+                            Location = "Tan Binh",
+                            PriceRangeMax = 4000000m,
+                            PriceRangeMin = 2000000m,
+                            UserId = 4
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -1241,7 +1682,7 @@ namespace RealEstateManagement.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", null)
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1250,7 +1691,7 @@ namespace RealEstateManagement.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", null)
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1265,7 +1706,7 @@ namespace RealEstateManagement.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", null)
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1274,27 +1715,70 @@ namespace RealEstateManagement.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", null)
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.Conversation", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.AddressEnity.Address", b =>
                 {
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", "Landlord")
+                    b.HasOne("RealEstateManagement.Data.Entity.AddressEnity.Province", "Province")
+                        .WithMany("Addresses")
+                        .HasForeignKey("ProvinceId");
+
+                    b.HasOne("RealEstateManagement.Data.Entity.AddressEnity.Street", "Street")
+                        .WithMany("Addresses")
+                        .HasForeignKey("StreetId");
+
+                    b.HasOne("RealEstateManagement.Data.Entity.AddressEnity.Ward", "Ward")
+                        .WithMany("Addresses")
+                        .HasForeignKey("WardId");
+
+                    b.Navigation("Province");
+
+                    b.Navigation("Street");
+
+                    b.Navigation("Ward");
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.AddressEnity.Street", b =>
+                {
+                    b.HasOne("RealEstateManagement.Data.Entity.AddressEnity.Ward", "Ward")
+                        .WithMany()
+                        .HasForeignKey("WardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ward");
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.AddressEnity.Ward", b =>
+                {
+                    b.HasOne("RealEstateManagement.Data.Entity.AddressEnity.Province", "Province")
+                        .WithMany()
+                        .HasForeignKey("ProvinceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Province");
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.Messages.Conversation", b =>
+                {
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", "Landlord")
                         .WithMany("ConversationsAsLandlord")
                         .HasForeignKey("LandlordId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("RealEstateManagement.Data.Entity.Property", "Property")
+                    b.HasOne("RealEstateManagement.Data.Entity.PropertyEntity.Property", "Property")
                         .WithMany("Conversations")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", "Renter")
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", "Renter")
                         .WithMany("ConversationsAsRenter")
                         .HasForeignKey("RenterId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1307,15 +1791,15 @@ namespace RealEstateManagement.Data.Migrations
                     b.Navigation("Renter");
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.Message", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.Messages.Message", b =>
                 {
-                    b.HasOne("RealEstateManagement.Data.Entity.Conversation", "Conversation")
+                    b.HasOne("RealEstateManagement.Data.Entity.Messages.Conversation", "Conversation")
                         .WithMany("Messages")
                         .HasForeignKey("ConversationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", "Sender")
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", "Sender")
                         .WithMany("MessagesSent")
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1326,9 +1810,9 @@ namespace RealEstateManagement.Data.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.Payment", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.Payment.Payment", b =>
                 {
-                    b.HasOne("RealEstateManagement.Data.Entity.Transaction", "Transaction")
+                    b.HasOne("RealEstateManagement.Data.Entity.Payment.Transaction", "Transaction")
                         .WithMany("Payments")
                         .HasForeignKey("TransactionId")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -1336,18 +1820,37 @@ namespace RealEstateManagement.Data.Migrations
                     b.Navigation("Transaction");
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.Property", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.Payment.Transaction", b =>
                 {
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", "Landlord")
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyEntity.Property", b =>
+                {
+                    b.HasOne("RealEstateManagement.Data.Entity.AddressEnity.Address", "Address")
+                        .WithOne("Property")
+                        .HasForeignKey("RealEstateManagement.Data.Entity.PropertyEntity.Property", "AddressId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", "Landlord")
                         .WithMany("Properties")
                         .HasForeignKey("LandlordId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.Navigation("Address");
+
                     b.Navigation("Landlord");
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyAmenity", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyEntity.PropertyAmenity", b =>
                 {
                     b.HasOne("RealEstateManagement.Data.Entity.Amenity", "Amenity")
                         .WithMany("PropertyAmenities")
@@ -1355,7 +1858,7 @@ namespace RealEstateManagement.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RealEstateManagement.Data.Entity.Property", "Property")
+                    b.HasOne("RealEstateManagement.Data.Entity.PropertyEntity.Property", "Property")
                         .WithMany("PropertyAmenities")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1366,9 +1869,9 @@ namespace RealEstateManagement.Data.Migrations
                     b.Navigation("Property");
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyImage", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyEntity.PropertyImage", b =>
                 {
-                    b.HasOne("RealEstateManagement.Data.Entity.Property", "Property")
+                    b.HasOne("RealEstateManagement.Data.Entity.PropertyEntity.Property", "Property")
                         .WithMany("Images")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1377,21 +1880,21 @@ namespace RealEstateManagement.Data.Migrations
                     b.Navigation("Property");
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyPost", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyEntity.PropertyPost", b =>
                 {
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", "Landlord")
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", "Landlord")
                         .WithMany()
                         .HasForeignKey("LandlordId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("RealEstateManagement.Data.Entity.Property", "Property")
+                    b.HasOne("RealEstateManagement.Data.Entity.PropertyEntity.Property", "Property")
                         .WithMany("Posts")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", "VerifiedByUser")
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", "VerifiedByUser")
                         .WithMany()
                         .HasForeignKey("VerifiedBy")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -1403,15 +1906,15 @@ namespace RealEstateManagement.Data.Migrations
                     b.Navigation("VerifiedByUser");
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyPromotion", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyEntity.PropertyPromotion", b =>
                 {
-                    b.HasOne("RealEstateManagement.Data.Entity.PromotionPackage", "PromotionPackage")
+                    b.HasOne("RealEstateManagement.Data.Entity.Payment.PromotionPackage", "PromotionPackage")
                         .WithMany("PropertyPromotions")
                         .HasForeignKey("PackageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RealEstateManagement.Data.Entity.Property", "Property")
+                    b.HasOne("RealEstateManagement.Data.Entity.PropertyEntity.Property", "Property")
                         .WithMany("PropertyPromotions")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1424,19 +1927,19 @@ namespace RealEstateManagement.Data.Migrations
 
             modelBuilder.Entity("RealEstateManagement.Data.Entity.RentalContract", b =>
                 {
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", "Landlord")
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", "Landlord")
                         .WithMany()
                         .HasForeignKey("LandlordId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("RealEstateManagement.Data.Entity.PropertyPost", "PropertyPost")
+                    b.HasOne("RealEstateManagement.Data.Entity.PropertyEntity.PropertyPost", "PropertyPost")
                         .WithOne("RentalContract")
                         .HasForeignKey("RealEstateManagement.Data.Entity.RentalContract", "PropertyPostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", "Renter")
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", "Renter")
                         .WithMany()
                         .HasForeignKey("RenterId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -1450,13 +1953,13 @@ namespace RealEstateManagement.Data.Migrations
 
             modelBuilder.Entity("RealEstateManagement.Data.Entity.Review", b =>
                 {
-                    b.HasOne("RealEstateManagement.Data.Entity.Property", "Property")
+                    b.HasOne("RealEstateManagement.Data.Entity.PropertyEntity.Property", "Property")
                         .WithMany("Reviews")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", "Renter")
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", "Renter")
                         .WithMany("Reviews")
                         .HasForeignKey("RenterId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1467,26 +1970,15 @@ namespace RealEstateManagement.Data.Migrations
                     b.Navigation("Renter");
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.Transaction", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.User.UserFavoriteProperty", b =>
                 {
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.UserFavoriteProperty", b =>
-                {
-                    b.HasOne("RealEstateManagement.Data.Entity.Property", "Property")
+                    b.HasOne("RealEstateManagement.Data.Entity.PropertyEntity.Property", "Property")
                         .WithMany("FavoritedByUsers")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", "User")
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", "User")
                         .WithMany("FavoriteProperties")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1497,9 +1989,9 @@ namespace RealEstateManagement.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.UserPreference", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.User.UserPreference", b =>
                 {
-                    b.HasOne("RealEstateManagement.Data.Entity.ApplicationUser", "User")
+                    b.HasOne("RealEstateManagement.Data.Entity.User.ApplicationUser", "User")
                         .WithMany("Preferences")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1508,39 +2000,48 @@ namespace RealEstateManagement.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.AddressEnity.Address", b =>
+                {
+                    b.Navigation("Property")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.AddressEnity.Province", b =>
+                {
+                    b.Navigation("Addresses");
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.AddressEnity.Street", b =>
+                {
+                    b.Navigation("Addresses");
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.AddressEnity.Ward", b =>
+                {
+                    b.Navigation("Addresses");
+                });
+
             modelBuilder.Entity("RealEstateManagement.Data.Entity.Amenity", b =>
                 {
                     b.Navigation("PropertyAmenities");
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.ApplicationUser", b =>
-                {
-                    b.Navigation("ConversationsAsLandlord");
-
-                    b.Navigation("ConversationsAsRenter");
-
-                    b.Navigation("FavoriteProperties");
-
-                    b.Navigation("MessagesSent");
-
-                    b.Navigation("Preferences");
-
-                    b.Navigation("Properties");
-
-                    b.Navigation("Reviews");
-                });
-
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.Conversation", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.Messages.Conversation", b =>
                 {
                     b.Navigation("Messages");
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.PromotionPackage", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.Payment.PromotionPackage", b =>
                 {
                     b.Navigation("PropertyPromotions");
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.Property", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.Payment.Transaction", b =>
+                {
+                    b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyEntity.Property", b =>
                 {
                     b.Navigation("Conversations");
 
@@ -1557,15 +2058,27 @@ namespace RealEstateManagement.Data.Migrations
                     b.Navigation("Reviews");
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyPost", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.PropertyEntity.PropertyPost", b =>
                 {
                     b.Navigation("RentalContract")
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RealEstateManagement.Data.Entity.Transaction", b =>
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.User.ApplicationUser", b =>
                 {
-                    b.Navigation("Payments");
+                    b.Navigation("ConversationsAsLandlord");
+
+                    b.Navigation("ConversationsAsRenter");
+
+                    b.Navigation("FavoriteProperties");
+
+                    b.Navigation("MessagesSent");
+
+                    b.Navigation("Preferences");
+
+                    b.Navigation("Properties");
+
+                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }

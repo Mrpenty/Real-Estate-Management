@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using RealEstateManagement.Data.Entity;
+using RealEstateManagement.Data.Entity.User;
 
 namespace RealEstateManagement.API.Extensions
 {

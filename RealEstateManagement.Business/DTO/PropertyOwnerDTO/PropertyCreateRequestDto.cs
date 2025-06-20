@@ -10,7 +10,7 @@ namespace RealEstateManagement.Business.DTO.PropertyOwnerDTO
     {
         public string Title { get; set; }
         public string Description { get; set; }
-        public string Address { get; set; } // Địa chỉ cho thuê
+        public int AddressID { get; set; } // Địa chỉ cho thuê
         public string Type { get; set; } // Loại phòng cho thuê
         public decimal Area { get; set; } // Bao nhiêu m2
         public int Bedrooms { get; set; } //Số phòng ngủ

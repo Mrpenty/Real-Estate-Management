@@ -81,12 +81,6 @@ namespace RealEstateManagement.API.Extensions
 
                             return Task.CompletedTask;
                         },
-
-
-
-
-
-
                     };
                 });
 

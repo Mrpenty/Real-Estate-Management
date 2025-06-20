@@ -1,4 +1,7 @@
-﻿namespace RealEstateManagement.Data.Entity
+﻿using RealEstateManagement.Data.Entity.User;
+using RealEstateManagement.Data.Entity.PropertyEntity;
+
+namespace RealEstateManagement.Data.Entity
 {
     public class Review
     {

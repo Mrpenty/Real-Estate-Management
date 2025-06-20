@@ -1,5 +1,5 @@
 
-﻿using Google.Apis.Auth;
+using Google.Apis.Auth;
 
 using Microsoft.AspNetCore.Http;
 
@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using RealEstateManagement.Business.DTO;
 using RealEstateManagement.Business.DTO.AuthDTO;
-using RealEstateManagement.Data.Entity;
+using RealEstateManagement.Data.Entity.User;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
