@@ -10,9 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSignalR()
     .AddMessagePackProtocol(); 
 
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDatabaseServices(builder.Configuration);
 builder.Services.AddIdentityServices();
@@ -25,13 +23,6 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddDependencyInjectionServices();
 var app = builder.Build();
 //app.UseRouting();
-
-//app.UseEndpoints(endpoints =>
-//{
-//    endpoints.MapControllers();
-//    endpoints.MapHub<NotificationHub>("/notificationHub"); // Route truy cập từ client
-//});
-
 app.UseErrorHandlingMiddleware();
 
 app.UseCorsPolicy(app.Environment);
