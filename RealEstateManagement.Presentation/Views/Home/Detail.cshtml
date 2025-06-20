@@ -1,0 +1,199 @@
+﻿@{
+    // ViewData["Title"] = "Home Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .text-orange-500 {
+        color: rgb(249 115 22 / var(--tw-text-opacity, 1)) !important;
+    }
+
+    a {
+        color: black !important;
+    }
+
+        a:hover {
+            color: rgb(249 115 22 / var(--tw-text-opacity, 1)) !important;
+            border-color: rgb(249 115 22 / var(--tw-border-opacity, 1));
+        }
+</style>
+@* <h1 class="text-xl font-bold mb-4">Kênh thông tin Phòng Trọ số 1 Việt Nam</h1> *@
+<nav class="text-sm text-blue-600 space-x-1 mb-2">
+    <a href="#" class="hover:underline">Cho thuê phòng trọ</a> /
+    <a href="#" class="hover:underline">Hồ Chí Minh</a> /
+    <a href="#" class="hover:underline">Quận 7</a> /
+    <span class="text-gray-700">Pass phòng cửa sổ lớn 175 Nguyễn Thị Thập</span>
+</nav>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <div class="md:col-span-2">
+        <div class="grid gap-6">
+            <div class="bg-white rounded-md shadow-sm p-4">
+                <div class="relative aspect-video w-full bg-black rounded-md overflow-hidden">
+                    <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" alt="Video preview" class="object-cover w-full h-full">
+@*                     <div class="absolute bottom-2 left-2 text-white text-xs bg-black/70 px-2 py-1 rounded">0:00 / 0:34</div> *@
+                </div>
+
+                <div class="flex space-x-2 mt-4 overflow-x-auto">
+                    <div class="border-2 border-red-500 rounded p-1">
+                        <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" class="w-20 h-16 object-cover" />
+                    </div>
+                    <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" class="w-20 h-16 object-cover rounded" />
+                    <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" class="w-20 h-16 object-cover rounded" />
+                    <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" class="w-20 h-16 object-cover rounded" />
+                    <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" class="w-20 h-16 object-cover rounded" />
+                </div>
+            </div>
+
+            <div class="bg-white rounded-md shadow-sm p-4">
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="text-yellow-500 text-lg font-bold">⭐⭐⭐⭐⭐</span>
+                    <span class="bg-red-500 text-white text-xs px-2 py-1 rounded uppercase font-semibold">Tin VIP Nổi Bật</span>
+                </div>
+                <h1 class="text-xl font-bold text-red-600">
+                    Pass phòng cửa sổ lớn 175 Nguyễn Thị Thập, đã trả tiền phòng đến 5/7
+                </h1>
+                <div class="flex items-center text-green-600 font-semibold text-lg space-x-2">
+                    <span>4.8 triệu/tháng</span>
+                    <span class="text-black font-normal">•</span>
+                    <span class="text-gray-700 text-base">30 m²</span>
+                    <span class="ml-auto text-sm text-gray-500">Cập nhật: 6 giờ trước</span>
+                </div>
+                <div class="text-sm text-gray-800 space-y-1">
+                    <p><span class="font-medium text-gray-600">Quận huyện:</span> <a href="#" class="text-blue-600 hover:underline">Cho thuê phòng trọ Quận 7</a></p>
+                    <p><span class="font-medium text-gray-600">Tỉnh thành:</span> <a href="#" class="text-blue-600 hover:underline">Hồ Chí Minh</a></p>
+                    <p><span class="font-medium text-gray-600">Địa chỉ:</span> 175 Đường Nguyễn Thị Thập, Phường Tân Phú, Quận 7, Hồ Chí Minh</p>
+                    <p><span class="font-medium text-gray-600">Mã tin:</span> #684636</p>
+                    <p><span class="font-medium text-gray-600">Ngày đăng:</span> Thứ 5, 20:47 19/06/2025</p>
+                    <p><span class="font-medium text-gray-600">Ngày hết hạn:</span> Chủ Nhật, 20:47 22/06/2025</p>
+                </div>
+                <h2 class="text-lg font-semibold text-gray-700 mb-2 mt-3">Thông tin mô tả</h2>
+                <div class="text-sm text-gray-800 space-y-2 leading-relaxed">
+                    <p><strong>PASS PHÒNG 175 NGUYỄN THỊ THẬP – VÀO Ở NGAY</strong></p>
+                    <p>Giá thuê: 4,8 triệu/tháng</p>
+                    <p>Cọc: 1 tháng</p>
+                    <p>Đã trả tiền phòng đến 5/7, ai vào ở trước ngày này không cần trả thêm gì, chỉ cần trả tiền tháng sau.</p>
+                    <p>Phòng có cửa sổ lớn, đầy đủ nội thất (máy lạnh, tủ lạnh, giường, nệm, bàn ghế...) – xách đồ vào ở ngay.</p>
+                </div>
+                <h2 class="text-lg font-semibold text-gray-700 mb-2 mt-3">Vị trí & bản đồ</h2>
+                <p class="text-sm text-gray-800">
+                    📍 Địa chỉ: 175 Đường Nguyễn Thị Thập, Phường Tân Phú, Quận 7, Hồ Chí Minh
+                    <a href="#" class="text-blue-600 hover:underline ml-1">Xem bản đồ lớn</a>
+                </p>
+                <div class="w-full h-64 rounded overflow-hidden border">
+                    <iframe src="https://www.google.com/maps?q=175+Đường+Nguyễn+Thị+Thập,+Phường+Tân+Phú,+Quận+7,+Hồ+Chí+Minh&output=embed"
+                            class="w-full h-full"
+                            style="border:0"
+                            allowfullscreen=""
+                            loading="lazy"></iframe>
+                </div>
+                <h2 class="text-lg font-semibold text-gray-700 mb-2 mt-3">Thông tin liên hệ</h2>
+                <div class="flex items-start space-x-4">
+                    <div class="w-14 h-14 bg-gray-200 rounded-full flex-shrink-0"></div>
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2">
+                            <p class="font-semibold text-gray-800">Nguyen Huy</p>
+                            <span class="text-green-600 text-xs font-medium">● Đang hoạt động</span>
+                        </div>
+                        <p class="text-sm text-gray-500">1 tin đăng • Tham gia từ: 19/06/2025</p>
+                        <div class="flex space-x-2 mt-2">
+                            <a href="tel:0369864430" class="bg-green-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-green-600">
+                                📞 0369864430
+                            </a>
+                            <a href="#" class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700">
+                                💬 Nhắn Zalo
+                            </a>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <div>
+        <div style="height: max-content;" class="w-full max-w-xs bg-white p-4 rounded-md shadow-sm space-y-4 text-sm">
+            <div class="space-y-4 text-center">
+                <div class="w-20 h-20 mx-auto rounded-full border bg-gray-100 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v1.2h19.2v-1.2c0-3.2-6.4-4.8-9.6-4.8z" />
+                    </svg>
+                </div>
+
+                <div>
+                    <p class="font-semibold text-gray-800">Nguyen Huy</p>
+                    <p class="text-sm text-gray-500">
+                        <span class="text-green-500">●</span> Đang hoạt động
+                    </p>
+                </div>
+
+                <p class="text-sm text-gray-500">1 tin đăng • Tham gia từ: 19/06/2025</p>
+
+                <div class="space-y-2">
+                    <a href="tel:0369864430" class="block w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold">
+                        📞 0369864430
+                    </a>
+                    <a href="#" class="block w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold">
+                        💬 Nhắn Zalo
+                    </a>
+                </div>
+
+                <div class="flex justify-around text-sm text-gray-600 pt-2 border-t">
+                    <button class="flex items-center space-x-1 hover:text-blue-600">
+                        <span>♡</span><span>Lưu tin</span>
+                    </button>
+                    <button class="flex items-center space-x-1 hover:text-blue-600">
+                        <span>🔗</span><span>Chia sẻ</span>
+                    </button>
+                    <button class="flex items-center space-x-1 hover:text-red-500">
+                        <span>⚠️</span><span>Báo xấu</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div style="height: max-content;" class="w-full mt-4 max-w-xs bg-white p-4 rounded-md shadow-sm space-y-4 text-sm">
+            <h3 class="font-semibold text-gray-800 mb-2">Tin mới đăng</h3>
+            <div class="space-y-4">
+
+                <div class="flex gap-2 items-start">
+                    <img src="https://pt123.cdn.static123.com/images/thumbs/450x300/fit/2025/06/13/z6700095844028-186681c11699e9a986e980c6cfa79e61_1749801645.jpg" alt="tin" class="w-20 h-14 rounded object-cover" />
+                    <div>
+                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
+                            Cho thuê phòng trọ có gác, giá rẻ gần ĐH Công Thương...
+                        </div>
+                        <div class="text-green-600 font-semibold text-sm">2.8 triệu/tháng</div>
+                        <div class="text-xs text-gray-500">27 giây trước</div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 items-start">
+                    <img src="https://pt123.cdn.static123.com/images/thumbs/450x300/fit/2025/06/13/z6700095844028-186681c11699e9a986e980c6cfa79e61_1749801645.jpg" alt="tin" class="w-20 h-14 rounded object-cover" />
+                    <div>
+                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
+                            CHO THUÊ NHÀ NGUYÊN CĂN TRẦN QUỐC TOẢN Gần nhà sách...
+                        </div>
+                        <div class="text-green-600 font-semibold text-sm">13 triệu/tháng</div>
+                        <div class="text-xs text-gray-500">5 phút trước</div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 items-start">
+                    <img src="https://pt123.cdn.static123.com/images/thumbs/450x300/fit/2025/06/13/z6700095844028-186681c11699e9a986e980c6cfa79e61_1749801645.jpg" alt="tin" class="w-20 h-14 rounded object-cover" />
+                    <div>
+                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
+                            Cho Thuê Phòng Có Gác, Nhà Mới Thang Máy, Thoáng Mát
+                        </div>
+                        <div class="text-green-600 font-semibold text-sm">5.5 triệu/tháng</div>
+                        <div class="text-xs text-gray-500">15 phút trước</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.getElementById('listPostId').classList.add("text-orange-500");
+    document.getElementById('listPostId').classList.replace("border-white", "border-orange-500");
+
+</script>
