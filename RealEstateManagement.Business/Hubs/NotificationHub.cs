@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-namespace RealEstateManagement.API.Hub
+namespace RealEstateManagement.Business.Hub
 {
     public class NotificationHub 
     {

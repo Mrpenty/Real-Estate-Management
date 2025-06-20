@@ -5,6 +5,8 @@ using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Business.Services.Properties;
+using RealEstateManagement.Business.Services.Chat;
+using RealEstateManagement.Business.Repositories.Chat;
 
 
 namespace RealEstateManagement.API.Extensions
@@ -22,6 +24,9 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IMailService, MailService>();
 
             services.AddScoped<ISmsService, TwilioSmsService>();
+            services.AddScoped<IChatService, ChatService>();
+            services.AddScoped<IChatRepository, ChatRepository>();
+
 
             services.AddScoped<IPropertyPostRepository, PropertyPostRepository>();
             services.AddScoped<IPropertyPostService, PropertyPostService>();

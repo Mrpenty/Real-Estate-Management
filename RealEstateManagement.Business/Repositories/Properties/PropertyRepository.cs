@@ -48,8 +48,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
                             .Should(
                                 s => s.MultiMatch(m => m
                                     .Fields(f => f
-                                        .Field(p => p.Title)
-                                        .Field(p => p.Description)
+                                        .Field(p => p.Title)                                        
                                         .Field(p => p.Type)
                                         .Field(p => p.Address)
                                         .Field(p => p.Amenities)
