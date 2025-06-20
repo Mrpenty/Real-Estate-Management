@@ -22,5 +22,11 @@ namespace RealEstateManagement.Business.Services.Properties
         Task<bool> AddToFavoriteAsync(int userId, int propertyId);
         Task<List<PropertyDetailDTO>> GetPropertiesByIdsAsync(List<int> ids);
 
+
+        //Elasticsearch
+        Task<bool> IndexPropertyAsync(PropertySearchDTO dto);
+        Task BulkIndexPropertiesAsync();
+        Task<IEnumerable<HomePropertyDTO>> SearchAsync(string keyword);
+
     }
 }

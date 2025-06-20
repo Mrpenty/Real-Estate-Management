@@ -28,4 +28,5 @@ namespace RealEstateManagement.Business.Services.Mail
             );
         }
     }
+
 }
