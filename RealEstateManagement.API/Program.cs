@@ -21,6 +21,9 @@ builder.Services.AddCorsServices(builder.Configuration, builder.Environment);
 builder.Services.AddSwaggerServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDependencyInjectionServices();
+
+builder.Services.AddElasticsearch(builder.Configuration);
+
 var app = builder.Build();
 //app.UseRouting();
 app.UseErrorHandlingMiddleware();

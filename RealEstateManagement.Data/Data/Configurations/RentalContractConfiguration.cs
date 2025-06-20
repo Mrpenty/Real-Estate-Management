@@ -36,6 +36,9 @@ namespace RealEstateManagement.Data.Data.Configurations
 
             builder.Property(rc => rc.ContactInfo)
                 .HasMaxLength(200);
+
+
+
         }
     }
 }
