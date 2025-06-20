@@ -1,4 +1,6 @@
 ﻿using System;
+using RealEstateManagement.Data.Entity.PropertyEntity;
+using RealEstateManagement.Data.Entity.User;
 
 namespace RealEstateManagement.Data.Entity
 {

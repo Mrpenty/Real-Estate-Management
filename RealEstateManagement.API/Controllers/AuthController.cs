@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Business.DTO.AuthDTO;
 using RealEstateManagement.Business.Repositories;
 using RealEstateManagement.Business.Services.Auth;
-using RealEstateManagement.Data.Entity;
+using RealEstateManagement.Data.Entity.User;
 
 namespace RealEstateManagement.API.Controllers
 {

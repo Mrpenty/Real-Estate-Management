@@ -1,12 +1,12 @@
 ﻿using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
-using RealEstateManagement.Data.Entity;
+using RealEstateManagement.Data.Entity.PropertyEntity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static RealEstateManagement.Data.Entity.PropertyPost;
+using static RealEstateManagement.Data.Entity.PropertyEntity.PropertyPost;
 
 namespace RealEstateManagement.Business.Services.OwnerService
 {

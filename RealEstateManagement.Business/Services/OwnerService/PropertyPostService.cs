@@ -1,6 +1,6 @@
 ﻿using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
-using RealEstateManagement.Data.Entity;
+using RealEstateManagement.Data.Entity.PropertyEntity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +21,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
         public async Task<int> CreatePropertyPostAsync(PropertyCreateRequestDto dto, int landlordId)
         {
             // 1. Kiểm tra dữ liệu bắt buộc
-            if (string.IsNullOrWhiteSpace(dto.Title) || string.IsNullOrWhiteSpace(dto.Address))
+            if (string.IsNullOrWhiteSpace(dto.Title) )
                 throw new ArgumentException("Tiêu đề và địa chỉ không được để trống.");
 
             if (dto.Area <= 0 || dto.Price <= 0)
@@ -35,7 +35,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
             {
                 Title = dto.Title,
                 Description = dto.Description,
-                Address = dto.Address,
+                AddressId = dto.AddressID,
                 Type = dto.Type,
                 Area = dto.Area,
                 Bedrooms = dto.Bedrooms,

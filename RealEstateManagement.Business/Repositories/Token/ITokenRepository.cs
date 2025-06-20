@@ -1,8 +1,8 @@
 ﻿using RealEstateManagement.Business.DTO;
-using RealEstateManagement.Data.Entity;
 using Microsoft.AspNetCore.Http;
 using RealEstateManagement.Business.DTO.AuthDTO;
 using Google.Apis.Auth;
+using RealEstateManagement.Data.Entity.User;
 
 
 namespace RealEstateManagement.Business.Repositories.Token

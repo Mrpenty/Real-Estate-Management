@@ -1,4 +1,4 @@
-﻿using RealEstateManagement.Data.Entity;
+﻿using RealEstateManagement.Data.Entity.PropertyEntity;
 using System;
 using System.Collections.Generic;
 using System.Linq;

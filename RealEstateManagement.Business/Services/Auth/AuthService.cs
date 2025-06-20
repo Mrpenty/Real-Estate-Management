@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Business.DTO.AuthDTO;
 using RealEstateManagement.Business.Repositories.Token;
 using RealEstateManagement.Business.Services.Mail;
-using RealEstateManagement.Data.Entity;
 
 using Google.Apis.Auth.OAuth2.Flows;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Google.Apis.Util.Store;
 using Google.Apis.Auth.OAuth2;
+using RealEstateManagement.Data.Entity.User;
 
 namespace RealEstateManagement.Business.Services.Auth
 {
