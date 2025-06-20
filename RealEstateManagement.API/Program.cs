@@ -20,12 +20,9 @@ builder.Services.AddSignalR()
 //               .AllowCredentials();
 //    });
 //});
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
+
 builder.Services.AddDatabaseServices(builder.Configuration);
 builder.Services.AddIdentityServices();
 
@@ -42,15 +39,11 @@ builder.Services.AddSwaggerServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDependencyInjectionServices();
 var app = builder.Build();
-//app.UseCors("CorsPolicy");
 
-//app.UseRouting();
 
-//app.UseEndpoints(endpoints =>
-//{
-//    endpoints.MapControllers();
-//    endpoints.MapHub<NotificationHub>("/notificationHub"); // Route truy cập từ client
-//});
+
+
+
 
 app.UseErrorHandlingMiddleware();
 

@@ -5,23 +5,24 @@ using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Business.Services.Properties;
-
-
 namespace RealEstateManagement.API.Extensions
 {
-
     public static class DependencyInjectionExtensions
+    {
+        public static IServiceCollection AddDependencyInjectionServices(this IServiceCollection services)
         {
-            public static IServiceCollection AddDependencyInjectionServices(this IServiceCollection services)
-            {
+            // Repository
             services.AddScoped<ITokenRepository, TokenRepository>();
+            services.AddScoped<IPropertyPostRepository, PropertyPostRepository>();
+            services.AddScoped<IPropertyRepository, PropertyRepository>();
 
+            // Service
+            services.AddScoped<IPropertyService, PropertyService>();
+            services.AddScoped<IPropertyPostService, PropertyPostService>();
             services.AddScoped<IAuthService, AuthService>();
-
-
             services.AddScoped<IMailService, MailService>();
-
             services.AddScoped<ISmsService, TwilioSmsService>();
+
 
             services.AddScoped<IPropertyPostRepository, PropertyPostRepository>();
             services.AddScoped<IPropertyPostService, PropertyPostService>();
@@ -32,9 +33,9 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IPropertyRepository, PropertyRepository>();
             services.AddScoped<IPropertyService, PropertyService>();
 
+
             return services;
-            }
         }
-    
+    }
 }
     

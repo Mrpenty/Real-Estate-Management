@@ -35,11 +35,12 @@ namespace RealEstateManagement.Business.Repositories.Token
         public async Task<TokenDTO> CreateJWTTokenAsync(ApplicationUser user, bool populateExp)
         {
 
+            
             var signingCredentials = GetSigningCreadentials();
-
+            
             var claims = await GetClaims(user);
-
-
+           
+          
             var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
 
             var refreshToken = GenerateRefreshToken();
@@ -122,16 +123,6 @@ namespace RealEstateManagement.Business.Repositories.Token
             context.Response.Cookies.Delete("refreshToken", cookieOptions);
         }
 
-
-
-
-
-
-
-
-
-
-
         private SigningCredentials GetSigningCreadentials()
         {
             var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
@@ -141,6 +132,7 @@ namespace RealEstateManagement.Business.Repositories.Token
 
         private async Task<List<Claim>> GetClaims(ApplicationUser user)
         {
+
 
             var claims = new List<Claim>
 
@@ -153,6 +145,7 @@ namespace RealEstateManagement.Business.Repositories.Token
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new("id", user.Id.ToString())
         };
+
 
 
             _logger.LogInformation("GetClaims: Basic claims added for user {UserId}", user.Id);
@@ -168,9 +161,6 @@ namespace RealEstateManagement.Business.Repositories.Token
             var issuer = _configuration["Jwt:Issuer"];
             var audience = _configuration["Jwt:Audience"];
             var expiryMinutes = _configuration["Jwt:ExpiryMinutes"];
-
-
-
             var tokenOptions = new JwtSecurityToken(
                 issuer: issuer,
                 audience: audience,
