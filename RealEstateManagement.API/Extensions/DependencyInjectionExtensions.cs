@@ -21,7 +21,7 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IPropertyPostService, PropertyPostService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IMailService, MailService>();
-            services.AddScoped<ISmsService, TwilioSmsService>();
+            services.AddScoped<ISmsService, SmsService>();
 
 
             services.AddScoped<IPropertyPostRepository, PropertyPostRepository>();

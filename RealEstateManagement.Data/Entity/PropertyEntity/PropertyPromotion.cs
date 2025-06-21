@@ -16,7 +16,7 @@ namespace RealEstateManagement.Data.Entity.PropertyEntity
         public DateTime EndDate { get; set; }
 
 
-        public Property Property { get; set; }
-        public PromotionPackage PromotionPackage { get; set; }
+        public Property? Property { get; set; }
+        public PromotionPackage? PromotionPackage { get; set; }
     }
 }

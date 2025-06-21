@@ -13,7 +13,7 @@ namespace RealEstateManagement.Data.Entity
         public bool IsApproved { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public Property Property { get; set; }
+        public Property? Property { get; set; }
         public ApplicationUser Renter { get; set; }
     }
 }

@@ -14,7 +14,7 @@ namespace RealEstateManagement.Data.Entity.AddressEnity
         // Quan hệ với các bảng tham chiếu
         public Province Province { get; set; }
         public Ward Ward { get; set; }
-        public Street Street { get; set; }
+        public Street? Street { get; set; }
 
         // Quan hệ với Property
         public int PropertyId { get; set; }

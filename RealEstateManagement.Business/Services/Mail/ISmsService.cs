@@ -8,6 +8,7 @@ namespace RealEstateManagement.Business.Services.Mail
 {
     public interface ISmsService
     {
-        Task SendOtpAsync(string phoneNumber, string otp);
+        Task TwilioSmsService(string phoneNumber, string otp);
+        Task ZaloSmsService(string phoneNumber, string otp);
     }
 }

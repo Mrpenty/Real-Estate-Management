@@ -16,7 +16,7 @@ namespace RealEstateManagement.Data.Entity.PropertyEntity
         public decimal Area { get; set; }
         public int Bedrooms { get; set; }
         public int LandlordId { get; set; }
-        public string Status { get; set; }
+        public string? Status { get; set; }
         public bool IsPromoted { get; set; }
         public decimal Price { get; set; }
         public bool IsVerified { get; set; }

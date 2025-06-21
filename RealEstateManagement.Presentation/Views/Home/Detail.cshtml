@@ -1,0 +1,176 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .gallery-main-image {
+        width: 100%;
+        height: 450px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    .gallery-thumbnail {
+        width: 100px;
+        height: 75px;
+        object-fit: cover;
+        border-radius: 4px;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+    .gallery-thumbnail.active {
+        border-color: #f97316;
+    }
+    .property-price-detail {
+        font-size: 24px;
+        font-weight: 700;
+        color: #e53935;
+    }
+    .property-section-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #f3f4f6;
+        padding-bottom: 0.5rem;
+    }
+    .contact-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 1.5rem;
+        background-color: #f9fafb;
+    }
+    .contact-btn {
+        display: block;
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 600;
+        color: white;
+    }
+    .btn-call { background-color: #ef4444; }
+    .btn-call:hover { background-color: #dc2626; }
+    .btn-zalo { background-color: #2563eb; }
+    .btn-zalo:hover { background-color: #1d4ed8; }
+</style>
+<div id="property-detail-container" class="container mx-auto px-4 py-8">
+    <!-- This div will be populated by the script -->
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('property-detail-container');
+    const urlParts = window.location.pathname.split('/');
+    const propertyId = urlParts[urlParts.length - 1];
+
+    if (!propertyId || isNaN(propertyId)) {
+        container.innerHTML = '<div class="text-center text-red-500">Không tìm thấy bất động sản.</div>';
+        return;
+    }
+
+    fetch(`https://localhost:7031/api/Property/${propertyId}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(property => {
+            renderPropertyDetail(property);
+        })
+        .catch(error => {
+            container.innerHTML = '<div class="text-center text-red-500">Lỗi khi tải dữ liệu. Vui lòng thử lại.</div>';
+            console.error('Error fetching property detail:', error);
+        });
+
+    function renderPropertyDetail(property) {
+        if (!property) {
+            container.innerHTML = '<div class="text-center text-red-500">Không có dữ liệu cho bất động sản này.</div>';
+            return;
+        }
+
+        const imagesHtml = (property.images && property.images.length > 0)
+            ? property.images.map((img, index) => `<img src="${img}" alt="thumbnail ${index + 1}" class="gallery-thumbnail ${index === 0 ? 'active' : ''}" onclick="changeImage('${img}', this)">`).join('')
+            : '<p>Không có ảnh.</p>';
+
+        const amenitiesHtml = (property.amenities && property.amenities.length > 0)
+            ? property.amenities.map(amenity => `<span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm">${amenity}</span>`).join('')
+            : '<p>Không có thông tin.</p>';
+
+        container.innerHTML = `
+            <div class="mb-4">
+                <h1 class="text-3xl font-bold text-gray-800">${property.title || 'Chưa có tiêu đề'}</h1>
+                <p class="text-gray-600 mt-1">${property.address || 'Chưa có địa chỉ'}</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="md:col-span-2">
+                    <!-- Image Gallery -->
+                    <div class="mb-6">
+                        <img id="main-image" src="${(property.images && property.images[0]) || 'https://via.placeholder.com/800x600'}" alt="Main property image" class="gallery-main-image mb-4">
+                        <div class="flex space-x-2 overflow-x-auto pb-2">
+                            ${imagesHtml}
+                        </div>
+                    </div>
+                    
+                    <!-- Property Info -->
+                    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                        <h2 class="property-section-title">Thông tin bất động sản</h2>
+                        <div class="flex items-center space-x-8">
+                            <div>
+                                <p class="text-gray-500">Mức giá</p>
+                                <p class="property-price-detail">${property.price ? property.price + ' triệu/tháng' : 'Thỏa thuận'}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500">Diện tích</p>
+                                <p class="text-2xl font-semibold">${property.area ? property.area + ' m²' : 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                        <h2 class="property-section-title">Mô tả chi tiết</h2>
+                        <p class="text-gray-700 leading-relaxed">${property.description || 'Không có mô tả chi tiết.'}</p>
+                    </div>
+
+                    <!-- Amenities -->
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h2 class="property-section-title">Tiện ích</h2>
+                        <div class="flex flex-wrap gap-2">
+                            ${amenitiesHtml}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Card -->
+                <div class="md:col-span-1">
+                    <div class="contact-card sticky top-8">
+                        <div class="flex items-center mb-4">
+                            <img src="${property.avatarUrl || 'https://via.placeholder.com/64'}" alt="Owner" class="w-16 h-16 rounded-full mr-4">
+                            <div>
+                                <p class="font-semibold text-lg">${property.ownerName || 'Chủ nhà'}</p>
+                                ${property.isVerified ? '<span class="text-green-600 text-sm font-medium">Đã xác thực</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <a href="tel:${property.phone || ''}" class="contact-btn btn-call">
+                                <i class="fas fa-phone-alt mr-2"></i> Gọi ngay
+                            </a>
+                            <a href="https://zalo.me/${property.phone || ''}" target="_blank" class="contact-btn btn-zalo">
+                                <i class="fas fa-comment-dots mr-2"></i> Gửi Zalo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+});
+
+function changeImage(src, element) {
+    document.getElementById('main-image').src = src;
+    document.querySelectorAll('.gallery-thumbnail').forEach(thumb => thumb.classList.remove('active'));
+    element.classList.add('active');
+}
+</script>

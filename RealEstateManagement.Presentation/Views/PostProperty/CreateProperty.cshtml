@@ -1,0 +1,291 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Đăng tin mới";
+}
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .form-section {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 1.5rem;
+    }
+    .form-section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+    .form-input, .form-select {
+        width: 100%;
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        padding: 0.75rem 1rem;
+    }
+    .address-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+    }
+    .address-modal-content {
+        background-color: #fefefe;
+        margin: 10% auto;
+        padding: 2rem;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 600px;
+        border-radius: 8px;
+    }
+    .close-button {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+</style>
+
+<div class="container mx-auto py-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4">Tạo tin đăng</h1>
+        
+        <!-- Step 1 Form -->
+        <form id="create-property-form">
+            <!-- Property Info -->
+            <div class="form-section">
+                <h2 class="form-section-title">Thông tin cơ bản</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="title" class="block mb-2 font-medium">Tiêu đề tin đăng</label>
+                        <input type="text" id="title" name="title" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="price" class="block mb-2 font-medium">Giá cho thuê (triệu/tháng)</label>
+                        <input type="number" id="price" name="price" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="area" class="block mb-2 font-medium">Diện tích (m²)</label>
+                        <input type="number" id="area" name="area" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="bedrooms" class="block mb-2 font-medium">Số phòng ngủ</label>
+                        <input type="number" id="bedrooms" name="bedrooms" class="form-input" required>
+                    </div>
+                     <div>
+                        <label for="bathrooms" class="block mb-2 font-medium">Số phòng tắm</label>
+                        <input type="number" id="bathrooms" name="bathrooms" class="form-input" required>
+                    </div>
+                    <div>
+                        <label for="type" class="block mb-2 font-medium">Loại hình</label>
+                        <select id="type" name="type" class="form-select">
+                            <option value="Phòng trọ">Phòng trọ</option>
+                            <option value="Nhà nguyên căn">Nhà nguyên căn</option>
+                            <option value="Căn hộ">Căn hộ</option>
+                        </select>
+                    </div>
+                </div>
+                 <div class="mt-4">
+                    <label for="description" class="block mb-2 font-medium">Mô tả chi tiết</label>
+                    <textarea id="description" name="description" rows="5" class="form-input"></textarea>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="form-section">
+                 <h2 class="form-section-title">Địa chỉ</h2>
+                 <input type="text" id="full-address-display" class="form-input" readonly placeholder="Nhấn để chọn địa chỉ">
+                 <input type="hidden" id="addressId" name="addressId">
+            </div>
+
+            <!-- Amenities -->
+            <div class="form-section">
+                <h2 class="form-section-title">Tiện ích</h2>
+                <div id="amenities-list" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Amenities will be loaded here -->
+                </div>
+            </div>
+            
+            <div class="text-right">
+                <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg">Tiếp tục</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Address Modal -->
+<div id="address-modal" class="address-modal">
+    <div class="address-modal-content">
+        <span class="close-button" id="close-modal-btn">&times;</span>
+        <h2 class="text-xl font-bold mb-4">Chọn địa chỉ</h2>
+        <div class="space-y-4">
+            <div>
+                <label class="block mb-2">Tỉnh/Thành</label>
+                <select id="province-select" class="form-select"></select>
+            </div>
+            <div>
+                <label class="block mb-2">Quận/Huyện</label>
+                <select id="district-select" class="form-select"></select>
+            </div>
+            <div>
+                <label class="block mb-2">Phường/Xã</label>
+                <select id="ward-select" class="form-select"></select>
+            </div>
+            <div>
+                <label class="block mb-2">Số nhà, đường</label>
+                <input type="text" id="street-input" class="form-input" placeholder="Nhập số nhà, tên đường">
+            </div>
+        </div>
+        <div class="text-right mt-6">
+             <button id="save-address-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const API_BASE_URL = 'https://localhost:7031/api';
+
+    // --- Amenities ---
+    fetch(`${API_BASE_URL}/Property/amenities`)
+        .then(res => res.json())
+        .then(amenities => {
+            const amenitiesContainer = document.getElementById('amenities-list');
+            amenities.forEach(amenity => {
+                amenitiesContainer.innerHTML += `
+                    <label class="flex items-center">
+                        <input type="checkbox" name="amenityIds" value="${amenity.id}" class="mr-2">
+                        ${amenity.name}
+                    </label>
+                `;
+            });
+        });
+
+    // --- Address Modal ---
+    const modal = document.getElementById('address-modal');
+    const addressInput = document.getElementById('full-address-display');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+
+    addressInput.addEventListener('click', () => modal.style.display = 'block');
+    closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+    window.addEventListener('click', (e) => {
+        if (e.target == modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // --- Address Logic ---
+    const provinceSelect = document.getElementById('province-select');
+    const districtSelect = document.getElementById('district-select');
+    const wardSelect = document.getElementById('ward-select');
+
+    // Load provinces
+    fetch(`${API_BASE_URL}/Property/provinces`)
+        .then(res => res.json())
+        .then(provinces => {
+            provinces.forEach(p => {
+                provinceSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+            });
+            provinceSelect.dispatchEvent(new Event('change')); // Trigger load districts
+        });
+    
+    // Province change -> Load districts
+    provinceSelect.addEventListener('change', () => {
+        const provinceId = provinceSelect.value;
+        districtSelect.innerHTML = '';
+        wardSelect.innerHTML = '';
+        if(provinceId){
+            fetch(`${API_BASE_URL}/Property/districts/${provinceId}`)
+            .then(res => res.json())
+            .then(districts => {
+                districts.forEach(d => {
+                    districtSelect.innerHTML += `<option value="${d.id}">${d.name}</option>`;
+                });
+                districtSelect.dispatchEvent(new Event('change')); // Trigger load wards
+            });
+        }
+    });
+
+    // District change -> Load wards
+    districtSelect.addEventListener('change', () => {
+        const districtId = districtSelect.value;
+        wardSelect.innerHTML = '';
+        if(districtId){
+             fetch(`${API_BASE_URL}/Property/wards/${districtId}`)
+            .then(res => res.json())
+            .then(wards => {
+                wards.forEach(w => {
+                    wardSelect.innerHTML += `<option value="${w.id}">${w.name}</option>`;
+                });
+            });
+        }
+    });
+    
+    // Save Address
+    document.getElementById('save-address-btn').addEventListener('click', function() {
+        // Here you should ideally call an API to create/get an address ID
+        // For now, we'll just display it and use a placeholder ID
+        const street = document.getElementById('street-input').value;
+        const ward = wardSelect.options[wardSelect.selectedIndex]?.text || '';
+        const district = districtSelect.options[districtSelect.selectedIndex]?.text || '';
+        const province = provinceSelect.options[provinceSelect.selectedIndex]?.text || '';
+        
+        document.getElementById('full-address-display').value = `${street}, ${ward}, ${district}, ${province}`;
+        // This is a placeholder. You need to implement address creation and get a real ID.
+        document.getElementById('addressId').value = 1; 
+        
+        modal.style.display = 'none';
+    });
+
+    // --- Form Submission ---
+    document.getElementById('create-property-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const amenityIds = [];
+        formData.getAll('amenityIds').forEach(id => amenityIds.push(parseInt(id)));
+
+        // NOTE: You need to get the real landlordId from auth service
+        const landlordId = "REPLACE_WITH_REAL_LOGGED_IN_USER_ID";
+
+        const data = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            price: parseFloat(formData.get('price')),
+            area: parseFloat(formData.get('area')),
+            bedrooms: parseInt(formData.get('bedrooms')),
+            bathrooms: parseInt(formData.get('bathrooms')),
+            type: formData.get('type'),
+            landlordId: landlordId, 
+            addressId: parseInt(formData.get('addressId')),
+            amenityIds: amenityIds
+        };
+        
+        fetch(`${API_BASE_URL}/PropertyPosts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(res => {
+            if(!res.ok) throw new Error('Failed to create property post');
+            return res.json();
+        })
+        .then(createdPost => {
+            // Redirect to step 2
+            window.location.href = `/PostProperty/CreateContract?propertyPostId=${createdPost.id}`;
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Đã có lỗi xảy ra. Vui lòng thử lại.');
+        });
+    });
+});
+</script> 

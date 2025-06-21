@@ -14,7 +14,7 @@
                    placeholder="Số điện thoại" 
                    class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm input-bootstrap" 
                    required />
-            <div class="text-xs text-gray-500 mt-1">Vui lòng nhập số điện thoại bắt đầu bằng 0 và có 10 chữ số</div>
+            <div class="text-xs text-gray-500 mt-1">Vui lòng nhập số điện thoại hợp lệ (10 hoặc 11 chữ số)</div>
         </div>
 
         <label class="block mb-2 text-sm font-medium text-gray-700" for="password">Mật khẩu</label>
@@ -72,8 +72,8 @@
             const errorMessage = document.getElementById('errorMessage');
             
             // Validate phone number format
-            if (!authService.validatePhoneNumber(phone)) {
-                errorMessage.textContent = 'Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số';
+            if (!/^(0\d{9,10})$/.test(phone)) {
+                errorMessage.textContent = 'Số điện thoại phải bắt đầu bằng 0 và có 10 hoặc 11 chữ số';
                 errorMessage.style.display = 'block';
                 return;
             }
@@ -95,13 +95,10 @@
 
         document.getElementById('phoneNumber').addEventListener('input', function(e) {
             let value = e.target.value.trim();
-            // Remove any non-digit characters except leading 0
+            // Remove any non-digit characters
             value = value.replace(/[^\d]/g, '');
-            if (value.length > 0 && !value.startsWith('0')) {
-                value = '0' + value;
-            }
-            if (value.length > 10) {
-                value = value.substring(0, 10);
+            if (value.length > 11) {
+                value = value.substring(0, 11);
             }
             e.target.value = value;
         });

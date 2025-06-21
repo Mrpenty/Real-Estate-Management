@@ -9,7 +9,8 @@ const authService = {
 
     formatPhoneForAPI(phone) {
         if (!phone) return '';
-        if (phone.startsWith('0') && phone.length === 10) {
+        // Handle both 10 and 11 digit numbers starting with 0
+        if (phone.startsWith('0') && (phone.length === 10 || phone.length === 11)) {
             return '+84' + phone.substring(1);
         }
         return phone;
@@ -17,7 +18,7 @@ const authService = {
 
     validatePhoneNumber(phone) {
         if (!phone) return false;
-        return (phone.startsWith('0') && phone.length === 10) || 
+        return (phone.startsWith('0') && phone.length === 11) || 
                (phone.startsWith('+84') && phone.length === 12);
     },
 
@@ -200,6 +201,26 @@ const authService = {
 
     getAuthToken() {
         return localStorage.getItem('authToken');
+    },
+
+    getCurrentUser() {
+        const token = localStorage.getItem('authToken');
+        if (!token) return null;
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            // The key for the name claim in JWT is often 'name' or a schema URL
+            const name = payload.name || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+            return {
+                id: payload.sub,
+                name: name,
+                email: payload.email
+                // Add other fields from payload as needed
+            };
+        } catch (e) {
+            console.error('Failed to parse token or get user info:', e);
+            return null;
+        }
     },
 
     updateNavigation() {

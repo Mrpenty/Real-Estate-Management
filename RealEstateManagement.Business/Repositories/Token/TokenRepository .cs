@@ -222,7 +222,7 @@ namespace RealEstateManagement.Business.Repositories.Token
             }
             catch (Exception ex)
             {
-                throw;
+                throw new SecurityTokenException("Invalid Google ID token", ex);
             }
         }
 

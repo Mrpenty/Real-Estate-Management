@@ -28,7 +28,7 @@ namespace RealEstateManagement.API.Controllers
 
         [HttpGet("homepage-allproperty")]
 
-        [Authorize(Roles = "Renter")]
+        //[Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetHomepageProperties()
         {
             _logger.LogInformation("GetHomepageProperties: Request received");
@@ -50,7 +50,7 @@ namespace RealEstateManagement.API.Controllers
         //Lấy property theo id
         [HttpGet("{id}")]
 
-        [Authorize(Roles = "Renter")]
+       // [Authorize(Roles = "Renter")]
 
         public async Task<ActionResult> GetPropertyById(int id)
         {
@@ -71,33 +71,33 @@ namespace RealEstateManagement.API.Controllers
         // Sắp xếp theo price
         [HttpGet("filter-by-price")]
 
-        [Authorize(Roles = "Renter")]
-        public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByPrice(decimal minPrice, decimal maxPrice)
+       // [Authorize(Roles = "Renter")]
+        //public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByPrice(decimal minPrice, decimal maxPrice)
 
-        {
-            try
-            {
-                if ((minPrice.HasValue && minPrice < 0) || (maxPrice.HasValue && maxPrice < 0))
-                    return BadRequest("Giá tiền không hợp lệ.");
+        //{
+        //    try
+        //    {
+        //        if ((minPrice.HasValue && minPrice < 0) || (maxPrice.HasValue && maxPrice < 0))
+        //            return BadRequest("Giá tiền không hợp lệ.");
 
-                if (minPrice.HasValue && maxPrice.HasValue && minPrice > maxPrice)
-                    return BadRequest("Giá trị minPrice phải nhỏ hơn hoặc bằng maxPrice.");
+        //        if (minPrice.HasValue && maxPrice.HasValue && minPrice > maxPrice)
+        //            return BadRequest("Giá trị minPrice phải nhỏ hơn hoặc bằng maxPrice.");
 
-                var properties = await _propertyService.FilterByPriceAsync(minPrice, maxPrice);
+        //        var properties = await _propertyService.FilterByPriceAsync(minPrice, maxPrice);
 
-                if (properties == null || !properties.Any())
-                    return NotFound("Không tìm thấy bất động sản nào");
+        //        if (properties == null || !properties.Any())
+        //            return NotFound("Không tìm thấy bất động sản nào");
 
-                return Ok(properties);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+        //        return Ok(properties);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Internal server error: {ex.Message}");
+        //    }
+        //}
         //Sắp xếp theo diện tích
         [HttpGet("filter-by-area")]
-        [Authorize(Roles = "Renter")]
+       // [Authorize(Roles = "Renter")]
 
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByArea([FromQuery] decimal? minArea, [FromQuery] decimal? maxArea)
 
@@ -199,7 +199,7 @@ namespace RealEstateManagement.API.Controllers
             }
         }
         [HttpPost("add-favorite")]
-        [Authorize(Roles = "Renter")]
+       // [Authorize(Roles = "Renter")]
         public async Task<IActionResult> AddToFavorite([FromBody] FavoritePropertyDTO dto)
         {
             var userIdClaim = User.FindFirst("id");

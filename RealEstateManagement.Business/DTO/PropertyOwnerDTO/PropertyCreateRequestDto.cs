@@ -8,7 +8,7 @@ namespace RealEstateManagement.Business.DTO.PropertyOwnerDTO
 {
     public class PropertyCreateRequestDto
     {
-        public string Title { get; set; }
+        public string? Title { get; set; }
         public string Description { get; set; }
         public int AddressID { get; set; } // Địa chỉ cho thuê
         public string Type { get; set; } // Loại phòng cho thuê
