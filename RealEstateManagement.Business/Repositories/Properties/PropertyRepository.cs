@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nest;
+using RealEstateManagement.Business.DTO.Location;
 
 namespace RealEstateManagement.Business.Repositories.Properties
 {
@@ -28,6 +29,12 @@ namespace RealEstateManagement.Business.Repositories.Properties
             return await _context.Properties
                 .Include(p => p.Images)
                 .Include(p => p.Landlord)
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Province)
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Ward)
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Street)
                 .Include(p => p.PropertyAmenities)
                     .ThenInclude(pa => pa.Amenity)
                 .Include(p => p.PropertyPromotions)
@@ -51,6 +58,12 @@ namespace RealEstateManagement.Business.Repositories.Properties
         {
             return await _context.Properties
                 .Include(p => p.Images)
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Province)
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Ward)
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Street)
                 .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities)
                     .ThenInclude(pa => pa.Amenity)
@@ -269,7 +282,28 @@ namespace RealEstateManagement.Business.Repositories.Properties
             return response.Documents.Select(d => d.Id).ToList();
         }
 
+        public async Task<List<ProvinceDTO>> GetListLocationAsync()
+        {
+            var streets = await _context.Streets.ToListAsync();
+            var wards = await _context.Wards.ToListAsync();
+            var provinces = await _context.Provinces.ToListAsync();
 
-
+            var result = provinces.Select(c => new ProvinceDTO
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Wards = wards.Where(w => w.Id == c.Id).Select(w => new WardDTO
+                {
+                    Id = w.Id,
+                    Name = w.Name,
+                    Streets = streets.Where(s => s.WardId == w.Id).Select(s => new StreetDTO
+                    {
+                        Id = s.Id,
+                        Name = s.Name
+                    }).ToList()
+                }).ToList(),
+            }).ToList();
+            return result;
+        }
     }
 }

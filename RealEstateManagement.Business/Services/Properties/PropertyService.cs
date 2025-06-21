@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Nest;
+using RealEstateManagement.Business.DTO.Location;
 using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Data.Entity;
@@ -8,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace RealEstateManagement.Business.Services.Properties
 {
@@ -31,6 +34,10 @@ namespace RealEstateManagement.Business.Services.Properties
                 Description = p.Description,
                 Type = p.Type,
                 AddressID = p.AddressId,
+                Street = p.Address.Street.Name,
+                Province = p.Address.Province.Name,
+                Ward = p.Address.Ward.Name,
+                DetailedAddress = p.Address.DetailedAddress,
                 Area = p.Area,
                 Bedrooms = p.Bedrooms,
                 Price = p.Price,
@@ -91,7 +98,12 @@ namespace RealEstateManagement.Business.Services.Properties
                 ContractEndDate = rentalContract?.EndDate,
                 ContractStatus = rentalContract?.Status.ToString(),
                 ContractPaymentMethod = rentalContract?.PaymentMethod,
-                ContractContactInfo = rentalContract?.ContactInfo
+                ContractContactInfo = rentalContract?.ContactInfo,
+                Street = p.Address.Street.Name,
+                Province = p.Address.Province.Name,
+                Ward = p.Address.Ward.Name,
+                DetailedAddress = p.Address.DetailedAddress,
+
             };
         }
         public async Task<IEnumerable<HomePropertyDTO>> FilterByPriceAsync([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice)
@@ -342,9 +354,11 @@ namespace RealEstateManagement.Business.Services.Properties
             });
         }
 
+        public async Task<List<ProvinceDTO>> GetListLocationAsync()
+        {
+            var result = await _repository.GetListLocationAsync();
 
-
-
-
+            return result;
+        }
     }
 }

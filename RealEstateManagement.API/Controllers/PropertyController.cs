@@ -28,7 +28,7 @@ namespace RealEstateManagement.API.Controllers
 
         [HttpGet("homepage-allproperty")]
 
-        [Authorize(Roles = "Renter")]
+        //[Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetHomepageProperties()
         {
             _logger.LogInformation("GetHomepageProperties: Request received");
@@ -50,7 +50,7 @@ namespace RealEstateManagement.API.Controllers
         //Lấy property theo id
         [HttpGet("{id}")]
 
-        [Authorize(Roles = "Renter")]
+        //[Authorize(Roles = "Renter")]
 
         public async Task<ActionResult> GetPropertyById(int id)
         {
@@ -77,10 +77,10 @@ namespace RealEstateManagement.API.Controllers
         {
             try
             {
-                if ((minPrice.HasValue && minPrice < 0) || (maxPrice.HasValue && maxPrice < 0))
+                if ((minPrice < 0) || (maxPrice < 0))
                     return BadRequest("Giá tiền không hợp lệ.");
 
-                if (minPrice.HasValue && maxPrice.HasValue && minPrice > maxPrice)
+                if (minPrice > maxPrice)
                     return BadRequest("Giá trị minPrice phải nhỏ hơn hoặc bằng maxPrice.");
 
                 var properties = await _propertyService.FilterByPriceAsync(minPrice, maxPrice);
@@ -223,6 +223,14 @@ namespace RealEstateManagement.API.Controllers
             var results = await _propertyService.SearchAsync(keyword);
             return Ok(results);
         }
+
+        [HttpGet("list-location")]
+        public async Task<IActionResult> ListLocation()
+        {
+            var results = await _propertyService.GetListLocationAsync();
+            return Ok(results);
+        }
+
         [HttpPost("index")]
         public async Task<IActionResult> IndexProperty([FromBody] PropertySearchDTO dto)
         {

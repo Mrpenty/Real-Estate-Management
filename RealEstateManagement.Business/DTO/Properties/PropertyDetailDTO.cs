@@ -37,5 +37,10 @@ namespace RealEstateManagement.Business.DTO.Properties
         public string ContractStatus { get; set; }
         public string ContractPaymentMethod { get; set; }
         public string ContractContactInfo { get; set; }
+        // thêm
+        public string Province { get; set; }
+        public string Ward { get; set; }
+        public string Street { get; set; }
+        public string DetailedAddress { get; set; }
     }
 }

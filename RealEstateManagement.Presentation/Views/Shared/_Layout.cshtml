@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>@ViewData["Title"] - RealEstateManagement.Presentation</title>
+    <title>@ViewData["Title"] RealEstateManagement.Presentation</title>
 @*     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script> *@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,6 +14,11 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SREM.AI.Web.styles.css" asp-append-version="true" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/authService.js" asp-append-version="true"></script>
+    <script src="~/js/helper.js" asp-append-version="true"></script>
 </head>
 <body>
     <header class="border-b" style="background-color:white">
@@ -27,7 +32,7 @@
             <div class="flex flex-grow mx-6 items-center">
                 <div class="flex items-center bg-gray-100 rounded-full px-3 py-1 w-full max-w-md">
                     <i class="fas fa-map-marker-alt text-gray-500 mr-2"></i>
-                    <input type="button" onclick="showFilterPopup('search-popup')" placeholder="Tìm theo khu vực" id="searchInput" class="input-bootstrap bg-transparent outline-none w-full text-sm" />
+                    <input type="button" onclick="showFilterPopup('search-popup')" value="Tìm theo khu vực" id="searchInput" class="input-bootstrap bg-transparent outline-none w-full text-left text-sm" />
                 </div>
                 <button onclick="showFilterPopup('filter-popup')" class="ml-2 border rounded-full px-3 py-1 text-sm hover:bg-gray-100">
                     <i class="fas fa-filter mr-1"></i> Bộ lọc
@@ -36,8 +41,10 @@
 
             <div class="flex items-center space-x-4">
                 <a href="/Home/ListFavorite" class="text-gray-700 hover:text-blue-600"><i class="far fa-heart mr-1"></i> Tin đã lưu</a>
-                <a href="/Auth/Register" class="text-gray-700 hover:text-blue-600"><i class="fas fa-user-plus mr-1"></i> Đăng ký</a>
-                <a href="/Auth/Login" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-in-alt mr-1"></i> Đăng nhập</a>
+                <a href="/Auth/Register" id="registerNavItem" class="text-gray-700 hover:text-blue-600"><i class="fas fa-user-plus mr-1"></i> Đăng ký</a>
+                <a href="/Auth/Login" id="loginNavItem" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-in-alt mr-1"></i> Đăng nhập</a>
+                <a href="#" id="userProfileLink" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-in-alt mr-1"></i>Full name</a>
+                <a href="#" onclick="handleLogout(event)" id="logoutNavItem" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-in-alt mr-1"></i> Đăng xuất</a>
                 <a href="/Admin/Index" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-1 rounded-full text-sm"><i class="fas fa-pen-alt mr-1"></i> Đăng tin</a>
             </div>
         </div>
@@ -45,15 +52,15 @@
         <nav class="border-b border-gray-200 shadow-sm">
             <div class="container mx-auto px-4">
                 <ul class="flex space-x-6 text-base font-medium pt-4">
-                    <li><a href="/" id="listPostId" class="nav-link border-b-2 pb-1 border-white">Phòng trọ</a></li>
-                    <li><a href="/nha-nguyen-can" class="nav-link border-b-2 pb-1 border-white">Nhà nguyên căn</a></li>
-                    <li><a href="/can-ho-chung-cu" class="nav-link border-b-2 pb-1 border-white">Căn hộ chung cư</a></li>
-                    <li><a href="/can-ho-mini" class="nav-link border-b-2 pb-1 border-white">Căn hộ mini</a></li>
-                    <li><a href="/can-ho-dich-vu" class="nav-link border-b-2 pb-1 border-white">Căn hộ dịch vụ</a></li>
-                    <li><a href="/o-ghep" class="nav-link border-b-2 pb-1 border-white">Ở ghép</a></li>
-                    <li><a href="/mat-bang" class="nav-link border-b-2 pb-1 border-white">Mặt bằng</a></li>
-                    <li><a href="/blog" class="nav-link border-b-2 pb-1 border-white">Blog</a></li>
-                    <li><a href="/bang-gia" class="nav-link border-b-2 pb-1 border-white">Bảng giá dịch vụ</a></li>
+                    <li><a href="/" id="listPostId" class="nav-link border-b-2 pb-1 border-gray-200">Phòng trọ</a></li>
+                    <li><a href="/nha-nguyen-can" class="nav-link border-b-2 pb-1 border-gray-200">Nhà nguyên căn</a></li>
+                    <li><a href="/can-ho-chung-cu" class="nav-link border-b-2 pb-1 border-gray-200">Căn hộ chung cư</a></li>
+                    <li><a href="/can-ho-mini" class="nav-link border-b-2 pb-1 border-gray-200">Căn hộ mini</a></li>
+                    <li><a href="/can-ho-dich-vu" class="nav-link border-b-2 pb-1 border-gray-200">Căn hộ dịch vụ</a></li>
+                    <li><a href="/o-ghep" class="nav-link border-b-2 pb-1 border-gray-200">Ở ghép</a></li>
+                    <li><a href="/mat-bang" class="nav-link border-b-2 pb-1 border-gray-200">Mặt bằng</a></li>
+                    <li><a href="/blog" class="nav-link border-b-2 pb-1 border-gray-200">Blog</a></li>
+                    <li><a href="/bang-gia" class="nav-link border-b-2 pb-1 border-gray-200">Bảng giá dịch vụ</a></li>
                 </ul>
             </div>
         </nav>
@@ -180,23 +187,19 @@
         </div>
     </div>
 
-
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
     <script>
 
-        const locations = {
-          "Hà Nội": {
-            "Quận Ba Đình": ["Phường Phúc Xá", "Phường Trúc Bạch"],
-            "Quận Cầu Giấy": ["Phường Dịch Vọng", "Phường Yên Hòa"]
-          },
-          "TP Hồ Chí Minh": {
-            "Quận 1": ["Phường Bến Nghé", "Phường Đa Kao"],
-            "Quận Bình Thạnh": ["Phường 1", "Phường 2"]
-          }
-        };
+        // const locations = {
+        //   "Hà Nội": {
+        //     "Quận Ba Đình": ["Phường Phúc Xá", "Phường Trúc Bạch"],
+        //     "Quận Cầu Giấy": ["Phường Dịch Vọng", "Phường Yên Hòa"]
+        //   },
+        //   "TP Hồ Chí Minh": {
+        //     "Quận 1": ["Phường Bến Nghé", "Phường Đa Kao"],
+        //     "Quận Bình Thạnh": ["Phường 1", "Phường 2"]
+        //   }
+        // };
 
         function hideFilterPopup(id) {
             document.getElementById(id).classList.add('hidden');
@@ -254,15 +257,19 @@
         let level = 0;
         let selectedProvince = "";
         let selectedDistrict = "";
+        let locations = [];
 
         const modal = document.getElementById("search-popup");
         const content = document.getElementById("modalContent");
         const title = document.getElementById("modalTitle");
         const backBtn = document.getElementById("backBtn");
 
+        getAllLocationAsync();
+        setTimeout(() => {
+            renderProvinces();
+        },300);
 
-        renderProvinces();
-                backBtn.onclick = () => {
+        backBtn.onclick = () => {
           if (level === 2) {
             level = 1;
             renderDistricts(selectedProvince);
@@ -272,55 +279,60 @@
           }
         };
 
-        function renderProvinces() {
+        async function getAllLocationAsync() {
+            locations = await getAllLocation();
+        }
+
+        async function renderProvinces() {
+          
           level = 0;
           title.innerText = "Chọn theo khu vực";
           backBtn.classList.add("hidden");
           content.innerHTML = "";
 
-          Object.keys(locations).forEach(province => {
-            const checked = province === selectedProvince ? "checked" : "";
-            const item = createCheckboxItem(province, checked, () => {
-              selectedProvince = province;
-              selectedDistrict = "";
-              selectedWard = "";
-              renderDistricts(province);
+            locations.forEach(province => {
+                const checked = province.id === selectedProvince.id ? "checked" : "";
+                const item = createCheckboxItem(province.name, checked, () => {
+                    selectedProvince = province;
+                    selectedDistrict = "";
+                    selectedWard = "";
+                    renderDistricts(province);
+                });
+                content.appendChild(item);
             });
-            content.appendChild(item);
-          });
         }
 
         function renderDistricts(province) {
           level = 1;
-          title.innerText = province;
+          title.innerText = province.name;
           backBtn.classList.remove("hidden");
           content.innerHTML = "";
 
-          Object.keys(locations[province]).forEach(district => {
-            const checked = district === selectedDistrict ? "checked" : "";
-            const item = createCheckboxItem(district, checked, () => {
-              selectedDistrict = district;
-              selectedWard = "";
-              renderWards(province, district);
+            province.wards.forEach(ward => {
+                const checked = ward.id === selectedDistrict.id ? "checked" : "";
+                const item = createCheckboxItem(ward.name, checked, () => {
+                    selectedDistrict = ward;
+                    selectedWard = "";
+                    renderWards(province, ward);
+                });
+                content.appendChild(item);
             });
-            content.appendChild(item);
-          });
         }
 
-        function renderWards(province, district) {
-          level = 2;
-          title.innerText = district;
-          content.innerHTML = "";
+        function renderWards(province, ward) {
+            level = 2;
+            title.innerText = ward.name;
+            content.innerHTML = "";
 
-          locations[province][district].forEach(ward => {
-            const checked = ward === selectedWard ? "checked" : "";
-            const item = createCheckboxItem(ward, checked, () => {
-              selectedWard = ward;
-              $('#searchInput').val(`${province} > ${district} > ${ward}`);
-              hideFilterPopup('search-popup');
+            ward.streets.forEach(street => {
+                const checked = street.id === selectedWard.id ? "checked" : "";
+                const item = createCheckboxItem(street.name, checked, () => {
+                    selectedWard = street;
+                    $('#searchInput').val(`${province.name} > ${ward.name} > ${street.name}`);
+                    hideFilterPopup('search-popup');
+                });
+                content.appendChild(item);
             });
-            content.appendChild(item);
-          });
         }
 
         function createCheckboxItem(label, checked, onClick) {

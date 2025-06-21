@@ -28,6 +28,11 @@ namespace RealEstateManagement.Business.DTO.Properties
         public string PromotionPackageName { get; set; }
         public List<string> Amenities { get; set; }
 
+        // thêm
+        public string Province { get; set; }
+        public string Ward { get; set; }
+        public string Street { get; set; }
+        public string DetailedAddress { get; set; }
 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RealEstateManagement.Business.DTO.Location;
 using RealEstateManagement.Business.DTO.Properties;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,8 @@ namespace RealEstateManagement.Business.Services.Properties
         Task<bool> IndexPropertyAsync(PropertySearchDTO dto);
         Task BulkIndexPropertiesAsync();
         Task<IEnumerable<HomePropertyDTO>> SearchAsync(string keyword);
+
+        Task<List<ProvinceDTO>> GetListLocationAsync();
 
     }
 }

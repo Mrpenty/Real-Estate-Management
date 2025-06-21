@@ -30,7 +30,7 @@
         <div class="grid gap-6">
             <div class="bg-white rounded-md shadow-sm p-4">
                 <div class="relative aspect-video w-full bg-black rounded-md overflow-hidden">
-                    <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" alt="Video preview" class="object-cover w-full h-full">
+                    <img src="" id="imgPrimaryUrl" onerror="handleImageError(this)" alt="preview" class="object-cover w-full h-full">
 @*                     <div class="absolute bottom-2 left-2 text-white text-xs bg-black/70 px-2 py-1 rounded">0:00 / 0:34</div> *@
                 </div>
 
@@ -46,42 +46,39 @@
             </div>
 
             <div class="bg-white rounded-md shadow-sm p-4">
-                <div class="flex items-center space-x-2 mb-2">
+@*                 <div class="flex items-center space-x-2 mb-2">
                     <span class="text-yellow-500 text-lg font-bold">⭐⭐⭐⭐⭐</span>
                     <span class="bg-red-500 text-white text-xs px-2 py-1 rounded uppercase font-semibold">Tin VIP Nổi Bật</span>
-                </div>
-                <h1 class="text-xl font-bold text-red-600">
-                    Pass phòng cửa sổ lớn 175 Nguyễn Thị Thập, đã trả tiền phòng đến 5/7
+                </div> *@
+                <h1 class="text-xl font-bold text-red-600 titleId">
                 </h1>
                 <div class="flex items-center text-green-600 font-semibold text-lg space-x-2">
-                    <span>4.8 triệu/tháng</span>
+                    <span class="priceId"></span>
                     <span class="text-black font-normal">•</span>
-                    <span class="text-gray-700 text-base">30 m²</span>
-                    <span class="ml-auto text-sm text-gray-500">Cập nhật: 6 giờ trước</span>
+                    <span class="text-gray-700 text-base"><span class="areaId"></span> m²</span>
+                    <span class="ml-auto text-sm text-gray-500">Cập nhật: <span class="timeAgoId"></span></span>
                 </div>
                 <div class="text-sm text-gray-800 space-y-1">
-                    <p><span class="font-medium text-gray-600">Quận huyện:</span> <a href="#" class="text-blue-600 hover:underline">Cho thuê phòng trọ Quận 7</a></p>
-                    <p><span class="font-medium text-gray-600">Tỉnh thành:</span> <a href="#" class="text-blue-600 hover:underline">Hồ Chí Minh</a></p>
-                    <p><span class="font-medium text-gray-600">Địa chỉ:</span> 175 Đường Nguyễn Thị Thập, Phường Tân Phú, Quận 7, Hồ Chí Minh</p>
-                    <p><span class="font-medium text-gray-600">Mã tin:</span> #684636</p>
-                    <p><span class="font-medium text-gray-600">Ngày đăng:</span> Thứ 5, 20:47 19/06/2025</p>
-                    <p><span class="font-medium text-gray-600">Ngày hết hạn:</span> Chủ Nhật, 20:47 22/06/2025</p>
+                    <p><span class="font-medium text-gray-600">Quận huyện:</span> <a href="#" class="text-blue-600 hover:underline wardId" ></a></p>
+                    <p><span class="font-medium text-gray-600">Tỉnh thành:</span> <a href="#" class="text-blue-600 hover:underline provinceId" ></a></p>
+                    <p><span class="font-medium text-gray-600">Địa chỉ:</span> <span class="addressId"></span></p>
+                    <p><span class="font-medium text-gray-600">Mã tin:</span> #<span id="propId"></span></p>
+                    <p><span class="font-medium text-gray-600">Ngày đăng:</span> <span id="createTimeId"></span></p>
                 </div>
                 <h2 class="text-lg font-semibold text-gray-700 mb-2 mt-3">Thông tin mô tả</h2>
                 <div class="text-sm text-gray-800 space-y-2 leading-relaxed">
-                    <p><strong>PASS PHÒNG 175 NGUYỄN THỊ THẬP – VÀO Ở NGAY</strong></p>
-                    <p>Giá thuê: 4,8 triệu/tháng</p>
+                    <p><strong class="titleId"></strong></p>
+                    <p>Giá thuê: <span class="priceId"></span>/tháng</p>
                     <p>Cọc: 1 tháng</p>
-                    <p>Đã trả tiền phòng đến 5/7, ai vào ở trước ngày này không cần trả thêm gì, chỉ cần trả tiền tháng sau.</p>
-                    <p>Phòng có cửa sổ lớn, đầy đủ nội thất (máy lạnh, tủ lạnh, giường, nệm, bàn ghế...) – xách đồ vào ở ngay.</p>
+                    <p class="descriptionId"></p>
                 </div>
                 <h2 class="text-lg font-semibold text-gray-700 mb-2 mt-3">Vị trí & bản đồ</h2>
-                <p class="text-sm text-gray-800">
-                    📍 Địa chỉ: 175 Đường Nguyễn Thị Thập, Phường Tân Phú, Quận 7, Hồ Chí Minh
+                <p class="text-sm text-gray-800 block mb-1">
+                    <div class="d-none">📍 Địa chỉ: <span class="addressId"></span></div>
                     <a href="#" class="text-blue-600 hover:underline ml-1">Xem bản đồ lớn</a>
                 </p>
                 <div class="w-full h-64 rounded overflow-hidden border">
-                    <iframe src="https://www.google.com/maps?q=175+Đường+Nguyễn+Thị+Thập,+Phường+Tân+Phú,+Quận+7,+Hồ+Chí+Minh&output=embed"
+                    <iframe id="mapFrame"
                             class="w-full h-full"
                             style="border:0"
                             allowfullscreen=""
@@ -92,13 +89,13 @@
                     <div class="w-14 h-14 bg-gray-200 rounded-full flex-shrink-0"></div>
                     <div class="flex-1">
                         <div class="flex items-center space-x-2">
-                            <p class="font-semibold text-gray-800">Nguyen Huy</p>
+                            <p class="font-semibold text-gray-800 contactName"></p>
                             <span class="text-green-600 text-xs font-medium">● Đang hoạt động</span>
                         </div>
                         <p class="text-sm text-gray-500">1 tin đăng • Tham gia từ: 19/06/2025</p>
                         <div class="flex space-x-2 mt-2">
                             <a href="tel:0369864430" class="bg-green-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-green-600">
-                                📞 0369864430
+                                📞 <span class="contactPhone"></span>
                             </a>
                             <a href="#" class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700">
                                 💬 Nhắn Zalo
@@ -119,7 +116,7 @@
                 </div>
 
                 <div>
-                    <p class="font-semibold text-gray-800">Nguyen Huy</p>
+                    <p class="font-semibold text-gray-800 contactName"></p>
                     <p class="text-sm text-gray-500">
                         <span class="text-green-500">●</span> Đang hoạt động
                     </p>
@@ -128,8 +125,8 @@
                 <p class="text-sm text-gray-500">1 tin đăng • Tham gia từ: 19/06/2025</p>
 
                 <div class="space-y-2">
-                    <a href="tel:0369864430" class="block w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold">
-                        📞 0369864430
+                    <a href="tel:0369864430" id="contactPhone" class="block w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold">
+                        📞 <span class="contactPhone"></span>
                     </a>
                     <a href="#" class="block w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold">
                         💬 Nhắn Zalo
@@ -191,9 +188,42 @@
     </div>
 </div>
 
-
+<script src="~/js/propertyService.js"></script>
 <script>
     document.getElementById('listPostId').classList.add("text-orange-500");
-    document.getElementById('listPostId').classList.replace("border-white", "border-orange-500");
+    document.getElementById('listPostId').classList.replace("border-gray-200", "border-orange-500");
+    let id = @ViewBag.Id;
+    getProperty();
+    async function getProperty(){
+        let prop = await propertyService.getProperty(id);
+        let addressInfo = prop.detailedAddress + ", " + prop.street + ", " + prop.ward + ", " + prop.province;
+        $('.titleId').html(prop.title);
+        $('#imgPrimaryUrl').html(prop.primaryImageUrl);
+        $('.areaId').html(prop.area);
+        $('.addressId').html(addressInfo);
+        $('.priceId').html(formatVietnameseNumber(prop.price));
+        $('.timeAgoId').html(timeAgo(prop.createdAt));
+        $('.descriptionId').html(prop.description);
+        $('.wardId').html(prop.ward);
+        $('.provinceId').html(prop.province);
+        $('#propId').html(prop.id);
+        $('#createTimeId').html(formatVietnameseDateTime(prop.createdAt));
+        $('.contactPhone').html(prop.landlordPhoneNumber);
+        $('.contactName').html(prop.landlordName);
+        if (prop.location != null) {
+            let lCoor = prop.location.split(',');
+
+            const lat = lCoor[0];
+            const lng = lCoor[1];
+
+            $('#mapFrame').attr('src', `https://www.google.com/maps?q=${lat},${lng}&output=embed`);
+        }
+        else {
+            const encodedLocation = encodeURIComponent(addressInfo);
+            $('#mapFrame').attr('src', `https://www.google.com/maps?q=${encodedLocation}&output=embed`);
+        }
+
+        //console.log(prop);
+    }
 
 </script>
