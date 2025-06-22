@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Nest;
 using RealEstateManagement.Business.DTO.Location;
+using RealEstateManagement.Data.Entity.AddressEnity;
 
 namespace RealEstateManagement.Business.Repositories.Properties
 {
@@ -134,6 +135,12 @@ namespace RealEstateManagement.Business.Repositories.Properties
         public async Task<IEnumerable<Property>> FilterAdvancedAsync(PropertyFilterDTO filter)
         {
             var query = _context.Properties
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Province)
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Ward)
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Street)
                 .Include(p => p.Images)
                 .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
@@ -141,17 +148,36 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .AsQueryable();
 
             if (filter.MinPrice.HasValue)
-                query = query.Where(p => p.Price >= filter.MinPrice.Value);
+            {
+                filter.MinPrice = filter.MinPrice * 1000000;
+                if (filter.ScopePrice == "higher") query = query.Where(p => p.Price > filter.MinPrice.Value);
+                else query = query.Where(p => p.Price >= filter.MinPrice.Value);
+            }
+                
             if (filter.MaxPrice.HasValue)
-                query = query.Where(p => p.Price <= filter.MaxPrice.Value);
+            {
+                filter.MaxPrice = filter.MaxPrice * 1000000;
+                if (filter.ScopePrice == "lower") query = query.Where(p => p.Price < filter.MaxPrice.Value);
+                else query = query.Where(p => p.Price <= filter.MaxPrice.Value);
+            }
+                
             if (filter.MinBedrooms.HasValue)
                 query = query.Where(p => p.Bedrooms >= filter.MinBedrooms.Value);
             if (filter.MaxBedrooms.HasValue)
                 query = query.Where(p => p.Bedrooms <= filter.MaxBedrooms.Value);
+
             if (filter.MinArea.HasValue)
-                query = query.Where(p => p.Area >= filter.MinArea.Value);
+            {
+                if(filter.ScopeArea == "higher") query = query.Where(p => p.Area > filter.MinArea.Value);
+                else query = query.Where(p => p.Area >= filter.MinArea.Value);
+            }
+                
             if (filter.MaxArea.HasValue)
-                query = query.Where(p => p.Area <= filter.MaxArea.Value);
+            {
+                if (filter.ScopeArea == "lower") query = query.Where(p => p.Area < filter.MaxArea.Value);
+                else query = query.Where(p => p.Area <= filter.MaxArea.Value);
+            }
+                
 
             if (filter.AmenityName != null
                && filter.AmenityName.Any(name => !string.IsNullOrWhiteSpace(name) && name.ToLower() != "string"))
@@ -163,6 +189,17 @@ namespace RealEstateManagement.Business.Repositories.Properties
 
                 query = query.Where(p =>
                     p.PropertyAmenities.Any(pa => validNames.Contains(pa.Amenity.Name.ToLower())));
+            }
+
+            if (!string.IsNullOrEmpty(filter.Location))
+            {
+                var arrLocation = filter.Location.Split(",");
+                var provinceId = int.Parse(arrLocation[0]);
+                var wardId = int.Parse(arrLocation[1]);
+                var streetId = int.Parse(arrLocation[2]);
+                if (provinceId != 0) query = query.Where(p => p.Address.PropertyId == provinceId);
+                if (wardId != 0) query = query.Where(p => p.Address.WardId == wardId);
+                if (streetId != 0) query = query.Where(p => p.Address.StreetId == streetId);
             }
 
             return await query
@@ -288,15 +325,37 @@ namespace RealEstateManagement.Business.Repositories.Properties
             var wards = await _context.Wards.ToListAsync();
             var provinces = await _context.Provinces.ToListAsync();
 
+            provinces.Add(new Province
+            {
+                Id = 0,
+                Name = "All"
+            });
+
+            wards.Add(new Ward
+            {
+                Id = 0,
+                Name = "All"
+            });
+
+            streets.Add(new Street
+            {
+                Id = 0,
+                Name = "All"
+            });
+
+            provinces = provinces.OrderBy(p => p.Id).ToList();
+            wards = wards.OrderBy(p => p.Id).ToList();
+            streets = streets.OrderBy(p => p.Id).ToList();
+
             var result = provinces.Select(c => new ProvinceDTO
             {
                 Id = c.Id,
                 Name = c.Name,
-                Wards = wards.Where(w => w.Id == c.Id).Select(w => new WardDTO
+                Wards = wards.Where(w => w.ProvinceId == c.Id || w.Id == 0).Select(w => new WardDTO
                 {
                     Id = w.Id,
                     Name = w.Name,
-                    Streets = streets.Where(s => s.WardId == w.Id).Select(s => new StreetDTO
+                    Streets = streets.Where(s => s.WardId == w.Id || s.Id == 0).Select(s => new StreetDTO
                     {
                         Id = s.Id,
                         Name = s.Name
@@ -305,5 +364,6 @@ namespace RealEstateManagement.Business.Repositories.Properties
             }).ToList();
             return result;
         }
+
     }
 }

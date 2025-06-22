@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace RealEstateManagement.Business.Services.Properties
 {
@@ -34,8 +33,11 @@ namespace RealEstateManagement.Business.Services.Properties
                 Description = p.Description,
                 Type = p.Type,
                 AddressID = p.AddressId,
+                StreetId = p.Address.StreetId,
                 Street = p.Address.Street.Name,
+                ProvinceId = p.Address.ProvinceId,
                 Province = p.Address.Province.Name,
+                WardId = p.Address.WardId,
                 Ward = p.Address.Ward.Name,
                 DetailedAddress = p.Address.DetailedAddress,
                 Area = p.Area,
@@ -207,6 +209,12 @@ namespace RealEstateManagement.Business.Services.Properties
                 Status = p.Status,
                 Location = p.Location,
                 CreatedAt = p.CreatedAt,
+                ProvinceId = p.Address.ProvinceId,
+                Province = p.Address.Province.Name,
+                WardId = p.Address.WardId,
+                Ward = p.Address.Ward.Name,
+                StreetId = p.Address.StreetId,
+                Street = p.Address.Street.Name,
                 ViewsCount = p.ViewsCount,
                 PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
                 LandlordName = p.Landlord?.Name,
@@ -359,6 +367,26 @@ namespace RealEstateManagement.Business.Services.Properties
             var result = await _repository.GetListLocationAsync();
 
             return result;
+        }
+
+        public async Task<IEnumerable<HomePropertyDTO>> SearchAdvanceAsync(int? provinceId = 0, int? wardId = 0, int? streetId = 0)
+        {
+            var properties = await GetAllPropertiesAsync();
+            if (provinceId != 0) properties = properties.Where(c => c.ProvinceId == provinceId);
+            if (wardId != 0) properties = properties.Where(c => c.WardId == wardId);
+            if (streetId != 0) properties = properties.Where(c => c.StreetId == streetId);
+            return properties.ToList();
+        }
+
+        public async Task<List<AmenityDTO>> GetListAmenityAsync()
+        {
+            var amenity = await _context.Amenities.ToListAsync();
+            return amenity.Select(c => new AmenityDTO
+            {
+                Id = c.Id,
+                Description = c.Description,
+                Name = c.Name
+            }).ToList();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.DTO.Location;
 using RealEstateManagement.Business.DTO.Properties;
+using RealEstateManagement.Data.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,8 +29,10 @@ namespace RealEstateManagement.Business.Services.Properties
         Task<bool> IndexPropertyAsync(PropertySearchDTO dto);
         Task BulkIndexPropertiesAsync();
         Task<IEnumerable<HomePropertyDTO>> SearchAsync(string keyword);
+        Task<IEnumerable<HomePropertyDTO>> SearchAdvanceAsync(int? province = 0, int? ward = 0, int? street = 0);
 
         Task<List<ProvinceDTO>> GetListLocationAsync();
 
+        Task<List<AmenityDTO>> GetListAmenityAsync();
     }
 }

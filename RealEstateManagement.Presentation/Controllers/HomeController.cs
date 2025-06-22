@@ -15,6 +15,10 @@ namespace RealEstateManagement.Presentation.Controllers
 
         public IActionResult Index()
         {
+            //ViewBag.ProvinceId = province;
+            //ViewBag.WardId = ward;
+            //ViewBag.StreetId = street;
+            //ViewBag
             return View();
         }
 

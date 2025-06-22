@@ -12,7 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/SREM.AI.Web.styles.css" asp-append-version="true" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -84,28 +83,25 @@
                 <div class="mb-6">
                     <h3 class="font-semibold mb-2">Danh mục cho thuê</h3>
                     <div id="rental-type" class="grid grid-cols-3 gap-2">
-                        <button class="rental-btn border-2 border-orange-500 rounded-lg py-2 px-3 text-sm flex flex-col items-center bg-orange-50 text-orange-600 font-semibold">
+                        <button value="0" class="rental-btn border-2 border-orange-500 rounded-lg py-2 px-3 text-sm flex flex-col items-center bg-orange-50 text-orange-600">
                             <span>Phòng trọ</span>
                         </button>
-                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Nhà riêng</span></button>
-                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Ở ghép</span></button>
-                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Mặt bằng</span></button>
-                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Căn hộ chung cư</span></button>
-                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Căn hộ mini</span></button>
+                        <button value="1" class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Nhà riêng</span></button>
+                        <button value="2" class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Ở ghép</span></button>
+                        <button value="0" class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Mặt bằng</span></button>
+                        <button value="0" class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Căn hộ chung cư</span></button>
+                        <button value="0" class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Căn hộ mini</span></button>
                     </div>
                 </div>
 
                 <div class="mb-6">
                     <h3 class="font-semibold mb-2">Lọc theo khu vực</h3>
                     <div class="grid grid-cols-3 gap-2">
-                        <select class="border px-3 py-2 rounded-lg text-sm text-gray-700">
-                            <option>Hồ Chí Minh</option>
+                        <select id="filterProvinceId" onchange="filterWard()" class="border-2 border-orange-500 px-3 py-2 bg-orange-50 text-orange-600 rounded-lg text-sm text-gray-700">
                         </select>
-                        <select class="border px-3 py-2 rounded-lg text-sm text-gray-700">
-                            <option>Quận 8</option>
+                        <select id="filterWarnId" onchange="filterStreet()" class="border-2 border-orange-500 bg-orange-50 text-orange-600 px-3 py-2 rounded-lg text-sm text-gray-700">
                         </select>
-                        <select class="border px-3 py-2 rounded-lg text-sm text-gray-700">
-                            <option>Tất cả</option>
+                        <select id="filterStreetId" class="border-2 border-orange-500 bg-orange-50 text-orange-600 px-3 py-2 rounded-lg text-sm text-gray-700">
                         </select>
                     </div>
                 </div>
@@ -113,36 +109,36 @@
                 <div class="mb-6">
                     <h3 class="font-semibold mb-2">Khoảng giá</h3>
                     <div id="rental-type-price" class="flex flex-wrap gap-2">
-                        <button class="rental-btn border-2 border-orange-500 rounded-full px-4 py-1 text-sm bg-orange-50 text-orange-600 font-semibold">Tất cả</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Dưới 1 triệu</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">1 - 2 triệu</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">2 - 3 triệu</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">3 - 5 triệu</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">5 - 7 triệu</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">7 - 10 triệu</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">10 - 15 triệu</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Trên 15 triệu</button>
+                        <button id="price-1" data-scope="all" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Tất cả</button>
+                        <button id="price-2" data-price-max='1' data-scope="lower" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Dưới 1 triệu</button>
+                        <button id="price-3" data-price-min='1' data-price-max='2' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">1 - 2 triệu</button>
+                        <button id="price-4" data-price-min='2' data-price-max='3' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">2 - 3 triệu</button>
+                        <button id="price-5" data-price-min='3' data-price-max='5' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">3 - 5 triệu</button>
+                        <button id="price-6" data-price-min='5' data-price-max='7' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">5 - 7 triệu</button>
+                        <button id="price-7" data-price-min='7' data-price-max='10' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">7 - 10 triệu</button>
+                        <button id="price-8" data-price-min='10' data-price-max='15' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">10 - 15 triệu</button>
+                        <button id="price-9" data-price-min='15' data-scope="higher" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Trên 15 triệu</button>
                     </div>
                 </div>
 
                 <div class="mb-6">
                     <h3 class="font-semibold mb-2">Khoảng diện tích</h3>
                     <div id="rental-type-acreage" class="flex flex-wrap gap-2">
-                        <button class="rental-btn border-2 border-orange-500 rounded-full px-4 py-1 text-sm bg-orange-50 text-orange-600 font-semibold">Tất cả</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Dưới 20m²</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 20m² - 30m²</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 30m² - 50m²</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 50m² - 70m²</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 70m² - 90m²</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Trên 90m²</button>
+                        <button id="area-1" data-scope="all" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Tất cả</button>
+                        <button id="area-2" data-area-max='20' data-scope="lower" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Dưới 20m²</button>
+                        <button id="area-3" data-area-min='20' data-area-max='30' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 20m² - 30m²</button>
+                        <button id="area-4" data-area-min='30' data-area-max='50' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 30m² - 50m²</button>
+                        <button id="area-5" data-area-min='50' data-area-max='70' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 50m² - 70m²</button>
+                        <button id="area-6" data-area-min='70' data-area-max='90' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 70m² - 90m²</button>
+                        <button id="area-7" data-area-min='90' data-scope="higher" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Trên 90m²</button>
                     </div>
                 </div>
 
                 <div class="mb-6">
                     <h3 class="font-semibold mb-2">Đặc điểm nổi bật</h3>
                     <div id="rental-type-special" class="flex flex-wrap gap-2">
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Đầy đủ nội thất</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có gác</button>
+
+@*                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có gác</button>
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Kệ bếp</button>
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có máy lạnh</button>
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có máy giặt</button>
@@ -151,13 +147,13 @@
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Không chung chủ</button>
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Giờ giấc tự do</button>
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có bảo vệ 24/24</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có hầm để xe</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có hầm để xe</button> *@
                     </div>
                 </div>
             </div>
 
             <div class="sticky bottom-0 bg-white w-full px-4 pt-2 pb-4 border-t rounded-b-lg">
-                <button class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl text-base shadow">Áp dụng</button>
+                <button type="button" onclick="filterAdvanced()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl text-base shadow">Áp dụng</button>
             </div>
 
         </div>
@@ -190,16 +186,6 @@
     @await RenderSectionAsync("Scripts", required: false)
     <script>
 
-        // const locations = {
-        //   "Hà Nội": {
-        //     "Quận Ba Đình": ["Phường Phúc Xá", "Phường Trúc Bạch"],
-        //     "Quận Cầu Giấy": ["Phường Dịch Vọng", "Phường Yên Hòa"]
-        //   },
-        //   "TP Hồ Chí Minh": {
-        //     "Quận 1": ["Phường Bến Nghé", "Phường Đa Kao"],
-        //     "Quận Bình Thạnh": ["Phường 1", "Phường 2"]
-        //   }
-        // };
 
         function hideFilterPopup(id) {
             document.getElementById(id).classList.add('hidden');
@@ -209,7 +195,6 @@
             document.getElementById(id).classList.remove('hidden');
         }
         listSelectedSingleChoice();
-        selectedMultipleChoice('rental-type-special');
         function listSelectedSingleChoice(){
             const listSelecter = ['rental-type','rental-type-price','rental-type-acreage'];
             listSelecter.forEach(item => {
@@ -223,41 +208,24 @@
             buttons.forEach(btn => {
               btn.addEventListener('click', () => {
                 buttons.forEach(b => {
-                  b.classList.remove('border-orange-500','bg-orange-50', 'text-orange-600', 'font-semibold');
+                  b.classList.remove('border-orange-500','bg-orange-50', 'text-orange-600');
                   b.classList.add('border-gray-300','bg-white');
                 });
                 btn.classList.remove('border-gray-300','bg-white');
-                btn.classList.add('border-orange-500', 'bg-orange-50','text-orange-600', 'font-semibold');
-              });
-            });
-        }
-
-        function selectedMultipleChoice(idSelecter){
-            const buttons = document.querySelectorAll(`#${idSelecter} .rental-btn`);
-
-            buttons.forEach(btn => {
-              btn.addEventListener('click', () => {
-                buttons.forEach(b => {
-
-                });
-                if(btn.classList.contains('border-orange-500')){
-                    btn.classList.remove('border-orange-500','bg-orange-50', 'text-orange-600', 'font-semibold');
-                    btn.classList.add('border-gray-300','bg-white');
-                }
-                else{
-                    btn.classList.remove('border-gray-300','bg-white');
-                    btn.classList.add('border-orange-500', 'bg-orange-50','text-orange-600', 'font-semibold');
-                }
-
+                btn.classList.add('border-orange-500', 'bg-orange-50','text-orange-600');
               });
             });
         }
 
 
         let level = 0;
-        let selectedProvince = "";
-        let selectedDistrict = "";
+        let selectedProvince = {id:""};
+        let selectedWard = { id: "" };
+        let selectedStreet = { id: "" };
         let locations = [];
+
+        const href = window.location.origin;
+        const urlParamParents = new URLSearchParams(window.location.search);
 
         const modal = document.getElementById("search-popup");
         const content = document.getElementById("modalContent");
@@ -272,7 +240,7 @@
         backBtn.onclick = () => {
           if (level === 2) {
             level = 1;
-            renderDistricts(selectedProvince);
+            renderWard(selectedProvince);
           } else if (level === 1) {
             level = 0;
             renderProvinces();
@@ -281,55 +249,123 @@
 
         async function getAllLocationAsync() {
             locations = await getAllLocation();
+            let obj = getValueFromParam(locations);
+            $('#searchInput').val(obj.valueSearch);
+            $('#titleHomePage').html(obj.valueTitle);
+            selectedProvince = obj.selectedProvince;
+            selectedWard = obj.selectedWard;
+            selectedStreet = obj.selectedStreet;
+
+            let html = '';
+            let htmlWard = '';
+            let htmlStreet = '';
+            locations.forEach(i => {
+                html += `<option value='${i.id}'>${i.name}</option>`;
+            })
+            $('#filterProvinceId').html(html);
+            if (selectedProvince.id != "") {
+                $('#filterProvinceId').val(selectedProvince.id);
+                selectedProvince.wards.forEach(i => {
+                    htmlWard += `<option value='${i.id}'>${i.name}</option>`;
+                })
+            }
+            else {
+                htmlWard += `<option value='0'>All</option>`;
+            }
+            $('#filterWarnId').html(htmlWard);
+
+            if (selectedWard.id != "") {
+                $('#filterWarnId').val(selectedWard.id);
+                selectedWard.streets.forEach(i => {
+                    htmlStreet += `<option value='${i.id}'>${i.name}</option>`;
+                })
+            }
+            else {
+                htmlStreet += `<option value='0'>All</option>`;
+            }
+            $('#filterStreetId').html(htmlStreet);
+            if (selectedStreet.id != "") $('#filterStreetId').val(selectedStreet.id);
+
+            const filterAmenity = urlParamParents.get('filterAmenity') ?? "";
+            await fillDataAmenity(filterAmenity);
+
+            const filterCategory = urlParamParents.get('filterCategory') ?? -1;
+            const filterPrice = urlParamParents.get('filterPrice') ?? "";
+            const filterArea = urlParamParents.get('filterArea') ?? "";
+
+            if (filterPrice != ""){
+                let idPrice = filterPrice.split(',')[3];
+                document.getElementById(idPrice).classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
+                document.getElementById(idPrice).classList.remove('border-gray-300', 'bg-white');
+            }
+            if (filterArea != "") {
+                let idArea = filterArea.split(',')[3];
+                document.getElementById(idArea).classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
+                document.getElementById(idArea).classList.remove('border-gray-300', 'bg-white');
+            }
+
+            //console.log(locations);
         }
 
-        async function renderProvinces() {
+        function renderProvinces() {
           
           level = 0;
           title.innerText = "Chọn theo khu vực";
           backBtn.classList.add("hidden");
           content.innerHTML = "";
 
+
             locations.forEach(province => {
-                const checked = province.id === selectedProvince.id ? "checked" : "";
+                const checked = province.id == selectedProvince.id ? "checked" : "";
                 const item = createCheckboxItem(province.name, checked, () => {
                     selectedProvince = province;
-                    selectedDistrict = "";
-                    selectedWard = "";
-                    renderDistricts(province);
+                    selectedWard = { id: "" };
+                    selectedStreet = { id: "" };
+                    renderWard(province);
+
+                    if (province.id == 0) {
+                        searchAdvanced();
+                    }
                 });
                 content.appendChild(item);
             });
         }
 
-        function renderDistricts(province) {
+        function renderWard(province) {
           level = 1;
           title.innerText = province.name;
           backBtn.classList.remove("hidden");
           content.innerHTML = "";
 
+
+
             province.wards.forEach(ward => {
-                const checked = ward.id === selectedDistrict.id ? "checked" : "";
+                const checked = ward.id == selectedWard.id ? "checked" : "";
                 const item = createCheckboxItem(ward.name, checked, () => {
-                    selectedDistrict = ward;
-                    selectedWard = "";
-                    renderWards(province, ward);
+                    selectedWard = ward;
+                    selectedStreet = { id: "" };
+                    renderStreets(province, ward);
+
+                    if (ward.id == 0) {
+                        searchAdvanced();
+                    }
                 });
                 content.appendChild(item);
+
             });
         }
 
-        function renderWards(province, ward) {
+        function renderStreets(province, ward) {
             level = 2;
             title.innerText = ward.name;
             content.innerHTML = "";
 
             ward.streets.forEach(street => {
-                const checked = street.id === selectedWard.id ? "checked" : "";
+                const checked = street.id == selectedStreet.id ? "checked" : "";
                 const item = createCheckboxItem(street.name, checked, () => {
-                    selectedWard = street;
-                    $('#searchInput').val(`${province.name} > ${ward.name} > ${street.name}`);
-                    hideFilterPopup('search-popup');
+                    selectedStreet = street;
+                    searchAdvanced();
+                    //hideFilterPopup('search-popup');
                 });
                 content.appendChild(item);
             });
@@ -357,6 +393,17 @@
 
           return div;
         }
+
+        function searchAdvanced() {
+            const newHref = addParamsToHref(href, {
+                province: selectedProvince.id ?? 0,
+                ward: selectedWard.id ?? 0,
+                street: selectedStreet.id ?? 0
+            });
+            window.location.href = newHref;
+        }
+
+
         function updateNavigation() {
             const isAuthenticated = authService.isAuthenticated();
             const loginNavItem = document.getElementById('loginNavItem');

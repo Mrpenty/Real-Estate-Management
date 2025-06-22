@@ -156,6 +156,12 @@ namespace RealEstateManagement.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("amenities")]
+        public async Task<IActionResult> GetListAmenities()
+        {
+            var result = await _propertyService.GetListAmenityAsync();
+            return Ok(result);
+        }
 
         //So sánh các property với nhau (tối đa là 3)
         [HttpPost("compare")]
@@ -221,6 +227,13 @@ namespace RealEstateManagement.API.Controllers
         public async Task<IActionResult> Search([FromQuery] string keyword)
         {
             var results = await _propertyService.SearchAsync(keyword);
+            return Ok(results);
+        }
+
+        [HttpGet("search-advanced")]
+        public async Task<IActionResult> SearchAdvanced([FromQuery] int? province = 0, [FromQuery] int? ward = 0, [FromQuery] int? street = 0)
+        {
+            var results = await _propertyService.SearchAdvanceAsync(province,ward,street);
             return Ok(results);
         }
 

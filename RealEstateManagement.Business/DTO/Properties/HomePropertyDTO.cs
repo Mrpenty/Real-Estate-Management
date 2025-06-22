@@ -29,8 +29,11 @@ namespace RealEstateManagement.Business.DTO.Properties
         public List<string> Amenities { get; set; }
 
         // thêm
+        public int? ProvinceId { get; set; }
         public string Province { get; set; }
+        public int? WardId { get; set; }
         public string Ward { get; set; }
+        public int? StreetId { get; set; }
         public string Street { get; set; }
         public string DetailedAddress { get; set; }
 
