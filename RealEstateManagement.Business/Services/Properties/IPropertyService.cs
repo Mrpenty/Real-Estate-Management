@@ -21,7 +21,7 @@ namespace RealEstateManagement.Business.Services.Properties
         Task<IEnumerable<HomePropertyDTO>> FilterAdvancedAsync(PropertyFilterDTO filter);
         //So sánh property (tối đa 3)
         Task<IEnumerable<ComparePropertyDTO>> ComparePropertiesAsync(List<int> ids);
-        Task<bool> AddToFavoriteAsync(int userId, int propertyId);
+
         Task<List<PropertyDetailDTO>> GetPropertiesByIdsAsync(List<int> ids);
 
 

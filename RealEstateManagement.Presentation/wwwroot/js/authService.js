@@ -9,7 +9,8 @@ const authService = {
 
     formatPhoneForAPI(phone) {
         if (!phone) return '';
-        if (phone.startsWith('0') && phone.length === 10) {
+        // Handle both 10 and 11 digit numbers starting with 0
+        if (phone.startsWith('0') && (phone.length === 10 || phone.length === 11)) {
             return '+84' + phone.substring(1);
         }
         return phone;
@@ -17,15 +18,15 @@ const authService = {
 
     validatePhoneNumber(phone) {
         if (!phone) return false;
-        return (phone.startsWith('0') && phone.length === 10) || 
-               (phone.startsWith('+84') && phone.length === 12);
+        return (phone.startsWith('0') && phone.length === 11) ||
+            (phone.startsWith('+84') && phone.length === 12);
     },
 
     // Authentication methods
     async login(phone, password) {
         try {
             console.log('Login attempt with phone:', phone);
-            
+
             const apiPhone = this.formatPhoneForAPI(phone);
             console.log('Formatted phone for API:', apiPhone);
 
@@ -64,7 +65,7 @@ const authService = {
     async register(registerData) {
         try {
             console.log('Register attempt with data:', registerData);
-            
+
             const apiPhone = this.formatPhoneForAPI(registerData.phoneNumber);
             console.log('Formatted phone for API:', apiPhone);
 
@@ -99,7 +100,7 @@ const authService = {
     async verifyOTP(phone, otp) {
         try {
             console.log('Verify OTP attempt:', { phone, otp });
-            
+
             const response = await fetch(`${API_BASE_URL}/verify-otp`, {
                 method: 'POST',
                 headers: {
@@ -126,7 +127,7 @@ const authService = {
     async resendOTP(phone) {
         try {
             console.log('Resend OTP attempt for phone:', phone);
-            
+
             const response = await fetch(`${API_BASE_URL}/resend-otp`, {
                 method: 'POST',
                 headers: {
@@ -174,7 +175,7 @@ const authService = {
     isAuthenticated() {
         const token = localStorage.getItem('authToken');
         console.log('Checking authentication, token exists:', !!token);
-        
+
         if (!token) return false;
 
         try {
@@ -182,7 +183,7 @@ const authService = {
             const isExpired = payload.exp * 1000 < Date.now();
             console.log('Token payload:', payload);
             console.log('Token expired:', isExpired);
-            
+
             if (isExpired) {
                 console.log('Token is expired, removing from localStorage');
                 localStorage.removeItem('authToken');
@@ -200,6 +201,26 @@ const authService = {
 
     getAuthToken() {
         return localStorage.getItem('authToken');
+    },
+
+    getCurrentUser() {
+        const token = localStorage.getItem('authToken');
+        if (!token) return null;
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            // The key for the name claim in JWT is often 'name' or a schema URL
+            const name = payload.name || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+            return {
+                id: payload.sub,
+                name: name,
+                email: payload.email
+                // Add other fields from payload as needed
+            };
+        } catch (e) {
+            console.error('Failed to parse token or get user info:', e);
+            return null;
+        }
     },
 
     updateNavigation() {
@@ -228,7 +249,7 @@ const authService = {
     async verifyEmail(email) {
         try {
             console.log('Verify email attempt:', email);
-            
+
             const response = await fetch(`${API_BASE_URL}/verify-email`, {
                 method: 'POST',
                 headers: {
@@ -259,7 +280,7 @@ const authService = {
     async googleLogin(idToken) {
         try {
             console.log('Google login attempt');
-            
+
             const response = await fetch(`${API_BASE_URL}/google-login`, {
                 method: 'POST',
                 headers: {

@@ -1,4 +1,5 @@
 ﻿using Nest;
+using Elasticsearch.Net;
 using RealEstateManagement.Business.DTO.Properties;
 
 namespace RealEstateManagement.API.Extensions

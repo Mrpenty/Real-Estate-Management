@@ -5,6 +5,10 @@ using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Business.Services.Properties;
+using RealEstateManagement.Business.Repositories.SearchProperties;
+using RealEstateManagement.Business.Services.SearchProperties;
+using RealEstateManagement.Business.Repositories.FavoriteRepository;
+using RealEstateManagement.Business.Services.Favorite;
 namespace RealEstateManagement.API.Extensions
 {
     public static class DependencyInjectionExtensions
@@ -23,6 +27,11 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IMailService, MailService>();
             services.AddScoped<ISmsService, TwilioSmsService>();
 
+            services.AddScoped<ISearchProRepo, SearchProRepo>();
+            services.AddScoped<ISearchProService, SearchProService>();
+
+            services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+            services.AddScoped<IFavoriteService, FavoriteService>();
 
             services.AddScoped<IPropertyPostRepository, PropertyPostRepository>();
             services.AddScoped<IPropertyPostService, PropertyPostService>();
