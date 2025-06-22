@@ -6,98 +6,382 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>@ViewData["Title"] - RealEstateManagement.Presentation</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"] SREM.AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/RealEstateManagement.Presentation.styles.css" asp-append-version="true" />
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">RealEstateManagement.Presentation</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        <li class="nav-item" id="loginNavItem">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Login">Login</a>
-                        </li>
-                        <li class="nav-item" id="registerNavItem">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Register">Register</a>
-                        </li>
-                        <li class="nav-item" id="logoutNavItem" style="display: none;">
-                            <a class="nav-link text-dark" href="#" onclick="handleLogout(event)">Logout</a>
-                        </li>
-                        <li class="nav-item" id="userProfileNavItem" style="display: none;">
-                            <a class="nav-link text-dark" href="#" id="userProfileLink">Profile</a>
-                        </li>
-                    </ul>
+    <header class="border-b" style="background-color:white">
+        <div class="container mx-auto px-4 py-2 flex items-center justify-between">
+            <div class="flex items-center" style="cursor:pointer" onclick="window.location.href='/'">
+                <h1 class="text-xl font-bold">
+                    <span class="text-blue-700">SREM.AI</span>
+                </h1>
+            </div>
+
+            <div class="flex flex-grow mx-6 items-center">
+                <div class="flex items-center bg-gray-100 rounded-full px-3 py-1 w-full max-w-md">
+                    <i class="fas fa-map-marker-alt text-gray-500 mr-2"></i>
+                    <input type="button" onclick="showFilterPopup('search-popup')" placeholder="Tìm theo khu vực" id="searchInput" class="input-bootstrap bg-transparent outline-none w-full text-sm" />
                 </div>
+                <button onclick="showFilterPopup('filter-popup')" class="ml-2 border rounded-full px-3 py-1 text-sm hover:bg-gray-100">
+                    <i class="fas fa-filter mr-1"></i> Bộ lọc
+                </button>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <a href="/Home/AddFavorite" class="text-gray-700 hover:text-blue-600"><i class="far fa-heart mr-1"></i> Tin đã lưu</a>
+
+                <!-- Authenticated User -->
+                <div id="userProfileNavItem" style="display: none;" class="flex items-center space-x-4">
+                    <a href="/Profile" id="userProfileLink" class="text-gray-700 hover:text-blue-600"></a>
+                    <a href="#" onclick="handleLogout(event)" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-out-alt mr-1"></i> Đăng xuất</a>
+                </div>
+
+                <!-- Unauthenticated User -->
+                <div id="authNavItems">
+                    <a href="/Auth/Register" class="text-gray-700 hover:text-blue-600"><i class="fas fa-user-plus mr-1"></i> Đăng ký</a>
+                    <a href="/Auth/Login" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-in-alt mr-1"></i> Đăng nhập</a>
+                </div>
+
+                <a href="/PostProperty/CreateProperty" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-1 rounded-full text-sm"><i class="fas fa-pen-alt mr-1"></i> Đăng tin</a>
+            </div>
+        </div>
+
+        <nav class="border-b border-gray-200 shadow-sm">
+            <div class="container mx-auto px-4">
+                <ul class="flex space-x-6 text-base font-medium pt-4">
+                    <li><a href="/" id="listPostId" class="nav-link border-b-2 pb-1 border-white">Phòng trọ</a></li>
+                    <li><a href="/nha-nguyen-can" class="nav-link border-b-2 pb-1 border-white">Nhà nguyên căn</a></li>
+                    <li><a href="/can-ho-chung-cu" class="nav-link border-b-2 pb-1 border-white">Căn hộ chung cư</a></li>
+                    <li><a href="/can-ho-mini" class="nav-link border-b-2 pb-1 border-white">Căn hộ mini</a></li>
+                    <li><a href="/can-ho-dich-vu" class="nav-link border-b-2 pb-1 border-white">Căn hộ dịch vụ</a></li>
+                    <li><a href="/o-ghep" class="nav-link border-b-2 pb-1 border-white">Ở ghép</a></li>
+                    <li><a href="/mat-bang" class="nav-link border-b-2 pb-1 border-white">Mặt bằng</a></li>
+                    <li><a href="/blog" class="nav-link border-b-2 pb-1 border-white">Blog</a></li>
+                    <li><a href="/bang-gia" class="nav-link border-b-2 pb-1 border-white">Bảng giá dịch vụ</a></li>
+                </ul>
             </div>
         </nav>
+
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+    <main class=" mx-auto px-4 py-6" style="margin-right:14rem !important;margin-left:14rem !important">
+        @RenderBody()
+    </main>
+    <!-- Popup -->
+    <div id="filter-popup" class="hidden fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-lg">
+
+            <div class="sticky top-0 bg-white z-10 px-4 pt-4 pb-3 rounded-t-lg shadow-sm border-b mb-2">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-semibold">Bộ lọc</h2>
+                    <button onclick="hideFilterPopup('filter-popup')" class="text-2xl text-gray-500 hover:text-red-500">&times;</button>
+                </div>
+            </div>
+
+            <div class="px-4 overflow-y-auto h-[60vh]">
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">Danh mục cho thuê</h3>
+                    <div id="rental-type" class="grid grid-cols-3 gap-2">
+                        <button class="rental-btn border-2 border-orange-500 rounded-lg py-2 px-3 text-sm flex flex-col items-center bg-orange-50 text-orange-600 font-semibold">
+                            <span>Phòng trọ</span>
+                        </button>
+                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Nhà riêng</span></button>
+                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Ở ghép</span></button>
+                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Mặt bằng</span></button>
+                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Căn hộ chung cư</span></button>
+                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Căn hộ mini</span></button>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">Lọc theo khu vực</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <select class="border px-3 py-2 rounded-lg text-sm text-gray-700">
+                            <option>Hồ Chí Minh</option>
+                        </select>
+                        <select class="border px-3 py-2 rounded-lg text-sm text-gray-700">
+                            <option>Quận 8</option>
+                        </select>
+                        <select class="border px-3 py-2 rounded-lg text-sm text-gray-700">
+                            <option>Tất cả</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">Khoảng giá</h3>
+                    <div id="rental-type-price" class="flex flex-wrap gap-2">
+                        <button class="rental-btn border-2 border-orange-500 rounded-full px-4 py-1 text-sm bg-orange-50 text-orange-600 font-semibold">Tất cả</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Dưới 1 triệu</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">1 - 2 triệu</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">2 - 3 triệu</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">3 - 5 triệu</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">5 - 7 triệu</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">7 - 10 triệu</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">10 - 15 triệu</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Trên 15 triệu</button>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">Khoảng diện tích</h3>
+                    <div id="rental-type-acreage" class="flex flex-wrap gap-2">
+                        <button class="rental-btn border-2 border-orange-500 rounded-full px-4 py-1 text-sm bg-orange-50 text-orange-600 font-semibold">Tất cả</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Dưới 20m²</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 20m² - 30m²</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 30m² - 50m²</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 50m² - 70m²</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 70m² - 90m²</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Trên 90m²</button>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">Đặc điểm nổi bật</h3>
+                    <div id="rental-type-special" class="flex flex-wrap gap-2">
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Đầy đủ nội thất</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có gác</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Kệ bếp</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có máy lạnh</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có máy giặt</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có tủ lạnh</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có thang máy</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Không chung chủ</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Giờ giấc tự do</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có bảo vệ 24/24</button>
+                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có hầm để xe</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sticky bottom-0 bg-white w-full px-4 pt-2 pb-4 border-t rounded-b-lg">
+                <button class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl text-base shadow">Áp dụng</button>
+            </div>
+
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - RealEstateManagement.Presentation - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- Popup Search-->
+    <div id="search-popup" class=" fixed inset-0 bg-black/30 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-lg">
+
+            <div class="sticky top-0 bg-white z-10 px-4 pt-4 pb-3 rounded-t-lg shadow-sm border-b mb-2">
+                <div class="flex justify-between items-center">
+                    <button id="backBtn" class="text-xl hidden">&larr;</button>
+                    <h2 id="modalTitle" class="text-lg font-semibold"></h2>
+                    <button onclick="hideFilterPopup('search-popup')" class="text-2xl text-gray-500 hover:text-red-500">&times;</button>
+                </div>
+            </div>
+
+            <div id="modalContent" class="px-4 overflow-y-auto h-[60vh]">
+
+                <div id="modalContent" class="flex-1">
+                </div>
+            </div>
+
+            <div class="sticky bottom-0 bg-white w-full px-4 pt-2 pb-4 border-t rounded-b-lg">
+            </div>
+
         </div>
-    </footer>
+    </div>
+
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/authService.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
     <script>
-        function updateNavigation() {
-            const isAuthenticated = authService.isAuthenticated();
-            const loginNavItem = document.getElementById('loginNavItem');
-            const registerNavItem = document.getElementById('registerNavItem');
-            const logoutNavItem = document.getElementById('logoutNavItem');
-            const userProfileNavItem = document.getElementById('userProfileNavItem');
 
-            if (isAuthenticated) {
-                loginNavItem.style.display = 'none';
-                registerNavItem.style.display = 'none';
-                logoutNavItem.style.display = 'block';
-                userProfileNavItem.style.display = 'block';
+        const locations = {
+            "Hà Nội": {
+                "Quận Ba Đình": ["Phường Phúc Xá", "Phường Trúc Bạch"],
+                "Quận Cầu Giấy": ["Phường Dịch Vọng", "Phường Yên Hòa"]
+            },
+            "TP Hồ Chí Minh": {
+                "Quận 1": ["Phường Bến Nghé", "Phường Đa Kao"],
+                "Quận Bình Thạnh": ["Phường 1", "Phường 2"]
+            }
+        };
+
+        function hideFilterPopup(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function showFilterPopup(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        listSelectedSingleChoice();
+        selectedMultipleChoice('rental-type-special');
+        function listSelectedSingleChoice() {
+            const listSelecter = ['rental-type', 'rental-type-price', 'rental-type-acreage'];
+            listSelecter.forEach(item => {
+                selectedSingleChoice(item);
+            });
+        }
+
+        function selectedSingleChoice(idSelecter) {
+            const buttons = document.querySelectorAll(`#${idSelecter} .rental-btn`);
+
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    buttons.forEach(b => {
+                        b.classList.remove('border-orange-500', 'bg-orange-50', 'text-orange-600', 'font-semibold');
+                        b.classList.add('border-gray-300', 'bg-white');
+                    });
+                    btn.classList.remove('border-gray-300', 'bg-white');
+                    btn.classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600', 'font-semibold');
+                });
+            });
+        }
+
+        function selectedMultipleChoice(idSelecter) {
+            const buttons = document.querySelectorAll(`#${idSelecter} .rental-btn`);
+
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    buttons.forEach(b => {
+
+                    });
+                    if (btn.classList.contains('border-orange-500')) {
+                        btn.classList.remove('border-orange-500', 'bg-orange-50', 'text-orange-600', 'font-semibold');
+                        btn.classList.add('border-gray-300', 'bg-white');
+                    }
+                    else {
+                        btn.classList.remove('border-gray-300', 'bg-white');
+                        btn.classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600', 'font-semibold');
+                    }
+
+                });
+            });
+        }
+
+
+        let level = 0;
+        let selectedProvince = "";
+        let selectedDistrict = "";
+
+        const modal = document.getElementById("search-popup");
+        const content = document.getElementById("modalContent");
+        const title = document.getElementById("modalTitle");
+        const backBtn = document.getElementById("backBtn");
+
+
+        renderProvinces();
+        backBtn.onclick = () => {
+            if (level === 2) {
+                level = 1;
+                renderDistricts(selectedProvince);
+            } else if (level === 1) {
+                level = 0;
+                renderProvinces();
+            }
+        };
+
+        function renderProvinces() {
+            level = 0;
+            title.innerText = "Chọn theo khu vực";
+            backBtn.classList.add("hidden");
+            content.innerHTML = "";
+
+            Object.keys(locations).forEach(province => {
+                const checked = province === selectedProvince ? "checked" : "";
+                const item = createCheckboxItem(province, checked, () => {
+                    selectedProvince = province;
+                    selectedDistrict = "";
+                    selectedWard = "";
+                    renderDistricts(province);
+                });
+                content.appendChild(item);
+            });
+        }
+
+        function renderDistricts(province) {
+            level = 1;
+            title.innerText = province;
+            backBtn.classList.remove("hidden");
+            content.innerHTML = "";
+
+            Object.keys(locations[province]).forEach(district => {
+                const checked = district === selectedDistrict ? "checked" : "";
+                const item = createCheckboxItem(district, checked, () => {
+                    selectedDistrict = district;
+                    selectedWard = "";
+                    renderWards(province, district);
+                });
+                content.appendChild(item);
+            });
+        }
+
+        function renderWards(province, district) {
+            level = 2;
+            title.innerText = district;
+            content.innerHTML = "";
+
+            locations[province][district].forEach(ward => {
+                const checked = ward === selectedWard ? "checked" : "";
+                const item = createCheckboxItem(ward, checked, () => {
+                    selectedWard = ward;
+                    $('#searchInput').val(`${province} > ${district} > ${ward}`);
+                    hideFilterPopup('search-popup');
+                });
+                content.appendChild(item);
+            });
+        }
+
+        function createCheckboxItem(label, checked, onClick) {
+            const div = document.createElement("div");
+            div.className = "flex items-center gap-2 py-2 px-3 border-b cursor-pointer hover:bg-gray-100";
+
+            const input = document.createElement("input");
+            input.type = "checkbox";
+            input.checked = checked;
+            input.className = "form-checkbox w-4 h-4 text-orange-500";
+            input.onclick = (e) => {
+                e.stopPropagation();
+                onClick();
+            };
+
+            const span = document.createElement("span");
+            span.innerText = label;
+            div.appendChild(input);
+            div.appendChild(span);
+
+            div.onclick = () => onClick();
+
+            return div;
+        }
+
+        function updateNavigation() {
+            if (authService.isAuthenticated()) {
+                document.getElementById('authNavItems').style.display = 'none';
+
+                const userProfileNav = document.getElementById('userProfileNavItem');
+                userProfileNav.style.display = 'flex';
+
+                const user = authService.getCurrentUser();
+                if (user && user.name) {
+                    document.getElementById('userProfileLink').innerText = `Chào, ${user.name}`;
+                }
             } else {
-                loginNavItem.style.display = 'block';
-                registerNavItem.style.display = 'block';
-                logoutNavItem.style.display = 'none';
-                userProfileNavItem.style.display = 'none';
+                document.getElementById('authNavItems').style.display = 'block';
+                document.getElementById('userProfileNavItem').style.display = 'none';
             }
         }
 
         async function handleLogout(event) {
             event.preventDefault();
-            try {
-                await authService.logout();
-                updateNavigation();
-                window.location.href = '/';
-            } catch (error) {
-                console.error('Logout failed:', error);
-                alert('Logout failed. Please try again.');
-            }
+            await authService.logout();
+            window.location.href = '/';
         }
 
         document.addEventListener('DOMContentLoaded', updateNavigation);
     </script>
-    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

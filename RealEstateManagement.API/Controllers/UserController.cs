@@ -7,7 +7,7 @@ using RealEstateManagement.Business.Services.User;
 using RealEstateManagement.Data.Entity;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-
+using RealEstateManagement.Data.Entity.User;
 namespace RealEstateManagement.API.Controllers
 {
     [Route("api/[controller]")]

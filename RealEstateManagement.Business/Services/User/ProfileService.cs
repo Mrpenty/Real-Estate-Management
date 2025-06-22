@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Business.Services.UploadPicService;
+using RealEstateManagement.Data.Entity.User;
 
 namespace RealEstateManagement.Business.Services.User
 {
