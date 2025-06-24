@@ -20,7 +20,7 @@ namespace RealEstateManagement.API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Landlord")]
+       // [Authorize(Roles = "Landlord")]
         public async Task<IActionResult> CreatePropertyPost([FromBody] PropertyCreateRequestDto dto)
         {
             try

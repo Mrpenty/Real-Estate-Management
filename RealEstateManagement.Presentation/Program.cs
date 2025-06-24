@@ -1,3 +1,8 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,24 +20,52 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Add HttpClient
-builder.Services.AddHttpClient();
+// Add HttpClient and configure the named client for the API
+builder.Services.AddHttpClient("REMApi", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7031/"); // Make sure this is your API's base URL
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 
-// Add Authentication
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = "Cookies";
-    options.DefaultSignInScheme = "Cookies";
-    options.DefaultChallengeScheme = "Cookies";
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddCookie("Cookies", options =>
+.AddJwtBearer(options =>
 {
-    options.LoginPath = "/Auth/Login";
-    options.LogoutPath = "/Auth/Logout";
-    options.AccessDeniedPath = "/Auth/AccessDenied";
-    options.Cookie.Name = "RealEstateManagement.Auth";
-    options.Cookie.HttpOnly = true;
-    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+        NameClaimType = JwtRegisteredClaimNames.Sub,
+        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
+        ValidateLifetime = true
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            if (context.Request.Cookies.ContainsKey("accessToken"))
+            {
+                context.Token = context.Request.Cookies["accessToken"];
+            }
+            return Task.CompletedTask;
+        },
+        OnChallenge = context =>
+        {
+            // This stops the default redirection to a login page
+            context.HandleResponse();
+            // Redirect to your custom login page
+            context.Response.Redirect("/Auth/Login?ReturnUrl=" + context.Request.Path);
+            return Task.CompletedTask;
+        }
+    };
 });
 
 var app = builder.Build();

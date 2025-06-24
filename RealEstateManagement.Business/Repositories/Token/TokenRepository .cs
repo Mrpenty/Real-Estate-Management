@@ -34,13 +34,8 @@ namespace RealEstateManagement.Business.Repositories.Token
 
         public async Task<TokenDTO> CreateJWTTokenAsync(ApplicationUser user, bool populateExp)
         {
-
-            
             var signingCredentials = GetSigningCreadentials();
-            
             var claims = await GetClaims(user);
-           
-          
             var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
 
             var refreshToken = GenerateRefreshToken();
@@ -89,9 +84,9 @@ namespace RealEstateManagement.Business.Repositories.Token
                     new CookieOptions
                     {
                         Expires = DateTimeOffset.UtcNow.AddDays(5),
-                        HttpOnly = false,
+                        HttpOnly = true,
                         IsEssential = true,
-                        Secure = false,
+                        Secure = true,
                         SameSite = SameSiteMode.Lax
                     }
                 );
@@ -102,7 +97,7 @@ namespace RealEstateManagement.Business.Repositories.Token
                     Expires = DateTimeOffset.UtcNow.AddDays(7),
                     HttpOnly = true,
                     IsEssential = true,
-                    Secure = false,
+                    Secure = true,
                     SameSite = SameSiteMode.Lax
                 }
             );

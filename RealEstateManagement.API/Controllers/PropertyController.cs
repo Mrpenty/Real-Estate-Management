@@ -28,7 +28,7 @@ namespace RealEstateManagement.API.Controllers
 
         [HttpGet("homepage-allproperty")]
 
-        //[Authorize(Roles = "Renter")]
+       // [Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetHomepageProperties()
         {
             _logger.LogInformation("GetHomepageProperties: Request received");
@@ -237,5 +237,32 @@ namespace RealEstateManagement.API.Controllers
             return Ok("Bulk indexing completed");
         }
 
+        [HttpGet("provinces")]
+        public async Task<IActionResult> GetProvinces()
+        {
+            var provinces = await _propertyService.GetProvincesAsync();
+            return Ok(provinces);
+        }
+
+        [HttpGet("wards/{provinceId}")]
+        public async Task<IActionResult> GetWards(int provinceId)
+        {
+            var wards = await _propertyService.GetWardsAsync(provinceId);
+            return Ok(wards);
+        }
+
+        [HttpGet("streets/{wardId}")]
+        public async Task<IActionResult> GetStreets(int wardId)
+        {
+            var streets = await _propertyService.GetStreetAsync(wardId);
+            return Ok(streets);
+        }
+
+        [HttpGet("amenities")]
+        public async Task<IActionResult> GetAmenities()
+        {
+            var amenities = await _propertyService.GetAmenitiesAsync();
+            return Ok(amenities);
+        }
     }
 }

@@ -52,5 +52,11 @@ namespace RealEstateManagement.Business.Repositories.impl
             _dbSet.Update(entity);
             return _context.SaveChangesAsync();
         }
+
+
+        public async Task<int> SaveChangesAsync()
+        {
+            return await _context.SaveChangesAsync();
+        }
     }
 }
