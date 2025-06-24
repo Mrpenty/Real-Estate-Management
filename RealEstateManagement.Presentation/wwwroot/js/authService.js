@@ -190,6 +190,7 @@ const authService = {
                 this.updateNavigation();
                 return false;
             }
+            document.getElementById('userProfileLink').innerHTML = '<i class="fas fa-user mr-1"></i>' + payload.name;
             return true;
         } catch (e) {
             console.error('Error parsing token:', e);

@@ -29,10 +29,17 @@ const propertyService = {
             //    filterAmenity,
             //    isFilter
             //});
+            const token = localStorage.getItem('authToken');
+            let userId = 0;
+            if (token) {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                userId = payload.id;
+            }
+            
 
             if (!isFilter) {
 
-                response = await fetch(`${API_PROPERTY_BASE_URL}/search-advanced?province=${provinceId}&ward=${wardId}&street=${streetId}`, {
+                response = await fetch(`${API_PROPERTY_BASE_URL}/search-advanced?province=${provinceId}&ward=${wardId}&street=${streetId}&userId=${userId}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

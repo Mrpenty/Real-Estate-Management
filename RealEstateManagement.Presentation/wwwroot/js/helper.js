@@ -1,5 +1,6 @@
 ﻿let locationData = null;
 const API_PROPERTY_LOCATION_BASE_URL = 'https://localhost:7031/api/Property';
+const API_FAVORITE_BASE_URL = 'https://localhost:7031/api/Favorite';
 
 function timeAgo(dateInput) {
     const date = new Date(dateInput);
@@ -268,6 +269,92 @@ function filterStreet() {
 }
 
 
-function addToFavourite(id) {
+async function addToFavourite(id) {
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) throw new Error(data.message || data.errorMessage || 'Update failed');
+        const response = await fetch(`${API_FAVORITE_BASE_URL}/add-favorite`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                propertyId: id
+            })
+        });
 
+
+        if (!response.ok) {
+            throw new Error(data.message || data.errorMessage || 'Update failed');
+        }
+        const data = await response.json();
+        //$(`#heart-icon-${id}`).attr('fill', 'currentColor');
+        alert('Đã thêm vào danh sách');
+        window.location.reload();
+
+        return data;
+    } catch (error) {
+        console.error('Update error:', error);
+        throw error;
+    }
+}
+
+async function removeToFavorite(id) {
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) throw new Error(data.message || data.errorMessage || 'Update failed');
+        const response = await fetch(`${API_FAVORITE_BASE_URL}/favorite`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                propertyId: id
+            })
+        });
+
+
+        if (!response.ok) {
+            throw new Error(data.message || data.errorMessage || 'Update failed');
+        }
+        const data = await response.json();
+        //$(`#heart-icon-${id}`).attr('fill', 'none');
+        alert('Đã xóa khỏi danh sách');
+        window.location.reload();
+
+        return data;
+    } catch (error) {
+        console.error('Update error:', error);
+        throw error;
+    }
+}
+
+async function listFavorite() {
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) throw new Error(data.message || data.errorMessage || 'Update failed');
+        const response = await fetch(`${API_FAVORITE_BASE_URL}/all-favorite`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+
+        if (!response.ok) {
+            throw new Error(data.message || data.errorMessage || 'Update failed');
+        }
+        const data = await response.json();
+
+        return data;
+    } catch (error) {
+        console.error('Update error:', error);
+        throw error;
+    }
 }

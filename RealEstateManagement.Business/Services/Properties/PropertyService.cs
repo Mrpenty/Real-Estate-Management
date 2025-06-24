@@ -23,9 +23,10 @@ namespace RealEstateManagement.Business.Services.Properties
             _repository = repository;
             _context = context;
         }
-        public async Task<IEnumerable<HomePropertyDTO>> GetAllPropertiesAsync()
+        public async Task<IEnumerable<HomePropertyDTO>> GetAllPropertiesAsync(int? userId = 0)
         {
             var properties = await _repository.GetAllAsync();
+            var favoriteUsers = await _context.UserFavoriteProperties.Where(c => c.UserId == userId).ToListAsync();
             return properties.Select(p => new HomePropertyDTO
             {
                 Id = p.Id,
@@ -42,6 +43,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 DetailedAddress = p.Address.DetailedAddress,
                 Area = p.Area,
                 Bedrooms = p.Bedrooms,
+                IsFavorite = favoriteUsers.FirstOrDefault(c => c.UserId == userId && c.PropertyId == p.Id) != null ? true : false,
                 Price = p.Price,
                 Status = p.Status,
                 Location = p.Location,
@@ -298,9 +300,9 @@ namespace RealEstateManagement.Business.Services.Properties
             return result;
         }
 
-        public async Task<IEnumerable<HomePropertyDTO>> SearchAdvanceAsync(int? provinceId = 0, int? wardId = 0, int? streetId = 0)
+        public async Task<IEnumerable<HomePropertyDTO>> SearchAdvanceAsync(int? provinceId = 0, int? wardId = 0, int? streetId = 0,int? userId = 0)
         {
-            var properties = await GetAllPropertiesAsync();
+            var properties = await GetAllPropertiesAsync(userId);
             if (provinceId != 0) properties = properties.Where(c => c.ProvinceId == provinceId);
             if (wardId != 0) properties = properties.Where(c => c.WardId == wardId);
             if (streetId != 0) properties = properties.Where(c => c.StreetId == streetId);
@@ -316,6 +318,21 @@ namespace RealEstateManagement.Business.Services.Properties
                 Description = c.Description,
                 Name = c.Name
             }).ToList();
+        }
+
+        public Task<bool> IndexPropertyAsync(PropertySearchDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task BulkIndexPropertiesAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<HomePropertyDTO>> SearchAsync(string keyword)
+        {
+            throw new NotImplementedException();
         }
     }
 }

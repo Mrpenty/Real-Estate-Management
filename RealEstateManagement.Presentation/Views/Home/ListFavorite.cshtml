@@ -22,53 +22,7 @@
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
     <div class="md:col-span-2">
-        <div class="grid gap-6">
-            <div class="max-w-3xl mx-auto bg-white rounded-md shadow-sm border border-gray-200 flex p-4 gap-4 items-start">
- 
-                <div class="relative w-40 h-28 flex-shrink-0">
-                    <img src="https://pt123.cdn.static123.com/images/thumbs/450x300/fit/2025/06/19/img-5236_1750317090.jpg" alt="Phòng trọ" class="w-full h-full object-cover rounded-lg">
-
-                    <div class="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z" />
-                        </svg>
-                    </div>
-
-                    <div class="absolute bottom-1 left-1 bg-black bg-opacity-60 text-white text-xs px-1.5 py-0.5 rounded">
-                        📷 10
-                    </div>
-                </div>
-
-                <div class="flex-1">
-                    <h2 class="text-blue-800 font-semibold text-base leading-tight">
-                        KHAI TRƯƠNG PHÒNG MỚI FULL NỘI THẤT NGAY ĐẠI HỌC VĂN HIẾN. TÂN BÌNH
-                    </h2>
-
-                    <div class="text-green-600 font-semibold mt-1">
-                        3.9 triệu/tháng <span class="text-gray-500 font-normal">· 20 m²</span>
-                    </div>
-
-                    <div class="text-sm text-gray-600 flex items-center gap-1 mt-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M17.657 16.657L13.414 12m0 0l-4.243 4.243M13.414 12L9.172 7.757m4.242 4.243a4 4 0 11-5.656-5.656 4 4 0 015.656 5.656z" />
-                        </svg>
-                        Tân Bình, Hồ Chí Minh
-                    </div>
-
-                    <p class="text-sm text-gray-700 mt-1 line-clamp-2">
-                        KHAI TRƯƠNG PHÒNG MỚI FULL NỘI THẤT NGAY ĐẠI HỌC VĂN HIẾN. TÂN BÌNH. Full nội thất cơ bản, nhà xe rộng, thang máy, máy giặt chung,...
-                    </p>
-
-                    <div class="text-xs text-gray-400 mt-1">23 phút trước</div>
-                </div>
-
-                <button class="mt-1 text-red-500 hover:text-red-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.13 2.44h1.75C14.09 5.01 15.76 4 17.5 4 20 4 22 6 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                    </svg>
-                </button>
-            </div>
+        <div id="listFavoriteId" class="grid gap-6">
 
         </div>
     </div>
@@ -115,3 +69,56 @@
         </div>
     </div>
 </div>
+<script>
+    getListFavorite();
+    async function getListFavorite(){
+        let listFavoriteItem = await listFavorite();
+        //console.log(listFavoriteItem);
+        let html = '';
+        listFavoriteItem.forEach(item => {
+            html += `
+                   <div class="max-w-3xl mx-auto bg-white rounded-md shadow-sm border border-gray-200 flex p-4 gap-4 items-start">
+
+                    <div class="relative w-40 h-28 flex-shrink-0">
+                            <img onerror="handleImageError(this)" src="${item.primaryImageUrl}" on alt="Phòng trọ" class="w-full h-full object-cover rounded-lg">
+
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg">
+                        </div>
+
+                    </div>
+
+                    <div class="flex-1">
+                        <h2  onclick="window.location.href='/Home/Detail/${item.id}'" style="cursor:pointer" class="text-blue-800 font-semibold text-base leading-tight">
+                            ${item.title}
+                        </h2>
+
+                        <div class="text-green-600 font-semibold mt-1">
+                                   ${formatVietnameseNumber(item.price)} / tháng <span class="text-gray-500 font-normal">· ${item.area} m²</span>
+                        </div>
+
+                        <div class="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M17.657 16.657L13.414 12m0 0l-4.243 4.243M13.414 12L9.172 7.757m4.242 4.243a4 4 0 11-5.656-5.656 4 4 0 015.656 5.656z" />
+                            </svg>
+                                ${item.detailedAddress}, ${item.street}, ${item.ward}, ${item.province}
+                        </div>
+
+                        <p class="text-sm text-gray-700 mt-1 line-clamp-2">
+                               ${item.description}
+                        </p>
+
+                        <div class="text-xs text-gray-400 mt-1">${timeAgo(item.createdAt)}</div>
+                    </div>
+
+                        <button onclick="removeToFavorite(${item.id})" class="mt-1 text-red-500 hover:text-red-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.13 2.44h1.75C14.09 5.01 15.76 4 17.5 4 20 4 22 6 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </button>
+                </div>
+            `;
+        });
+        $('#listFavoriteId').html(html);
+    }
+</script>

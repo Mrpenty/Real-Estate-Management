@@ -109,7 +109,7 @@
     getAllProperty();
     async function getAllProperty() { 
         let listProperty = await propertyService.getAllproperty();
-        //console.log(listProperty);
+        console.log(listProperty);
         if (listProperty) { 
             let html = '';
             listProperty.forEach(item => {
@@ -123,11 +123,19 @@
                         </div> *@
 
 
-                        <button class="absolute top-2 right-2 p-2 bg-white rounded-full shadow hover:bg-red-100 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-red-500">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
-                            </svg>
-                        </button>
+                            <button id="btnFavourite" onclick="updateFavorite(${item.id},${item.isFavorite})" class="absolute top-2 right-2 p-2 bg-white rounded-full shadow hover:bg-red-100 transition">
+                                ${item.isFavorite ?
+                                    `
+                                            <svg id="heart-icon-${item.id}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-red-500">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
+                                            </svg>
+                                    ` :
+                                    `
+                                                <svg id="heart-icon-${item.id}"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-red-500">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
+                                        </svg>
+                                    `}
+                            </button>
                     </div>
 
 
@@ -163,6 +171,15 @@
                 `;
             });
             document.getElementById('listPropertyId').innerHTML = html;
+        }
+    }
+
+    async function updateFavorite(id, isFavorite) {
+        const isAuthenticated = authService.isAuthenticated();
+        if (!isAuthenticated) window.location.href = '/Auth/Login';
+        else {
+            if (!isFavorite) addToFavourite(id);
+            else removeToFavorite(id);
         }
     }
 </script>

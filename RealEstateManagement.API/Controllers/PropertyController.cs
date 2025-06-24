@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.DTO.Properties;
+using RealEstateManagement.Business.Services.Favorite;
 using RealEstateManagement.Business.Services.Properties;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -13,7 +14,6 @@ namespace RealEstateManagement.API.Controllers
     public class PropertyController : ControllerBase
     {
         private readonly IPropertyService _propertyService;
-
         public PropertyController(IPropertyService propertyService)
         {
             _propertyService = propertyService;
@@ -25,7 +25,7 @@ namespace RealEstateManagement.API.Controllers
         {
             try
             {
-                var properties = await _propertyService.GetAllPropertiesAsync();
+                var properties = await _propertyService.GetAllPropertiesAsync(0);
 
                 if (properties == null || !properties.Any())
                     return NotFound("Không tìm thấy bất động sản nào");
@@ -154,23 +154,23 @@ namespace RealEstateManagement.API.Controllers
                 return StatusCode(500, $"Đã xảy ra lỗi: {ex.Message}");
             }
         }
-        [HttpPost("add-favorite")]
-        [Authorize(Roles = "Renter")]
-        public async Task<IActionResult> AddToFavorite([FromBody] FavoritePropertyDTO dto)
-        {
-            var userIdClaim = User.FindFirst("id");
-            if (userIdClaim == null)
-                return Unauthorized("Đăng nhập trước khi thêm vào danh sách yêu thích");
-            if (!int.TryParse(userIdClaim.Value, out var userId))
-                return Unauthorized("ID người dùng không hợp lệ");
-            //var userIdClaim = int.Parse(User.FindFirst("id").Value);
-            var result = await _propertyService.AddToFavoriteAsync(userId, dto.PropertyId);
-            if (!result)
-                return BadRequest("Đã có trong danh sách yêu thích hoặc dữ liệu không hợp lệ.");
+        //[HttpPost("add-favorite")]
+        //[Authorize(Roles = "Renter")]
+        //public async Task<IActionResult> AddToFavorite([FromBody] FavoritePropertyDTO dto)
+        //{
+        //    var userIdClaim = User.FindFirst("id");
+        //    if (userIdClaim == null)
+        //        return Unauthorized("Đăng nhập trước khi thêm vào danh sách yêu thích");
+        //    if (!int.TryParse(userIdClaim.Value, out var userId))
+        //        return Unauthorized("ID người dùng không hợp lệ");
+        //    //var userIdClaim = int.Parse(User.FindFirst("id").Value);
+        //    var result = await _favoriteService.AddToFavoriteAsync(userId, dto.PropertyId);
+        //    if (!result)
+        //        return BadRequest("Đã có trong danh sách yêu thích hoặc dữ liệu không hợp lệ.");
 
-            return Ok("Đã thêm vào danh sách yêu thích.");
+        //    return Ok("Đã thêm vào danh sách yêu thích.");
 
-        }
+        //}
 
         // GET: api/PropertySearch/search?query=apartment
         [HttpGet("search")]
@@ -181,9 +181,9 @@ namespace RealEstateManagement.API.Controllers
         }
 
         [HttpGet("search-advanced")]
-        public async Task<IActionResult> SearchAdvanced([FromQuery] int? province = 0, [FromQuery] int? ward = 0, [FromQuery] int? street = 0)
+        public async Task<IActionResult> SearchAdvanced([FromQuery] int? province = 0, [FromQuery] int? ward = 0, [FromQuery] int? street = 0, [FromQuery] int? userId = 0)
         {
-            var results = await _propertyService.SearchAdvanceAsync(province,ward,street);
+            var results = await _propertyService.SearchAdvanceAsync(province,ward,street, userId);
             return Ok(results);
         }
 

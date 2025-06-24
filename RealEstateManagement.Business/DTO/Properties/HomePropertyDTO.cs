@@ -36,6 +36,7 @@ namespace RealEstateManagement.Business.DTO.Properties
         public int? StreetId { get; set; }
         public string Street { get; set; }
         public string DetailedAddress { get; set; }
+        public bool IsFavorite { get; set; }
 
     }
 }

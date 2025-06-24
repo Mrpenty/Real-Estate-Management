@@ -12,7 +12,7 @@ namespace RealEstateManagement.Business.Services.Properties
 {
     public interface IPropertyService
     {
-        Task<IEnumerable<HomePropertyDTO>> GetAllPropertiesAsync();
+        Task<IEnumerable<HomePropertyDTO>> GetAllPropertiesAsync(int? userId = 0);
         //Lấy 1 id
         Task<PropertyDetailDTO> GetPropertyByIdAsync(int id);
         Task<IEnumerable<HomePropertyDTO>> FilterByPriceAsync([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice);
@@ -29,7 +29,7 @@ namespace RealEstateManagement.Business.Services.Properties
         Task<bool> IndexPropertyAsync(PropertySearchDTO dto);
         Task BulkIndexPropertiesAsync();
         Task<IEnumerable<HomePropertyDTO>> SearchAsync(string keyword);
-        Task<IEnumerable<HomePropertyDTO>> SearchAdvanceAsync(int? province = 0, int? ward = 0, int? street = 0);
+        Task<IEnumerable<HomePropertyDTO>> SearchAdvanceAsync(int? province = 0, int? ward = 0, int? street = 0,int? userId = 0);
 
         Task<List<ProvinceDTO>> GetListLocationAsync();
 
