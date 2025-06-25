@@ -32,26 +32,22 @@ namespace RealEstateManagement.Business.Services.OwnerService
             if (dto.ProvinceId <= 0 || dto.WardId <= 0 || string.IsNullOrWhiteSpace(dto.Street))
                 throw new ArgumentException("Vui lòng chọn đầy đủ thông tin địa chỉ.");
 
-            // 2. Get or create the Address
-            var address = await _addressRepository.GetByDetailsAsync(dto.ProvinceId, dto.WardId, dto.Street);
-            if (address == null)
+            // 2. Luôn tạo mới Address cho mỗi Property
+            var address = new Address
             {
-                address = new Address
-                {
-                    ProvinceId = dto.ProvinceId,
-                    WardId = dto.WardId,
-                    DetailedAddress = dto.Street
-                };
-                await _addressRepository.AddAsync(address);
-                await _addressRepository.SaveChangesAsync();
-            }
+                ProvinceId = dto.ProvinceId,
+                WardId = dto.WardId,
+                DetailedAddress = dto.Street
+            };
+            await _addressRepository.AddAsync(address);
+            await _addressRepository.SaveChangesAsync();
 
             // 3. Initialize Property with the AddressId
             var property = new Property
             {
                 Title = dto.Title,
                 Description = dto.Description,
-                AddressId = address.Id, // Use the found or created address Id
+                AddressId = address.Id, // Use the newly created address Id
                 Type = dto.Type,
                 Area = dto.Area,
                 Bedrooms = dto.Bedrooms,
