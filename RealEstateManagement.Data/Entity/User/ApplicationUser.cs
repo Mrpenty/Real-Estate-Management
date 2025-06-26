@@ -28,7 +28,7 @@ namespace RealEstateManagement.Data.Entity.User
         public string? ConfirmationCode { get; set; }
         public DateTime? ConfirmationCodeExpiry { get; set; }
         public ICollection<UserPreference> Preferences { get; set; }
-        public ICollection<Property> Properties { get; set; }
+        public ICollection<Property>? Properties { get; set; }
         public ICollection<Review> Reviews { get; set; }
 
         public ICollection<Conversation> ConversationsAsRenter { get; set; }

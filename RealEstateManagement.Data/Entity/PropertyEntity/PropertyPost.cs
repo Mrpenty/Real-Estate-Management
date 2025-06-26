@@ -14,7 +14,7 @@ namespace RealEstateManagement.Data.Entity.PropertyEntity
         public int? VerifiedBy { get; set; }
         public DateTime? ArchiveDate { get; set; }
 
-        public Property Property { get; set; }
+        public Property? Property { get; set; }
         public ApplicationUser Landlord { get; set; }
         public ApplicationUser VerifiedByUser { get; set; }
         public RentalContract RentalContract { get; set; }  // 👈 thêm navigation property

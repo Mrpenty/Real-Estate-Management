@@ -105,7 +105,7 @@ namespace RealEstateManagement.Business.Services.Auth
             user.ConfirmationCodeExpiry = DateTime.Now.AddMinutes(5); 
             await _userManager.UpdateAsync(user);
 
-            await _smsService.SendOtpAsync(user.PhoneNumber, confirmationCode);
+            await _smsService.ZaloSmsService(user.PhoneNumber, confirmationCode);
 
             return new AuthMessDTO { IsAuthSuccessful = true, ErrorMessage = "Registration successful. An OTP has been sent to your phone for verification." };
         }

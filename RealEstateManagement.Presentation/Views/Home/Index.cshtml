@@ -16,21 +16,34 @@
             border-color: rgb(249 115 22 / var(--tw-border-opacity, 1));
     }
 </style>
+<<<<<<< DongVT/FE/PostProperty
+<h1 class="text-xl font-bold mb-4">Kênh thông tin Phòng Trọ số 1 Việt Nam</h1>
+<div class="flex flex-wrap gap-2 mb-6">
+=======
 <h1 class="text-xl font-bold mb-4" id="titleHomePage"></h1>
 @* <div class="flex flex-wrap gap-2 mb-6">
+>>>>>>> master
     <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Hồ Chí Minh</button>
     <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Hà Nội</button>
     <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Đà Nẵng</button>
     <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Bình Dương</button>
     <button class="bg-gray-100 text-gray-700 px-3 py-1 rounded">Tất cả</button>
+<<<<<<< DongVT/FE/PostProperty
+</div>
+=======
 </div> *@
+>>>>>>> master
 
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
     <div class="md:col-span-2">
+<<<<<<< DongVT/FE/PostProperty
+        <div id="property-list" class="grid gap-6"></div>
+=======
         <div class="grid gap-6" id="listPropertyId"> 
         </div>
+>>>>>>> master
     </div>
 
     <div>
@@ -102,6 +115,71 @@
         </div>
     </div>
 </div>
+<<<<<<< DongVT/FE/PostProperty
+<script>
+    document.getElementById('listPostId').classList.add("text-orange-500");
+    document.getElementById('listPostId').classList.replace("border-white", "border-orange-500");
+
+    // Fetch and render property list
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('https://localhost:7031/api/Property/homepage-allproperty')
+            .then(response => response.json())
+            .then(data => {
+                const list = document.getElementById('property-list');
+                list.innerHTML = '';
+                if (Array.isArray(data)) {
+                    data.forEach(property => {
+                        const card = document.createElement('div');
+                        card.className = 'bg-white rounded-md shadow-sm overflow-hidden border border-gray-200 mb-4';
+                        card.innerHTML = `
+                            <div class="relative">
+                                <img src="${property.thumbnailUrl || 'https://via.placeholder.com/450x300'}" alt="Phòng trọ" class="w-full h-60 object-cover">
+                                <div class="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-sm px-2 py-1 rounded">
+                                    ${property.imageCount || 0} ảnh
+                                </div>
+                                <button class="absolute top-2 right-2 p-2 bg-white rounded-full shadow hover:bg-red-100 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-red-500">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="px-4 py-3">
+                                <h3 onclick="window.location.href='/Home/Detail/${property.id}'" style="cursor:pointer" class="font-bold text-red-600 text-base uppercase leading-snug">
+                                    ${property.title || 'Không có tiêu đề'}
+                                </h3>
+                                <div class="text-green-600 font-semibold mt-2">${property.price ? property.price + ' triệu/tháng' : ''}</div>
+                                <div class="text-sm text-gray-600 mt-1">
+                                    ${property.area ? property.area + ' m² · ' : ''}${property.district || ''}${property.province ? ', ' + property.province : ''}
+                                </div>
+                                <p class="text-sm text-gray-700 mt-2 line-clamp-2">
+                                    ${property.description || ''}
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-between px-4 pb-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+                                        ${property.ownerName ? property.ownerName[0] : 'U'}
+                                    </div>
+                                    <div class="text-sm text-gray-700">
+                                        ${property.ownerName || ''} <span class="text-gray-400">(${property.postedAgo || ''})</span>
+                                    </div>
+                                </div>
+                                <a href="tel:${property.phone || ''}" class="text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-1 rounded text-sm font-medium">
+                                    ${property.phone || 'Liên hệ'}
+                                </a>
+                            </div>
+                        `;
+                        list.appendChild(card);
+                    });
+                } else {
+                    list.innerHTML = '<div>Không có dữ liệu bất động sản.</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching properties:', error);
+            });
+    });
+=======
 <script src="~/js/propertyService.js"></script>
 <script>
     document.getElementById('listPostId').classList.add("text-orange-500");
@@ -182,4 +260,5 @@
             else removeToFavorite(id);
         }
     }
+>>>>>>> master
 </script>

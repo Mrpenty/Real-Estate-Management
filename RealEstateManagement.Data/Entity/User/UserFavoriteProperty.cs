@@ -9,6 +9,6 @@ namespace RealEstateManagement.Data.Entity.User
         public DateTime CreatedAt { get; set; }
 
         public ApplicationUser User { get; set; }
-        public Property Property { get; set; }
+        public Property? Property { get; set; }
     }
 }

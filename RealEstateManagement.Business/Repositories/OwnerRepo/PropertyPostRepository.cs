@@ -19,23 +19,35 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
 
         public async Task<int> CreatePropertyPostAsync(Property property, PropertyPost post, List<int> amenityIds)
         {
-            _context.Properties.Add(property);
-            await _context.SaveChangesAsync();
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            foreach (var amenityId in amenityIds)
+            try
             {
-                _context.PropertyAmenities.Add(new PropertyAmenity
+                _context.Properties.Add(property);
+                await _context.SaveChangesAsync();
+
+                foreach (var amenityId in amenityIds)
                 {
-                    PropertyId = property.Id,
-                    AmenityId = amenityId
-                });
+                    _context.PropertyAmenities.Add(new PropertyAmenity
+                    {
+                        PropertyId = property.Id,
+                        AmenityId = amenityId
+                    });
+                }
+
+                post.PropertyId = property.Id;
+                _context.PropertyPosts.Add(post);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return post.Id;
             }
-
-            post.PropertyId = property.Id;
-            _context.PropertyPosts.Add(post);
-
-            await _context.SaveChangesAsync();
-            return post.Id;
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw; // Ném lại ngoại lệ để xử lý ở tầng trên
+            }
         }
 
         public async Task<PropertyPost> GetByPropertyIdAsync(int propertyId)
@@ -48,6 +60,11 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         {
             _context.PropertyPosts.Update(post);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<PropertyPost> GetByIdAsync(int postId)
+        {
+            return await _context.PropertyPosts.FirstOrDefaultAsync(p => p.Id == postId);
         }
     }
 

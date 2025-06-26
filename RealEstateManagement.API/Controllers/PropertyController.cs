@@ -20,7 +20,12 @@ namespace RealEstateManagement.API.Controllers
         }
 
         [HttpGet("homepage-allproperty")]
+<<<<<<< DongVT/FE/PostProperty
+
+       // [Authorize(Roles = "Renter")]
+=======
         //[Authorize(Roles = "Renter")]
+>>>>>>> master
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetHomepageProperties()
         {
             try
@@ -39,7 +44,13 @@ namespace RealEstateManagement.API.Controllers
         }
         //Lấy property theo id
         [HttpGet("{id}")]
+<<<<<<< DongVT/FE/PostProperty
+
+       // [Authorize(Roles = "Renter")]
+
+=======
         //[Authorize(Roles = "Renter")]
+>>>>>>> master
         public async Task<ActionResult> GetPropertyById(int id)
         {
             var property = await _propertyService.GetPropertyByIdAsync(id);
@@ -51,6 +62,25 @@ namespace RealEstateManagement.API.Controllers
         }
         // Sắp xếp theo price
         [HttpGet("filter-by-price")]
+<<<<<<< DongVT/FE/PostProperty
+
+       // [Authorize(Roles = "Renter")]
+        //public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByPrice(decimal minPrice, decimal maxPrice)
+
+        //{
+        //    try
+        //    {
+        //        if ((minPrice.HasValue && minPrice < 0) || (maxPrice.HasValue && maxPrice < 0))
+        //            return BadRequest("Giá tiền không hợp lệ.");
+
+        //        if (minPrice.HasValue && maxPrice.HasValue && minPrice > maxPrice)
+        //            return BadRequest("Giá trị minPrice phải nhỏ hơn hoặc bằng maxPrice.");
+
+        //        var properties = await _propertyService.FilterByPriceAsync(minPrice, maxPrice);
+
+        //        if (properties == null || !properties.Any())
+        //            return NotFound("Không tìm thấy bất động sản nào");
+=======
         //[Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByPrice([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice)
         {
@@ -64,17 +94,23 @@ namespace RealEstateManagement.API.Controllers
 
                 if (properties == null || !properties.Any())
                     return NotFound("Không tìm thấy bất động sản nào trong khoảng giá.");
+>>>>>>> master
 
-                return Ok(properties);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+        //        return Ok(properties);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Internal server error: {ex.Message}");
+        //    }
+        //}
         //Sắp xếp theo diện tích
         [HttpGet("filter-by-area")]
+<<<<<<< DongVT/FE/PostProperty
+       // [Authorize(Roles = "Renter")]
+
+=======
         //[Authorize(Roles = "Renter")]
+>>>>>>> master
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByArea([FromQuery] decimal? minArea, [FromQuery] decimal? maxArea)
         {
             if (!minArea.HasValue || !maxArea.HasValue)
@@ -154,6 +190,25 @@ namespace RealEstateManagement.API.Controllers
                 return StatusCode(500, $"Đã xảy ra lỗi: {ex.Message}");
             }
         }
+<<<<<<< DongVT/FE/PostProperty
+        [HttpPost("add-favorite")]
+       // [Authorize(Roles = "Renter")]
+        public async Task<IActionResult> AddToFavorite([FromBody] FavoritePropertyDTO dto)
+        {
+            var userIdClaim = User.FindFirst("id");
+            if (userIdClaim == null)
+                return Unauthorized("Đăng nhập trước khi thêm vào danh sách yêu thích");
+            if (!int.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized("ID người dùng không hợp lệ");
+            //var userIdClaim = int.Parse(User.FindFirst("id").Value);
+            var result = await _propertyService.AddToFavoriteAsync(userId, dto.PropertyId);
+            if (!result)
+                return BadRequest("Đã có trong danh sách yêu thích hoặc dữ liệu không hợp lệ.");
+
+            return Ok("Đã thêm vào danh sách yêu thích.");
+
+        }
+=======
         //[HttpPost("add-favorite")]
         //[Authorize(Roles = "Renter")]
         //public async Task<IActionResult> AddToFavorite([FromBody] FavoritePropertyDTO dto)
@@ -171,6 +226,7 @@ namespace RealEstateManagement.API.Controllers
         //    return Ok("Đã thêm vào danh sách yêu thích.");
 
         //}
+>>>>>>> master
 
         // GET: api/PropertySearch/search?query=apartment
         [HttpGet("search")]
@@ -208,5 +264,32 @@ namespace RealEstateManagement.API.Controllers
             return Ok("Bulk indexing completed");
         }
 
+        [HttpGet("provinces")]
+        public async Task<IActionResult> GetProvinces()
+        {
+            var provinces = await _propertyService.GetProvincesAsync();
+            return Ok(provinces);
+        }
+
+        [HttpGet("wards/{provinceId}")]
+        public async Task<IActionResult> GetWards(int provinceId)
+        {
+            var wards = await _propertyService.GetWardsAsync(provinceId);
+            return Ok(wards);
+        }
+
+        [HttpGet("streets/{wardId}")]
+        public async Task<IActionResult> GetStreets(int wardId)
+        {
+            var streets = await _propertyService.GetStreetAsync(wardId);
+            return Ok(streets);
+        }
+
+        [HttpGet("amenities")]
+        public async Task<IActionResult> GetAmenities()
+        {
+            var amenities = await _propertyService.GetAmenitiesAsync();
+            return Ok(amenities);
+        }
     }
 }

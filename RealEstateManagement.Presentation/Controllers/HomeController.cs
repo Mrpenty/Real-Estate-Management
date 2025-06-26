@@ -37,6 +37,10 @@ namespace RealEstateManagement.Presentation.Controllers
             return View();
         }
 
+        public IActionResult Detail(int id)
+        {
+            return View();
+        }
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

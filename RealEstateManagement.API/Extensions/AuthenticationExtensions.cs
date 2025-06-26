@@ -27,7 +27,8 @@ namespace RealEstateManagement.API.Extensions
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
                         NameClaimType = JwtRegisteredClaimNames.Sub,
-                        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
+                        ValidateLifetime = true // Đảm bảo kiểm tra thời gian hết hạn
                     };
 
                     options.Events = new JwtBearerEvents
@@ -37,53 +38,52 @@ namespace RealEstateManagement.API.Extensions
                             var logger = ctx.HttpContext.RequestServices.GetService<ILogger<JwtBearerEvents>>();
                             logger?.LogInformation("OnMessageReceived: Starting token extraction");
 
-                            
                             var authHeader = ctx.Request.Headers["Authorization"].FirstOrDefault();
-                            logger?.LogInformation("OnMessageReceived: Authorization header: {AuthHeader}", 
+                            logger?.LogInformation("OnMessageReceived: Authorization header: {AuthHeader}",
                                 authHeader != null ? authHeader.Substring(0, Math.Min(50, authHeader.Length)) + "..." : "null");
-                            
-                            if (!string.IsNullOrEmpty(authHeader))
+
+                            string token = null;
+                            if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                             {
-                                var prefix = authHeader.Length >= 7 ? authHeader.Substring(0, 7) : authHeader;
-                                logger?.LogInformation("OnMessageReceived: Authorization header prefix: '{Prefix}'", prefix);
-                            }
-                            
-                            if (!string.IsNullOrEmpty(authHeader))
-                            {
-                                string token;
-                                
-                                if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    token = authHeader.Substring("Bearer ".Length).Trim();
-                                    logger?.LogInformation("OnMessageReceived: Token extracted from Authorization header with Bearer prefix");
-                                }
-                                else
-                                {
-                                    token = authHeader.Trim();
-                                    logger?.LogInformation("OnMessageReceived: Token extracted from Authorization header (raw token, no Bearer prefix)");
-                                }
-                                
-                                if (!string.IsNullOrEmpty(token))
-                                {
-                                    ctx.Token = token;
-                                    logger?.LogInformation("OnMessageReceived: Token set successfully");
-                                }
-                                else
-                                {
-                                    logger?.LogWarning("OnMessageReceived: Token is empty after extraction");
-                                    ctx.NoResult();
-                                }
+                                token = authHeader.Substring("Bearer ".Length).Trim();
+                                logger?.LogInformation("OnMessageReceived: Token extracted from Authorization header");
                             }
                             else
                             {
+                                // Kiểm tra cookie nếu header không có
+                                var accessToken = ctx.Request.Cookies["accessToken"];
+                                if (!string.IsNullOrEmpty(accessToken))
+                                {
+                                    token = accessToken;
+                                    logger?.LogInformation("OnMessageReceived: Token extracted from accessToken cookie");
+                                }
+                            }
 
-                                logger?.LogWarning("OnMessageReceived: No Authorization header found");
+                            if (!string.IsNullOrEmpty(token))
+                            {
+                                ctx.Token = token;
+                                logger?.LogInformation("OnMessageReceived: Token set successfully: {Token}", token.Substring(0, Math.Min(50, token.Length)) + "...");
+                            }
+                            else
+                            {
+                                logger?.LogWarning("OnMessageReceived: No valid token found in header or cookie");
                                 ctx.NoResult();
                             }
 
                             return Task.CompletedTask;
                         },
-
+                        OnChallenge = context =>
+                        {
+                            context.HandleResponse(); // Ngăn chuyển hướng tự động
+                            context.Response.StatusCode = 401;
+                            return Task.CompletedTask;
+                        },
+                        OnAuthenticationFailed = context =>
+                        {
+                            var logger = context.HttpContext.RequestServices.GetService<ILogger<JwtBearerEvents>>();
+                            logger?.LogError("Authentication failed: {Error}", context.Exception.Message);
+                            return Task.CompletedTask;
+                        }
                     };
                 });
 

@@ -9,7 +9,7 @@ namespace RealEstateManagement.Business.DTO.Properties
     public class PropertyDetailDTO
     {
         public int Id { get; set; }
-        public string Title { get; set; }
+        public string? Title { get; set; }
         public string Description { get; set; }
         public string Type { get; set; }
         public int AddressID { get; set; }
@@ -25,7 +25,7 @@ namespace RealEstateManagement.Business.DTO.Properties
         public string LandlordPhoneNumber { get; set; }
         public string LandlordProfilePictureUrl { get; set; }
         public DateTime LandlordCreatedAt { get; set; }
-        public string PromotionPackageName { get; set; }
+        public string? PromotionPackageName { get; set; }
         public List<string> Amenities { get; set; }
         public List<string> ImageUrls { get; set; }
         // Contract Details

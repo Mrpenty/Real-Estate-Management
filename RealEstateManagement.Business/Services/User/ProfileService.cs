@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using RealEstateManagement.Business.DTO.UserDTO;
-using RealEstateManagement.Data.Entity;
+using RealEstateManagement.Data.Entity.User;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -139,6 +139,7 @@ namespace RealEstateManagement.Business.Services.User
             catch (Exception ex)
             {
                 return ProfilePictureUploadResult.Failure("An error occurred while uploading the profile picture");
+               
             }
         }
     }

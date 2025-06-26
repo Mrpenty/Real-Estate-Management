@@ -5,6 +5,7 @@ using RealEstateManagement.Business.DTO.Location;
 using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Data.Entity;
+using RealEstateManagement.Data.Entity.AddressEnity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -320,6 +321,25 @@ namespace RealEstateManagement.Business.Services.Properties
             }).ToList();
         }
 
+<<<<<<< DongVT/FE/PostProperty
+        public async Task<IEnumerable<Province>> GetProvincesAsync()
+        {
+            return await _context.Provinces.ToListAsync();
+        }
+
+        public async Task<IEnumerable<Street>> GetStreetAsync(int wardId)
+        {
+            return await _context.Streets.Where(w => w.WardId == wardId).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Ward>> GetWardsAsync(int provinceid)
+        {
+            return await _context.Wards.Where(w => w.ProvinceId == provinceid).ToListAsync();
+        }
+        public async Task<IEnumerable<Amenity>> GetAmenitiesAsync()
+        {
+            return await _context.Amenities.ToListAsync();
+=======
         public Task<bool> IndexPropertyAsync(PropertySearchDTO dto)
         {
             throw new NotImplementedException();
@@ -333,6 +353,7 @@ namespace RealEstateManagement.Business.Services.Properties
         public Task<IEnumerable<HomePropertyDTO>> SearchAsync(string keyword)
         {
             throw new NotImplementedException();
+>>>>>>> master
         }
     }
 }

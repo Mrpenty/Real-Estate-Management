@@ -8,6 +8,6 @@
         public bool IsPrimary { get; set; }
         public int Order { get; set; }
 
-        public Property Property { get; set; }
+        public Property? Property { get; set; }
     }
 }

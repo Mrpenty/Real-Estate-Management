@@ -1,0 +1,110 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Tạo hợp đồng";
+}
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .form-section {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+    }
+     .form-input, .form-select {
+        width: 100%;
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        padding: 0.75rem 1rem;
+    }
+</style>
+
+<div class="container mx-auto py-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4">Bước 2: Thông tin hợp đồng</h1>
+        
+        <form id="create-contract-form" class="form-section">
+            <input type="hidden" id="propertyPostId" value="@ViewBag.PropertyPostId">
+            <div class="space-y-4">
+                 <div>
+                    <label for="monthlyRent" class="block mb-2 font-medium">Tiền thuê hàng tháng</label>
+                    <input type="number" id="monthlyRent" name="monthlyRent" class="form-input" required>
+                </div>
+                <div>
+                    <label for="depositAmount" class="block mb-2 font-medium">Tiền cọc</label>
+                    <input type="number" id="depositAmount" name="depositAmount" class="form-input" required>
+                </div>
+                <div>
+                    <label for="contractDurationMonths" class="block mb-2 font-medium">Thời hạn hợp đồng (tháng)</label>
+                    <input type="number" id="contractDurationMonths" name="contractDurationMonths" class="form-input" required>
+                </div>
+                <div>
+                    <label for="startDate" class="block mb-2 font-medium">Ngày bắt đầu</label>
+                    <input type="date" id="startDate" name="startDate" class="form-input" required>
+                </div>
+                <div>
+                    <label for="paymentMethod" class="block mb-2 font-medium">Phương thức thanh toán</label>
+                    <input type="text" id="paymentMethod" name="paymentMethod" class="form-input" placeholder="Vd: Chuyển khoản, tiền mặt">
+                </div>
+                 <div>
+                    <label for="renterId" class="block mb-2 font-medium">ID người thuê (Nếu có)</label>
+                    <input type="text" id="renterId" name="renterId" class="form-input">
+                </div>
+                <div>
+                    <label for="contactInfo" class="block mb-2 font-medium">Thông tin liên hệ</label>
+                    <input type="text" id="contactInfo" name="contactInfo" class="form-input" placeholder="Nhập tên, số điện thoại...">
+                </div>
+            </div>
+            <div class="text-right mt-6">
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg">Hoàn tất và Đăng tin</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('create-contract-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const API_BASE_URL = 'https://localhost:7031/api';
+    
+    // NOTE: RenterID is optional. LandlordID should be taken from the logged in user
+    const data = {
+        propertyPostId: parseInt(document.getElementById('propertyPostId').value),
+        monthlyRent: parseFloat(formData.get('monthlyRent')),
+        depositAmount: parseFloat(formData.get('depositAmount')),
+        contractDurationMonths: parseInt(formData.get('contractDurationMonths')),
+        startDate: formData.get('startDate'),
+        paymentMethod: formData.get('paymentMethod'),
+        renterId: formData.get('renterId') || null,
+        contactInfo: formData.get('contactInfo')
+    };
+
+    fetch(`${API_BASE_URL}/owner/rental-contracts`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            // 'Authorization': 'Bearer YOUR_TOKEN_HERE' // Add auth token
+        },
+        body: JSON.stringify(data)
+    })
+    .then(res => {
+        if (!res.ok) {
+            return res.text().then(text => { throw new Error(text || 'Failed to create contract') });
+        }
+        return res.json();
+    })
+    .then(createdContract => {
+        alert('Đăng tin và tạo hợp đồng thành công!');
+        // Redirect to the new property detail page
+        window.location.href = `/Home/Detail/${createdContract.propertyPostId}`;
+    })
+    .catch(err => {
+        console.error(err);
+        alert(`Đã có lỗi xảy ra: ${err.message}`);
+    });
+});
+</script> 

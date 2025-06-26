@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -5,16 +6,17 @@ namespace RealEstateManagement.Presentation.Controllers
 {
     public class AuthController : Controller
     {
+        [AllowAnonymous]
         public IActionResult Login()
         {
             // Check if user is already authenticated
             if (User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Home");
-            }
+            } 
             return View();
         }
-
+        [AllowAnonymous]
         public IActionResult Register()
         {
             // Check if user is already authenticated

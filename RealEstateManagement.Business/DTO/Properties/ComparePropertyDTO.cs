@@ -11,7 +11,7 @@ namespace RealEstateManagement.Business.DTO.Properties
         public int Id { get; set; }
         public string Title { get; set; }
         public string Type { get; set; }
-        public string Status { get; set; }
+        public string? Status { get; set; }
         public string PrimaryImageUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         public int ViewsCount { get; set; }
