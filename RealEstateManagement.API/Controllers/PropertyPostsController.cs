@@ -20,7 +20,11 @@ namespace RealEstateManagement.API.Controllers
         }
 
         [HttpPost]
+<<<<<<< DongVT/FE/PostProperty
        // [Authorize(Roles = "Landlord")]
+=======
+        //[Authorize(Roles = "Landlord")]
+>>>>>>> master
         public async Task<IActionResult> CreatePropertyPost([FromBody] PropertyCreateRequestDto dto)
         {
             try

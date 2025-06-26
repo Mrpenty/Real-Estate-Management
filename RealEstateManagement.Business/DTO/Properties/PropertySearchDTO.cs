@@ -14,6 +14,8 @@
         public decimal Price { get; set; }
         public int Bedrooms { get; set; }
         public string Location { get; set; }
+        // Thêm trường DetailedAddress
+        public string DetailedAddress { get; set; }
     }
 
 }

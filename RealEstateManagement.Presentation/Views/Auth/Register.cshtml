@@ -44,7 +44,7 @@
         </div>
 
         <p class="text-sm text-center text-gray-600">
-            Đã có tài khoản? <a href="/Account/Login" class="text-orange-500 font-medium hover:underline">Đăng Nhập Ngay</a>
+            Đã có tài khoản? <a href="/Auth/Login" class="text-orange-500 font-medium hover:underline">Đăng Nhập Ngay</a>
         </p>
         <p class="text-sm text-center text-gray-600 mt-2">
             <a href="/" class="text-orange-500 font-medium hover:underline">Về trang chủ</a>
@@ -80,7 +80,7 @@
                 phone = '+84' + phone.substring(1);
                 console.log('Converted phone from 0 to +84:', phone);
             } else if (!phone.startsWith('+84') || phone.length !== 12) {
-                console.log('Phone validation failed:', { 
+                console.log('Phone validation failed:', {
                     phone: phone,
                     startsWithPlus84: phone.startsWith('+84'),
                     length: phone.length
