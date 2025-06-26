@@ -72,5 +72,10 @@ namespace RealEstateManagement.Business.Services.OwnerService
             // 5. Call Repository to save the post, property, and amenities
             return await _postRepository.CreatePropertyPostAsync(property, post, dto.AmenityIds);
         }
+
+        public async Task<PropertyPost> GetPostByIdAsync(int postId)
+        {
+            return await _postRepository.GetByIdAsync(postId);
+        }
     }
 }

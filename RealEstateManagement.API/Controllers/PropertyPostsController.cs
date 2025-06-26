@@ -52,8 +52,10 @@ namespace RealEstateManagement.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPostById(int id)
         {
-            // Sau này có thể thêm logic lấy chi tiết bài post
-            return Ok(new { id });
+            var post = await _propertyPostService.GetPostByIdAsync(id);
+            if (post == null)
+                return NotFound();
+            return Ok(new { id = post.Id, propertyId = post.PropertyId });
         }
     }
 }

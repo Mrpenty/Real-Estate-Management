@@ -6,97 +6,86 @@
 <div class="w-full min-h-screen flex items-center justify-center" style="background-color: #FDF5ED;">
     <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8 mx-auto">
         <h1 class="text-2xl font-bold text-center mb-8">Property Listing Form</h1>
-        <form id="create-property-form" class="space-y-8">
-            <!-- Basic Information -->
-            <div>
-                <h2 class="text-lg font-semibold mb-4">Basic Information</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="title" class="block text-sm font-medium mb-1">Title *</label>
-                        <input type="text" id="title" name="title" class="form-input w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-orange-400" placeholder="Enter property title" required>
+        <!-- Bước 1: Nhập thông tin property -->
+        <div id="step-1">
+            <form id="property-form" class="space-y-8">
+                <!-- Basic Information -->
+                <div>
+                    <h2 class="text-lg font-semibold mb-4">Basic Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="title" class="block text-sm font-medium mb-1">Title *</label>
+                            <input type="text" id="title" name="title" class="form-input w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-orange-400" placeholder="Enter property title" required>
+                        </div>
+                        <div>
+                            <label for="price" class="block text-sm font-medium mb-1">Price *</label>
+                            <input type="number" id="price" name="price" class="form-input w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-orange-400" placeholder="Enter price" required>
+                        </div>
                     </div>
-                    <div>
-                        <label for="price" class="block text-sm font-medium mb-1">Price *</label>
-                        <input type="number" id="price" name="price" class="form-input w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-orange-400" placeholder="Enter price" required>
+                    <div class="mt-4">
+                        <label for="description" class="block text-sm font-medium mb-1">Description *</label>
+                        <textarea id="description" name="description" rows="4" class="form-input w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-orange-400" placeholder="Describe your property" required></textarea>
                     </div>
                 </div>
-                <div class="mt-4">
-                    <label for="description" class="block text-sm font-medium mb-1">Description *</label>
-                    <textarea id="description" name="description" rows="4" class="form-input w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-orange-400" placeholder="Describe your property" required></textarea>
-                </div>
-            </div>
 
-            <!-- Location -->
-            <div>
-                <h2 class="text-lg font-semibold mb-4">Location</h2>
-                <label for="open-address-modal" class="block text-sm font-medium mb-1">Address *</label>
-                <input type="text" id="open-address-modal" class="form-input w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-orange-400 cursor-pointer" placeholder="Enter property address" readonly required>
-                <input type="hidden" id="province-id" name="ProvinceId" />
-                <input type="hidden" id="ward-id" name="WardId" />
-                <input type="hidden" id="street-id" name="StreetId" />
-                <input type="hidden" id="street-number" name="StreetNumber" />
-                <div class="mt-4 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-32 text-gray-400">
-                    <span>Map will appear here</span>
+                <!-- Location -->
+                <div>
+                    <h2 class="text-lg font-semibold mb-4">Location</h2>
+                    <label for="open-address-modal" class="block text-sm font-medium mb-1">Address *</label>
+                    <input type="text" id="open-address-modal" class="form-input w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-orange-400 cursor-pointer" placeholder="Enter property address" readonly required>
+                    <input type="hidden" id="province-id" name="ProvinceId" />
+                    <input type="hidden" id="ward-id" name="WardId" />
+                    <input type="hidden" id="street-id" name="StreetId" />
+                    <input type="hidden" id="street-number" name="StreetNumber" />
+                    <div class="mt-4 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-32 text-gray-400">
+                        <span>Map will appear here</span>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Property Details -->
-            <div>
-                <h2 class="text-lg font-semibold mb-4">Property Details</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div>
-                        <label for="type" class="block text-sm font-medium mb-1">Property Type *</label>
-                        <select id="type" name="type" class="form-select w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-orange-400">
-                            <option value="">Select type</option>
-                            <option value="Phòng trọ">Phòng trọ</option>
-                            <option value="Nhà nguyên căn">Nhà nguyên căn</option>
-                            <option value="Căn hộ">Căn hộ</option>
-                        </select>
+                <!-- Property Details -->
+                <div>
+                    <h2 class="text-lg font-semibold mb-4">Property Details</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label for="type" class="block text-sm font-medium mb-1">Property Type *</label>
+                            <select id="type" name="type" class="form-select w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-orange-400">
+                                <option value="">Select type</option>
+                                <option value="Phòng trọ">Phòng trọ</option>
+                                <option value="Nhà nguyên căn">Nhà nguyên căn</option>
+                                <option value="Căn hộ">Căn hộ</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="bedrooms" class="block text-sm font-medium mb-1">Number of Rooms *</label>
+                            <input type="number" id="bedrooms" name="bedrooms" class="form-input w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-orange-400" placeholder="Number of rooms" required>
+                        </div>
+                        <div>
+                            <label for="area" class="block text-sm font-medium mb-1">Area (m²) *</label>
+                            <input type="number" id="area" name="area" class="form-input w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-orange-400" placeholder="Property area" required>
+                        </div>
                     </div>
-                    <div>
-                        <label for="bedrooms" class="block text-sm font-medium mb-1">Number of Rooms *</label>
-                        <input type="number" id="bedrooms" name="bedrooms" class="form-input w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-orange-400" placeholder="Number of rooms" required>
-                    </div>
-                    <div>
-                        <label for="area" class="block text-sm font-medium mb-1">Area (m²) *</label>
-                        <input type="number" id="area" name="area" class="form-input w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-orange-400" placeholder="Property area" required>
+                    <div class="mb-4">
+                        <span class="block text-sm font-medium mb-1">Amenities</span>
+                        <div id="amenities-container" class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <!-- Amenities will be loaded here by JavaScript -->
+                        </div>
                     </div>
                 </div>
-                <div class="mb-4">
-                    <span class="block text-sm font-medium mb-1">Amenities</span>
-                    <div id="amenities-container" class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        <!-- Amenities will be loaded here by JavaScript -->
-                    </div>
-                </div>
-            </div>
 
-            <!-- Images -->
-            <div>
-                <h2 class="text-lg font-semibold mb-4">Images</h2>
-                <div class="mb-4">
-                    <label for="image-input" class="block font-semibold mb-2">Ảnh bất động sản</label>
-                    <input type="file" id="image-input" name="images" multiple accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" />
-                    <input type="hidden" id="primary-image-index" value="0" />
-                    <div id="image-preview" class="flex flex-wrap gap-4 mt-4"></div>
-                </div>
-            </div>
+                <button type="submit" id="btn-next" class="mt-4 px-6 py-2 bg-orange-500 text-white rounded">Tiếp tục</button>
+            </form>
+        </div>
 
-            <!-- Submit -->
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-8">
-                <div class="flex flex-col md:flex-row md:items-center gap-2 text-sm">
-                    
-                    <label class="flex items-center">
-                        <input type="checkbox" class="mr-2"> <span>Publish immediately</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="checkbox" class="mr-2"> <span>Save as draft</span>
-                    </label>
-                </div>
-                <div class="flex gap-2 mt-4 md:mt-0">
-                    <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-8 rounded-lg shadow-lg transition duration-300">Save</button>
-                </div>
+        <!-- Bước 2: Upload ảnh -->
+        <div id="step-2" style="display:none;">
+            <div class="mb-4">
+                <label for="image-input" class="block font-semibold mb-2">Ảnh bất động sản</label>
+                <input type="file" id="image-input" name="images" multiple accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" />
+                <input type="hidden" id="primary-image-index" value="0" />
+                <div id="image-preview" class="flex flex-wrap gap-4 mt-4"></div>
             </div>
-        </form>
+            <button id="btn-finish" class="px-6 py-2 bg-green-500 text-white rounded">Hoàn tất</button>
+        </div>
     </div>
 </div>
 
@@ -248,51 +237,6 @@
                     `);
                 });
             });
-             // Form submission
-            $('#create-property-form').on('submit', function (e) {
-                e.preventDefault();
-
-                const formData = {
-                    title: $('#title').val(),
-                    description: $('#description').val(),
-                    price: parseFloat($('#price').val()),
-                    area: parseFloat($('#area').val()),
-                    bedrooms: parseInt($('#bedrooms').val()),
-                    bathrooms: parseInt($('#bathrooms').val()),
-                    type: $('#type').val(),
-                    location: $('#open-address-modal').val(),
-                    amenityIds: $('input[name="AmenityIds"]:checked').map(function () {
-                        return parseInt(this.value);
-                    }).get(),
-                    provinceId: $('#province-id').val(),
-                    wardId: $('#ward-id').val(),
-                    street: $('#street-number').val() + " " + $('#street-select option:selected').text()
-                };
-
-                console.log('Submitting form data:', formData);
-
-                postPropertyService.createProperty(formData)
-                    .then(function(response) {
-                        if (response.success) {
-                            const propertyId = response.propertyPostId;
-                            const imageInput = document.getElementById('image-input');
-                            const imageFiles = Array.from(imageInput.files);
-                            const primaryImageIndex = parseInt($('#primary-image-index').val());
-                            if (imageFiles.length > 0) {
-                                uploadImages(propertyId);
-                            } else {
-                                alert('Đăng tin thành công!');
-                                window.location.href = '/';
-                            }
-                        } else {
-                            alert('Error creating property: ' + response.message);
-                        }
-                    })
-                    .catch(function(error) {
-                        console.error('Error:', error);
-                        alert('An error occurred while creating the property. ' + error);
-                    });
-            });
             
         });
     </script>
@@ -309,12 +253,72 @@
 </script>
 
 <script>
+let createdPropertyId = null;
+let imageFiles = [];
+let primaryImageIndex = 0;
+
+// Bước 1: Submit property
+const propertyForm = document.getElementById('property-form');
+propertyForm.onsubmit = async function(e) {
+    e.preventDefault();
+    // Thu thập dữ liệu property từ form
+    const formData = new FormData(propertyForm);
+    // Build object đúng chuẩn DTO backend
+    const amenityIds = Array.from(document.querySelectorAll('input[name="AmenityIds"]:checked')).map(cb => parseInt(cb.value));
+    const provinceId = parseInt(formData.get('ProvinceId'));
+    const wardId = parseInt(formData.get('WardId'));
+    // Ghép số nhà và tên đường
+    const streetNumber = formData.get('StreetNumber') || '';
+    const streetSelect = document.getElementById('street-select');
+    const streetName = streetSelect && streetSelect.options[streetSelect.selectedIndex] ? streetSelect.options[streetSelect.selectedIndex].text : '';
+    const street = (streetNumber + ' ' + streetName).trim();
+    const propertyData = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        type: formData.get('type'),
+        area: parseFloat(formData.get('area')),
+        bedrooms: parseInt(formData.get('bedrooms')),
+        price: parseFloat(formData.get('price')),
+        location: '0,0', // Nếu có map thì lấy toạ độ thực tế
+        amenityIds: amenityIds,
+        provinceId: provinceId,
+        wardId: wardId,
+        street: street
+    };
+    // Kiểm tra dữ liệu trước khi gửi
+    for (const key in propertyData) {
+        if (propertyData[key] === undefined || propertyData[key] === null || propertyData[key] === '' || (Array.isArray(propertyData[key]) && propertyData[key].length === 0)) {
+            alert('Vui lòng nhập đầy đủ thông tin: ' + key);
+            return;
+        }
+    }
+    // Gửi API tạo property
+    const token = localStorage.getItem('authToken');
+    const res = await fetch('https://localhost:7031/api/PropertyPosts', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        credentials: 'include',
+        body: JSON.stringify(propertyData)
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert('Tạo property thất bại! ' + (err.message || ''));
+        return;
+    }
+    const data = await res.json();
+    createdPropertyId = data.propertyId || data.id; // Đảm bảo backend trả về propertyId
+    // Chuyển sang bước 2
+    document.getElementById('step-1').style.display = 'none';
+    document.getElementById('step-2').style.display = '';
+};
+
+// Bước 2: Preview ảnh và upload
 const imageInput = document.getElementById('image-input');
 const imagePreview = document.getElementById('image-preview');
 const primaryImageIndexInput = document.getElementById('primary-image-index');
-
-let imageFiles = [];
-let primaryImageIndex = 0;
 
 imageInput.addEventListener('change', function (e) {
     imageFiles = Array.from(e.target.files);
@@ -370,7 +374,7 @@ function renderImagePreview() {
     });
 }
 
-// Hàm upload ảnh sau khi tạo property thành công
+// Bước 2: Upload ảnh
 async function uploadImages(propertyId) {
     await Promise.all(imageFiles.map(async (file, idx) => {
         // TODO: Thay thế đoạn này bằng upload thực tế lên server/storage để lấy url thực tế
@@ -384,11 +388,21 @@ async function uploadImages(propertyId) {
             isPrimary: idx === primaryImageIndex,
             order: idx
         };
-        await fetch(`/api/properties/${propertyId}/images`, {
+            await fetch(`https://localhost:7031/api/properties/${propertyId}/images`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dto)
         });
     }));
 }
+
+document.getElementById('btn-finish').onclick = async function() {
+    if (!createdPropertyId) {
+        alert('Chưa có propertyId!');
+        return;
+    }
+    await uploadImages(createdPropertyId);
+    alert('Đăng tin thành công!');
+    window.location.href = '/'; // hoặc chuyển hướng tuỳ ý
+};
 </script> 

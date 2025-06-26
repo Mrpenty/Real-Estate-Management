@@ -61,6 +61,11 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
             _context.PropertyPosts.Update(post);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<PropertyPost> GetByIdAsync(int postId)
+        {
+            return await _context.PropertyPosts.FirstOrDefaultAsync(p => p.Id == postId);
+        }
     }
 
 }

@@ -23,6 +23,14 @@ const authService = {
     },
 
     // Authentication methods
+    setAuthToken(token) {
+        localStorage.setItem('authToken', token);
+        document.cookie = `accessToken=${token}; path=/; secure; samesite=strict`;
+    },
+    clearAuthToken() {
+        localStorage.removeItem('authToken');
+        document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    },
     async login(phone, password) {
         try {
             console.log('Login attempt with phone:', phone);
@@ -51,8 +59,8 @@ const authService = {
             }
 
             if (data.token) {
-                console.log('Storing token in localStorage');
-                localStorage.setItem('authToken', data.token);
+                console.log('Storing token in localStorage and cookie');
+                this.setAuthToken(data.token);
                 this.updateNavigation();
             }
             return data;
@@ -166,7 +174,7 @@ const authService = {
         } catch (error) {
             console.error('Logout API error:', error);
         } finally {
-            localStorage.removeItem('authToken');
+            this.clearAuthToken();
             this.updateNavigation();
             return { success: true };
         }
@@ -185,16 +193,14 @@ const authService = {
             console.log('Token expired:', isExpired);
             
             if (isExpired) {
-                console.log('Token is expired, removing from localStorage');
-                localStorage.removeItem('authToken');
-                this.updateNavigation();
+                console.log('Token is expired, logging out');
+                this.logout();
                 return false;
             }
             return true;
         } catch (e) {
             console.error('Error parsing token:', e);
-            localStorage.removeItem('authToken');
-            this.updateNavigation();
+            this.logout();
             return false;
         }
     },
@@ -267,7 +273,7 @@ const authService = {
             }
 
             if (data.token) {
-                localStorage.setItem('authToken', data.token);
+                this.setAuthToken(data.token);
                 this.updateNavigation();
             }
             return data;
@@ -298,7 +304,7 @@ const authService = {
             }
 
             if (data.token) {
-                localStorage.setItem('authToken', data.token);
+                this.setAuthToken(data.token);
                 this.updateNavigation();
             }
             return data;
