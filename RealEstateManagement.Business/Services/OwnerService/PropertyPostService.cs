@@ -29,7 +29,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 throw new ArgumentException("Tiêu đề không được để trống.");
             if (dto.Area <= 0 || dto.Price <= 0)
                 throw new ArgumentException("Diện tích và giá phải lớn hơn 0.");
-            if (dto.ProvinceId <= 0 || dto.WardId <= 0 || string.IsNullOrWhiteSpace(dto.Street))
+            if (dto.ProvinceId <= 0 || dto.WardId <= 0 || dto.StreetId <=0)
                 throw new ArgumentException("Vui lòng chọn đầy đủ thông tin địa chỉ.");
 
             // 2. Luôn tạo mới Address cho mỗi Property
@@ -37,7 +37,8 @@ namespace RealEstateManagement.Business.Services.OwnerService
             {
                 ProvinceId = dto.ProvinceId,
                 WardId = dto.WardId,
-                DetailedAddress = dto.Street
+                StreetId = dto.StreetId,
+                DetailedAddress = dto.DetailedAddress
             };
             await _addressRepository.AddAsync(address);
             await _addressRepository.SaveChangesAsync();
@@ -70,6 +71,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
             };
 
             // 5. Call Repository to save the post, property, and amenities
+            // Repository now returns property ID
             return await _postRepository.CreatePropertyPostAsync(property, post, dto.AmenityIds);
         }
 

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0" />
 
     <title>@ViewData["Title"] RealEstateManagement</title>
-@*     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    @*     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script> *@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
@@ -42,7 +42,7 @@
 
             <div class="flex items-center space-x-4">
                 <a href="/Home/ListFavorite" class="text-gray-700 hover:text-blue-600"><i class="far fa-heart mr-1"></i> Tin đã lưu</a>
-                
+
                 <!-- Authenticated User -->
                 <div id="userProfileNavItem" style="display: none;" class="flex items-center space-x-4">
                     <a href="/Profile" id="userProfileLink" class="text-gray-700 hover:text-blue-600"></a>
@@ -157,6 +157,7 @@
                     <div id="rental-type-special" class="flex flex-wrap gap-2">
 
 
+
 @*                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có gác</button>
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Kệ bếp</button>
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có máy lạnh</button>
@@ -217,6 +218,7 @@
         }
         listSelectedSingleChoice();
 
+
         function listSelectedSingleChoice(){
             const listSelecter = ['rental-type','rental-type-price','rental-type-acreage'];
             listSelecter.forEach(item => {
@@ -243,6 +245,7 @@
 
         let level = 0;
 
+
         let selectedProvince = {id:""};
         let selectedWard = { id: "" };
         let selectedStreet = { id: "" };
@@ -260,9 +263,10 @@
         getAllLocationAsync();
         setTimeout(() => {
             renderProvinces();
-        },300);
+        }, 300);
 
         backBtn.onclick = () => {
+
           if (level === 2) {
             level = 1;
             renderWard(selectedProvince);
@@ -319,7 +323,7 @@
             const filterPrice = urlParamParents.get('filterPrice') ?? "";
             const filterArea = urlParamParents.get('filterArea') ?? "";
 
-            if (filterPrice != ""){
+            if (filterPrice != "") {
                 let idPrice = filterPrice.split(',')[3];
                 document.getElementById(idPrice).classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
                 document.getElementById(idPrice).classList.remove('border-gray-300', 'bg-white');
@@ -340,8 +344,6 @@
           backBtn.classList.add("hidden");
           content.innerHTML = "";
 
-
-
             locations.forEach(province => {
                 const checked = province.id == selectedProvince.id ? "checked" : "";
                 const item = createCheckboxItem(province.name, checked, () => {
@@ -359,10 +361,10 @@
         }
 
         function renderWard(province) {
-          level = 1;
-          title.innerText = province.name;
-          backBtn.classList.remove("hidden");
-          content.innerHTML = "";
+            level = 1;
+            title.innerText = province.name;
+            backBtn.classList.remove("hidden");
+            content.innerHTML = "";
 
 
 
@@ -399,37 +401,37 @@
         }
 
         function createCheckboxItem(label, checked, onClick) {
-          const div = document.createElement("div");
-          div.className = "flex items-center gap-2 py-2 px-3 border-b cursor-pointer hover:bg-gray-100";
+            const div = document.createElement("div");
+            div.className = "flex items-center gap-2 py-2 px-3 border-b cursor-pointer hover:bg-gray-100";
 
-          const input = document.createElement("input");
-          input.type = "checkbox";
-          input.checked = checked;
-          input.className = "form-checkbox w-4 h-4 text-orange-500";
-          input.onclick = (e) => {
-            e.stopPropagation();
-            onClick();
-          };
+            const input = document.createElement("input");
+            input.type = "checkbox";
+            input.checked = checked;
+            input.className = "form-checkbox w-4 h-4 text-orange-500";
+            input.onclick = (e) => {
+                e.stopPropagation();
+                onClick();
+            };
 
-          const span = document.createElement("span");
-          span.innerText = label;
-          div.appendChild(input);
-          div.appendChild(span);
+            const span = document.createElement("span");
+            span.innerText = label;
+            div.appendChild(input);
+            div.appendChild(span);
 
-          div.onclick = () => onClick();
+            div.onclick = () => onClick();
 
-          return div;
+            return div;
         }
 
         function updateNavigation() {
             if (authService.isAuthenticated()) {
                 document.getElementById('authNavItems').style.display = 'none';
-                
+
                 const userProfileNav = document.getElementById('userProfileNavItem');
                 userProfileNav.style.display = 'flex';
-                
+
                 const user = authService.getCurrentUser();
-                if(user && user.name) {
+                if (user && user.name) {
                     document.getElementById('userProfileLink').innerText = `Chào, ${user.name}`;
                 }
 
@@ -455,5 +457,6 @@
 
         document.addEventListener('DOMContentLoaded', updateNavigation);
     </script>
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

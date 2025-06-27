@@ -25,7 +25,7 @@ namespace RealEstateManagement.API.Extensions
             // Generic Repository
             services.AddScoped(typeof(IRepositoryAsync<>), typeof(RepositoryAsync<>));
 
-             //---Repository--\\
+            //---Repository--\\
             services.AddScoped<ITokenRepository, TokenRepository>();
 
             // Property Repository
@@ -64,4 +64,3 @@ namespace RealEstateManagement.API.Extensions
         }
     }
 }
-    

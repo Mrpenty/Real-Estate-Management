@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://localhost:7031/api/Auth';
+﻿const API_BASE_URL = 'https://localhost:7031/api/Auth';
 
 const authService = {
     // Phone number utilities
@@ -25,8 +25,19 @@ const authService = {
 
     // Authentication methods
     setAuthToken(token) {
-        localStorage.setItem('authToken', token);
-        document.cookie = `accessToken=${token}; path=/; secure; samesite=strict`;
+        console.log('[setAuthToken] Saving token to localStorage:', token);
+        try {
+            localStorage.setItem('authToken', token);
+            console.log('[setAuthToken] Token saved to localStorage');
+        } catch (e) {
+            console.error('[setAuthToken] Error saving token to localStorage:', e);
+        }
+        try {
+            document.cookie = `accessToken=${token}; path=/; secure; samesite=strict`;
+            console.log('[setAuthToken] Token saved to cookie');
+        } catch (e) {
+            console.error('[setAuthToken] Error saving token to cookie:', e);
+        }
     },
     clearAuthToken() {
         localStorage.removeItem('authToken');
@@ -60,9 +71,11 @@ const authService = {
             }
 
             if (data.token) {
-                console.log('Storing token in localStorage and cookie');
+                console.log('[login] Token received from API:', data.token);
                 this.setAuthToken(data.token);
                 this.updateNavigation();
+            } else {
+                console.warn('[login] No token received from API');
             }
             return data;
         } catch (error) {
@@ -198,7 +211,10 @@ const authService = {
                 this.logout();
                 return false;
             }
-            document.getElementById('userProfileLink').innerHTML = '<i class="fas fa-user mr-1"></i>' + payload.name;
+            const userProfileLink = document.getElementById('userProfileLink');
+            if (userProfileLink) {
+                userProfileLink.innerHTML = '<i class="fas fa-user mr-1"></i>' + payload.name;
+            }
             return true;
         } catch (e) {
             console.error('Error parsing token:', e);

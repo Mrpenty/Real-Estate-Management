@@ -20,6 +20,7 @@ namespace RealEstateManagement.Business.DTO.PropertyOwnerDTO
         // Address fields
         public int ProvinceId { get; set; }
         public int WardId { get; set; }
-        public string Street { get; set; }
+        public int  StreetId { get; set; }
+        public string DetailedAddress { get; set; }
     }
 }

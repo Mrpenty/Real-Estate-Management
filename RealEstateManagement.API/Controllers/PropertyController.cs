@@ -109,8 +109,6 @@ namespace RealEstateManagement.API.Controllers
             return Ok(result);
         }
 
-        
-
         //So sánh các property với nhau (tối đa là 3)
         [HttpPost("compare")]
         //[Authorize(Roles = "Renter")]
@@ -182,7 +180,7 @@ namespace RealEstateManagement.API.Controllers
         [HttpGet("search-advanced")]
         public async Task<IActionResult> SearchAdvanced([FromQuery] int? province = 0, [FromQuery] int? ward = 0, [FromQuery] int? street = 0, [FromQuery] int? userId = 0)
         {
-            var results = await _propertyService.SearchAdvanceAsync(province,ward,street, userId);
+            var results = await _propertyService.SearchAdvanceAsync(province, ward, street, userId);
             return Ok(results);
         }
 

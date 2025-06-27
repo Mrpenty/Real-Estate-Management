@@ -41,7 +41,7 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return post.Id;
+                return property.Id;
             }
             catch (Exception)
             {

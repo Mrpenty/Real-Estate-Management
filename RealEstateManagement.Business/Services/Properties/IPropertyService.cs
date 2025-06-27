@@ -30,7 +30,7 @@ namespace RealEstateManagement.Business.Services.Properties
         Task<bool> IndexPropertyAsync(PropertySearchDTO dto);
         Task BulkIndexPropertiesAsync();
         Task<IEnumerable<HomePropertyDTO>> SearchAsync(string keyword);
-        Task<IEnumerable<HomePropertyDTO>> SearchAdvanceAsync(int? province = 0, int? ward = 0, int? street = 0,int? userId = 0);
+        Task<IEnumerable<HomePropertyDTO>> SearchAdvanceAsync(int? province = 0, int? ward = 0, int? street = 0, int? userId = 0);
 
         Task<List<ProvinceDTO>> GetListLocationAsync();
 
@@ -39,7 +39,8 @@ namespace RealEstateManagement.Business.Services.Properties
         Task<IEnumerable<Street>> GetStreetAsync(int wardId);
         Task<IEnumerable<Ward>> GetWardsAsync(int provinces);
 
-       Task<IEnumerable<Amenity>> GetAmenitiesAsync();
+        Task<IEnumerable<Amenity>> GetAmenitiesAsync();
+
 
 
     }
