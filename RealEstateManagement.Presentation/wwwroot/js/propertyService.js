@@ -7,17 +7,25 @@ const propertyService = {
             const urlParams = new URLSearchParams(window.location.search);
 
             let listLocationSelected = sessionStorage.getItem('selectedLocationLists');
+            let provinceId = sessionStorage.getItem('provinceId');
             let provinces = [];
             let wards = [];
             let streets = [];
             if (listLocationSelected != null && listLocationSelected != undefined) {
                 listLocationSelected = JSON.parse(listLocationSelected);
-                listLocationSelected.forEach(item => {
-                    provinces.push(item.province.id);
-                    wards.push(item.ward.id);
-                    streets.push(item.street.id);
-                });
+                if (listLocationSelected.length != 0) {
+                    listLocationSelected.forEach(item => {
+                        provinces.push(item.province.id);
+                        wards.push(item.ward.id);
+                        streets.push(item.street.id);
+                    });
+                }
+                else {
+                    provinces.push(provinceId);
+                }
+
             }
+            else provinces.push(provinceId);
 
             const provinceIds = provinces.join(',');
             const wardIds = wards.join(',');;

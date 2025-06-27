@@ -112,12 +112,20 @@
     document.getElementById('listPostId').classList.replace("border-gray-200", "border-orange-500");
     
     let listLocationSelected = sessionStorage.getItem('selectedLocationLists');
-    if(listLocationSelected != null && listLocationSelected != undefined){
+    let provinceId = sessionStorage.getItem('provinceId');
+    let provinceName = sessionStorage.getItem('provinceName');
+    if (listLocationSelected != null && listLocationSelected != undefined) {
         let html = '';
         listLocationSelected = JSON.parse(listLocationSelected);
-        listLocationSelected.forEach(item => {
-            html += `<button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">${item.locationName}</button>`;
-        });
+        if (listLocationSelected.length != 0) {
+            listLocationSelected.forEach(item => {
+                html += `<button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">${item.locationName}</button>`;
+            });
+        }
+        else {
+            html += `<button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">${provinceName}</button>`
+        }
+
         $('#locationSelected').html(html);
     }
     

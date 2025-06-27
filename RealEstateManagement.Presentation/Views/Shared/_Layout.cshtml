@@ -278,6 +278,7 @@
 
         searchInput.addEventListener("input", () => {
             isSearchLocation = false;
+            searchInput.dataset.id = -1;
             checkShowDropDown();
             renderProvincesList(searchInput.value);
         });
@@ -633,6 +634,13 @@
 
         function searchLocationInput(){
             //sessionStorage.setItem('selectedProvince',JSON.stringify(selectedLocationLists));
+            let provinceId = searchInput.dataset.id;
+            if (provinceId == -1) {
+                alert('Không tìm thấy tỉnh thành tương ứng');
+                return;
+            }
+            sessionStorage.setItem('provinceId', searchInput.dataset.id);
+            sessionStorage.setItem('provinceName', searchInput.value);
             sessionStorage.setItem('selectedLocationLists',JSON.stringify(selectedLocationLists));
             window.location.href = '/';
         }
