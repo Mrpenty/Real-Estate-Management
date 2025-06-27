@@ -8,25 +8,25 @@ namespace RealEstateManagement.API.Controllers
     [Route("api/[controller]")]
     public class ChatController : ControllerBase
     {
-        private readonly IChatService _messageService;
+        //private readonly IChatService _messageService;
 
-        public ChatController(IChatService messageService)
-        {
-            _messageService = messageService;
-        }
+        //public ChatController(IChatService messageService)
+        //{
+        //    _messageService = messageService;
+        //}
 
-        [HttpPost("send")]
-        public async Task<IActionResult> SendMessage([FromBody] SendMessageDTO dto)
-        {
-            var result = await _messageService.SendMessageAsync(dto);
-            return Ok(result);
-        }
+        //[HttpPost("send")]
+        //public async Task<IActionResult> SendMessage([FromBody] SendMessageDTO dto)
+        //{
+        //    var result = await _messageService.SendMessageAsync(dto);
+        //    return Ok(result);
+        //}
 
-        [HttpGet("{conversationId}")]
-        public async Task<IActionResult> GetMessages(int conversationId)
-        {
-            var messages = await _messageService.GetMessagesAsync(conversationId);
-            return Ok(messages);
-        }
+        //[HttpGet("{conversationId}")]
+        //public async Task<IActionResult> GetMessages(int conversationId)
+        //{
+        //    var messages = await _messageService.GetMessagesAsync(conversationId);
+        //    return Ok(messages);
+        //}
     }
 }

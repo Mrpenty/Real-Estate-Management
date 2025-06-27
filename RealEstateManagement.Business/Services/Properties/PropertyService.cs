@@ -36,7 +36,6 @@ namespace RealEstateManagement.Business.Services.Properties
                 Type = p.Type,
                 AddressID = p.AddressId,
                 StreetId = p.Address.StreetId,
-                Street = p.Address.Street.Name,
                 ProvinceId = p.Address.ProvinceId,
                 Province = p.Address.Province.Name,
                 WardId = p.Address.WardId,
@@ -353,20 +352,5 @@ namespace RealEstateManagement.Business.Services.Properties
             return await _context.Amenities.ToListAsync();
 
         }
-
-
-        public Task<bool> IndexPropertyAsync(PropertySearchDTO dto)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task BulkIndexPropertiesAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<HomePropertyDTO>> SearchAsync(string keyword)
-        {
-            throw new NotImplementedException();
-        }
-    }  }
+    }
+}

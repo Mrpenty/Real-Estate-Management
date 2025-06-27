@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.API.Extensions;
-using RealEstateManagement.API.Hub;
+
 using RealEstateManagement.API.Middleware;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Business.Services.Properties;

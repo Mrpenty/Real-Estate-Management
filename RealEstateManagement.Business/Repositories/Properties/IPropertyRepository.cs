@@ -25,10 +25,6 @@ namespace RealEstateManagement.Business.Repositories.Properties
         //Lấy nhiều property để so sánh
         Task<List<Property>> GetPropertiesByIdsAsync(List<int> ids);
 
-        //Elasticsearch
-        Task<bool> IndexPropertyAsync(PropertySearchDTO dto);
-        Task BulkIndexPropertiesAsync(IEnumerable<PropertySearchDTO> properties);
-        Task<List<int>> SearchPropertyIdsAsync(string keyword);
         Task<List<ProvinceDTO>> GetListLocationAsync();
 
     }
