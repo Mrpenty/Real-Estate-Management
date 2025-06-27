@@ -301,12 +301,25 @@ namespace RealEstateManagement.Business.Services.Properties
             return result;
         }
 
-        public async Task<IEnumerable<HomePropertyDTO>> SearchAdvanceAsync(int? provinceId = 0, int? wardId = 0, int? streetId = 0, int? userId = 0)
+        public async Task<IEnumerable<HomePropertyDTO>> SearchAdvanceAsync(string provinceId, string wardId, string streetId,int? userId = 0)
         {
             var properties = await GetAllPropertiesAsync(userId);
-            if (provinceId != 0) properties = properties.Where(c => c.ProvinceId == provinceId);
-            if (wardId != 0) properties = properties.Where(c => c.WardId == wardId);
-            if (streetId != 0) properties = properties.Where(c => c.StreetId == streetId);
+            if (!string.IsNullOrEmpty(provinceId) && provinceId != "0")
+            {
+                var provinceList = provinceId.Split(",").Select(c => int.Parse(c)).ToList();
+                properties = properties.Where(c => provinceList.Contains(c.ProvinceId.Value));
+            }
+            if (!string.IsNullOrEmpty(wardId) && wardId != "0")
+            {
+                var wardList = wardId.Split(",").Select(c => int.Parse(c)).ToList();
+                properties = properties.Where(c => wardList.Contains(c.WardId.Value));
+            }
+            if (!string.IsNullOrEmpty(streetId) && streetId != "0")
+            {
+                var streetList = streetId.Split(",").Select(c => int.Parse(c)).ToList();
+                properties = properties.Where(c => streetList.Contains(c.StreetId.Value));
+            }
+
             return properties.ToList();
         }
 

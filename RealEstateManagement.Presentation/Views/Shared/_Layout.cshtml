@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -29,11 +29,47 @@
                     <span class="text-blue-700">RealEstateManagement</span>
                 </h1>
             </div>
+            <div class="relative w-full max-w-md mx-auto ml-6 flex">
+                <input id="province-search" type="search" placeholder="Tìm tỉnh thành..."
+                       class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+                <div id="dropdown" style="top:100%" class="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-80 overflow-y-auto hidden">
+                    <div class="p-4">
+                        <div class="p-4 border-t">
+                            <p class="font-semibold text-sm text-gray-600 mb-2">Tất cả tỉnh thành</p>
+                            <div id="province-list" class="grid grid-cols-3 gap-2 text-sm">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dropdown2" style="height:25.3rem;top:100%" class="dropdown2 absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg hidden">
+                    <div class="p-4">
+                        <div class="p-4 border-t">
+                            <input id="search-location-input"
+                                   type="search"
+                                   placeholder="Nhập tối đa 5 địa điểm"
+                                   class="w-full border px-4 py-2 rounded-md mb-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   />
+                            <p class="font-semibold text-sm text-gray-600 mb-2">Địa điểm đã chọn</p>
+                            <div id="location-selected-list" class="flex flex-wrap gap-2">
+                            </div>
+                            <p class="font-semibold text-sm text-gray-600 mb-2 mt-2">Tất cả địa điểm</p>
+                            <div id="location-list" style="max-height:15rem;left:0" class="absolute z-10 mt-1 w-full bg-white overflow-y-auto">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button style="width:9rem" id="search-btn" onclick="searchLocationInput()"
+                        class="bg-orange-500 ml-2 text-black font-medium px-4 py-2 rounded-md">
+                    Tìm kiếm
+                </button>
+            </div>
 
             <div class="flex flex-grow mx-6 items-center">
-                <div class="flex items-center bg-gray-100 rounded-full px-3 py-1 w-full max-w-md">
+                <div style="display:none" class="flex items-center bg-gray-100 rounded-full px-3 py-1 w-full max-w-md">
                     <i class="fas fa-map-marker-alt text-gray-500 mr-2"></i>
-                    <input type="button" onclick="showFilterPopup('search-popup')" placeholder="Tìm theo khu vực" id="searchInput" class="input-bootstrap bg-transparent outline-none w-full text-sm" />
+                    <input type="button" onclick="showFilterPopup('search-popup')" value="Toàn quốc " id="searchInput" class="input-bootstrap bg-transparent outline-none w-full text-left text-sm" />
                 </div>
                 <button onclick="showFilterPopup('filter-popup')" class="ml-2 border rounded-full px-3 py-1 text-sm hover:bg-gray-100">
                     <i class="fas fa-filter mr-1"></i> Bộ lọc
@@ -108,7 +144,7 @@
                     </div>
                 </div>
 
-                <div class="mb-6">
+                <div style="display:none" class="mb-6">
                     <h3 class="font-semibold mb-2">Lọc theo khu vực</h3>
                     <div class="grid grid-cols-3 gap-2">
 
@@ -156,19 +192,6 @@
                     <h3 class="font-semibold mb-2">Đặc điểm nổi bật</h3>
                     <div id="rental-type-special" class="flex flex-wrap gap-2">
 
-
-
-@*                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có gác</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Kệ bếp</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có máy lạnh</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có máy giặt</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có tủ lạnh</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có thang máy</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Không chung chủ</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Giờ giấc tự do</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có bảo vệ 24/24</button>
-
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có hầm để xe</button> *@
                     </div>
                 </div>
             </div>
@@ -181,7 +204,6 @@
         </div>
     </div>
 
-    <!-- Popup Search-->
     <div id="search-popup" class=" fixed inset-0 bg-black/30 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl w-full max-w-lg shadow-lg">
 
@@ -208,6 +230,159 @@
 
     <script>
 
+        const searchInput = document.getElementById('province-search');
+        const dropdown = document.getElementById('dropdown');
+        const dropdown2 = document.getElementById('dropdown2');
+        const provinceList = document.getElementById('province-list');
+        const locationList = document.getElementById("location-list");
+        let isSearchLocation = false;
+
+
+        const locationInput = document.getElementById("search-location-input");
+        const selectedLocationsEl = document.getElementById("location-selected-list");
+        let selectedProvinceId = -1;
+        let selectedLocationLists = [];
+
+        function renderProvincesList(filter = "") {
+              provinceList.innerHTML = "";
+              const filtered = locations.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
+              filtered.forEach(province => {
+                if(province.id != 0){
+                    const btn = document.createElement("button");
+                    btn.className = "province-item text-left px-2 py-1 rounded hover:bg-gray-100";
+                    btn.textContent = province.name;
+                    btn.dataset.id = province.id;
+                    btn.dataset.name = province.name;
+                    btn.addEventListener("click", () => selectProvinceItem(province.id));
+                    provinceList.appendChild(btn);
+                }
+              });
+        }
+
+        searchInput.addEventListener("focus", () => {
+            checkShowDropDown();
+            if(!isSearchLocation) renderProvincesList(searchInput.value);
+            else renderLocations(searchInput.dataset.id);
+        });
+
+        function checkShowDropDown(){
+            if(!isSearchLocation){
+                dropdown.classList.remove("hidden");
+                dropdown2.classList.add("hidden");
+            }
+            else{
+                dropdown.classList.add("hidden");
+                dropdown2.classList.remove("hidden");
+            }
+        }
+
+        searchInput.addEventListener("input", () => {
+            isSearchLocation = false;
+            checkShowDropDown();
+            renderProvincesList(searchInput.value);
+        });
+
+        document.addEventListener("click", (e) => {
+          if (!e.target.closest(".relative")) {
+            dropdown.classList.add("hidden");
+          }
+          if(!e.target.closest('.dropdown2-item') && !e.target.closest(".relative")){
+              dropdown2.classList.add("hidden");
+          }
+        });
+
+        document.addEventListener("click", (e) => {
+          if (e.target.classList.contains("province-item")) {
+            const provinceName = e.target.dataset.name;
+            searchInput.value = provinceName;
+            searchInput.dataset.id = e.target.dataset.id;
+            dropdown.classList.add("hidden");
+            isSearchLocation = true;
+          }
+        });
+
+        let listLocationName = [];
+        let listLocationBackup = [];
+        function renderLocations(id = -1) {
+          locationList.innerHTML = "";
+          if(listLocationBackup.length == 0){
+              const provinceItem = locations.filter(l => l.id == id)[0];
+              provinceItem.wards.forEach(ward => {
+                      ward.streets.forEach(street => {
+                          if(ward.id != 0 && street.id != 0){
+                              let itemValue = { province:{id: provinceItem.id,
+                                  name: provinceItem.name},
+                                  ward : {id:ward.id,name: ward.name },
+                                  street: {id: street.id,name:street.name },
+                                  locationName : `${street.name}, ${ward.name}, ${provinceItem.name}`
+                              };
+                              listLocationBackup.push(itemValue);
+                          }
+                      })
+              })
+          }
+
+          listLocationName = listLocationBackup;
+          listLocationName = listLocationName.filter(p => p.locationName.toLowerCase().includes(locationInput.value.toLowerCase()));
+          listLocationName.forEach(loc => {
+              const li = document.createElement("li");
+              li.className = "cursor-pointer py-1 hover:bg-gray-100 flex items-center gap-1 dropdown2-item";
+              li.innerHTML = `<span class="text-blue-500 ml-4"><i class="fas fa-map-marker-alt text-gray-500 mr-2"></i></span><span>${loc.locationName}</span>`;
+              li.addEventListener("click", () => selectLocation(loc));
+              locationList.appendChild(li);
+            });
+        }
+
+        function selectProvinceItem(id) {
+          selectedLocationsEl.innerHTML = "";
+          selectedLocationLists = [];
+          renderSelectedLocations();
+          listLocationBackup = [];
+          dropdown2.style.height = 25.3 + 2.1 * selectedLocationLists.length + 'rem';
+          renderLocations(id);
+        }
+
+        function selectLocation(loc) {
+            let findIndex = selectedLocationLists.findIndex(p => p.province.id == loc.province.id 
+                && p.ward.id == loc.ward.id
+                && p.street.id == loc.street.id);
+          if(findIndex != -1){
+              alert('Địa điểm đã được chọn trước đó');
+              return;
+          }
+          if (selectedLocationLists.length >= 5){
+              alert('Đã tối đa 5 địa điểm');
+              return;
+          }
+          selectedLocationLists.push(loc);
+          renderSelectedLocations();
+          locationInput.value = "";
+          dropdown2.style.height = 25.3 + 2.1 * selectedLocationLists.length + 'rem';
+          renderLocations(searchInput.dataset.id);
+          // locationDropdown.classList.add("hidden");
+        }
+
+        function renderSelectedLocations() {
+          selectedLocationsEl.innerHTML = "";
+          selectedLocationLists
+          .forEach(loc => {
+            const tag = document.createElement("div");
+            tag.className = "bg-blue-100 text-blue-700 px-3 py-1 dropdown2-item rounded-full text-sm flex items-center gap-2";
+            tag.innerHTML = `<span>${loc.locationName}</span>
+                             <button class="text-blue-600 hover:text-red-500 font-bold">×</button>`;
+            tag.querySelector("button").addEventListener("click", () => {
+                selectedLocationLists = selectedLocationLists.filter(l => l.locationName !== loc.locationName);
+                dropdown2.style.height = 25.3 + 2.1 * selectedLocationLists.length + 'rem';
+                renderSelectedLocations();
+            });
+            selectedLocationsEl.appendChild(tag);
+          });
+        }
+
+        locationInput.addEventListener("input", () => {
+            listLocationBackup = [];
+            renderLocations(searchInput.dataset.id);
+        });
 
         function hideFilterPopup(id) {
             document.getElementById(id).classList.add('hidden');
@@ -328,12 +503,19 @@
                 document.getElementById(idPrice).classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
                 document.getElementById(idPrice).classList.remove('border-gray-300', 'bg-white');
             }
+            else{
+                document.getElementById('price-1').classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
+                document.getElementById('price-1').classList.remove('border-gray-300', 'bg-white');
+            }
             if (filterArea != "") {
                 let idArea = filterArea.split(',')[3];
                 document.getElementById(idArea).classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
                 document.getElementById(idArea).classList.remove('border-gray-300', 'bg-white');
             }
-
+            else{
+                document.getElementById('area-1').classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
+                document.getElementById('area-1').classList.remove('border-gray-300', 'bg-white');
+            }
             //console.log(locations);
         }
 
@@ -447,6 +629,33 @@
                 street: selectedStreet.id ?? 0
             });
             window.location.href = newHref;
+        }
+
+
+        function updateNavigation() {
+            const isAuthenticated = authService.isAuthenticated();
+            const loginNavItem = document.getElementById('loginNavItem');
+            const registerNavItem = document.getElementById('registerNavItem');
+            const logoutNavItem = document.getElementById('logoutNavItem');
+            const userProfileNavItem = document.getElementById('userProfileLink');
+
+            if (isAuthenticated) {
+                loginNavItem.style.display = 'none';
+                registerNavItem.style.display = 'none';
+                logoutNavItem.style.display = 'block';
+                userProfileNavItem.style.display = 'block';
+            } else {
+                loginNavItem.style.display = 'block';
+                registerNavItem.style.display = 'block';
+                logoutNavItem.style.display = 'none';
+                userProfileNavItem.style.display = 'none';
+            }
+        }
+
+        function searchLocationInput(){
+            //sessionStorage.setItem('selectedProvince',JSON.stringify(selectedLocationLists));
+            sessionStorage.setItem('selectedLocationLists',JSON.stringify(selectedLocationLists));
+            window.location.reload();
         }
 
         async function handleLogout(event) {

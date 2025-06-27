@@ -153,9 +153,23 @@ function filterAdvanced() {
     const valueAmenities = Array.from(activeBtnAmenities).map(btn => btn.value);
 
     //location
-    const province = $('#filterProvinceId').val();
-    const ward = $('#filterWarnId').val();
-    const street = $('#filterStreetId').val();
+
+    let listLocationSelected = sessionStorage.getItem('selectedLocationLists');
+    let provinces = [];
+    let wards = [];
+    let streets = [];
+    if (listLocationSelected != null && listLocationSelected != undefined) {
+        listLocationSelected = JSON.parse(listLocationSelected);
+        listLocationSelected.forEach(item => {
+            provinces.push(item.province.id);
+            wards.push(item.ward.id);
+            streets.push(item.street.id);
+        });
+    }
+
+    const province = provinces.join(',');
+    const ward = wards.join(',');
+    const street = streets.join(',');
 
     let data = {
         province, ward, street,
@@ -209,7 +223,7 @@ function getValueFromParam(locations) {
     const wardId = parseInt(urlParams.get('ward'));
     const streetId = parseInt(urlParams.get('street'));
     if (provinceId == 0 || provinceId == undefined || isNaN(provinceId)) return {
-        valueSearch: "Tìm theo khu vực",
+        valueSearch: "Toàn quốc",
         valueTitle: "Kênh thông tin Bất Động Sản Việt Nam",
         selectedProvince: { id: "" }, selectedWard: { id: "" }, selectedStreet: { id: "" }
     };

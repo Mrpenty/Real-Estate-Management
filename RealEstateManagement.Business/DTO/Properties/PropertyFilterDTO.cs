@@ -21,6 +21,10 @@ namespace RealEstateManagement.Business.DTO.Properties
         public string? PropertyType { get; set; }
         public bool? IsVerified { get; set; }
         public string? SearchKeyword { get; set; }
+
+        public List<int> Provinces { get; set; }
+        public List<int> Wards { get; set; }
+        public List<int> Streets { get; set; }
     }
 
 }

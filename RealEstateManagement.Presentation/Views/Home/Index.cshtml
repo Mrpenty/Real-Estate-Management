@@ -18,14 +18,13 @@
 </style>
 
 <h1 class="text-xl font-bold mb-4" id="titleHomePage"></h1>
-@* <div class="flex flex-wrap gap-2 mb-6">
-    <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Hồ Chí Minh</button>
+<div class="flex flex-wrap gap-2 mb-6" id="locationSelected">
+@*     <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Hồ Chí Minh</button>
     <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Hà Nội</button>
     <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Đà Nẵng</button>
-    <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Bình Dương</button>
-    <button class="bg-gray-100 text-gray-700 px-3 py-1 rounded">Tất cả</button>
-
-</div> *@
+    <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Bình Dương</button> *@
+    @* <button class="bg-gray-100 text-gray-700 px-3 py-1 rounded">Tất cả</button> *@
+</div>
 
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -111,11 +110,23 @@
 <script>
     document.getElementById('listPostId').classList.add("text-orange-500");
     document.getElementById('listPostId').classList.replace("border-gray-200", "border-orange-500");
+    
+    let listLocationSelected = sessionStorage.getItem('selectedLocationLists');
+    if(listLocationSelected != null && listLocationSelected != undefined){
+        let html = '';
+        listLocationSelected = JSON.parse(listLocationSelected);
+        listLocationSelected.forEach(item => {
+            html += `<button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">${item.locationName}</button>`;
+        });
+        $('#locationSelected').html(html);
+    }
+    
     getAllProperty();
-    async function getAllProperty() {
+
+    async function getAllProperty() { 
         let listProperty = await propertyService.getAllproperty();
-        console.log(listProperty);
-        if (listProperty) {
+        //console.log(listProperty);
+        if (listProperty) { 
             let html = '';
             listProperty.forEach(item => {
                 html += `<div class="bg-white rounded-md shadow-sm overflow-hidden border border-gray-200" data-id="${item.id}">

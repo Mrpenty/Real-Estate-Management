@@ -6,9 +6,22 @@ const propertyService = {
         try {
             const urlParams = new URLSearchParams(window.location.search);
 
-            const provinceId = urlParams.get('province') ?? 0;
-            const wardId = urlParams.get('ward') ?? 0;
-            const streetId = urlParams.get('street') ?? 0;
+            let listLocationSelected = sessionStorage.getItem('selectedLocationLists');
+            let provinces = [];
+            let wards = [];
+            let streets = [];
+            if (listLocationSelected != null && listLocationSelected != undefined) {
+                listLocationSelected = JSON.parse(listLocationSelected);
+                listLocationSelected.forEach(item => {
+                    provinces.push(item.province.id);
+                    wards.push(item.ward.id);
+                    streets.push(item.street.id);
+                });
+            }
+
+            const provinceIds = provinces.join(',');
+            const wardIds = wards.join(',');;
+            const streetIds = streets.join(',');
             const filterCategory = urlParams.get('filterCategory');
             const filterPrice = urlParams.get('filterPrice');
             const filterArea = urlParams.get('filterArea');
@@ -18,6 +31,8 @@ const propertyService = {
             let response = null;
 
             isFilter = Boolean(isFilter);
+
+            //console.log(provinceIds, wardIds, streetIds);
 
             //console.log({
             //    provinceId,
@@ -39,7 +54,7 @@ const propertyService = {
 
             if (!isFilter) {
 
-                response = await fetch(`${API_PROPERTY_BASE_URL}/search-advanced?province=${provinceId}&ward=${wardId}&street=${streetId}&userId=${userId}`, {
+                response = await fetch(`${API_PROPERTY_BASE_URL}/search-advanced?province=${provinceIds}&ward=${wardIds}&street=${streetIds}&userId=${userId}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -60,7 +75,9 @@ const propertyService = {
                     minArea: arrArea[1],
                     maxArea: arrArea[2],
                     amenityName: filterAmenity.split(",") ?? [],
-                    location: `${provinceId ?? 0},${wardId ?? 0},${streetId ?? 0}`
+                    provinces: provinces,
+                    wards: wards,
+                    streets: streets,
                 }
                 response = await fetch(`${API_PROPERTY_BASE_URL}/filter-advanced`, {
                     method: 'POST',
