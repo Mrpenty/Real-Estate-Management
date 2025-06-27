@@ -301,7 +301,7 @@ namespace RealEstateManagement.Business.Services.Properties
             return result;
         }
 
-        public async Task<IEnumerable<HomePropertyDTO>> SearchAdvanceAsync(int? provinceId = 0, int? wardId = 0, int? streetId = 0,int? userId = 0)
+        public async Task<IEnumerable<HomePropertyDTO>> SearchAdvanceAsync(int? provinceId = 0, int? wardId = 0, int? streetId = 0, int? userId = 0)
         {
             var properties = await GetAllPropertiesAsync(userId);
             if (provinceId != 0) properties = properties.Where(c => c.ProvinceId == provinceId);
@@ -321,7 +321,6 @@ namespace RealEstateManagement.Business.Services.Properties
             }).ToList();
         }
 
-<<<<<<< DongVT/FE/PostProperty
         public async Task<IEnumerable<Province>> GetProvincesAsync()
         {
             return await _context.Provinces.ToListAsync();
@@ -339,7 +338,10 @@ namespace RealEstateManagement.Business.Services.Properties
         public async Task<IEnumerable<Amenity>> GetAmenitiesAsync()
         {
             return await _context.Amenities.ToListAsync();
-=======
+
+        }
+
+
         public Task<bool> IndexPropertyAsync(PropertySearchDTO dto)
         {
             throw new NotImplementedException();
@@ -353,7 +355,5 @@ namespace RealEstateManagement.Business.Services.Properties
         public Task<IEnumerable<HomePropertyDTO>> SearchAsync(string keyword)
         {
             throw new NotImplementedException();
->>>>>>> master
         }
-    }
-}
+    }  }
