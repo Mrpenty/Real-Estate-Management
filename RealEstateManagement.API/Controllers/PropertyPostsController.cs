@@ -20,11 +20,7 @@ namespace RealEstateManagement.API.Controllers
         }
 
         [HttpPost]
-<<<<<<< DongVT/FE/PostProperty
-       // [Authorize(Roles = "Landlord")]
-=======
         //[Authorize(Roles = "Landlord")]
->>>>>>> master
         public async Task<IActionResult> CreatePropertyPost([FromBody] PropertyCreateRequestDto dto)
         {
             try
@@ -37,20 +33,19 @@ namespace RealEstateManagement.API.Controllers
                 if (!int.TryParse(userIdClaim.Value, out var landlordId))
                     return Unauthorized("ID người dùng không hợp lệ");
 
-                var postId = await _propertyPostService.CreatePropertyPostAsync(dto, landlordId);
-                return CreatedAtAction(nameof(GetPostById), new { id = postId }, new { id = postId });
+                var propertyId = await _propertyPostService.CreatePropertyPostAsync(dto, landlordId);
+                return Ok(new { propertyId = propertyId });
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Đã xảy ra lỗi khi tạo bài đăng.", chiTiet = ex.Message });
+                _logger.LogError(ex, "Error creating property post");
+                return StatusCode(500, "An error occurred while creating the property post");
             }
-            
         }
-
 
         // ✅ Có sẵn để CreatedAtAction dùng được
         [HttpGet("{id}")]

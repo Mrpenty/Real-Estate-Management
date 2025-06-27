@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -6,25 +6,9 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-<<<<<<< DongVT/FE/PostProperty
-    <title>@ViewData["Title"] SREM.AI</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/RealEstateManagement.Presentation.styles.css" asp-append-version="true" />
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body>
-    <header class="border-b" style="background-color:white">
-        <div class="container mx-auto px-4 py-2 flex items-center justify-between">
-            <div class="flex items-center" style="cursor:pointer" onclick="window.location.href='/'">
-                <h1 class="text-xl font-bold">
-                    <span class="text-blue-700">SREM.AI</span>
-=======
+
     <title>@ViewData["Title"] RealEstateManagement</title>
-@*     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    @*     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script> *@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
@@ -34,6 +18,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/authService.js" asp-append-version="true"></script>
+    <script src="~/js/postPropertyService.js"></script>
     <script src="~/js/helper.js" asp-append-version="true"></script>
 </head>
 <body>
@@ -42,14 +27,12 @@
             <div class="flex items-center" style="cursor:pointer" onclick="window.location.href='/'">
                 <h1 class="text-xl font-bold">
                     <span class="text-blue-700">RealEstateManagement</span>
->>>>>>> master
                 </h1>
             </div>
 
             <div class="flex flex-grow mx-6 items-center">
                 <div class="flex items-center bg-gray-100 rounded-full px-3 py-1 w-full max-w-md">
                     <i class="fas fa-map-marker-alt text-gray-500 mr-2"></i>
-<<<<<<< DongVT/FE/PostProperty
                     <input type="button" onclick="showFilterPopup('search-popup')" placeholder="Tìm theo khu vực" id="searchInput" class="input-bootstrap bg-transparent outline-none w-full text-sm" />
                 </div>
                 <button onclick="showFilterPopup('filter-popup')" class="ml-2 border rounded-full px-3 py-1 text-sm hover:bg-gray-100">
@@ -59,7 +42,7 @@
 
             <div class="flex items-center space-x-4">
                 <a href="/Home/ListFavorite" class="text-gray-700 hover:text-blue-600"><i class="far fa-heart mr-1"></i> Tin đã lưu</a>
-                
+
                 <!-- Authenticated User -->
                 <div id="userProfileNavItem" style="display: none;" class="flex items-center space-x-4">
                     <a href="/Profile" id="userProfileLink" class="text-gray-700 hover:text-blue-600"></a>
@@ -72,21 +55,7 @@
                     <a href="/Auth/Login" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-in-alt mr-1"></i> Đăng nhập</a>
                 </div>
 
-=======
-                    <input type="button" onclick="showFilterPopup('search-popup')" value="Tìm theo khu vực" id="searchInput" class="input-bootstrap bg-transparent outline-none w-full text-left text-sm" />
-                </div>
-                <button onclick="showFilterPopup('filter-popup')" class="ml-2 border rounded-full px-3 py-1 text-sm hover:bg-gray-100">
-                    <i class="fas fa-filter mr-1"></i> Bộ lọc
-                </button>
-            </div>
 
-            <div class="flex items-center space-x-4">
-                <a href="/Home/ListFavorite" class="text-gray-700 hover:text-blue-600"><i class="far fa-heart mr-1"></i> Tin đã lưu</a>
-                <a href="/Auth/Register" id="registerNavItem" class="text-gray-700 hover:text-blue-600"><i class="fas fa-user-plus mr-1"></i> Đăng ký</a>
-                <a href="/Auth/Login" id="loginNavItem" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-in-alt mr-1"></i> Đăng nhập</a>
-                <a href="/Profile" id="userProfileLink" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-in-alt mr-1"></i>Full name</a>
-                <a href="#" onclick="handleLogout(event)" id="logoutNavItem" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-in-alt mr-1"></i> Đăng xuất</a>
->>>>>>> master
                 <a href="/PostProperty/CreateProperty" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-1 rounded-full text-sm"><i class="fas fa-pen-alt mr-1"></i> Đăng tin</a>
             </div>
         </div>
@@ -94,17 +63,7 @@
         <nav class="border-b border-gray-200 shadow-sm">
             <div class="container mx-auto px-4">
                 <ul class="flex space-x-6 text-base font-medium pt-4">
-<<<<<<< DongVT/FE/PostProperty
-                    <li><a href="/" id="listPostId" class="nav-link border-b-2 pb-1 border-white">Phòng trọ</a></li>
-                    <li><a href="/nha-nguyen-can" class="nav-link border-b-2 pb-1 border-white">Nhà nguyên căn</a></li>
-                    <li><a href="/can-ho-chung-cu" class="nav-link border-b-2 pb-1 border-white">Căn hộ chung cư</a></li>
-                    <li><a href="/can-ho-mini" class="nav-link border-b-2 pb-1 border-white">Căn hộ mini</a></li>
-                    <li><a href="/can-ho-dich-vu" class="nav-link border-b-2 pb-1 border-white">Căn hộ dịch vụ</a></li>
-                    <li><a href="/o-ghep" class="nav-link border-b-2 pb-1 border-white">Ở ghép</a></li>
-                    <li><a href="/mat-bang" class="nav-link border-b-2 pb-1 border-white">Mặt bằng</a></li>
-                    <li><a href="/blog" class="nav-link border-b-2 pb-1 border-white">Blog</a></li>
-                    <li><a href="/bang-gia" class="nav-link border-b-2 pb-1 border-white">Bảng giá dịch vụ</a></li>
-=======
+
                     <li><a href="/" id="listPostId" class="nav-link border-b-2 pb-1 border-gray-200">Phòng trọ</a></li>
                     <li><a href="/nha-nguyen-can" class="nav-link border-b-2 pb-1 border-gray-200">Nhà nguyên căn</a></li>
                     <li><a href="/can-ho-chung-cu" class="nav-link border-b-2 pb-1 border-gray-200">Căn hộ chung cư</a></li>
@@ -114,7 +73,6 @@
                     <li><a href="/mat-bang" class="nav-link border-b-2 pb-1 border-gray-200">Mặt bằng</a></li>
                     <li><a href="/blog" class="nav-link border-b-2 pb-1 border-gray-200">Blog</a></li>
                     <li><a href="/bang-gia" class="nav-link border-b-2 pb-1 border-gray-200">Bảng giá dịch vụ</a></li>
->>>>>>> master
                 </ul>
             </div>
         </nav>
@@ -138,16 +96,7 @@
                 <div class="mb-6">
                     <h3 class="font-semibold mb-2">Danh mục cho thuê</h3>
                     <div id="rental-type" class="grid grid-cols-3 gap-2">
-<<<<<<< DongVT/FE/PostProperty
-                        <button class="rental-btn border-2 border-orange-500 rounded-lg py-2 px-3 text-sm flex flex-col items-center bg-orange-50 text-orange-600 font-semibold">
-                            <span>Phòng trọ</span>
-                        </button>
-                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Nhà riêng</span></button>
-                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Ở ghép</span></button>
-                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Mặt bằng</span></button>
-                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Căn hộ chung cư</span></button>
-                        <button class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Căn hộ mini</span></button>
-=======
+
                         <button value="0" class="rental-btn border-2 border-orange-500 rounded-lg py-2 px-3 text-sm flex flex-col items-center bg-orange-50 text-orange-600">
                             <span>Phòng trọ</span>
                         </button>
@@ -156,29 +105,18 @@
                         <button value="0" class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Mặt bằng</span></button>
                         <button value="0" class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Căn hộ chung cư</span></button>
                         <button value="0" class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Căn hộ mini</span></button>
->>>>>>> master
                     </div>
                 </div>
 
                 <div class="mb-6">
                     <h3 class="font-semibold mb-2">Lọc theo khu vực</h3>
                     <div class="grid grid-cols-3 gap-2">
-<<<<<<< DongVT/FE/PostProperty
-                        <select class="border px-3 py-2 rounded-lg text-sm text-gray-700">
-                            <option>Hồ Chí Minh</option>
-                        </select>
-                        <select class="border px-3 py-2 rounded-lg text-sm text-gray-700">
-                            <option>Quận 8</option>
-                        </select>
-                        <select class="border px-3 py-2 rounded-lg text-sm text-gray-700">
-                            <option>Tất cả</option>
-=======
+
                         <select id="filterProvinceId" onchange="filterWard()" class="border-2 border-orange-500 px-3 py-2 bg-orange-50 text-orange-600 rounded-lg text-sm text-gray-700">
                         </select>
                         <select id="filterWarnId" onchange="filterStreet()" class="border-2 border-orange-500 bg-orange-50 text-orange-600 px-3 py-2 rounded-lg text-sm text-gray-700">
                         </select>
                         <select id="filterStreetId" class="border-2 border-orange-500 bg-orange-50 text-orange-600 px-3 py-2 rounded-lg text-sm text-gray-700">
->>>>>>> master
                         </select>
                     </div>
                 </div>
@@ -186,17 +124,7 @@
                 <div class="mb-6">
                     <h3 class="font-semibold mb-2">Khoảng giá</h3>
                     <div id="rental-type-price" class="flex flex-wrap gap-2">
-<<<<<<< DongVT/FE/PostProperty
-                        <button class="rental-btn border-2 border-orange-500 rounded-full px-4 py-1 text-sm bg-orange-50 text-orange-600 font-semibold">Tất cả</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Dưới 1 triệu</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">1 - 2 triệu</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">2 - 3 triệu</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">3 - 5 triệu</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">5 - 7 triệu</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">7 - 10 triệu</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">10 - 15 triệu</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Trên 15 triệu</button>
-=======
+
                         <button id="price-1" data-scope="all" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Tất cả</button>
                         <button id="price-2" data-price-max='1' data-scope="lower" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Dưới 1 triệu</button>
                         <button id="price-3" data-price-min='1' data-price-max='2' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">1 - 2 triệu</button>
@@ -206,22 +134,14 @@
                         <button id="price-7" data-price-min='7' data-price-max='10' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">7 - 10 triệu</button>
                         <button id="price-8" data-price-min='10' data-price-max='15' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">10 - 15 triệu</button>
                         <button id="price-9" data-price-min='15' data-scope="higher" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Trên 15 triệu</button>
->>>>>>> master
+
                     </div>
                 </div>
 
                 <div class="mb-6">
                     <h3 class="font-semibold mb-2">Khoảng diện tích</h3>
                     <div id="rental-type-acreage" class="flex flex-wrap gap-2">
-<<<<<<< DongVT/FE/PostProperty
-                        <button class="rental-btn border-2 border-orange-500 rounded-full px-4 py-1 text-sm bg-orange-50 text-orange-600 font-semibold">Tất cả</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Dưới 20m²</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 20m² - 30m²</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 30m² - 50m²</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 50m² - 70m²</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 70m² - 90m²</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Trên 90m²</button>
-=======
+
                         <button id="area-1" data-scope="all" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Tất cả</button>
                         <button id="area-2" data-area-max='20' data-scope="lower" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Dưới 20m²</button>
                         <button id="area-3" data-area-min='20' data-area-max='30' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 20m² - 30m²</button>
@@ -229,20 +149,15 @@
                         <button id="area-5" data-area-min='50' data-area-max='70' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 50m² - 70m²</button>
                         <button id="area-6" data-area-min='70' data-area-max='90' data-scope="equal" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Từ 70m² - 90m²</button>
                         <button id="area-7" data-area-min='90' data-scope="higher" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Trên 90m²</button>
->>>>>>> master
                     </div>
                 </div>
 
                 <div class="mb-6">
                     <h3 class="font-semibold mb-2">Đặc điểm nổi bật</h3>
                     <div id="rental-type-special" class="flex flex-wrap gap-2">
-<<<<<<< DongVT/FE/PostProperty
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Đầy đủ nội thất</button>
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có gác</button>
-=======
 
-@*                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có gác</button>
->>>>>>> master
+
+                        @*                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có gác</button>
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Kệ bếp</button>
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có máy lạnh</button>
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có máy giặt</button>
@@ -251,21 +166,15 @@
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Không chung chủ</button>
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Giờ giấc tự do</button>
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có bảo vệ 24/24</button>
-<<<<<<< DongVT/FE/PostProperty
-                        <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có hầm để xe</button>
-=======
+
                         <button class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Có hầm để xe</button> *@
->>>>>>> master
                     </div>
                 </div>
             </div>
 
             <div class="sticky bottom-0 bg-white w-full px-4 pt-2 pb-4 border-t rounded-b-lg">
-<<<<<<< DongVT/FE/PostProperty
-                <button class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl text-base shadow">Áp dụng</button>
-=======
+
                 <button type="button" onclick="filterAdvanced()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl text-base shadow">Áp dụng</button>
->>>>>>> master
             </div>
 
         </div>
@@ -294,33 +203,10 @@
 
         </div>
     </div>
-<<<<<<< DongVT/FE/PostProperty
 
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/authService.js"></script>
-    <script src="~/js/postPropertyService.js"></script>
-    @await RenderSectionAsync("Scripts", required: false)
     <script>
 
-        const locations = {
-          "Hà Nội": {
-            "Quận Ba Đình": ["Phường Phúc Xá", "Phường Trúc Bạch"],
-            "Quận Cầu Giấy": ["Phường Dịch Vọng", "Phường Yên Hòa"]
-          },
-          "TP Hồ Chí Minh": {
-            "Quận 1": ["Phường Bến Nghé", "Phường Đa Kao"],
-            "Quận Bình Thạnh": ["Phường 1", "Phường 2"]
-          }
-        };
-=======
-
-    @await RenderSectionAsync("Scripts", required: false)
-    <script>
-
->>>>>>> master
 
         function hideFilterPopup(id) {
             document.getElementById(id).classList.add('hidden');
@@ -330,108 +216,63 @@
             document.getElementById(id).classList.remove('hidden');
         }
         listSelectedSingleChoice();
-<<<<<<< DongVT/FE/PostProperty
-        selectedMultipleChoice('rental-type-special');
-=======
->>>>>>> master
-        function listSelectedSingleChoice(){
-            const listSelecter = ['rental-type','rental-type-price','rental-type-acreage'];
+
+        function listSelectedSingleChoice() {
+            const listSelecter = ['rental-type', 'rental-type-price', 'rental-type-acreage'];
             listSelecter.forEach(item => {
                 selectedSingleChoice(item);
             });
         }
 
-        function selectedSingleChoice(idSelecter){
+        function selectedSingleChoice(idSelecter) {
             const buttons = document.querySelectorAll(`#${idSelecter} .rental-btn`);
 
             buttons.forEach(btn => {
-              btn.addEventListener('click', () => {
-                buttons.forEach(b => {
-<<<<<<< DongVT/FE/PostProperty
-                  b.classList.remove('border-orange-500','bg-orange-50', 'text-orange-600', 'font-semibold');
-                  b.classList.add('border-gray-300','bg-white');
+                btn.addEventListener('click', () => {
+                    buttons.forEach(b => {
+
+                        b.classList.remove('border-orange-500', 'bg-orange-50', 'text-orange-600');
+                        b.classList.add('border-gray-300', 'bg-white');
+                    });
+                    btn.classList.remove('border-gray-300', 'bg-white');
+                    btn.classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
                 });
-                btn.classList.remove('border-gray-300','bg-white');
-                btn.classList.add('border-orange-500', 'bg-orange-50','text-orange-600', 'font-semibold');
-              });
-            });
-        }
-
-        function selectedMultipleChoice(idSelecter){
-            const buttons = document.querySelectorAll(`#${idSelecter} .rental-btn`);
-
-            buttons.forEach(btn => {
-              btn.addEventListener('click', () => {
-                buttons.forEach(b => {
-
-                });
-                if(btn.classList.contains('border-orange-500')){
-                    btn.classList.remove('border-orange-500','bg-orange-50', 'text-orange-600', 'font-semibold');
-                    btn.classList.add('border-gray-300','bg-white');
-                }
-                else{
-                    btn.classList.remove('border-gray-300','bg-white');
-                    btn.classList.add('border-orange-500', 'bg-orange-50','text-orange-600', 'font-semibold');
-                }
-
-=======
-                  b.classList.remove('border-orange-500','bg-orange-50', 'text-orange-600');
-                  b.classList.add('border-gray-300','bg-white');
-                });
-                btn.classList.remove('border-gray-300','bg-white');
-                btn.classList.add('border-orange-500', 'bg-orange-50','text-orange-600');
->>>>>>> master
-              });
             });
         }
 
 
         let level = 0;
-<<<<<<< DongVT/FE/PostProperty
-        let selectedProvince = "";
-        let selectedDistrict = "";
-=======
-        let selectedProvince = {id:""};
+
+        let selectedProvince = { id: "" };
         let selectedWard = { id: "" };
         let selectedStreet = { id: "" };
         let locations = [];
 
         const href = window.location.origin;
         const urlParamParents = new URLSearchParams(window.location.search);
->>>>>>> master
 
         const modal = document.getElementById("search-popup");
         const content = document.getElementById("modalContent");
         const title = document.getElementById("modalTitle");
         const backBtn = document.getElementById("backBtn");
 
-<<<<<<< DongVT/FE/PostProperty
 
-        renderProvinces();
-                backBtn.onclick = () => {
-          if (level === 2) {
-            level = 1;
-            renderDistricts(selectedProvince);
-=======
         getAllLocationAsync();
         setTimeout(() => {
             renderProvinces();
-        },300);
+        }, 300);
 
         backBtn.onclick = () => {
-          if (level === 2) {
-            level = 1;
-            renderWard(selectedProvince);
->>>>>>> master
-          } else if (level === 1) {
-            level = 0;
-            renderProvinces();
-          }
+            if (level === 2) {
+                level = 1;
+                renderWard(selectedProvince);
+            } else if (level === 1) {
+                level = 0;
+                renderProvinces();
+            }
         };
 
-<<<<<<< DongVT/FE/PostProperty
-        function renderProvinces() {
-=======
+
         async function getAllLocationAsync() {
             locations = await getAllLocation();
             let obj = getValueFromParam(locations);
@@ -478,7 +319,7 @@
             const filterPrice = urlParamParents.get('filterPrice') ?? "";
             const filterArea = urlParamParents.get('filterArea') ?? "";
 
-            if (filterPrice != ""){
+            if (filterPrice != "") {
                 let idPrice = filterPrice.split(',')[3];
                 document.getElementById(idPrice).classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
                 document.getElementById(idPrice).classList.remove('border-gray-300', 'bg-white');
@@ -493,58 +334,13 @@
         }
 
         function renderProvinces() {
-          
->>>>>>> master
-          level = 0;
-          title.innerText = "Chọn theo khu vực";
-          backBtn.classList.add("hidden");
-          content.innerHTML = "";
 
-<<<<<<< DongVT/FE/PostProperty
-          Object.keys(locations).forEach(province => {
-            const checked = province === selectedProvince ? "checked" : "";
-            const item = createCheckboxItem(province, checked, () => {
-              selectedProvince = province;
-              selectedDistrict = "";
-              selectedWard = "";
-              renderDistricts(province);
-            });
-            content.appendChild(item);
-          });
-        }
+            level = 0;
+            title.innerText = "Chọn theo khu vực";
+            backBtn.classList.add("hidden");
+            content.innerHTML = "";
 
-        function renderDistricts(province) {
-          level = 1;
-          title.innerText = province;
-          backBtn.classList.remove("hidden");
-          content.innerHTML = "";
 
-          Object.keys(locations[province]).forEach(district => {
-            const checked = district === selectedDistrict ? "checked" : "";
-            const item = createCheckboxItem(district, checked, () => {
-              selectedDistrict = district;
-              selectedWard = "";
-              renderWards(province, district);
-            });
-            content.appendChild(item);
-          });
-        }
-
-        function renderWards(province, district) {
-          level = 2;
-          title.innerText = district;
-          content.innerHTML = "";
-
-          locations[province][district].forEach(ward => {
-            const checked = ward === selectedWard ? "checked" : "";
-            const item = createCheckboxItem(ward, checked, () => {
-              selectedWard = ward;
-              $('#searchInput').val(`${province} > ${district} > ${ward}`);
-              hideFilterPopup('search-popup');
-            });
-            content.appendChild(item);
-          });
-=======
 
             locations.forEach(province => {
                 const checked = province.id == selectedProvince.id ? "checked" : "";
@@ -563,10 +359,10 @@
         }
 
         function renderWard(province) {
-          level = 1;
-          title.innerText = province.name;
-          backBtn.classList.remove("hidden");
-          content.innerHTML = "";
+            level = 1;
+            title.innerText = province.name;
+            backBtn.classList.remove("hidden");
+            content.innerHTML = "";
 
 
 
@@ -600,45 +396,48 @@
                 });
                 content.appendChild(item);
             });
->>>>>>> master
         }
 
         function createCheckboxItem(label, checked, onClick) {
-          const div = document.createElement("div");
-          div.className = "flex items-center gap-2 py-2 px-3 border-b cursor-pointer hover:bg-gray-100";
+            const div = document.createElement("div");
+            div.className = "flex items-center gap-2 py-2 px-3 border-b cursor-pointer hover:bg-gray-100";
 
-          const input = document.createElement("input");
-          input.type = "checkbox";
-          input.checked = checked;
-          input.className = "form-checkbox w-4 h-4 text-orange-500";
-          input.onclick = (e) => {
-            e.stopPropagation();
-            onClick();
-          };
+            const input = document.createElement("input");
+            input.type = "checkbox";
+            input.checked = checked;
+            input.className = "form-checkbox w-4 h-4 text-orange-500";
+            input.onclick = (e) => {
+                e.stopPropagation();
+                onClick();
+            };
 
-          const span = document.createElement("span");
-          span.innerText = label;
-          div.appendChild(input);
-          div.appendChild(span);
+            const span = document.createElement("span");
+            span.innerText = label;
+            div.appendChild(input);
+            div.appendChild(span);
 
-          div.onclick = () => onClick();
+            div.onclick = () => onClick();
 
-          return div;
+            return div;
         }
 
-<<<<<<< DongVT/FE/PostProperty
         function updateNavigation() {
             if (authService.isAuthenticated()) {
                 document.getElementById('authNavItems').style.display = 'none';
-                
+
                 const userProfileNav = document.getElementById('userProfileNavItem');
                 userProfileNav.style.display = 'flex';
-                
+
                 const user = authService.getCurrentUser();
-                if(user && user.name) {
+                if (user && user.name) {
                     document.getElementById('userProfileLink').innerText = `Chào, ${user.name}`;
                 }
-=======
+
+            } else {
+                document.getElementById('authNavItems').style.display = 'block';
+                document.getElementById('userProfileNavItem').style.display = 'none';
+            }
+        }
         function searchAdvanced() {
             const newHref = addParamsToHref(href, {
                 province: selectedProvince.id ?? 0,
@@ -646,26 +445,6 @@
                 street: selectedStreet.id ?? 0
             });
             window.location.href = newHref;
-        }
-
-
-        function updateNavigation() {
-            const isAuthenticated = authService.isAuthenticated();
-            const loginNavItem = document.getElementById('loginNavItem');
-            const registerNavItem = document.getElementById('registerNavItem');
-            const logoutNavItem = document.getElementById('logoutNavItem');
-            const userProfileNavItem = document.getElementById('userProfileLink');
-
-            if (isAuthenticated) {
-                loginNavItem.style.display = 'none';
-                registerNavItem.style.display = 'none';
-                logoutNavItem.style.display = 'block';
-                userProfileNavItem.style.display = 'block';
->>>>>>> master
-            } else {
-                document.getElementById('authNavItems').style.display = 'block';
-                document.getElementById('userProfileNavItem').style.display = 'none';
-            }
         }
 
         async function handleLogout(event) {
@@ -676,5 +455,6 @@
 
         document.addEventListener('DOMContentLoaded', updateNavigation);
     </script>
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

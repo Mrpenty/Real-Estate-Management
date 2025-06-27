@@ -267,11 +267,8 @@ propertyForm.onsubmit = async function(e) {
     const amenityIds = Array.from(document.querySelectorAll('input[name="AmenityIds"]:checked')).map(cb => parseInt(cb.value));
     const provinceId = parseInt(formData.get('ProvinceId'));
     const wardId = parseInt(formData.get('WardId'));
-    // Ghép số nhà và tên đường
-    const streetNumber = formData.get('StreetNumber') || '';
-    const streetSelect = document.getElementById('street-select');
-    const streetName = streetSelect && streetSelect.options[streetSelect.selectedIndex] ? streetSelect.options[streetSelect.selectedIndex].text : '';
-    const street = (streetNumber + ' ' + streetName).trim();
+    const streetId = parseInt(formData.get('StreetId'));
+    const detailedAddress = formData.get('StreetNumber') || '';
     const propertyData = {
         title: formData.get('title'),
         description: formData.get('description'),
@@ -283,7 +280,8 @@ propertyForm.onsubmit = async function(e) {
         amenityIds: amenityIds,
         provinceId: provinceId,
         wardId: wardId,
-        street: street
+        streetId: streetId,
+        detailedAddress: detailedAddress
     };
     // Kiểm tra dữ liệu trước khi gửi
     for (const key in propertyData) {
@@ -309,7 +307,7 @@ propertyForm.onsubmit = async function(e) {
         return;
     }
     const data = await res.json();
-    createdPropertyId = data.propertyId || data.id; // Đảm bảo backend trả về propertyId
+    createdPropertyId = data.propertyId; // Sử dụng propertyId từ response
     // Chuyển sang bước 2
     document.getElementById('step-1').style.display = 'none';
     document.getElementById('step-2').style.display = '';
@@ -376,24 +374,54 @@ function renderImagePreview() {
 
 // Bước 2: Upload ảnh
 async function uploadImages(propertyId) {
-    await Promise.all(imageFiles.map(async (file, idx) => {
-        // TODO: Thay thế đoạn này bằng upload thực tế lên server/storage để lấy url thực tế
-        const url = await new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onload = e => resolve(e.target.result);
-            reader.readAsDataURL(file);
+    const token = localStorage.getItem('authToken');
+    
+    for (let idx = 0; idx < imageFiles.length; idx++) {
+        const file = imageFiles[idx];
+        
+        // Upload file lên server trước
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const uploadResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/upload`, {
+            method: 'POST',
+            headers: {
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: formData
         });
+        
+        if (!uploadResponse.ok) {
+            const error = await uploadResponse.text();
+            alert(`Upload ảnh thất bại: ${error}`);
+            return;
+        }
+        
+        const uploadResult = await uploadResponse.json();
+        const imageUrl = uploadResult.imageUrl;
+        
+        // Lưu thông tin ảnh vào database
         const dto = {
-            url: url, // url thực tế sau khi upload
+            url: imageUrl,
             isPrimary: idx === primaryImageIndex,
             order: idx
         };
-            await fetch(`https://localhost:7031/api/properties/${propertyId}/images`, {
+        
+        const saveResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
             body: JSON.stringify(dto)
         });
-    }));
+        
+        if (!saveResponse.ok) {
+            const error = await saveResponse.text();
+            alert(`Lưu thông tin ảnh thất bại: ${error}`);
+            return;
+        }
+    }
 }
 
 document.getElementById('btn-finish').onclick = async function() {
