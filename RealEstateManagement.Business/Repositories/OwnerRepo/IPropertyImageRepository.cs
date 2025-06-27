@@ -1,10 +1,10 @@
-﻿using System;
+﻿using RealEstateManagement.Data.Entity;
+using RealEstateManagement.Data.Entity.PropertyEntity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RealEstateManagement.Data.Entity.PropertyEntity;
-
 
 namespace RealEstateManagement.Business.Repositories.OwnerRepo
 {
