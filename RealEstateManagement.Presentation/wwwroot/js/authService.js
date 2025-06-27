@@ -252,22 +252,19 @@ const authService = {
         const isAuthenticated = this.isAuthenticated();
         console.log('Is authenticated:', isAuthenticated);
 
-        const loginNavItem = document.getElementById('loginNavItem');
-        const registerNavItem = document.getElementById('registerNavItem');
-        const logoutNavItem = document.getElementById('logoutNavItem');
 
-        if (loginNavItem) {
+        const userProfileNavItem = document.getElementById('userProfileNavItem');
+        const authNavItems = document.getElementById('authNavItems');
+
+        if (userProfileNavItem) {
             console.log('Login nav item visibility:', !isAuthenticated);
-            loginNavItem.style.display = isAuthenticated ? 'none' : 'block';
+            userProfileNavItem.style.display = isAuthenticated ? 'block' : 'none';
         }
-        if (registerNavItem) {
+        if (authNavItems) {
             console.log('Register nav item visibility:', !isAuthenticated);
-            registerNavItem.style.display = isAuthenticated ? 'none' : 'block';
+            authNavItems.style.display = isAuthenticated ? 'none' : 'block';
         }
-        if (logoutNavItem) {
-            console.log('Logout nav item visibility:', isAuthenticated);
-            logoutNavItem.style.display = isAuthenticated ? 'block' : 'none';
-        }
+
     },
 
     async verifyEmail(email) {

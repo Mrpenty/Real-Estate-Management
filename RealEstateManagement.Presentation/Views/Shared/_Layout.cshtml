@@ -26,7 +26,7 @@
         <div class="w-full px-4 py-4 flex items-center justify-between">
             <div class="flex items-center" style="cursor:pointer" onclick="window.location.href='/'">
                 <h1 class="text-xl font-bold">
-                    <span class="text-blue-700">RealEstateManagement</span>
+                    <span class="text-blue-700">RealEstate</span>
                 </h1>
             </div>
             <div class="relative w-full max-w-md mx-auto ml-6 flex">
@@ -631,31 +631,10 @@
             window.location.href = newHref;
         }
 
-
-        function updateNavigation() {
-            const isAuthenticated = authService.isAuthenticated();
-            const loginNavItem = document.getElementById('loginNavItem');
-            const registerNavItem = document.getElementById('registerNavItem');
-            const logoutNavItem = document.getElementById('logoutNavItem');
-            const userProfileNavItem = document.getElementById('userProfileLink');
-
-            if (isAuthenticated) {
-                loginNavItem.style.display = 'none';
-                registerNavItem.style.display = 'none';
-                logoutNavItem.style.display = 'block';
-                userProfileNavItem.style.display = 'block';
-            } else {
-                loginNavItem.style.display = 'block';
-                registerNavItem.style.display = 'block';
-                logoutNavItem.style.display = 'none';
-                userProfileNavItem.style.display = 'none';
-            }
-        }
-
         function searchLocationInput(){
             //sessionStorage.setItem('selectedProvince',JSON.stringify(selectedLocationLists));
             sessionStorage.setItem('selectedLocationLists',JSON.stringify(selectedLocationLists));
-            window.location.reload();
+            window.location.href = '/';
         }
 
         async function handleLogout(event) {
