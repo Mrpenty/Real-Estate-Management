@@ -305,19 +305,6 @@ namespace RealEstateManagement.Business.Repositories.Properties
             return result;
         }
 
-        public Task<bool> IndexPropertyAsync(PropertySearchDTO dto)
-        {
-            throw new NotImplementedException();
-        }
 
-        public Task BulkIndexPropertiesAsync(IEnumerable<PropertySearchDTO> properties)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<int>> SearchPropertyIdsAsync(string keyword)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -4,7 +4,7 @@ namespace RealEstateManagement.Business.Repositories.Chat
 {
     public interface IChatRepository
     {
-        Task<Message> SaveMessageAsync(Message message);
-        Task<List<Message>> GetMessagesByConversationIdAsync(int conversationId);
+        //Task<Message> SaveMessageAsync(Message message);
+        //Task<List<Message>> GetMessagesByConversationIdAsync(int conversationId);
     }
 }

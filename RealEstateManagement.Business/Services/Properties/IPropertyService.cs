@@ -25,11 +25,6 @@ namespace RealEstateManagement.Business.Services.Properties
 
         Task<List<PropertyDetailDTO>> GetPropertiesByIdsAsync(List<int> ids);
 
-
-        //Elasticsearch
-        Task<bool> IndexPropertyAsync(PropertySearchDTO dto);
-        Task BulkIndexPropertiesAsync();
-        Task<IEnumerable<HomePropertyDTO>> SearchAsync(string keyword);
         Task<IEnumerable<HomePropertyDTO>> SearchAdvanceAsync(string province = "", string ward = "", string street = "",int? userId = 0);
 
         Task<List<ProvinceDTO>> GetListLocationAsync();
