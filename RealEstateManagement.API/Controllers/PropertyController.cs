@@ -20,7 +20,6 @@ namespace RealEstateManagement.API.Controllers
         }
 
         [HttpGet("homepage-allproperty")]
-
         //[Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetHomepageProperties()
         {
@@ -213,6 +212,30 @@ namespace RealEstateManagement.API.Controllers
         {
             var amenities = await _propertyService.GetAmenitiesAsync();
             return Ok(amenities);
+        }
+        [HttpGet("filter-by-type")]
+        public async Task<IActionResult> FilterByType([FromQuery] string type)
+        {
+            if (string.IsNullOrEmpty(type))
+            {
+                return BadRequest("Bạn phải nhập loại bất động sản.");
+            }
+
+            try
+            {
+                var properties = await _propertyService.FilterByTypeAsync(type);
+
+                if (properties == null || !properties.Any())
+                {
+                    return NotFound("Không tìm thấy bất động sản nào với loại đã cung cấp.");
+                }
+
+                return Ok(properties);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
     }
 }

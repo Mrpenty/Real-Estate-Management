@@ -17,12 +17,10 @@ namespace RealEstateManagement.Business.Repositories.Properties
     public class PropertyRepository : IPropertyRepository
     {
         private readonly RentalDbContext _context;
-        private readonly IElasticClient _elasticClient;
 
-        public PropertyRepository(RentalDbContext context, IElasticClient elasticClient)
+        public PropertyRepository(RentalDbContext context)
         {
             _context = context;
-            _elasticClient = elasticClient;
         }
         //Lấy tất cả property
         public async Task<IEnumerable<Property>> GetAllAsync()
@@ -305,6 +303,38 @@ namespace RealEstateManagement.Business.Repositories.Properties
             return result;
         }
 
+        public async Task<IEnumerable<Property>> FilterByTypeAsync(string type)
+        {
+            var query = _context.Properties
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Province)
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Ward)
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Street)
+                .Include(p => p.Images)
+                .Include(p => p.Landlord)
+                .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
+                .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
+                .AsQueryable();
+            if (!string.IsNullOrWhiteSpace(type))
+            {
+                query = query.Where(p => p.Type == type);
+            }
+            return await query
+                .Select(p => new
+                {
+                    Property = p,
+                    PromotionLevel = p.PropertyPromotions.Any()
+                        ? p.PropertyPromotions.Max(pp => pp.PromotionPackage.Level)
+                        : 0
+                })
+                .OrderByDescending(x => x.PromotionLevel)
+                .ThenByDescending(x => x.Property.CreatedAt)
+                .ThenByDescending(x => x.Property.ViewsCount)
+                .Select(x => x.Property)
+                .ToListAsync();
+        }
 
     }
 }

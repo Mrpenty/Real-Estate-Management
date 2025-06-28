@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.API.Extensions;
-
+using RealEstateManagement.API.Hubs;
 using RealEstateManagement.API.Middleware;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Business.Services.Properties;
@@ -25,7 +25,7 @@ builder.Services.AddDependencyInjectionServices();
 builder.Services.AddElasticsearch(builder.Configuration);
 
 var app = builder.Build();
-//app.UseRouting();
+app.UseRouting();
 app.UseErrorHandlingMiddleware();
 
 app.UseCorsPolicy(app.Environment);
@@ -39,7 +39,11 @@ app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHub<ChatHub>("/chatHub");     // 👈 Map SignalR Hub
+});
 app.MapControllers();
 app.UseSwaggerServices(app.Environment);
 app.Run();

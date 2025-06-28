@@ -38,7 +38,8 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IAddressRepository, AddressRepository>();
             services.AddScoped<ISearchProRepo, SearchProRepo>();
             services.AddScoped<IFavoriteRepository, FavoriteRepository>();
-
+            //Chat Repository
+            services.AddScoped<IChatRepository, ChatRepository>();
 
             //----Service----\\
 
@@ -59,6 +60,8 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<ISearchProService, SearchProService>();
             services.AddScoped<IFavoriteService, FavoriteService>();
 
+            //Chat Serivce
+            services.AddScoped<IChatService, ChatService>();
 
             return services;
         }

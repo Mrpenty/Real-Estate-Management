@@ -27,5 +27,6 @@ namespace RealEstateManagement.Business.Repositories.Properties
 
         Task<List<ProvinceDTO>> GetListLocationAsync();
 
+        Task<IEnumerable<Property>> FilterByTypeAsync(string type);
     }
 }
