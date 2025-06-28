@@ -1,12 +1,11 @@
 ﻿using RealEstateManagement.Business.DTO.Chat;
+using RealEstateManagement.Data.Entity.Messages;
 
 namespace RealEstateManagement.Business.Services.Chat
 {
     public interface IChatService
     {
-        //Task<MessageDTO> SendMessageAsync(SendMessageDTO dto);
-        //Task<List<MessageDTO>> GetMessagesAsync(int conversationId);
+        Task<Conversation> CreateConversationAsync(ConversationDTO dto);
+        Task<Conversation> GetDetailsAsync(int id);
     }
-
-
 }

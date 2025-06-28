@@ -36,7 +36,7 @@ namespace RealEstateManagement.Business.Services.Properties
 
         Task<IEnumerable<Amenity>> GetAmenitiesAsync();
 
-
+        Task<IEnumerable<HomePropertyDTO>> FilterByTypeAsync(string type);
 
     }
 }

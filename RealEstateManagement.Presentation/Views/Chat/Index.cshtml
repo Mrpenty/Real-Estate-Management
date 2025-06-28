@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Chat";
+    var conversationId = ViewBag.ConversationId;
+}
+
+<h2>Real-time Chat</h2>
+
+<input type="text" id="userInput" placeholder="User ID" />
+<input type="text" id="messageInput" placeholder="Message" />
+<button id="sendButton">Send</button>
+<ul id="messagesList"></ul>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        var conversationId = "@conversationId";
+    </script>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/chat.js"></script>
+
+}
+

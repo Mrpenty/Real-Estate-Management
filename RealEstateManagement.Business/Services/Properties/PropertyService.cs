@@ -352,5 +352,38 @@ namespace RealEstateManagement.Business.Services.Properties
             return await _context.Amenities.ToListAsync();
 
         }
+        public async Task<IEnumerable<HomePropertyDTO>> FilterByTypeAsync(string type)
+        {
+            var properties = await _repository.FilterByTypeAsync(type);
+            return properties.Select(p => new HomePropertyDTO
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Description = p.Description,
+                Type = p.Type,
+                AddressID = p.AddressId,
+                Area = p.Area,
+                Bedrooms = p.Bedrooms,
+                Price = p.Price,
+                Status = p.Status,
+                Location = p.Location,
+                CreatedAt = p.CreatedAt,
+                ProvinceId = p.Address.ProvinceId,
+                Province = p.Address.Province.Name,
+                WardId = p.Address.WardId,
+                Ward = p.Address.Ward.Name,
+                StreetId = p.Address.StreetId,
+                ViewsCount = p.ViewsCount,
+                PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
+                LandlordName = p.Landlord?.Name,
+                LandlordPhoneNumber = p.Landlord?.PhoneNumber,
+                LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
+                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                PromotionPackageName = p.PropertyPromotions?
+                    .OrderByDescending(pp => pp.PromotionPackage.Level)
+                    .Select(pp => pp.PromotionPackage.Name)
+                    .FirstOrDefault()
+            });
+        }
     }
 }
