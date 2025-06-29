@@ -6,15 +6,11 @@ using System.Threading.Tasks;
 
 namespace RealEstateManagement.Business.DTO.Chat
 {
-    public class ConversationDTO
+    public class CreateConversationDTO
     {
-        public int Id { get; set; } 
+        //public int Id { get; set; }
         public int RenterId { get; set; }
         public int LandlordId { get; set; }
         public int? PropertyId { get; set; }
-        public string RenterName { get; set; }
-        public string LandlordName { get; set; }
-        //Danh sách tin nhắn
-        public List<MessageDTO> Messages { get; set; }
     }
 }

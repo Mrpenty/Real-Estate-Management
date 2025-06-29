@@ -10,10 +10,16 @@ namespace RealEstateManagement.API.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, conversationId);
         }
 
-        public async Task SendMessage(string conversationId, string senderId, string message)
+        public async Task SendMessage(string conversationId, string senderId, string content)
         {
-            // Gửi đến tất cả các client trong cùng cuộc hội thoại
-            await Clients.Group(conversationId).SendAsync("ReceiveMessage", senderId, message);
+            var message = new
+            {
+                SenderId = senderId,
+                Content = content,
+                SentAt = DateTime.UtcNow
+            };
+
+            await Clients.Group(conversationId).SendAsync("ReceiveMessage", message);
         }
     }
 
