@@ -8,14 +8,16 @@ using RealEstateManagement.Business.Services.Properties;
 using RealEstateManagement.Business.Repositories.AddressRepo;
 using RealEstateManagement.Business.Repositories.Repository;
 using RealEstateManagement.Business.Services.User;
-using RealEstateManagement.Business.Repositories.Chat;
-using RealEstateManagement.Business.Services.Chat;
 using RealEstateManagement.Business.Services.UploadPicService;
 
 using RealEstateManagement.Business.Repositories.SearchProperties;
 using RealEstateManagement.Business.Services.SearchProperties;
 using RealEstateManagement.Business.Repositories.FavoriteRepository;
 using RealEstateManagement.Business.Services.Favorite;
+using RealEstateManagement.Business.Repositories.Chat.Conversations;
+using RealEstateManagement.Business.Repositories.Chat.Messages;
+using RealEstateManagement.Business.Services.Chat.Messages;
+using RealEstateManagement.Business.Services.Chat.Conversations;
 namespace RealEstateManagement.API.Extensions
 {
     public static class DependencyInjectionExtensions
@@ -39,7 +41,8 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<ISearchProRepo, SearchProRepo>();
             services.AddScoped<IFavoriteRepository, FavoriteRepository>();
             //Chat Repository
-            services.AddScoped<IChatRepository, ChatRepository>();
+            services.AddScoped<IConversationRepository, ConversationRepository>();
+            services.AddScoped<IMessageRepository,MessageRepository>();
 
             //----Service----\\
 
@@ -61,7 +64,8 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IFavoriteService, FavoriteService>();
 
             //Chat Serivce
-            services.AddScoped<IChatService, ChatService>();
+            services.AddScoped<IConversationService, ConversationService>();
+            services.AddScoped<IMessageService, MessageService>();
 
             return services;
         }

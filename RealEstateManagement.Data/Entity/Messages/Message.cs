@@ -13,7 +13,6 @@ namespace RealEstateManagement.Data.Entity.Messages
         public DateTime SentAt { get; set; }
 
         // Navigation properties
-        public Conversation Conversation { get; set; }
         public ApplicationUser Sender { get; set; }
     }
 }

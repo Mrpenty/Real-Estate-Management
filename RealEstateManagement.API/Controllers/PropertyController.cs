@@ -150,24 +150,6 @@ namespace RealEstateManagement.API.Controllers
             }
         }
 
-        //[HttpPost("add-favorite")]
-        //[Authorize(Roles = "Renter")]
-        //public async Task<IActionResult> AddToFavorite([FromBody] FavoritePropertyDTO dto)
-        //{
-        //    var userIdClaim = User.FindFirst("id");
-        //    if (userIdClaim == null)
-        //        return Unauthorized("Đăng nhập trước khi thêm vào danh sách yêu thích");
-        //    if (!int.TryParse(userIdClaim.Value, out var userId))
-        //        return Unauthorized("ID người dùng không hợp lệ");
-        //    //var userIdClaim = int.Parse(User.FindFirst("id").Value);
-        //    var result = await _favoriteService.AddToFavoriteAsync(userId, dto.PropertyId);
-        //    if (!result)
-        //        return BadRequest("Đã có trong danh sách yêu thích hoặc dữ liệu không hợp lệ.");
-
-        //    return Ok("Đã thêm vào danh sách yêu thích.");
-
-        //}
-
         // GET: api/PropertySearch/search?query=apartment
 
         [HttpGet("search-advanced")]
