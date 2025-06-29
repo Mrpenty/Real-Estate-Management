@@ -36,6 +36,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 Type = p.Type,
                 AddressID = p.AddressId,
                 StreetId = p.Address.StreetId,
+                Street = p.Address.Street.Name,
                 ProvinceId = p.Address.ProvinceId,
                 Province = p.Address.Province.Name,
                 WardId = p.Address.WardId,

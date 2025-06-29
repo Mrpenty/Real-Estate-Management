@@ -28,7 +28,7 @@ const propertyService = {
             else provinces.push(provinceId);
 
             const provinceIds = provinces.join(',');
-            const wardIds = wards.join(',');;
+            const wardIds = wards.join(',');
             const streetIds = streets.join(',');
             const filterCategory = urlParams.get('filterCategory');
             const filterPrice = urlParams.get('filterPrice');
@@ -42,16 +42,16 @@ const propertyService = {
 
             //console.log(provinceIds, wardIds, streetIds);
 
-            //console.log({
-            //    provinceId,
-            //    wardId,
-            //    streetId,
-            //    filterCategory,
-            //    filterPrice,
-            //    filterArea,
-            //    filterAmenity,
-            //    isFilter
-            //});
+            console.log({
+                provinceId,
+                wardId,
+                streetId,
+                filterCategory,
+                filterPrice,
+                filterArea,
+                filterAmenity,
+                isFilter
+            });
             const token = localStorage.getItem('authToken');
             let userId = 0;
             if (token) {
