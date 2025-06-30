@@ -39,7 +39,8 @@ namespace RealEstateManagement.Business.Services.Auth
 
         public async Task<AuthMessDTO> LoginAsync(LoginDTO loginDTO)
         {
-            loginDTO.LoginIdentifier = loginDTO.LoginIdentifier.Replace("+84", "0");
+            //Comment 
+            //loginDTO.LoginIdentifier = loginDTO.LoginIdentifier.Replace("+84", "0");
             var user = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == loginDTO.LoginIdentifier);
 
             if (user == null)

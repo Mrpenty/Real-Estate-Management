@@ -145,18 +145,18 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
                 .AsQueryable();
 
-            if (filter.MinPrice.HasValue && filter.ScopePrice != "all")
+            query = query.Where(p => p.Type == filter.Type);
+
+            if (filter.MinPrice.HasValue)
             {
                 filter.MinPrice = filter.MinPrice * 1000000;
-                if (filter.ScopePrice == "higher") query = query.Where(p => p.Price > filter.MinPrice.Value);
-                else query = query.Where(p => p.Price >= filter.MinPrice.Value);
+                query = query.Where(p => p.Price >= filter.MinPrice.Value);
             }
                 
-            if (filter.MaxPrice.HasValue && filter.ScopePrice != "all")
+            if (filter.MaxPrice.HasValue)
             {
                 filter.MaxPrice = filter.MaxPrice * 1000000;
-                if (filter.ScopePrice == "lower") query = query.Where(p => p.Price < filter.MaxPrice.Value);
-                else query = query.Where(p => p.Price <= filter.MaxPrice.Value);
+                query = query.Where(p => p.Price <= filter.MaxPrice.Value);
             }
                 
             if (filter.MinBedrooms.HasValue)
@@ -164,16 +164,14 @@ namespace RealEstateManagement.Business.Repositories.Properties
             if (filter.MaxBedrooms.HasValue)
                 query = query.Where(p => p.Bedrooms <= filter.MaxBedrooms.Value);
 
-            if (filter.MinArea.HasValue && filter.ScopeArea != "all")
+            if (filter.MinArea.HasValue)
             {
-                if(filter.ScopeArea == "higher") query = query.Where(p => p.Area > filter.MinArea.Value);
-                else query = query.Where(p => p.Area >= filter.MinArea.Value);
+                query = query.Where(p => p.Area >= filter.MinArea.Value);
             }
                 
-            if (filter.MaxArea.HasValue && filter.ScopeArea != "all")
+            if (filter.MaxArea.HasValue)
             {
-                if (filter.ScopeArea == "lower") query = query.Where(p => p.Area < filter.MaxArea.Value);
-                else query = query.Where(p => p.Area <= filter.MaxArea.Value);
+                query = query.Where(p => p.Area <= filter.MaxArea.Value);
             }
                 
 
@@ -189,16 +187,6 @@ namespace RealEstateManagement.Business.Repositories.Properties
                     p.PropertyAmenities.Any(pa => validNames.Contains(pa.Amenity.Name.ToLower())));
             }
 
-            //if (!string.IsNullOrEmpty(filter.Location))
-            //{
-            //    var arrLocation = filter.Location.Split(",");
-            //    var provinceId = int.Parse(arrLocation[0]);
-            //    var wardId = int.Parse(arrLocation[1]);
-            //    var streetId = int.Parse(arrLocation[2]);
-            //    if (provinceId != 0) query = query.Where(p => p.Address.PropertyId == provinceId);
-            //    if (wardId != 0) query = query.Where(p => p.Address.WardId == wardId);
-            //    if (streetId != 0) query = query.Where(p => p.Address.StreetId == streetId);
-            //}
 
             if (filter.Provinces.Count != 0)
             {
