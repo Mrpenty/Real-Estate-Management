@@ -35,6 +35,7 @@ namespace RealEstateManagement.Presentation.Controllers
         {
             try
             {
+                //comment
                 var token = HttpContext.Request.Cookies["accessToken"];
                 if (string.IsNullOrEmpty(token))
                 {
