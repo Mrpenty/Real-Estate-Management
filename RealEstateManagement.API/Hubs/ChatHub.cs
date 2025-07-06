@@ -101,17 +101,7 @@ namespace RealEstateManagement.API.Hubs
                 SentAt = message.SentAt,
                 SenderId = senderId
             });
-            //// ✅ Nếu người nhận đang mở conversation thì xem như đã đọc
-            //int receiverId = (conversation.RenterId == userId) ? conversation.LandlordId : conversation.RenterId;
 
-            //var connections = ChatConnectionManager.GetConnections(conversationId);
-            //if (connections.Contains(receiverId))
-            //{
-            //    message.IsRead = true;
-            //    await _context.SaveChangesAsync();
-
-            //    await Clients.Group(conversationId).SendAsync("MessageRead", conversationId, receiverId, message.Id);
-            //}
 
             // ✅ Nếu người nhận đang mở cuộc trò chuyện, thì gọi lại hàm MarkAsRead để trigger event "MessageRead"
             int receiverId = (conversation.RenterId == userId) ? conversation.LandlordId : conversation.RenterId;
@@ -133,6 +123,20 @@ namespace RealEstateManagement.API.Hubs
             }
 
             await base.OnDisconnectedAsync(exception);
+        }
+        // Khi người dùng đang gõ
+        public async Task Typing(string conversationId, string senderId)
+        {
+            // Gửi cho tất cả (trừ chính sender)
+            await Clients.GroupExcept(conversationId, Context.ConnectionId)
+                .SendAsync("ShowTyping", conversationId, int.Parse(senderId));
+        }
+
+        // Khi người dùng dừng gõ (sau timeout)
+        public async Task StopTyping(string conversationId, string senderId)
+        {
+            await Clients.GroupExcept(conversationId, Context.ConnectionId)
+                .SendAsync("HideTyping", conversationId, int.Parse(senderId));
         }
 
     }

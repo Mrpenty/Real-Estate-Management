@@ -9,6 +9,8 @@ const pageSize = 20;
 let isLoading = false;
 let allMessagesLoaded = false;
 
+let typingTimeout;
+const TYPING_DELAY = 3000;
 // Kết nối tới hub SignalR
 connection.start().then(function () {
     console.log("SignalR connected");
@@ -32,7 +34,6 @@ connection.on("ReceiveMessage", function (message) {
     div.innerHTML = `
         <div>${message.content}</div>
         <small>${new Date(message.sentAt).toLocaleString()}</small>
-
     `;
     container.appendChild(div);
 
@@ -81,10 +82,10 @@ async function loadConversations() {
             const timeText = conv.lastSentAt ? new Date(conv.lastSentAt).toLocaleString() : "";
 
             div.innerHTML = `
-        <div class="name">${displayName}</div>
-        <div class="last-message">${shortMessage}</div>
-        <small class="timestamp">${timeText}</small>
-    `;
+                <div class="name">${displayName}</div>
+                <div class="last-message">${shortMessage}</div>
+                <small class="timestamp">${timeText}</small>
+            `;
 
             div.addEventListener("click", () => loadMessages(conv.id, 0, pageSize, false));
             listDiv.appendChild(div);
@@ -136,7 +137,16 @@ connection.on("MessageRead", function (conversationId, readerId, messageId) {
         lastMessage.appendChild(icon);
     }
 });
+connection.on("ShowTyping", function (conversationId, typingUserId) {
+    console.log("Nhận ShowTyping từ:", typingUserId, "trong conversation:", conversationId);
+    if (conversationId !== currentConversationId || typingUserId === userId) return;
+    document.getElementById("typingIndicator").style.display = "block";
+});
 
+connection.on("HideTyping", function (conversationId, typingUserId) {
+    if (conversationId !== currentConversationId || typingUserId === userId) return;
+    document.getElementById("typingIndicator").style.display = "none";
+});
 
 window.loadMessages = async function (conversationId, skip = 0, take = 20, append = false) {
     currentConversationId = conversationId;
@@ -220,6 +230,7 @@ window.loadMessages = async function (conversationId, skip = 0, take = 20, appen
 
 document.getElementById("sendButton").addEventListener("click", async function () {
     const content = document.getElementById("messageInput").value.trim();
+
     if (!content || currentConversationId === null) return;
 
     try {
@@ -236,6 +247,20 @@ document.getElementById("messageInput").addEventListener("keydown", function (ev
         document.getElementById("sendButton").click();
     }
 });
+
+document.getElementById("messageInput").addEventListener("input", function () {
+    if (!currentConversationId || !userId) return;
+
+    // Gửi "Typing" nếu đang nhập
+    connection.invoke("Typing", currentConversationId.toString(), userId.toString());
+
+    // Xóa timeout cũ, thiết lập timeout mới
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+        connection.invoke("StopTyping", currentConversationId.toString(), userId.toString());
+    }, TYPING_DELAY);
+});
+
 //Lấy token
 function getUserIdFromToken(token) {
     const payload = JSON.parse(atob(token.split('.')[1]));
