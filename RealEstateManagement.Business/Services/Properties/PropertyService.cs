@@ -356,5 +356,4 @@ namespace RealEstateManagement.Business.Services.Properties
         {
             throw new NotImplementedException();
         }
-    }
-}
+    }  }

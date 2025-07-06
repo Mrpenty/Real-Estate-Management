@@ -109,8 +109,6 @@ namespace RealEstateManagement.API.Controllers
             return Ok(result);
         }
 
-
-
         //So sánh các property với nhau (tối đa là 3)
         [HttpPost("compare")]
         //[Authorize(Roles = "Renter")]
