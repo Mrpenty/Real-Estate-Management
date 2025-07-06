@@ -17,14 +17,29 @@ namespace RealEstateManagement.Business.Services.OwnerService
             _repository = repository;
         }
 
-        public async Task<RentalContract> GetByIdAsync(int id)
+        //Xem hợp đồng của bài Post đó
+        public async Task<RentalContractViewDto> GetByPostIdAsync(int id)
         {
-            return await _repository.GetByIdAsync(id);
-        }
+            var entity = await _repository.GetByPostIdAsync(id);
+            if (entity == null) throw new Exception("Không tìm thấy hợp đồng.");
 
-        public async Task<IEnumerable<RentalContract>> GetByPostIdAsync(int postId)
-        {
-            return await _repository.GetByPostIdAsync(postId);
+            return new RentalContractViewDto
+            {
+                Id = entity.Id,
+                PropertyPostId = entity.PropertyPostId,
+                DepositAmount = entity.DepositAmount,
+                MonthlyRent = entity.MonthlyRent,
+                ContractDurationMonths = entity.ContractDurationMonths,
+                PaymentCycle = entity.PaymentCycle,
+                PaymentDayOfMonth = entity.PaymentDayOfMonth,
+                StartDate = entity.StartDate,
+                EndDate = entity.EndDate,
+                PaymentMethod = entity.PaymentMethod,
+                ContactInfo = entity.ContactInfo,
+                Status = entity.Status,
+                CreatedAt = entity.CreatedAt,
+                ConfirmedAt = entity.ConfirmedAt
+            };
         }
 
         public async Task AddAsync(RentalContractCreateDto dto)
@@ -48,6 +63,13 @@ namespace RealEstateManagement.Business.Services.OwnerService
             if (string.IsNullOrWhiteSpace(dto.PaymentMethod))
                 throw new ArgumentException("Phương thức thanh toán không được để trống.");
 
+            if (dto.PaymentDayOfMonth < 1 || dto.PaymentDayOfMonth > 31)
+                throw new ArgumentException("Ngày thanh toán phải nằm trong khoảng từ 1 đến 31.");
+
+            if (!Enum.IsDefined(typeof(RentalContract.PaymentCycleType), dto.PaymentCycle))
+                throw new ArgumentException("Kiểu thanh toán không hợp lệ (phải là Monthly, Quarterly hoặc Yearly).");
+
+
             var contract = new RentalContract
             {
                 PropertyPostId = dto.PropertyPostId,
@@ -58,16 +80,19 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 StartDate = dto.StartDate,
                 PaymentMethod = dto.PaymentMethod,
                 ContactInfo = dto.ContactInfo,
+                PaymentCycle = dto.PaymentCycle,
+                PaymentDayOfMonth = dto.PaymentDayOfMonth,
                 Status = RentalContract.ContractStatus.Pending,
                 CreatedAt = DateTime.Now
             };
+
 
             await _repository.AddAsync(contract);
         }
 
         public async Task UpdateStatusAsync(RentalContractStatusDto statusDto)
         {
-            var contract = await _repository.GetByIdAsync(statusDto.ContractId);
+            var contract = await _repository.GetByPostIdAsync(statusDto.ContractId);
             if (contract == null)
                 throw new Exception("Không tìm thấy hợp đồng.");
 
@@ -87,7 +112,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
 
         public async Task UpdateContractAsync(int contractId, RentalContractUpdateDto dto)
         {
-            var contract = await _repository.GetByIdAsync(contractId);
+            var contract = await _repository.GetByRentalContractIdAsync(contractId);
             if (contract == null)
                 throw new Exception("Không tìm thấy hợp đồng.");
 
@@ -104,12 +129,21 @@ namespace RealEstateManagement.Business.Services.OwnerService
             if (string.IsNullOrWhiteSpace(dto.PaymentMethod))
                 throw new ArgumentException("Phương thức thanh toán không được để trống.");
 
+            if (dto.PaymentDayOfMonth < 1 || dto.PaymentDayOfMonth > 31)
+                throw new ArgumentException("Ngày thanh toán phải nằm trong khoảng từ 1 đến 31.");
+
+            if (!Enum.IsDefined(typeof(RentalContract.PaymentCycleType), dto.PaymentCycle))
+                throw new ArgumentException("Kiểu thanh toán không hợp lệ (phải là Monthly, Quarterly hoặc Yearly).");
+
+
             contract.DepositAmount = dto.DepositAmount;
             contract.MonthlyRent = dto.MonthlyRent;
             contract.ContractDurationMonths = dto.ContractDurationMonths;
             contract.StartDate = dto.StartDate;
             contract.PaymentMethod = dto.PaymentMethod;
             contract.ContactInfo = dto.ContactInfo;
+            contract.PaymentCycle = dto.PaymentCycle;
+            contract.PaymentDayOfMonth = dto.PaymentDayOfMonth;
 
             await _repository.UpdateContractAsync(contract);
         }

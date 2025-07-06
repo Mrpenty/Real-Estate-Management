@@ -103,7 +103,7 @@ namespace RealEstateManagement.API.Controllers
         [HttpPost("filter-advanced")]
         public async Task<IActionResult> FilterAdvanced([FromBody] PropertyFilterDTO filter)
         {
-
+            if (filter.Provinces.Count == 1 && filter.Provinces[0] == 0) filter.Provinces = new List<int>();
             var result = await _propertyService.FilterAdvancedAsync(filter);
             return Ok(result);
         }
@@ -152,12 +152,12 @@ namespace RealEstateManagement.API.Controllers
 
         // GET: api/PropertySearch/search?query=apartment
 
-        [HttpGet("search-advanced")]
-        public async Task<IActionResult> SearchAdvanced([FromQuery] string province = "", [FromQuery] string ward = "", [FromQuery] string street = "", [FromQuery] int? userId = 0)
-        {
-            var results = await _propertyService.SearchAdvanceAsync(province, ward, street, userId);
-            return Ok(results);
-        }
+        //[HttpGet("search-advanced")]
+        //public async Task<IActionResult> SearchAdvanced([FromQuery] string province = "", [FromQuery] string ward = "", [FromQuery] string street = "", [FromQuery] int? userId = 0)
+        //{
+        //    var results = await _propertyService.SearchAdvanceAsync(province, ward, street, userId);
+        //    return Ok(results);
+        //}
 
         [HttpGet("list-location")]
         public async Task<IActionResult> ListLocation()

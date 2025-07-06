@@ -129,57 +129,32 @@ async function getAllLocation() {
 }
 
 function filterAdvanced() {
+    let minPrice = $('#minInputPrice').val();
+    let maxPrice = $('#maxInputPrice').val();
 
-    //category
-    const activeBtnCategory = document.querySelector('#rental-type .rental-btn.text-orange-600');
-    const cateValue = activeBtnCategory.value;
+    let minArea = $('#minInputArea').val();
+    let maxArea = $('#maxInputArea').val();
 
-    //price
-    const activeBtnPrice = document.querySelector('#rental-type-price .rental-btn.text-orange-600');
-    const priceMin = activeBtnPrice.dataset.priceMin;
-    const priceMax = activeBtnPrice.dataset.priceMax;
-    const scopePrice = activeBtnPrice.dataset.scope;
-    const priceId = activeBtnPrice.id;
-
-    //area
-    const activeBtnArea = document.querySelector('#rental-type-acreage .rental-btn.text-orange-600');
-    const areaMin = activeBtnArea.dataset.areaMin;
-    const areaMax = activeBtnArea.dataset.areaMax;
-    const scopeArea = activeBtnArea.dataset.scope;
-    const areaId = activeBtnArea.id;
+    let minRoom = $('#rangeMin').val();
+    let maxRoom = $('#rangeMax').val();
 
     //amenity
     const activeBtnAmenities = document.querySelectorAll('#rental-type-special .rental-btn.text-orange-600');
     const valueAmenities = Array.from(activeBtnAmenities).map(btn => btn.value);
 
-    //location
-
-    let listLocationSelected = sessionStorage.getItem('selectedLocationLists');
-    let provinces = [];
-    let wards = [];
-    let streets = [];
-    if (listLocationSelected != null && listLocationSelected != undefined) {
-        listLocationSelected = JSON.parse(listLocationSelected);
-        listLocationSelected.forEach(item => {
-            provinces.push(item.province.id);
-            wards.push(item.ward.id);
-            streets.push(item.street.id);
-        });
+    let data = {
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+        minArea: minArea,
+        maxArea: maxArea,
+        minBedrooms: minRoom,
+        maxBedrooms: maxRoom,
+        //type: type,
+        amenityName: valueAmenities
     }
 
-    const province = provinces.join(',');
-    const ward = wards.join(',');
-    const street = streets.join(',');
-
-    let data = {
-        province, ward, street,
-        filterCategory: `${cateValue}`,
-        filterPrice: `${scopePrice},${priceMin ?? 0},${priceMax ?? 0},${priceId ?? ""}`,
-        filterArea: `${scopeArea},${areaMin ?? 0},${areaMax ?? 0},${areaId ?? ""}`,
-        filterAmenity: valueAmenities.join(","),
-        isFilter: true
-    };
-    window.location.href = addParamsToHref(window.location.origin, params = data);
+    sessionStorage.setItem('filterData', JSON.stringify(data));
+    window.location.reload();
 }
 
 async function fillDataAmenity(amenityFilter) {
@@ -206,14 +181,6 @@ async function fillDataAmenity(amenityFilter) {
 
         });
     });
-}
-
-function addParamsToHref(href, params = {}) {
-    const url = new URL(href, window.location.origin);
-    for (const key in params) {
-        url.searchParams.set(key, params[key]);
-    }
-    return url.toString();
 }
 
 

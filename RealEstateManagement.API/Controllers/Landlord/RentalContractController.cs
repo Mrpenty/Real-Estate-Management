@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
 using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Data.Entity;
 using System;
 using System.Threading.Tasks;
 
-namespace RealEstateManagement.API.Controllers.Owner
+namespace RealEstateManagement.API.Controllers.Landlord
 {
+    [Authorize(Roles = "Landlord")]
     [ApiController]
     [Route("api/owner/rental-contracts")]
     public class RentalContractController : ControllerBase
@@ -18,24 +20,14 @@ namespace RealEstateManagement.API.Controllers.Owner
             _rentalContractService = rentalContractService;
         }
 
-        // GET: api/owner/rental-contracts/{id}
+        // GET: api/owner/rental-contracts/{propertyPostId}
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetByPropertyPostId(int id)
         {
-            var contract = await _rentalContractService.GetByIdAsync(id);
-            if (contract == null)
-                return NotFound();
-
+            var contract = await _rentalContractService.GetByPostIdAsync(id);
             return Ok(contract);
         }
 
-        // GET: api/owner/rental-contracts/post/{postId}
-        [HttpGet("post/{postId}")]
-        public async Task<IActionResult> GetByPostId(int postId)
-        {
-            var contracts = await _rentalContractService.GetByPostIdAsync(postId);
-            return Ok(contracts);
-        }
 
         // POST: api/owner/rental-contracts
         [HttpPost]

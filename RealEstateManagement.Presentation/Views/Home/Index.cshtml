@@ -41,26 +41,26 @@
             <div>
                 <h3 class="font-semibold text-gray-800 mb-2">Xem theo khoảng giá</h3>
                 <ul class="space-y-1">
-                    <li><a href="#" class="text-orange-500 hover:underline">Dưới 1 triệu</a></li>
-                    <li><a href="#" class="text-orange-500 hover:underline">Từ 1 - 2 triệu</a></li>
-                    <li><a href="#" class="text-orange-500 hover:underline">Từ 2 - 3 triệu</a></li>
-                    <li><a href="#" class="text-orange-500 hover:underline">Từ 3 - 5 triệu</a></li>
-                    <li><a href="#" class="text-orange-500 hover:underline">Từ 5 - 7 triệu</a></li>
-                    <li><a href="#" class="text-orange-500 hover:underline">Từ 7 - 10 triệu</a></li>
-                    <li><a href="#" class="text-orange-500 hover:underline">Từ 10 - 15 triệu</a></li>
-                    <li><a href="#" class="text-orange-500 hover:underline">Trên 15 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,0,1)" class="text-orange-500 hover:underline">Dưới 1 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,1,2)" class="text-orange-500 hover:underline">Từ 1 - 2 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,2,3)" class="text-orange-500 hover:underline">Từ 2 - 3 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,3,5)" class="text-orange-500 hover:underline">Từ 3 - 5 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,5,7)" class="text-orange-500 hover:underline">Từ 5 - 7 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,7,10)" class="text-orange-500 hover:underline">Từ 7 - 10 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,10,15)" class="text-orange-500 hover:underline">Từ 10 - 15 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,15,100)" class="text-orange-500 hover:underline">Trên 15 triệu</a></li>
                 </ul>
             </div>
 
             <div>
                 <h3 class="font-semibold text-gray-800 mb-2">Xem theo diện tích</h3>
                 <ul class="space-y-1">
-                    <li><a href="#" class="text-orange-500 hover:underline">Dưới 20 m²</a></li>
-                    <li><a href="#" class="text-orange-500 hover:underline">Từ 20 - 30 m²</a></li>
-                    <li><a href="#" class="text-orange-500 hover:underline">Từ 30 - 50 m²</a></li>
-                    <li><a href="#" class="text-orange-500 hover:underline">Từ 50 - 70 m²</a></li>
-                    <li><a href="#" class="text-orange-500 hover:underline">Từ 70 - 90 m²</a></li>
-                    <li><a href="#" class="text-orange-500 hover:underline">Trên 90 m²</a></li>
+                    <li><a href="#" onclick="filterArea(event,0,20)" class="text-orange-500 hover:underline">Dưới 20 m²</a></li>
+                    <li><a href="#" onclick="filterArea(event,20,30)" class="text-orange-500 hover:underline">Từ 20 - 30 m²</a></li>
+                    <li><a href="#" onclick="filterArea(event,30,50)" class="text-orange-500 hover:underline">Từ 30 - 50 m²</a></li>
+                    <li><a href="#" onclick="filterArea(event,50,70)" class="text-orange-500 hover:underline">Từ 50 - 70 m²</a></li>
+                    <li><a href="#" onclick="filterArea(event,70,90)" class="text-orange-500 hover:underline">Từ 70 - 90 m²</a></li>
+                    <li><a href="#" onclick="filterArea(event,90,200)" class="text-orange-500 hover:underline">Trên 90 m²</a></li>
                 </ul>
             </div>
         </div>
@@ -108,8 +108,13 @@
 
 <script src="~/js/propertyService.js"></script>
 <script>
-    document.getElementById('listPostId').classList.add("text-orange-500");
-    document.getElementById('listPostId').classList.replace("border-gray-200", "border-orange-500");
+
+    let urlParams1 = new URLSearchParams(window.location.search);
+    let type1 = urlParams1.get('type');
+    if (type1 == null || type1 == undefined) type1 = "room";
+
+    document.getElementById(type1).classList.add("text-orange-500");
+    document.getElementById(type1).classList.replace("border-gray-200", "border-orange-500");
     
     let listLocationSelected = sessionStorage.getItem('selectedLocationLists');
     let provinceId = sessionStorage.getItem('provinceId');
@@ -122,7 +127,7 @@
                 html += `<button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">${item.locationName}</button>`;
             });
         }
-        else {
+        else if(provinceId != 0 && provinceId != -1){
             html += `<button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">${provinceName}</button>`
         }
 
@@ -196,6 +201,24 @@
             });
             document.getElementById('listPropertyId').innerHTML = html;
         }
+    }
+
+    function filterPrice(event,minPrice,maxPrice){
+        event.preventDefault();
+        let body = {
+            minPrice,maxPrice
+        };
+        sessionStorage.setItem('filterData',JSON.stringify(body));
+        window.location.reload();
+    }
+
+    function filterArea(event,minArea,maxArea){
+        event.preventDefault();
+        let body = {
+            minArea,maxArea
+        };
+        sessionStorage.setItem('filterData',JSON.stringify(body));
+        window.location.reload();
     }
 
     async function updateFavorite(id, isFavorite) {

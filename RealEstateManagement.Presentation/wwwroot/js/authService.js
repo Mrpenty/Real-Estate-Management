@@ -211,6 +211,20 @@ const authService = {
                 this.logout();
                 return false;
             }
+
+            const userNameValue = document.getElementById('userNameIdC');
+            const phoneNumberIdC = document.getElementById('phoneNumberIdC');
+            let nameCls = document.getElementById('nameCls');
+            let phoneCls = document.getElementById('phoneCls');
+            if (userNameValue && phoneNumberIdC) {
+                userNameValue.value = payload.name;
+                phoneNumberIdC.value = payload.prn;
+            }
+            if (nameCls && phoneCls) {
+                nameCls.innerHTML = payload.name;
+                phoneCls.innerHTML = payload.prn;
+            }
+
             const userProfileLink = document.getElementById('userProfileLink');
             if (userProfileLink) {
                 userProfileLink.innerHTML = '<i class="fas fa-user mr-1"></i>' + payload.name;

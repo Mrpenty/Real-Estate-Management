@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
 
-    <title>@ViewData["Title"] RealEstateManagement</title>
+    <title>RealEstate</title>
     @*     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script> *@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,6 +20,28 @@
     <script src="~/js/authService.js" asp-append-version="true"></script>
     <script src="~/js/postPropertyService.js"></script>
     <script src="~/js/helper.js" asp-append-version="true"></script>
+    <style>
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            height: 16px;
+            width: 16px;
+            background-color: #06b6d4;
+            border: 3px solid #000;
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: all;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            height: 16px;
+            width: 16px;
+            background-color: #06b6d4;
+            border: 3px solid #000;
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: all;
+        }
+    </style>
 </head>
 <body>
     <header class="border-b" style="background-color:white;width:100%">
@@ -49,8 +71,7 @@
                             <input id="search-location-input"
                                    type="search"
                                    placeholder="Nhập tối đa 5 địa điểm"
-                                   class="w-full border px-4 py-2 rounded-md mb-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                   />
+                                   class="w-full border px-4 py-2 rounded-md mb-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             <p class="font-semibold text-sm text-gray-600 mb-2">Địa điểm đã chọn</p>
                             <div id="location-selected-list" class="flex flex-wrap gap-2">
                             </div>
@@ -77,7 +98,7 @@
             </div>
 
             <div class="flex items-center space-x-4">
-                <a href="/Home/ListFavorite" class="text-gray-700 hover:text-blue-600"><i class="far fa-heart mr-1"></i> Tin đã lưu</a>
+                <a href="#" onclick="getFavoriteList(event)" class="text-gray-700 hover:text-blue-600"><i class="far fa-heart mr-1"></i> Tin đã lưu</a>
 
                 <!-- Authenticated User -->
                 <div id="userProfileNavItem" style="display: none;" class="flex items-center space-x-4">
@@ -90,11 +111,11 @@
                 <div id="authNavItems">
                     <a href="/Auth/Register" class="text-gray-700 hover:text-blue-600"><i class="fas fa-user-plus mr-1"></i> Đăng ký</a>
                     <a href="/Auth/Login" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-in-alt mr-1"></i> Đăng nhập</a>
-                    
+
                 </div>
 
 
-                <a href="/PostProperty/CreateProperty" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-1 rounded-full text-sm"><i class="fas fa-pen-alt mr-1"></i> Đăng tin</a>
+                <a href="#" onclick="createProperty(event)" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-1 rounded-full text-sm"><i class="fas fa-pen-alt mr-1"></i> Đăng tin</a>
             </div>
         </div>
 
@@ -102,15 +123,9 @@
             <div class="container mx-auto px-4">
                 <ul class="flex space-x-6 text-base font-medium pt-4">
 
-                    <li><a href="/" id="listPostId" class="nav-link border-b-2 pb-1 border-gray-200">Phòng trọ</a></li>
-                    <li><a href="/nha-nguyen-can" class="nav-link border-b-2 pb-1 border-gray-200">Nhà nguyên căn</a></li>
-                    <li><a href="/can-ho-chung-cu" class="nav-link border-b-2 pb-1 border-gray-200">Căn hộ chung cư</a></li>
-                    <li><a href="/can-ho-mini" class="nav-link border-b-2 pb-1 border-gray-200">Căn hộ mini</a></li>
-                    <li><a href="/can-ho-dich-vu" class="nav-link border-b-2 pb-1 border-gray-200">Căn hộ dịch vụ</a></li>
-                    <li><a href="/o-ghep" class="nav-link border-b-2 pb-1 border-gray-200">Ở ghép</a></li>
-                    <li><a href="/mat-bang" class="nav-link border-b-2 pb-1 border-gray-200">Mặt bằng</a></li>
-                    <li><a href="/blog" class="nav-link border-b-2 pb-1 border-gray-200">Blog</a></li>
-                    <li><a href="/bang-gia" class="nav-link border-b-2 pb-1 border-gray-200">Bảng giá dịch vụ</a></li>
+                    <li><a href="/?type=room" id="room" class="nav-link border-b-2 pb-1 border-gray-200">Phòng trọ</a></li>
+                    <li><a href="/?type=house" id="house" class="nav-link border-b-2 pb-1 border-gray-200">Nhà nguyên căn</a></li>
+                    <li><a href="/?type=apartment" id="apartment" class="nav-link border-b-2 pb-1 border-gray-200">Căn hộ chung cư</a></li>
                 </ul>
             </div>
         </nav>
@@ -131,21 +146,6 @@
             </div>
 
             <div class="px-4 overflow-y-auto h-[60vh]">
-                <div class="mb-6">
-                    <h3 class="font-semibold mb-2">Danh mục cho thuê</h3>
-                    <div id="rental-type" class="grid grid-cols-3 gap-2">
-
-                        <button value="0" class="rental-btn border-2 border-orange-500 rounded-lg py-2 px-3 text-sm flex flex-col items-center bg-orange-50 text-orange-600">
-                            <span>Phòng trọ</span>
-                        </button>
-                        <button value="1" class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Nhà riêng</span></button>
-                        <button value="2" class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Ở ghép</span></button>
-                        <button value="0" class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Mặt bằng</span></button>
-                        <button value="0" class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Căn hộ chung cư</span></button>
-                        <button value="0" class="rental-btn border-2 rounded-lg py-2 px-1 text-sm flex flex-col items-center"><span>Căn hộ mini</span></button>
-                    </div>
-                </div>
-
                 <div style="display:none" class="mb-6">
                     <h3 class="font-semibold mb-2">Lọc theo khu vực</h3>
                     <div class="grid grid-cols-3 gap-2">
@@ -161,7 +161,32 @@
 
                 <div class="mb-6">
                     <h3 class="font-semibold mb-2">Khoảng giá</h3>
-                    <div id="rental-type-price" class="flex flex-wrap gap-2">
+                    <div class="flex justify-between items-center mb-2 text-sm">
+                        <div>
+                            Từ: <span class="font-semibold text-cyan-700" id="minLabelPrice"></span>
+                        </div>
+                        <div>
+                            Đến: <span class="font-semibold text-cyan-700" id="maxLabelPrice"></span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 mb-2">
+                        <input id="minInputPrice" type="number" class="w-full border rounded px-2 py-1 text-center" value="0" min="0" />
+                        <span>→</span>
+                        <input id="maxInputPrice" type="number" class="w-full border rounded px-2 py-1 text-center" value="100" max="100" />
+                    </div>
+
+                    <div class="relative h-4">
+                        <div class="absolute inset-0 bg-gray-200 rounded-full"></div>
+
+                        <div id="rangeTrackPrice" class="absolute h-full bg-cyan-600 rounded-full"></div>
+
+                        <input id="rangeMinPrice" type="range" min="0" max="100" value="0"
+                               class="absolute w-full h-4 appearance-none bg-transparent pointer-events-none thumb-min" />
+                        <input id="rangeMaxPrice" type="range" min="0" max="100" value="100"
+                               class="absolute w-full h-4 appearance-none bg-transparent pointer-events-none thumb-max" />
+                    </div>
+                    <div id="rental-type-price" class="flex flex-wrap gap-2 mt-4" style="display:none">
 
                         <button id="price-1" data-scope="all" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Tất cả</button>
                         <button id="price-2" data-price-max='1' data-scope="lower" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Dưới 1 triệu</button>
@@ -178,7 +203,32 @@
 
                 <div class="mb-6">
                     <h3 class="font-semibold mb-2">Khoảng diện tích</h3>
-                    <div id="rental-type-acreage" class="flex flex-wrap gap-2">
+                    <div class="flex justify-between items-center mb-2 text-sm">
+                        <div>
+                            Từ: <span class="font-semibold text-cyan-700" id="minLabelArea"></span>
+                        </div>
+                        <div>
+                            Đến: <span class="font-semibold text-cyan-700" id="maxLabelArea"></span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 mb-2">
+                        <input id="minInputArea" type="number" class="w-full border rounded px-2 py-1 text-center" value="0" min="0" />
+                        <span>→</span>
+                        <input id="maxInputArea" type="number" class="w-full border rounded px-2 py-1 text-center" value="200" max="200" />
+                    </div>
+
+                    <div class="relative h-4">
+                        <div class="absolute inset-0 bg-gray-200 rounded-full"></div>
+
+                        <div id="rangeTrackArea" class="absolute h-full bg-cyan-600 rounded-full"></div>
+
+                        <input id="rangeMinArea" type="range" min="0" max="200" value="0"
+                               class="absolute w-full h-4 appearance-none bg-transparent pointer-events-none thumb-min" />
+                        <input id="rangeMaxArea" type="range" min="0" max="200" value="200"
+                               class="absolute w-full h-4 appearance-none bg-transparent pointer-events-none thumb-max" />
+                    </div>
+                    <div id="rental-type-acreage" class="flex flex-wrap gap-2" style="display:none">
 
                         <button id="area-1" data-scope="all" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Tất cả</button>
                         <button id="area-2" data-area-max='20' data-scope="lower" class="rental-btn border-2 rounded-full px-4 py-1 text-sm">Dưới 20m²</button>
@@ -191,9 +241,42 @@
                 </div>
 
                 <div class="mb-6">
+                    <h3 class="font-semibold mb-2">Số lượng phòng</h3>
+                    <div id="rental-type" class="">
+
+                        <div class="">
+                            <div class="flex justify-between items-center mb-2 text-sm">
+                                <div>
+                                    Từ: <span class="font-semibold text-cyan-700" id="minLabel"></span>
+                                </div>
+                                <div>
+                                    Đến: <span class="font-semibold text-cyan-700" id="maxLabel"></span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2 mb-2">
+                                <input id="minInput" type="number" class="w-full border rounded px-2 py-1 text-center" value="0" min="0" />
+                                <span>→</span>
+                                <input id="maxInput" type="number" class="w-full border rounded px-2 py-1 text-center" value="15" max="15" />
+                            </div>
+
+                            <div class="relative h-4">
+                                <div class="absolute inset-0 bg-gray-200 rounded-full"></div>
+
+                                <div id="rangeTrack" class="absolute h-full bg-cyan-600 rounded-full"></div>
+
+                                <input id="rangeMin" type="range" min="0" max="15" value="0"
+                                       class="absolute w-full h-4 appearance-none bg-transparent pointer-events-none thumb-min" />
+                                <input id="rangeMax" type="range" min="0" max="15" value="15"
+                                       class="absolute w-full h-4 appearance-none bg-transparent pointer-events-none thumb-max" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
                     <h3 class="font-semibold mb-2">Đặc điểm nổi bật</h3>
                     <div id="rental-type-special" class="flex flex-wrap gap-2">
-
                     </div>
                 </div>
             </div>
@@ -237,6 +320,7 @@
         const dropdown2 = document.getElementById('dropdown2');
         const provinceList = document.getElementById('province-list');
         const locationList = document.getElementById("location-list");
+        let isAuthenticationLayout = authService.isAuthenticated();
         let isSearchLocation = false;
 
 
@@ -346,7 +430,7 @@
         }
 
         function selectLocation(loc) {
-            let findIndex = selectedLocationLists.findIndex(p => p.province.id == loc.province.id 
+            let findIndex = selectedLocationLists.findIndex(p => p.province.id == loc.province.id
                 && p.ward.id == loc.ward.id
                 && p.street.id == loc.street.id);
           if(findIndex != -1){
@@ -494,36 +578,14 @@
             $('#filterStreetId').html(htmlStreet);
             if (selectedStreet.id != "") $('#filterStreetId').val(selectedStreet.id);
 
-            const filterAmenity = urlParamParents.get('filterAmenity') ?? "";
-            await fillDataAmenity(filterAmenity);
+            // const filterAmenity = urlParamParents.get('filterAmenity') ?? "";
+            // await fillDataAmenity(filterAmenity);
 
-            const filterCategory = urlParamParents.get('filterCategory') ?? -1;
-            const filterPrice = urlParamParents.get('filterPrice') ?? "";
-            const filterArea = urlParamParents.get('filterArea') ?? "";
-
-            if (filterPrice != "") {
-                let idPrice = filterPrice.split(',')[3];
-                document.getElementById(idPrice).classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
-                document.getElementById(idPrice).classList.remove('border-gray-300', 'bg-white');
-            }
-            else{
-                document.getElementById('price-1').classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
-                document.getElementById('price-1').classList.remove('border-gray-300', 'bg-white');
-            }
-            if (filterArea != "") {
-                let idArea = filterArea.split(',')[3];
-                document.getElementById(idArea).classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
-                document.getElementById(idArea).classList.remove('border-gray-300', 'bg-white');
-            }
-            else{
-                document.getElementById('area-1').classList.add('border-orange-500', 'bg-orange-50', 'text-orange-600');
-                document.getElementById('area-1').classList.remove('border-gray-300', 'bg-white');
-            }
             //console.log(locations);
         }
 
         function renderProvinces() {
-          
+
           level = 0;
           title.innerText = "Chọn theo khu vực";
           backBtn.classList.add("hidden");
@@ -609,7 +671,7 @@
         }
 
         function updateNavigation() {
-            if (authService.isAuthenticated()) {
+            if (isAuthenticationLayout) {
                 document.getElementById('authNavItems').style.display = 'none';
 
                 const userProfileNav = document.getElementById('userProfileNavItem');
@@ -625,6 +687,13 @@
                 document.getElementById('userProfileNavItem').style.display = 'none';
             }
         }
+
+        function getFavoriteList(event){
+            event.preventDefault();
+            if(isAuthenticationLayout) window.location.href= '/Home/ListFavorite';
+            else window.location.href= '/Auth/Login';
+        }
+
         function searchAdvanced() {
             const newHref = addParamsToHref(href, {
                 province: selectedProvince.id ?? 0,
@@ -634,17 +703,27 @@
             window.location.href = newHref;
         }
 
+        function createProperty(event){
+            event.preventDefault();
+            if(isAuthenticationLayout) window.location.href = '/PostProperty/CreateProperty';
+            else window.location.href = '/Auth/Login';
+        }
+
         function searchLocationInput(){
             //sessionStorage.setItem('selectedProvince',JSON.stringify(selectedLocationLists));
-            let provinceId = searchInput.dataset.id;
+            let provinceId = searchInput.dataset?.id ?? 0;
             if (provinceId == -1) {
                 alert('Không tìm thấy tỉnh thành tương ứng');
                 return;
             }
-            sessionStorage.setItem('provinceId', searchInput.dataset.id);
-            sessionStorage.setItem('provinceName', searchInput.value);
+            sessionStorage.setItem('provinceId', provinceId);
+            sessionStorage.setItem('provinceName',searchInput.value);
             sessionStorage.setItem('selectedLocationLists',JSON.stringify(selectedLocationLists));
-            window.location.href = '/';
+            const urlParams = new URLSearchParams(window.location.search);
+            let type = urlParams.get('type');
+            if (type == null || type == undefined) type = "room";
+            
+            window.location.href = `/?type=${type}`;
         }
 
         async function handleLogout(event) {
@@ -654,6 +733,119 @@
         }
 
         document.addEventListener('DOMContentLoaded', updateNavigation);
+
+        setupDoubleRangeSlider({
+            rangeMinId: "rangeMinArea",
+            rangeMaxId: "rangeMaxArea",
+            inputMinId: "minInputArea",
+            inputMaxId: "maxInputArea",
+            labelMinId: "minLabelArea",
+            labelMaxId: "maxLabelArea",
+            trackId: "rangeTrackArea",
+            maxValue: 200,
+            labelInfo: 'm<sup>2</sup>'
+        });
+
+        setupDoubleRangeSlider({
+            rangeMinId: "rangeMinPrice",
+            rangeMaxId: "rangeMaxPrice",
+            inputMinId: "minInputPrice",
+            inputMaxId: "maxInputPrice",
+            labelMinId: "minLabelPrice",
+            labelMaxId: "maxLabelPrice",
+            trackId: "rangeTrackPrice",
+            maxValue: 100,
+            labelInfo: 'triệu'
+        });
+        
+
+        setupDoubleRangeSlider({
+            rangeMinId: "rangeMin",
+            rangeMaxId: "rangeMax",
+            inputMinId: "minInput",
+            inputMaxId: "maxInput",
+            labelMinId: "minLabel",
+            labelMaxId: "maxLabel",
+            trackId: "rangeTrack",
+            maxValue: 15
+        });
+
+
+        function setupDoubleRangeSlider({rangeMinId,rangeMaxId,inputMinId,inputMaxId,
+                labelMinId,labelMaxId,trackId,maxValue = 15,labelInfo = ''
+            }) {
+                const rangeMin = document.getElementById(rangeMinId);
+                const rangeMax = document.getElementById(rangeMaxId);
+                const minInput = document.getElementById(inputMinId);
+                const maxInput = document.getElementById(inputMaxId);
+                const minLabel = document.getElementById(labelMinId);
+                const maxLabel = document.getElementById(labelMaxId);
+                const rangeTrack = document.getElementById(trackId);
+
+                function updateRangeUI() {
+                    const min = parseInt(rangeMin.value);
+                    const max = parseInt(rangeMax.value);
+
+                    minInput.value = min;
+                    maxInput.value = max;
+
+                    minLabel.innerHTML = min + ' ' + labelInfo;
+                    maxLabel.innerHTML = max + ' ' + labelInfo;
+
+                    const minPercent = (min / maxValue) * 100;
+                    const maxPercent = (max / maxValue) * 100;
+                    rangeTrack.style.left = minPercent + "%";
+                    rangeTrack.style.right = (100 - maxPercent) + "%";
+                }
+
+                rangeMin.addEventListener("input", function () {
+                    let minVal = parseInt(rangeMin.value);
+                    let maxVal = parseInt(rangeMax.value);
+
+                    if (minVal > maxVal) {
+                        minVal = maxVal;
+                        rangeMin.value = maxVal; 
+                    }
+                    updateRangeUI();
+                });
+
+                rangeMax.addEventListener("input", function () {
+                    let minVal = parseInt(rangeMin.value);
+                    let maxVal = parseInt(rangeMax.value);
+
+                    if (maxVal < minVal) {
+                        maxVal = minVal;
+                        rangeMax.value = minVal;
+                    }
+                    updateRangeUI();
+                });
+
+                minInput.addEventListener("input", function () {
+                    let minVal = parseInt(minInput.value);
+                    let maxVal = parseInt(maxInput.value);
+
+                    if (minVal > maxVal) {
+                        minVal = maxVal;
+                        minInput.value = maxVal;
+                    }
+                    rangeMin.value = minInput.value;
+                    updateRangeUI();
+                });
+
+                maxInput.addEventListener("input", function () {
+                    let minVal = parseInt(minInput.value);
+                    let maxVal = parseInt(maxInput.value);
+
+                    if (maxVal < minVal) {
+                        maxVal = minVal;
+                        maxInput.value = minVal;
+                    }
+                    rangeMax.value = maxInput.value;
+                    updateRangeUI();
+                });
+
+                updateRangeUI();
+            }
     </script>
     @RenderSection("Scripts", required: false)
 </body>

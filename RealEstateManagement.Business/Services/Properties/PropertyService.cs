@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Nest;
 using RealEstateManagement.Business.DTO.Location;
 using RealEstateManagement.Business.DTO.Properties;
+using RealEstateManagement.Business.Repositories.FavoriteRepository;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.AddressEnity;
@@ -17,12 +18,14 @@ namespace RealEstateManagement.Business.Services.Properties
     public class PropertyService : IPropertyService
     {
         private readonly IPropertyRepository _repository;
+        private readonly IFavoriteRepository _repositoryFavorite;
         private readonly RentalDbContext _context;
 
-        public PropertyService(IPropertyRepository repository, RentalDbContext context)
+        public PropertyService(IPropertyRepository repository, IFavoriteRepository repositoryFavorite, RentalDbContext context)
         {
             _repository = repository;
             _context = context;
+            _repositoryFavorite = repositoryFavorite;
         }
         public async Task<IEnumerable<HomePropertyDTO>> GetAllPropertiesAsync(int? userId = 0)
         {
@@ -36,6 +39,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 Type = p.Type,
                 AddressID = p.AddressId,
                 StreetId = p.Address.StreetId,
+                Street = p.Address.Street.Name,
                 ProvinceId = p.Address.ProvinceId,
                 Province = p.Address.Province.Name,
                 WardId = p.Address.WardId,
@@ -198,6 +202,7 @@ namespace RealEstateManagement.Business.Services.Properties
         public async Task<IEnumerable<HomePropertyDTO>> FilterAdvancedAsync(PropertyFilterDTO filter)
         {
             var properties = await _repository.FilterAdvancedAsync(filter);
+            var favoriteUsers = await _repositoryFavorite.AllFavoritePropertyAsync(filter.UserId);
             return properties.Select(p => new HomePropertyDTO
             {
                 Id = p.Id,
@@ -216,6 +221,8 @@ namespace RealEstateManagement.Business.Services.Properties
                 WardId = p.Address.WardId,
                 Ward = p.Address.Ward.Name,
                 StreetId = p.Address.StreetId,
+                DetailedAddress = p.Address.DetailedAddress,
+                IsFavorite = favoriteUsers.FirstOrDefault(c => c.Id == p.Id) != null ? true : false,
                 Street = p.Address.Street.Name,
                 ViewsCount = p.ViewsCount,
                 PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
@@ -300,27 +307,6 @@ namespace RealEstateManagement.Business.Services.Properties
             return result;
         }
 
-        public async Task<IEnumerable<HomePropertyDTO>> SearchAdvanceAsync(string provinceId, string wardId, string streetId,int? userId = 0)
-        {
-            var properties = await GetAllPropertiesAsync(userId);
-            if (!string.IsNullOrEmpty(provinceId) && provinceId != "0")
-            {
-                var provinceList = provinceId.Split(",").Select(c => int.Parse(c)).ToList();
-                properties = properties.Where(c => provinceList.Contains(c.ProvinceId.Value));
-            }
-            if (!string.IsNullOrEmpty(wardId) && wardId != "0")
-            {
-                var wardList = wardId.Split(",").Select(c => int.Parse(c)).ToList();
-                properties = properties.Where(c => wardList.Contains(c.WardId.Value));
-            }
-            if (!string.IsNullOrEmpty(streetId) && streetId != "0")
-            {
-                var streetList = streetId.Split(",").Select(c => int.Parse(c)).ToList();
-                properties = properties.Where(c => streetList.Contains(c.StreetId.Value));
-            }
-
-            return properties.ToList();
-        }
 
         public async Task<List<AmenityDTO>> GetListAmenityAsync()
         {

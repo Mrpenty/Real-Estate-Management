@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace RealEstateManagement.Presentation.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class PostPropertyController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -20,6 +20,12 @@ namespace RealEstateManagement.Presentation.Controllers
 
         [HttpGet]
         public IActionResult CreateProperty()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult CreateProperty1()
         {
             return View();
         }

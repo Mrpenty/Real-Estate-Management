@@ -9,8 +9,8 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
 {
     public interface IRentalContractRepository
     {
-        Task<RentalContract> GetByIdAsync(int id); //Cho Detailt
-        Task<IEnumerable<RentalContract>> GetByPostIdAsync(int postId); //Lấy tất cả hợp đồng liên quan tới bài đăng đó
+        Task<RentalContract> GetByPostIdAsync(int id); //Xem hợp đồng của bài Post đó
+        Task<RentalContract> GetByRentalContractIdAsync(int id); // Lấy RentalContract Id
         Task AddAsync(RentalContract contract);
         Task UpdateContractAsync(RentalContract contract );
         Task DeleteAsync(int id);

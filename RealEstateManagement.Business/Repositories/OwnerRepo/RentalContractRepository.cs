@@ -17,20 +17,17 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
             _context = context;
         }
 
-        public async Task<RentalContract> GetByIdAsync(int id)
+        //Xem hợp đồng của bài Post đó
+        public async Task<RentalContract> GetByPostIdAsync(int id)
         {
             return await _context.RentalContracts
                 .Include(c => c.PropertyPost)
-                .Include(c => c.Landlord)
-                .Include(c => c.Renter)
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .FirstOrDefaultAsync(c => c.PropertyPostId == id);
         }
 
-        public async Task<IEnumerable<RentalContract>> GetByPostIdAsync(int postId)
+        public async Task<RentalContract> GetByRentalContractIdAsync(int id)
         {
-            return await _context.RentalContracts
-                .Where(c => c.PropertyPostId == postId)
-                .ToListAsync();
+            return await _context.RentalContracts.FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task AddAsync(RentalContract contract)

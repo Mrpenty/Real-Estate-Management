@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RealEstateManagement.Data.Entity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,10 @@ namespace RealEstateManagement.Business.DTO.PropertyOwnerDTO
         public decimal DepositAmount { get; set; }
         public decimal MonthlyRent { get; set; }
         public int ContractDurationMonths { get; set; }
+
+        public RentalContract.PaymentCycleType PaymentCycle { get; set; } = RentalContract.PaymentCycleType.Monthly;
+        public int PaymentDayOfMonth { get; set; } = 5;
+
 
         public DateTime? StartDate { get; set; }
 
