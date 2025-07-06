@@ -4,8 +4,9 @@ using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
 using RealEstateManagement.Business.Services.OwnerService;
 using System.Security.Claims;
 
-namespace RealEstateManagement.API.Controllers
+namespace RealEstateManagement.API.Controllers.Landlord
 {
+    [Authorize(Roles = "Landlord")]
     [ApiController]
     [Route("api/[controller]")]
     public class PropertyPostsController : ControllerBase
@@ -34,7 +35,7 @@ namespace RealEstateManagement.API.Controllers
                     return Unauthorized("ID người dùng không hợp lệ");
 
                 var propertyId = await _propertyPostService.CreatePropertyPostAsync(dto, landlordId);
-                return Ok(new { propertyId = propertyId });
+                return Ok(new { propertyId });
             }
             catch (ArgumentException ex)
             {

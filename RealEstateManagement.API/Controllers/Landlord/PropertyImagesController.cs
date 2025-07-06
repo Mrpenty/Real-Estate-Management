@@ -4,7 +4,7 @@ using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Business.Services.UploadPicService;
 using Microsoft.Extensions.Logging;
 
-namespace RealEstateManagement.API.Controllers
+namespace RealEstateManagement.API.Controllers.Landlord
 {
     [Route("api/properties/{propertyId}/images")]
     [ApiController]
@@ -27,7 +27,7 @@ namespace RealEstateManagement.API.Controllers
             try
             {
                 _logger.LogInformation("Starting upload for property {PropertyId}, file: {FileName}", propertyId, file?.FileName);
-                
+
                 if (file == null || file.Length == 0)
                 {
                     return BadRequest("No file uploaded");
@@ -56,11 +56,11 @@ namespace RealEstateManagement.API.Controllers
         {
             try
             {
-                _logger.LogInformation("Saving image info for property {PropertyId}, URL: {ImageUrl}, IsPrimary: {IsPrimary}, Order: {Order}", 
+                _logger.LogInformation("Saving image info for property {PropertyId}, URL: {ImageUrl}, IsPrimary: {IsPrimary}, Order: {Order}",
                     propertyId, dto.Url, dto.IsPrimary, dto.Order);
-                
+
                 var image = await _imageService.AddImageAsync(propertyId, dto);
-                
+
                 _logger.LogInformation("Image saved successfully for property {PropertyId}, ImageId: {ImageId}", propertyId, image.Id);
                 return Ok(image);
             }

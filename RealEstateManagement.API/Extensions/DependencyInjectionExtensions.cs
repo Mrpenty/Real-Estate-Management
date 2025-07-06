@@ -9,7 +9,6 @@ using RealEstateManagement.Business.Repositories.AddressRepo;
 using RealEstateManagement.Business.Repositories.Repository;
 using RealEstateManagement.Business.Services.User;
 using RealEstateManagement.Business.Services.UploadPicService;
-
 using RealEstateManagement.Business.Repositories.SearchProperties;
 using RealEstateManagement.Business.Services.SearchProperties;
 using RealEstateManagement.Business.Repositories.FavoriteRepository;
@@ -35,6 +34,7 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IPropertyRepository, PropertyRepository>();
             services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
             services.AddScoped<IRentalContractRepository, RentalContractRepository>();
+            services.AddScoped<IOwnerPropertyRepository, OwnerPropertyRepository>();
 
             // Some support Repository
             services.AddScoped<IAddressRepository, AddressRepository>();
@@ -51,6 +51,8 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IPropertyPostService, PropertyPostService>();
             services.AddScoped<IPropertyImageService, PropertyImageService>();
             services.AddScoped<IPropertyImageService, PropertyImageService>();
+            services.AddScoped<IOwnerPropertyService, OwnerPropertyService>();
+            services.AddScoped<IRentalContractService, RentalContractService>();
 
             //user and auth services
             services.AddScoped<IAuthService, AuthService>();
