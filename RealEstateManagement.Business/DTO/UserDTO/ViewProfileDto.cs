@@ -13,5 +13,13 @@
         public bool PhoneNumberConfirmed { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? LastLoginAt { get; set; }
+        public bool IsActive { get; set; }
+        public string? CitizenIdFrontImageUrl { get; set; }
+        public string? CitizenIdBackImageUrl { get; set; }
+        public string? CitizenIdNumber { get; set; }
+        public DateTime? CitizenIdIssuedDate { get; set; }
+        public DateTime? CitizenIdExpiryDate { get; set; }
+
+        public string? VerificationRejectReason { get; set; }
     }
 }

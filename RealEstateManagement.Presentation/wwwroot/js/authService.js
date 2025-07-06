@@ -25,22 +25,25 @@ const authService = {
 
     // Authentication methods
     setAuthToken(token) {
-        console.log('[setAuthToken] Saving token to localStorage:', token);
+        const expiryMs = 3 * 24 * 60 * 60 * 1000; // 3 ngày
+        const expiryDate = new Date(Date.now() + expiryMs);
         try {
             localStorage.setItem('authToken', token);
-            console.log('[setAuthToken] Token saved to localStorage');
+            localStorage.setItem('authTokenExpiry', expiryDate.getTime().toString());
+            console.log('[setAuthToken] Token and expiry saved to localStorage');
         } catch (e) {
             console.error('[setAuthToken] Error saving token to localStorage:', e);
         }
         try {
-            document.cookie = `accessToken=${token}; path=/; secure; samesite=strict`;
-            console.log('[setAuthToken] Token saved to cookie');
+            document.cookie = `accessToken=${token}; path=/; secure; samesite=strict; expires=${expiryDate.toUTCString()}`;
+            console.log('[setAuthToken] Token saved to cookie with expiry');
         } catch (e) {
             console.error('[setAuthToken] Error saving token to cookie:', e);
         }
     },
     clearAuthToken() {
         localStorage.removeItem('authToken');
+        localStorage.removeItem('authTokenExpiry');
         document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     },
     async login(phone, password) {
@@ -196,18 +199,24 @@ const authService = {
 
     isAuthenticated() {
         const token = localStorage.getItem('authToken');
+        const expiry = localStorage.getItem('authTokenExpiry');
         console.log('Checking authentication, token exists:', !!token);
 
-        if (!token) return false;
+        if (!token || !expiry) return false;
+        if (Date.now() > parseInt(expiry)) {
+            console.log('Token expired by local expiry, logging out');
+            this.logout();
+            return false;
+        }
 
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             const isExpired = payload.exp * 1000 < Date.now();
             console.log('Token payload:', payload);
-            console.log('Token expired:', isExpired);
+            console.log('Token expired (JWT exp):', isExpired);
 
             if (isExpired) {
-                console.log('Token is expired, logging out');
+                console.log('Token is expired by JWT, logging out');
                 this.logout();
                 return false;
             }
@@ -249,10 +258,12 @@ const authService = {
             const payload = JSON.parse(atob(token.split('.')[1]));
             // The key for the name claim in JWT is often 'name' or a schema URL
             const name = payload.name || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+            const role = payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
             return {
                 id: payload.sub,
                 name: name,
-                email: payload.email
+                email: payload.email,
+                role: role
                 // Add other fields from payload as needed
             };
         } catch (e) {

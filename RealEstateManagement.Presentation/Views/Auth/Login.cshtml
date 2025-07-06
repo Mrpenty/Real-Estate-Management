@@ -81,7 +81,12 @@
             try {
                 const data = await authService.login(phone, password);
                 if (data.isAuthSuccessful) {
-                    window.location.href = '/'; // Đã khôi phục chức năng chuyển trang
+                    const user = authService.getCurrentUser();
+                    if (user && user.role && user.role.toLowerCase() === 'admin') {
+                        window.location.href = '/AdminUser';
+                    } else {
+                        window.location.href = '/';
+                    }
                 } else {
                     errorMessage.textContent = data.errorMessage || 'Đăng nhập thất bại';
                     errorMessage.style.display = 'block';

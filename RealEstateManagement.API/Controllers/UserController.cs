@@ -134,6 +134,106 @@ namespace RealEstateManagement.API.Controllers
             }
         }
 
+       
+        [HttpPut("admin-update/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AdminUpdateUser(int id, [FromBody] UpdateProfileDto dto)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user == null)
+                return NotFound("User not found");
+
+            if (dto.IsVerified.HasValue) user.IsVerified = dto.IsVerified.Value;
+            if (dto.IsActive.HasValue) user.IsActive = dto.IsActive.Value;
+            if (!string.IsNullOrEmpty(dto.Role)) user.Role = dto.Role;
+            if (!string.IsNullOrEmpty(dto.Name)) user.Name = dto.Name;
+            if (!string.IsNullOrEmpty(dto.Email)) user.Email = dto.Email;
+            if (!string.IsNullOrEmpty(dto.PhoneNumber)) user.PhoneNumber = dto.PhoneNumber;
+            if (!string.IsNullOrEmpty(dto.CitizenIdNumber)) user.CitizenIdNumber = dto.CitizenIdNumber;
+            if (!string.IsNullOrEmpty(dto.CitizenIdFrontImageUrl)) user.CitizenIdFrontImageUrl = dto.CitizenIdFrontImageUrl;
+            if (!string.IsNullOrEmpty(dto.CitizenIdBackImageUrl)) user.CitizenIdBackImageUrl = dto.CitizenIdBackImageUrl;
+            if (dto.CitizenIdIssuedDate.HasValue) user.CitizenIdIssuedDate = dto.CitizenIdIssuedDate;
+            if (dto.CitizenIdExpiryDate.HasValue) user.CitizenIdExpiryDate = dto.CitizenIdExpiryDate;
+            if (!string.IsNullOrEmpty(dto.VerificationRejectReason)) user.VerificationRejectReason = dto.VerificationRejectReason;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+                return Ok(new { message = "User updated successfully" });
+            return BadRequest(result.Errors);
+        }
+
+     
+        [HttpGet("admin-list")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult GetAdminUserList(string search = "", string role = "", bool? isActive = null, int page = 1, int pageSize = 10)
+        {
+            var users = _userManager.Users
+                .Where(u => u.Role == "renter" || u.Role == "landlord");
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                users = users.Where(u => u.Name.Contains(search) || u.PhoneNumber.Contains(search));
+            }
+            if (!string.IsNullOrEmpty(role))
+            {
+                users = users.Where(u => u.Role == role);
+            }
+            if (isActive.HasValue)
+            {
+                users = users.Where(u => u.IsActive == isActive.Value);
+            }
+
+            int totalUsers = users.Count();
+            var userList = users
+                .OrderByDescending(u => u.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(u => new {
+                    u.Id,
+                    u.Name,
+                    u.PhoneNumber,
+                    u.Email,
+                    u.Role,
+                    u.IsActive,
+                    u.CreatedAt
+                })
+                .ToList();
+
+            return Ok(new {
+                totalUsers,
+                page,
+                pageSize,
+                totalPages = (int)Math.Ceiling((double)totalUsers / pageSize),
+                users = userList
+            });
+        }
+
+        [HttpPost("upload-cccd-front")]
+        public async Task<IActionResult> UploadCccdFront(IFormFile file)
+        {
+            var userId = GetUserIdFromToken();
+            if (userId == 0) return Unauthorized("Invalid user token");
+            if (file == null || file.Length == 0) return BadRequest("No file uploaded");
+
+            var result = await _profileService.UploadCccdImageAsync(userId, file, true);
+            if (result.Succeeded)
+                return Ok(new { message = "Uploaded successfully", imageUrl = result.ImageUrl });
+            return BadRequest(new { errors = result.Errors });
+        }
+
+        [HttpPost("upload-cccd-back")]
+        public async Task<IActionResult> UploadCccdBack(IFormFile file)
+        {
+            var userId = GetUserIdFromToken();
+            if (userId == 0) return Unauthorized("Invalid user token");
+            if (file == null || file.Length == 0) return BadRequest("No file uploaded");
+
+            var result = await _profileService.UploadCccdImageAsync(userId, file, false);
+            if (result.Succeeded)
+                return Ok(new { message = "Uploaded successfully", imageUrl = result.ImageUrl });
+            return BadRequest(new { errors = result.Errors });
+        }
+
         private int GetUserIdFromToken()
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;

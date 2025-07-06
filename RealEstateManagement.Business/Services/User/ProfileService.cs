@@ -39,13 +39,19 @@ namespace RealEstateManagement.Business.Services.User
                 Name = user.Name,
                 ProfilePictureUrl = user.ProfilePictureUrl,
                 Email = user.Email ?? string.Empty,
-                Role = role,
+                Role = user.Role,
                 PhoneNumber = user.PhoneNumber ?? string.Empty,
                 IsVerified = user.IsVerified,
                 EmailConfirmed = user.EmailConfirmed,
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                 CreatedAt = user.CreatedAt,
-                
+                IsActive = user.IsActive,
+                CitizenIdFrontImageUrl = user.CitizenIdFrontImageUrl,
+                CitizenIdBackImageUrl = user.CitizenIdBackImageUrl,
+                VerificationRejectReason = user.VerificationRejectReason,
+                CitizenIdNumber = user.CitizenIdNumber,
+                CitizenIdIssuedDate = user.CitizenIdIssuedDate,
+                CitizenIdExpiryDate = user.CitizenIdExpiryDate,
             };
 
             return profile;
@@ -85,6 +91,19 @@ namespace RealEstateManagement.Business.Services.User
             if (!string.IsNullOrEmpty(model.ProfilePictureUrl))
             {
                 user.ProfilePictureUrl = model.ProfilePictureUrl;
+            }
+
+            if (!string.IsNullOrEmpty(model.CitizenIdNumber))
+            {
+                user.CitizenIdNumber = model.CitizenIdNumber;
+            }
+            if (model.CitizenIdIssuedDate.HasValue)
+            {
+                user.CitizenIdIssuedDate = model.CitizenIdIssuedDate;
+            }
+            if (model.CitizenIdExpiryDate.HasValue)
+            {
+                user.CitizenIdExpiryDate = model.CitizenIdExpiryDate;
             }
 
             var emailChanged = !string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase);
@@ -141,6 +160,36 @@ namespace RealEstateManagement.Business.Services.User
                 return ProfilePictureUploadResult.Failure("An error occurred while uploading the profile picture");
                
             }
+        }
+
+        public async Task<ProfilePictureUploadResult> UploadCccdImageAsync(int userId, IFormFile file, bool isFront)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null) return ProfilePictureUploadResult.Failure("User not found");
+
+            var folder = isFront ? "cccd-front" : "cccd-back";
+            var prefix = isFront ? $"cccd_front_{userId}" : $"cccd_back_{userId}";
+            var uploadResult = await _uploadPicService.UploadImageAsync(file, folder, prefix);
+
+            if (!uploadResult.Succeeded)
+                return ProfilePictureUploadResult.Failure(uploadResult.ErrorMessage ?? "Upload failed");
+
+            // Xóa ảnh cũ nếu có
+            if (isFront && !string.IsNullOrEmpty(user.CitizenIdFrontImageUrl))
+                await _uploadPicService.DeleteImageAsync(user.CitizenIdFrontImageUrl);
+            if (!isFront && !string.IsNullOrEmpty(user.CitizenIdBackImageUrl))
+                await _uploadPicService.DeleteImageAsync(user.CitizenIdBackImageUrl);
+
+            if (isFront)
+                user.CitizenIdFrontImageUrl = uploadResult.ImageUrl;
+            else
+                user.CitizenIdBackImageUrl = uploadResult.ImageUrl;
+
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (updateResult.Succeeded)
+                return ProfilePictureUploadResult.Success(uploadResult.ImageUrl!);
+            else
+                return ProfilePictureUploadResult.Failure(updateResult.Errors.Select(e => e.Description));
         }
     }
 }
