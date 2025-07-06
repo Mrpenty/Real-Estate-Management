@@ -1,0 +1,663 @@
+@{
+    Layout = "~/Views/Shared/_RenterLayout.cshtml";
+    ViewData["Title"] = "Cập nhật tin";
+}
+
+<div class="bg-white px-6 pt-6 border-b" style="position:fixed;width:100%;z-index:999">
+    <h1 class="text-2xl font-semibold mb-4">Đăng tin cho thuê</h1>
+
+    <div class="flex space-x-6 text-sm font-medium">
+        <button data-scroll="AreaId" class="tab-btn text-orange-600 border-b-2 border-orange-600 pb-2">
+            Khu vực
+        </button>
+        <button data-scroll="DescriptionInformationId" class="tab-btn text-gray-600 hover:text-orange-600 pb-2">
+            Thông tin mô tả
+        </button>
+        <button data-scroll="ImageId" class="tab-btn text-gray-600 hover:text-orange-600 pb-2">
+            Hình ảnh
+        </button>
+        <button data-scroll="ContactId" class="tab-btn text-gray-600 hover:text-orange-600 pb-2">
+            Thông tin liên hệ
+        </button>
+    </div>
+</div>
+<form id="property-form">
+    <div class="bg-white p-6 rounded ml-20 mr-20 mt-8 border mb-8" style="margin-top:9rem">
+        <h2 class="text-lg font-semibold mb-4">Loại chuyên mục</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block mb-1 font-medium">
+                    Danh mục <span class="text-red-600 font-bold">(∗)</span>
+                </label>
+                <select required id="type" name="type" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>-- Chọn danh mục --</option>
+                    <option selected value="room">Phòng trọ</option>
+                    <option value="house">Nhà nguyên căn</option>
+                    <option value="apartment">Căn hộ</option>
+                </select>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="AreaId" class="section bg-white p-6 rounded ml-20 mr-20 mt-8 border mb-8">
+        <h2 class="text-lg font-semibold mb-4">Khu vực</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block mb-1 font-medium">
+                    Tỉnh/Thành phố <span class="text-red-600 font-bold">(∗)</span>
+                </label>
+                <select id="province-select" name="province-select" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>-- Chọn Tỉnh/TP --</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block mb-1 font-medium">
+                    Phường/Xã <span class="text-red-600 font-bold">(∗)</span>
+                </label>
+                <select id="ward-select" name="WardId" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>-- Chọn phường/xã --</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block mb-1 font-medium">Đường phố <span class="text-red-600 font-bold">(∗)</span></label>
+                <select id="street-select" name="StreetId" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>-- Chọn đường phố --</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block mb-1 font-medium">Địa chỉ chi tiết</label>
+                <input type="text" id="addressInfoId" name="AddressInfo" placeholder="Địa chỉ chi tiết" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <button onclick="updateMap()" type="button" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 flex items-center gap-1">
+                    <span>Tìm kiếm trên bản đồ</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded ml-20 mr-20 mt-8 border mb-8">
+        <h2 class="text-lg font-semibold mb-4">Bản đồ</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+            <div>
+                <iframe id="mapFrame"
+                        width="100%"
+                        height="300"
+                        class="rounded border border-gray-300"
+                        style="border:0"
+                        loading="lazy"
+                        allowfullscreen
+                        referrerpolicy="no-referrer-when-downgrade"
+                        src="https://www.google.com/maps?q=HoChiMinh,+Vietnam&output=embed">
+                </iframe>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="DescriptionInformationId" class="section bg-white p-6 rounded ml-20 mr-20 mt-8 border mb-8">
+        <h2 class="text-lg font-semibold mb-4">Thông tin mô tả</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+            <div>
+                <label class="block mb-1 font-medium">
+                    Tiêu đề <span class="text-red-600 font-bold">(∗)</span>
+                </label>
+                <textarea required name="title" id="title" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+
+            <div>
+                <label class="block mb-1 font-medium">
+                    Nội dung mô tả <span class="text-red-600 font-bold">(∗)</span>
+                </label>
+                <textarea required id="description" name="description" rows="10" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-4">
+                    <label class="block mb-1 font-medium">
+                        Giá cho thuê <span class="text-red-600 font-bold">(∗)</span>
+                    </label>
+                    <div class="w-full" style="width:100%">
+                        <div class="mt-1 flex rounded-md">
+                            <input id="price" required name="price" type="number"
+                                   class="flex-1 block w-full rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm" />
+                            <select class="rounded-none rounded-r-md border border-l-0 border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option>đồng/tháng</option>
+                                <option>đồng/m<sup>2</sup>/tháng</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-4">
+                    <label class="block mb-1 font-medium">
+                        Diện tích <span class="text-red-600 font-bold">(∗)</span>
+                    </label>
+                    <div class="w-full" style="width:100%">
+                        <div class="mt-1 flex rounded-md">
+                            <input type="number" id="area" name="area" required
+                                   class="flex-1 block w-full rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm" />
+                            <span class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-100 px-3 text-sm text-gray-700">
+                                m<sup>2</sup>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-4">
+                    <label class="block mb-1 font-medium">
+                        Số phòng <span class="text-red-600 font-bold">(∗)</span>
+                    </label>
+                    <div class="w-full" style="width:100%">
+                        <div class="mt-1 flex rounded-md">
+                            <input type="number" id="bedrooms" name="bedrooms" required
+                                   class="flex-1 block w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="featuresId" class="bg-white p-6 rounded ml-20 mr-20 mt-8 border mb-8">
+        <h2 class="text-lg font-semibold mb-4">Đặc điểm nổi bật</h2>
+
+        <div id="amenities-container" class="flex mb-3">
+        </div>
+
+    </div>
+
+    <div id="ImageId" class="section bg-white p-6 rounded ml-20 mr-20 mt-8 border mb-8">
+        <h2 class="text-lg font-semibold mb-4">Hình ảnh</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+            <label for="imageUpload"
+                   class="flex flex-col items-center justify-center w-full h-56 border-2 border-dashed border-blue-400 rounded-lg bg-blue-50 cursor-pointer hover:bg-blue-100 transition">
+                <div class="flex flex-col items-center">
+                    <img src="~/image/upload-image.png" style="width:60px" />
+                    <p class="text-sm text-gray-700">Tải ảnh từ thiết bị</p>
+                </div>
+                <input id="imageUpload" type="file" class="hidden" multiple accept="image/*">
+            </label>
+            <ul class="mt-4 text-sm text-gray-600 space-y-1 list-disc list-inside">
+                <li>Tải lên tối đa 8 ảnh trong một bài đăng</li>
+                <li>Dung lượng ảnh tối đa 5MB</li>
+                <li>Hình ảnh phải liên quan đến phòng trọ, nhà cho thuê</li>
+                <li>Không chèn văn bản, số điện thoại lên ảnh</li>
+            </ul>
+
+            <div id="previewContainer" class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+        </div>
+    </div>
+
+
+    <div id="ContactId" class="section bg-white p-6 rounded ml-20 mr-20 mt-8 border mb-8">
+        <h2 class="text-lg font-semibold mb-4">Thông tin liên hệ</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="userNameIdC" class="block mb-1 font-medium">
+                    Tài khoản
+                </label>
+                <input id="userNameIdC" type="text" disabled class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label for="phoneNumberIdC" class="block mb-1 font-medium">
+                    Số điện thoại
+                </label>
+                <input type="text" id="phoneNumberIdC" disabled class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </div>
+    </div>
+
+    <div class="ml-20 mr-20 mb-20">
+        <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-full mb-6 transition">
+            Hoàn tất
+        </button>
+    </div>
+</form>
+
+<script>
+     let isAuthen = authService.isAuthenticated();
+     if(!isAuthen){
+         window.location.href = '/Auth/Login';
+     }
+
+     let itemPropertyBody = null;
+
+     const apiBaseUrl = 'https://localhost:7031/api';
+     const baseUrl = 'https://localhost:7031';
+     const provinceSelect = $('#province-select');
+     const wardSelect = $('#ward-select');
+     const streetSelect = $('#street-select');
+     const addressInfo = $('#addressInfoId');
+     const fullAddressInput = $('#open-address-modal');
+
+
+     getProperty();
+     async function getProperty(){
+         itemPropertyBody = await propertyService.getProperty(@ViewBag.Id);
+         console.log(itemPropertyBody);
+         $('#type').val(itemPropertyBody.type);
+         provinceSelect.val(itemPropertyBody.provinceId);
+         addressInfo.val(itemPropertyBody.detailedAddress);
+
+         wardSelect.empty().append('<option value="">Chọn Phường/Xã</option>');
+         streetSelect.empty().append('<option value="">Chọn Đường</option>');
+         if (itemPropertyBody.provinceId) {
+             $.get(`${apiBaseUrl}/Property/wards/${itemPropertyBody.provinceId}`,async function (data) {
+                     data.forEach(w => wardSelect.append(`<option value="${w.id}">${w.name}</option>`));
+             });
+         }
+
+
+         streetSelect.empty().append('<option value="">Chọn Đường</option>');
+         if (itemPropertyBody.wardId) {
+             $.get(`${apiBaseUrl}/Property/streets/${itemPropertyBody.wardId}`,async function (data) {
+                 data.forEach(s => streetSelect.append(`<option value="${s.id}">${s.name}</option>`));
+             });
+         }
+
+         $('#title').val(itemPropertyBody.title);
+         $('#description').val(itemPropertyBody.description);
+         $('#price').val(itemPropertyBody.price);
+         $('#bedrooms').val(itemPropertyBody.bedrooms);
+         $('#area').val(itemPropertyBody.area);
+
+         itemPropertyBody.amenities.forEach(id => {
+            const checkbox = document.querySelector(`input[name="AmenityIds"][value="${id}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+
+         });
+
+             itemPropertyBody.imageUrls.forEach(url =>{
+               const wrapper = document.createElement('div');
+               wrapper.className = "relative";
+
+               const img = document.createElement('img');
+               img.src = baseUrl + url;
+               img.className = "w-full h-32 object-cover rounded-md shadow";
+
+               const deleteBtn = document.createElement('button');
+               deleteBtn.innerHTML = "<span>&times;</span>";
+               deleteBtn.type = "button";
+               deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600";
+               deleteBtn.onclick = () => {
+                        wrapper.remove();
+               };
+
+               wrapper.appendChild(img);
+               wrapper.appendChild(deleteBtn);
+               previewContainer.appendChild(wrapper);
+         });
+
+         setTimeout(() => {
+             wardSelect.val(itemPropertyBody.wardId);
+             streetSelect.val(itemPropertyBody.streetId);
+
+             updateMap();
+         },500)
+
+     }
+
+     $.get(`${apiBaseUrl}/Property/provinces`,async function (data) {
+            provinceSelect.empty().append('<option value="">Chọn Tỉnh/Thành</option>');
+            data.forEach(p => provinceSelect.append(`<option value="${p.id}">${p.name}</option>`));
+     });
+
+
+     let createdPropertyId = null;
+     let imageFiles = [];
+     let primaryImageIndex = 0;
+
+     const propertyForm = document.getElementById('property-form');
+     propertyForm.onsubmit = async function(e) {
+         e.preventDefault();
+         // Thu thập dữ liệu property từ form
+         const formData = new FormData(propertyForm);
+         //console.log(Object.fromEntries(formData.entries()));
+         // Build object đúng chuẩn DTO backend
+         const amenityIds = Array.from(document.querySelectorAll('input[name="AmenityIds"]:checked')).map(cb => parseInt(cb.value));
+         const provinceId = parseInt(formData.get('province-select'));
+         const wardId = parseInt(formData.get('WardId'));
+         const streetId = parseInt(formData.get('StreetId'));
+         const detailedAddress = formData.get('AddressInfo') || '';
+         const propertyData = {
+             title: formData.get('title'),
+             description: formData.get('description'),
+             type: formData.get('type'),
+             area: parseFloat(formData.get('area')),
+             bedrooms: parseInt(formData.get('bedrooms')),
+             price: parseFloat(formData.get('price')),
+             location: '',
+             amenityIds: amenityIds,
+             provinceId: provinceId,
+             wardId: wardId,
+             streetId: streetId,
+             detailedAddress: detailedAddress
+         };
+
+
+         updateMap();
+         if(imageFiles.length == 0){
+             alert('Cần cập nhật ảnh');
+             return;
+         }
+         // Kiểm tra dữ liệu trước khi gửi
+         // for (const key in propertyData) {
+         //     if (propertyData[key] === undefined || propertyData[key] === null || propertyData[key] === '' || (Array.isArray(propertyData[key]) && propertyData[key].length === 0)) {
+         //         alert('Vui lòng nhập đầy đủ thông tin: ' + key);
+         //         return;
+         //     }
+         // }
+         // Gửi API tạo property
+
+         propertyData['location'] = await fetchLocationAndSetPropertyData();
+         const token = localStorage.getItem('authToken');
+         const res = await fetch('https://localhost:7031/api/PropertyPosts', {
+             method: 'POST',
+             headers: {
+                 'Content-Type': 'application/json',
+                 ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+             },
+             credentials: 'include',
+             body: JSON.stringify(propertyData)
+         });
+         if (!res.ok) {
+             const err = await res.json().catch(() => ({}));
+             alert('Tạo property thất bại! ' + (err.message || ''));
+             return;
+         }
+         const data = await res.json();
+         createdPropertyId = data.propertyId; // Sử dụng propertyId từ response
+         if(createdPropertyId){
+             uploadImages(createdPropertyId)
+         }
+     };
+
+    async function fetchLocationAndSetPropertyData() {
+       const location = `${addressInfo.val()} ${streetSelect.find("option:selected").text()} ${wardSelect.find("option:selected").text()} ${provinceSelect.find("option:selected").text()}`;
+       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`;
+       let latlon = '';
+
+       try {
+         const response = await fetch(url);
+         const data = await response.json();
+
+         if (data.length > 0) {
+           const lat = data[0].lat;
+           const lon = data[0].lon;
+           latlon = `${lat},${lon}`;
+         } else {
+           console.log("Không tìm thấy địa chỉ.");
+           latlon = location.trim();
+         }
+       } catch (error) {
+         console.error("Lỗi khi gọi API vị trí:", error);
+         latlon = location.trim();
+       }
+
+       return latlon ;
+     }
+
+         async function uploadImages(propertyId) {
+             const token = localStorage.getItem('authToken');
+
+             for (let idx = 0; idx < imageFiles.length; idx++) {
+                 const file = imageFiles[idx];
+
+                 // Upload file lên server trước
+                 const formData = new FormData();
+                 formData.append('file', file);
+
+                 const uploadResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/upload`, {
+                     method: 'POST',
+                     headers: {
+                         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                     },
+                     body: formData
+                 });
+
+                 if (!uploadResponse.ok) {
+                     const error = await uploadResponse.text();
+                     alert(`Upload ảnh thất bại: ${error}`);
+                     return;
+                 }
+
+                 const uploadResult = await uploadResponse.json();
+                 const imageUrl = uploadResult.imageUrl;
+
+                 // Lưu thông tin ảnh vào database
+                 const dto = {
+                     url: imageUrl,
+                     isPrimary: idx === primaryImageIndex,
+                     order: idx
+                 };
+
+                 const saveResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images`, {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json',
+                         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                     },
+                     body: JSON.stringify(dto)
+                 });
+
+                 if (!saveResponse.ok) {
+                     const error = await saveResponse.text();
+                     alert(`Lưu thông tin ảnh thất bại: ${error}`);
+                     return;
+                 }
+
+                 alert('Lưu thông tin thành công');
+                 window.location.href = '/';
+             }
+         }
+
+
+     provinceSelect.on('change',async function () {
+         const provinceId = $(this).val();
+         wardSelect.empty().append('<option value="">Chọn Phường/Xã</option>');
+         streetSelect.empty().append('<option value="">Chọn Đường</option>');
+             if (provinceId) {
+                   $.get(`${apiBaseUrl}/Property/wards/${provinceId}`,async function (data) {
+                       data.forEach(w => wardSelect.append(`<option value="${w.id}">${w.name}</option>`));
+                  });
+             }
+     });
+
+     wardSelect.on('change',async function () {
+         const wardId = $(this).val();
+         streetSelect.empty().append('<option value="">Chọn Đường</option>');
+         if (wardId) {
+             $.get(`${apiBaseUrl}/Property/streets/${wardId}`,async function (data) {
+                 data.forEach(s => streetSelect.append(`<option value="${s.id}">${s.name}</option>`));
+             });
+         }
+     });
+
+     function updateMap() {
+       if(provinceSelect.val() == ''){
+           alert('Chọn tỉnh/thành phố');
+           return;
+       }
+       if(wardSelect.val() == ''){
+            alert('Chọn phường/xã');
+           return;
+       }
+
+       if(streetSelect.val() == ''){
+             alert('Chọn đường phố');
+             return;
+       }
+
+
+       const location = `${addressInfo.val()} ${streetSelect.find("option:selected").text()} ${wardSelect.find("option:selected").text()} ${provinceSelect.find("option:selected").text()}`;
+       //console.log(location);
+       const iframe = document.getElementById("mapFrame");
+
+       if (location.trim() !== "") {
+         const encodedLocation = encodeURIComponent(location.trim());
+         iframe.src = `https://www.google.com/maps?q=${encodedLocation}&output=embed`;
+       }
+     }
+
+     getAmenities();
+     async function getAmenities(){
+             let listData = await getAllAmenities();
+             const amenitiesContainer = $('#amenities-container');
+             listData.forEach(amenity => {
+                    amenitiesContainer.append(`
+                                 <div class="flex items-center mr-4">
+                                     <input type="checkbox" name="AmenityIds" value="${amenity.id}" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                     <label class="ml-2 block text-sm text-gray-900">${amenity.name}</label>
+                                 </div>
+                             `);
+             });
+     }
+
+
+
+     //font-bold text-blue-800
+     document.getElementById('CreatePostId').classList.add('font-bold', 'text-blue-800');
+
+     let isScrollingByClick = false;
+
+     document.querySelectorAll('.tab-btn').forEach(btn => {
+       btn.addEventListener('click', function () {
+         document.querySelectorAll('.tab-btn').forEach(b => {
+           b.classList.remove('text-orange-600', 'border-b-2', 'border-orange-600');
+           b.classList.add('text-gray-600', 'font-semibold');
+         });
+
+         this.classList.remove('text-gray-600', 'font-semibold');
+         this.classList.add('text-orange-600', 'border-b-2', 'border-orange-600');
+
+         const sectionId = this.getAttribute('data-scroll');
+         const sectionEl = document.getElementById(sectionId);
+         if (sectionEl) {
+           isScrollingByClick = true;
+           const offset = 190;
+           const y = sectionEl.getBoundingClientRect().top + window.pageYOffset - offset;
+           window.scrollTo({ top: y, behavior: 'smooth' });
+         }
+
+         setTimeout(() => {
+             isScrollingByClick = false;
+         }, 600);
+       });
+     });
+
+
+     const tabButtons = document.querySelectorAll('.tab-btn');
+     const sections = document.querySelectorAll('.section');
+
+
+     const sectionMap = {};
+     tabButtons.forEach(btn => {
+       const id = btn.getAttribute('data-scroll');
+       sectionMap[id] = btn;
+     });
+
+     const observer = new IntersectionObserver(
+       (entries) => {
+         if (isScrollingByClick) return;
+
+         entries.forEach(entry => {
+           if (entry.isIntersecting) {
+
+             tabButtons.forEach(btn => {
+               btn.classList.remove('text-orange-600', 'border-b-2', 'border-orange-600');
+               btn.classList.add('text-gray-600', 'font-semibold');
+             });
+
+             const id = entry.target.getAttribute('id');
+             const activeBtn = sectionMap[id];
+             if (activeBtn) {
+               activeBtn.classList.remove('text-gray-600', 'font-semibold');
+               activeBtn.classList.add('text-orange-600', 'border-b-2', 'border-orange-600');
+             }
+           }
+         });
+       },
+       {
+         rootMargin: '-30% 0px -40% 0px',
+         threshold: 0.1
+       }
+     );
+
+     sections.forEach(section => observer.observe(section));
+
+
+     const imageUpload = document.getElementById('imageUpload');
+     const previewContainer = document.getElementById('previewContainer');
+
+     imageUpload.addEventListener('change', () => {
+         try {
+                 imageFiles = [];
+                 previewContainer.innerHTML = "";
+
+                  const fileAlls = Array.from(imageUpload.files);
+                  if (fileAlls.length > 8) {
+                      alert("Chỉ được tải tối đa 8 ảnh!");
+                      imageUpload.value = "";
+                      return;
+                  }
+
+
+                 const files = fileAlls.slice(0, 8);
+                 imageFiles = files;
+                 for (const file of files) {
+                 if (file.size > 5 * 1024 * 1024) {
+                         alert(`Ảnh "${file.name}" vượt quá 5MB. Vui lòng chọn ảnh nhẹ hơn.`);
+                         imageUpload.value = "";
+                         return;
+                     }
+                 }
+
+
+
+                  files.forEach((file, index) => {
+                      if (!file.type.startsWith("image/")) return;
+
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                          const wrapper = document.createElement('div');
+                          wrapper.className = "relative";
+
+                          const img = document.createElement('img');
+                          img.src = reader.result;
+                          img.className = "w-full h-32 object-cover rounded-md shadow";
+
+                          const deleteBtn = document.createElement('button');
+                          deleteBtn.innerHTML = "<span>&times;</span>";
+                          deleteBtn.type = "button";
+                          deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600";
+                          deleteBtn.onclick = () => {
+                              wrapper.remove();
+                          };
+
+                          wrapper.appendChild(img);
+                          wrapper.appendChild(deleteBtn);
+                          previewContainer.appendChild(wrapper);
+                      };
+                      reader.readAsDataURL(file);
+                  });
+         } catch (error) {
+             console.log(error);
+         }
+     });
+</script>

@@ -75,6 +75,19 @@ namespace RealEstateManagement.Presentation.Controllers
         }
 
         [HttpGet]
+        public IActionResult ListProperty()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult DetailProperty(int id)
+        {
+            ViewBag.Id = id;
+            return View();
+        }
+
+        [HttpGet]
         public IActionResult CreateContract(int propertyPostId)
         {
             ViewBag.PropertyPostId = propertyPostId;

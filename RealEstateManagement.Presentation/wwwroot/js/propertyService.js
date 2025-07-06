@@ -57,7 +57,6 @@ const propertyService = {
             $('#minInput').val(body.minRoom ?? 0);
             $('#maxInput').val(body.maxRoom ?? 15);
 
-            console.log(body);
             let response = await fetch(`${API_PROPERTY_BASE_URL}/filter-advanced`, {
                 method: 'POST',
                 headers: {

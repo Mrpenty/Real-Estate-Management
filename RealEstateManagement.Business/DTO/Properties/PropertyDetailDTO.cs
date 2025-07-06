@@ -42,5 +42,8 @@ namespace RealEstateManagement.Business.DTO.Properties
         public string Ward { get; set; }
         public string Street { get; set; }
         public string DetailedAddress { get; set; }
+        public int? ProvinceId { get; set; }
+        public int? WardId { get; set; }
+        public int? StreetId { get; set; }
     }
 }
