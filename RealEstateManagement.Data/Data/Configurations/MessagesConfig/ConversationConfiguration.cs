@@ -25,8 +25,13 @@ public partial class ApplicationUserConfiguration
                 .WithMany(p => p.Conversations)
                 .HasForeignKey(c => c.PropertyId)
                 .OnDelete(DeleteBehavior.Restrict);
+            builder.Property(c => c.LastMessage)
+                .HasMaxLength(1000) 
+                .IsRequired(false); 
 
-            // Indexes
+            builder.Property(c => c.LastSentAt)
+                .IsRequired(false); 
+
             builder.HasIndex(c => c.RenterId);
             builder.HasIndex(c => c.LandlordId);
             builder.HasIndex(c => c.PropertyId);

@@ -23,13 +23,17 @@ namespace RealEstateManagement.Business.Repositories.Chat.Messages
             await _context.SaveChangesAsync();
             return message;
         }
-        public async Task<IEnumerable<Message>> GetByConversationIdAsync(int conversationId)
+        public async Task<IEnumerable<Message>> GetByConversationIdAsync(int conversationId, int skip = 0, int take = 20)
         {
-            return await _context.Message
+            var messages = await _context.Message
                 .Include(m => m.Sender)
                 .Where(m => m.ConversationId == conversationId)
-                .OrderBy(m => m.SentAt)
+                .OrderByDescending(m => m.SentAt)
+                .Skip(skip)
+                .Take(take)
                 .ToListAsync();
+            messages.Reverse();
+            return messages;
         }
     }
 }

@@ -10,6 +10,6 @@ namespace RealEstateManagement.Business.Repositories.Chat.Messages
     public interface IMessageRepository
     {
         Task<Message> CreateAsync(Message message);
-        Task<IEnumerable<Message>> GetByConversationIdAsync(int conversationId);
+        Task<IEnumerable<Message>> GetByConversationIdAsync(int conversationId, int skip = 0, int take = 20);
     }
 }

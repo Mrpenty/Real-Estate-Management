@@ -48,6 +48,8 @@ namespace RealEstateManagement.Business.Services.Chat.Conversations
                 Id = c.Id,
                 RenterId = c.RenterId,
                 LandlordId = c.LandlordId,
+                LastMessage = c.LastMessage,
+                LastSentAt = c.LastSentAt,
                 RenterName = userId == c.LandlordId ? c.Renter.Name ?? c.Renter.Email : null,
                 LandlordName = userId == c.RenterId ? c.Landlord.Name ?? c.Landlord.Email : null
             });

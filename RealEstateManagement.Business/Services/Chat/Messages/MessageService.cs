@@ -32,9 +32,9 @@ namespace RealEstateManagement.Business.Services.Chat.Messages
 
             return await _repo.CreateAsync(message);
         }
-        public async Task<IEnumerable<MessageViewDTO>> GetMessagesByConversationAsync(int conversationId)
+        public async Task<IEnumerable<MessageViewDTO>> GetMessagesByConversationAsync(int conversationId, int skip = 0, int take = 20)
         {
-            var messages = await _repo.GetByConversationIdAsync(conversationId);
+            var messages = await _repo.GetByConversationIdAsync(conversationId, skip, take);
             if (messages == null || !messages.Any())
             {
                 return new List<MessageViewDTO>();
