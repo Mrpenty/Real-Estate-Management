@@ -11,6 +11,8 @@ namespace RealEstateManagement.Data.Entity.Messages
         public int? PropertyId { get; set; }
         public DateTime CreatedAt { get; set; }
 
+        public string? LastMessage { get; set; }        // ✔ nội dung cuối cùng
+        public DateTime? LastSentAt { get; set; }
         // Navigation properties
         public ApplicationUser Renter { get; set; }
         public ApplicationUser Landlord { get; set; }

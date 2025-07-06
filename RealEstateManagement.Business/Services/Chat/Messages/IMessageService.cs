@@ -11,6 +11,6 @@ namespace RealEstateManagement.Business.Services.Chat.Messages
     public interface IMessageService
     {
         Task<Message> SendMessageAsync(MessageDTO dto, int senderId);
-        Task<IEnumerable<MessageViewDTO>> GetMessagesByConversationAsync(int conversationId);
+        Task<IEnumerable<MessageViewDTO>> GetMessagesByConversationAsync(int conversationId, int skip = 0, int take = 20);
     }
 }

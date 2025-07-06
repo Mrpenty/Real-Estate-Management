@@ -24,12 +24,12 @@ namespace RealEstateManagement.Business.Repositories.Chat.Conversations
             return conversation;
         }
 
-        //public async Task<Conversation> GetByIdWithDetailsAsync(int id)
-        //{
-        //    return await _context.Conversation
-        //        .Include(c => c.Messages)
-        //        .FirstOrDefaultAsync(c => c.Id == id);
-        //}
+        public async Task<Conversation> GetByIdWithDetailsAsync(int id)
+        {
+            return await _context.Conversation
+                .Include(c => c.Messages)
+                .FirstOrDefaultAsync(c => c.Id == id);
+        }
         public async Task<Conversation?> GetByUsersAsync(int renterId, int landlordId, int? propertyId = null)
         {
             return await _context.Conversation
@@ -42,6 +42,7 @@ namespace RealEstateManagement.Business.Repositories.Chat.Conversations
         {
             return await _context.Conversation
                 .Where(c => c.RenterId == userId || c.LandlordId == userId)
+                .OrderByDescending(c => c.LastSentAt ?? c.CreatedAt)
                 .Include(c => c.Renter)
                 .Include(c => c.Landlord)
                 .Include(c => c.Property)

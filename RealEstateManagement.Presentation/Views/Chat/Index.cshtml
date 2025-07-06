@@ -6,6 +6,7 @@
     .chat-container {
         display: flex;
         height: 90vh;
+        width: 100%;
         border: 1px solid #ccc;
         border-radius: 10px;
         overflow: hidden;
@@ -52,10 +53,15 @@
     }
 
     .message {
-        margin-bottom: 15px;
-        background-color: #f2f2f2;
-        padding: 10px;
-        border-radius: 10px;
+        max-width: 60%;
+        padding: 10px 14px;
+        margin-bottom: 10px;
+        border-radius: 18px;
+        font-size: 14px;
+        line-height: 1.4;
+        word-wrap: break-word;
+        display: inline-block;
+        position: relative;
     }
 
     #sendMessageForm {
@@ -85,16 +91,18 @@
 
     .message.left {
         align-self: flex-start;
-        background-color: #f1f1f1;
+        background-color: #e4e6eb;
+        color: #050505;
         text-align: left;
-        border-radius: 10px 10px 10px 0;
+        border-top-left-radius: 0;
     }
 
     .message.right {
         align-self: flex-end;
-        background-color: #d1e7dd;
-        text-align: right;
-        border-radius: 10px 10px 0 10px;
+        background-color: #0084ff;
+        color: white;
+        text-align: left;
+        border-top-right-radius: 0;
     }
 
     .message strong {
@@ -105,12 +113,60 @@
     .message small {
         display: block;
         font-size: 0.75em;
+        color: #000;
+    }
+
+    .last-message {
+        font-size: 0.85em; /* Hoặc thử 12px */
+        color: #666; /* Màu nhẹ hơn cho dịu mắt */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .conversation-item.active {
+        background-color: #d1e7dd; /* Màu sáng nhẹ để làm nổi bật */
+        border: 2px solid #0d6efd; /* Đường viền nổi bật */
+    }
+
+/*     .message-time {
+        font-size: 11px;
         color: #666;
+        background-color: rgba(0, 0, 0, 0.75);
+        color: white;
+        padding: 2px 6px;
+        border-radius: 12px;
+        position: absolute;
+        bottom: -22px;
+        right: 10px;
+        white-space: nowrap;
+        display: none;
+        z-index: 10;
+    }
+
+    .message:hover .message-time {
+        display: block;
+    } */
+
+    .message-time-inline {
+        font-size: 11px;
+        display: block;
+        margin-top: 2px;
+        text-align: right;
+        opacity: 0.6;
     }
 
         button:hover {
             background-color: #0056b3;
         }
+
+
+    .read-icon {
+        font-size: 12px;
+        color: #000;
+        margin-left: 8px;
+    }
+
 </style>
 
 
@@ -122,6 +178,9 @@
         <div id="messagesContainer">
             <p>Chọn một cuộc trò chuyện để bắt đầu.</p>
         </div>
+@*         <div id="typingIndicator" class="text-gray-500 text-sm mb-2 ml-2" style="display:none;">
+            Đang nhập<span class="typing-dots">...</span>
+        </div> *@
         <div id="sendMessageForm">
             <input type="text" id="messageInput" placeholder="Nhập tin nhắn..." />
             <button id="sendButton">Gửi</button>
@@ -130,5 +189,5 @@
 </div>
 @section Scripts {
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
-    <script src="~/js/chat.js"></script>
+    <script src="~/js/chat.js?v=@DateTime.Now.Ticks"></script>
 }
