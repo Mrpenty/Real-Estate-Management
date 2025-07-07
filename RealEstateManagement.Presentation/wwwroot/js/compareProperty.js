@@ -58,7 +58,7 @@ function getListCompare() {
             //        </td>
             //    `).join('')}
             //`;
-            table.appendChild(titleRow);
+            //table.appendChild(titleRow);
         },
         error: function (xhr, status, error) {
             return null;
