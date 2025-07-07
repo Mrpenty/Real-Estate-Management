@@ -41,7 +41,7 @@ namespace RealEstateManagement.API.Controllers
 
             try
             {
-                loginDTO.LoginIdentifier = loginDTO.LoginIdentifier.Replace("+84", "0");
+                //loginDTO.LoginIdentifier = loginDTO.LoginIdentifier.Replace("+84", "0");
                 var response = await _authService.LoginAsync(loginDTO);
                 return Ok(response);
             }
