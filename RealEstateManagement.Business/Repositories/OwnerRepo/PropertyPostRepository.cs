@@ -66,6 +66,11 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         {
             return await _context.PropertyPosts.FirstOrDefaultAsync(p => p.Id == postId);
         }
+
+        public IQueryable<PropertyPost> GetAll()
+        {
+            return _context.PropertyPosts.AsQueryable();
+        }
     }
 
 }

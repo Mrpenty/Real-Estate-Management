@@ -1,0 +1,344 @@
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var postId = ViewBag.PostId;
+}
+<div class="container mx-auto py-8">
+    <div class="mb-4">
+        <a href="/Admin/PostManagement" class="text-blue-600 hover:underline">
+            <i class="fas fa-arrow-left mr-2"></i>Quay lại danh sách
+        </a>
+    </div>
+    
+    <div id="postDetailContent" class="bg-white rounded-lg shadow-lg p-6">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p class="mt-2">Đang tải...</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const ADMIN_API_BASE_URL = 'https://localhost:7031';
+const postId = @postId;
+
+const AdminPostService = {
+    async getPostDetail(id) {
+        const res = await fetch(`${ADMIN_API_BASE_URL}/api/Admin/PropertyPosts/${id}`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+        if (!res.ok) throw new Error('Không thể lấy chi tiết bài đăng');
+        return await res.json();
+    },
+    async updatePostStatus(id, status, rejectReason = null) {
+        const body = rejectReason ? { status, rejectReason } : { status };
+        const res = await fetch(`${ADMIN_API_BASE_URL}/api/Admin/PropertyPosts/${id}/status`, {
+            method: 'PUT',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error('Không thể cập nhật trạng thái bài đăng');
+        return await res.json();
+    }
+};
+
+async function loadPostDetail() {
+    try {
+        const post = await AdminPostService.getPostDetail(postId);
+        renderPostDetail(post);
+    } catch (err) {
+        document.getElementById('postDetailContent').innerHTML = `
+            <div class="text-center text-red-500">
+                <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                <p>${err.message}</p>
+            </div>
+        `;
+    }
+}
+
+function capitalizeFirst(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function renderPostDetail(post) {
+    const property = post.property || {};
+    const landlord = post.landlord || {};
+    const address = property.address || {};
+    const images = property.images || [];
+    const amenities = property.amenities || [];
+    
+    let actionButtons = '';
+    const statusStr = (post.status || '').toLowerCase();
+    if (statusStr === 'pending') {
+        actionButtons = `
+            <button onclick="approvePost()" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+                <i class="fas fa-check mr-2"></i>Duyệt
+            </button>
+            <button onclick="rejectPost()" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700">
+                <i class="fas fa-times mr-2"></i>Từ chối
+            </button>
+        `;
+    } else if (statusStr === 'approved') {
+        actionButtons = `
+            <button onclick="rejectPost()" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700">
+                <i class="fas fa-times mr-2"></i>Từ chối
+            </button>
+        `;
+    }
+
+    document.getElementById('postDetailContent').innerHTML = `
+        <div class="space-y-6">
+            <!-- Header -->
+            <div class="border-b pb-4">
+                <h1 class="text-3xl font-bold mb-2">${property.title || 'Không có tiêu đề'}</h1>
+                <div class="flex items-center gap-4 text-gray-600">
+                    <span class="px-3 py-1 rounded-full text-sm font-medium ${
+                        statusStr === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        statusStr === 'approved' ? 'bg-green-100 text-green-800' :
+                        statusStr === 'rejected' ? 'bg-red-100 text-red-800' :
+                        statusStr === 'rented' ? 'bg-blue-100 text-blue-800' :
+                        statusStr === 'sold' ? 'bg-gray-300 text-gray-800' :
+                        'bg-gray-100 text-gray-700'
+                    }">${capitalizeFirst(post.statusDisplay || post.status)}</span>
+                    <span><i class="fas fa-calendar mr-1"></i>${post.createdAt ? new Date(post.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Thông tin cơ bản -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Thông tin chủ nhà -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
+                        <h3 class="text-xl font-bold mb-4 flex items-center text-blue-800">
+                            <i class="fas fa-user-circle text-blue-600 mr-3 text-2xl"></i>Thông tin chủ nhà
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                                <i class="fas fa-user text-blue-500 mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500">Tên đầy đủ</div>
+                                    <div class="font-semibold">${landlord.fullName || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                                <i class="fas fa-envelope text-blue-500 mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500">Email</div>
+                                    <div class="font-semibold">${landlord.email || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                                <i class="fas fa-phone text-blue-500 mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500">Số điện thoại</div>
+                                    <div class="font-semibold">${landlord.phoneNumber || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                                <i class="fas fa-at text-blue-500 mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500">Tên đăng nhập</div>
+                                    <div class="font-semibold">${landlord.userName || 'N/A'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin bất động sản -->
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
+                        <h3 class="text-xl font-bold mb-4 flex items-center text-green-800">
+                            <i class="fas fa-home text-green-600 mr-3 text-2xl"></i>Thông tin bất động sản
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                                <i class="fas fa-building text-green-500 mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500">Loại bất động sản</div>
+                                    <div class="font-semibold">${property.type || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                                <i class="fas fa-bed text-green-500 mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500">Số phòng ngủ</div>
+                                    <div class="font-semibold">${property.bedrooms || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                                <i class="fas fa-ruler-combined text-green-500 mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500">Diện tích</div>
+                                    <div class="font-semibold">${property.area ? property.area + ' m²' : 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                                <i class="fas fa-dollar-sign text-green-500 mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500">Giá</div>
+                                    <div class="font-semibold text-green-600">${property.price ? property.price.toLocaleString('vi-VN') + ' VNĐ' : 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                                <i class="fas fa-map-marker-alt text-green-500 mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500">Vị trí</div>
+                                    <div class="font-semibold">${property.location || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                                <i class="fas fa-eye text-green-500 mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500">Lượt xem</div>
+                                    <div class="font-semibold">${property.viewsCount || 0}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Địa chỉ -->
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg border border-purple-200">
+                        <h3 class="text-xl font-bold mb-4 flex items-center text-purple-800">
+                            <i class="fas fa-map-marker-alt text-purple-600 mr-3 text-2xl"></i>Địa chỉ
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                                <i class="fas fa-map text-purple-500 mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500">Địa chỉ chi tiết</div>
+                                    <div class="font-semibold">${address.detailedAddress || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                                <i class="fas fa-city text-purple-500 mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500">Tỉnh/Thành phố</div>
+                                    <div class="font-semibold">${address.province?.name || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                                <i class="fas fa-building text-purple-500 mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500">Quận/Huyện</div>
+                                    <div class="font-semibold">${address.ward?.name || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-white rounded-lg shadow-sm">
+                                <i class="fas fa-road text-purple-500 mr-3"></i>
+                                <div>
+                                    <div class="text-sm text-gray-500">Đường</div>
+                                    <div class="font-semibold">${address.street?.name || 'N/A'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mô tả -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-3 flex items-center">
+                            <i class="fas fa-align-left text-blue-600 mr-2"></i>Mô tả
+                        </h3>
+                        <p class="text-gray-700">${property.description || 'Không có mô tả'}</p>
+                    </div>
+
+                    <!-- Tiện ích -->
+                    ${amenities.length > 0 ? `
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-3 flex items-center">
+                            <i class="fas fa-star text-blue-600 mr-2"></i>Tiện ích
+                        </h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            ${amenities.map(amenity => `
+                                <div class="flex items-center">
+                                    <i class="fas fa-check text-green-500 mr-2"></i>
+                                    <span>${amenity.name}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <!-- Hành động -->
+                    ${actionButtons ? `<div class="bg-gray-50 p-4 rounded-lg"><h3 class="text-lg font-semibold mb-3">Hành động</h3><div class="flex gap-3">${actionButtons}</div></div>` : ''}
+                </div>
+                
+                <!-- Hình ảnh -->
+                <div class="lg:col-span-1">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-images text-blue-600 mr-2"></i>Hình ảnh
+                        </h3>
+                        ${images.length > 0 ? `
+                            <div class="grid grid-cols-2 gap-4">
+                                ${images.map((img, idx) => `
+                                    <div class="relative group">
+                                        <img src="${img.url || '/image/no-image.png'}" alt="Property image" 
+                                             class="w-full h-40 object-cover rounded-lg shadow-md border-2 border-gray-200 group-hover:scale-105 transition-transform duration-200 cursor-pointer"
+                                             onclick="openImageModal('${img.url || '/image/no-image.png'}')">
+                                        <span class="absolute top-2 left-2 bg-white/80 text-xs px-2 py-1 rounded shadow">${idx+1}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div class="text-center text-gray-500 py-8">
+                                <i class="fas fa-image text-4xl mb-2"></i>
+                                <p>Không có hình ảnh</p>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+async function approvePost() {
+    if (!confirm('Bạn có chắc chắn muốn duyệt bài đăng này?')) return;
+    
+    try {
+        await AdminPostService.updatePostStatus(postId, 'approved');
+        alert('Đã duyệt bài đăng thành công!');
+        window.location.href = '/Admin/PostManagement';
+    } catch (err) {
+        alert('Lỗi: ' + err.message);
+    }
+}
+
+async function rejectPost() {
+    const reason = prompt('Nhập lý do từ chối:');
+    if (!reason) return;
+    
+    try {
+        await AdminPostService.updatePostStatus(postId, 'rejected', reason);
+        alert('Đã từ chối bài đăng!');
+        window.location.href = '/Admin/PostManagement';
+    } catch (err) {
+        alert('Lỗi: ' + err.message);
+    }
+}
+
+function openImageModal(imageUrl) {
+    // Tạo modal xem ảnh full size
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="relative max-w-4xl max-h-full">
+            <button onclick="this.parentElement.parentElement.remove()" 
+                    class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300">&times;</button>
+            <img src="${imageUrl}" alt="Full size" class="max-w-full max-h-full object-contain">
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // Đóng modal khi click bên ngoài
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+// Load dữ liệu khi trang load
+loadPostDetail();
+</script>
+} 

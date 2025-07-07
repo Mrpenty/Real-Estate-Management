@@ -1,5 +1,5 @@
 const ADMIN_API_BASE_URL = "https://localhost:7031";
-const AdminService = {
+const AdminUserService = {
     /**
      * Lấy danh sách user cho admin (role: renter, landlord), có filter, search, paging
      * @param {Object} params { search, role, isActive, page, pageSize }
@@ -25,4 +25,4 @@ const AdminService = {
     },
     // Có thể bổ sung các hàm duyệt, ban, đổi role, ... sau
 };
-window.AdminService = AdminService; 
+window.AdminUserService = AdminUserService; 

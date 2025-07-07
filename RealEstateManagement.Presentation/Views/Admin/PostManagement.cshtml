@@ -1,0 +1,188 @@
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="container mx-auto py-8">
+    <h1 class="text-2xl font-bold mb-4">Quản lý bài đăng chờ duyệt</h1>
+    <div class="flex flex-col md:flex-row md:items-end gap-4 mb-4">
+        <div>
+            <label class="block text-sm font-medium mb-1">Tìm kiếm</label>
+            <input id="searchInput" type="text" placeholder="Tìm theo tiêu đề hoặc chủ nhà..." class="border rounded px-3 py-2 w-64" />
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Trạng thái</label>
+            <select id="statusFilter" class="border rounded px-3 py-2 w-40">
+                <option value="">Tất cả</option>
+                <option value="0">Bản nháp</option>
+                <option value="1">Chờ duyệt</option>
+                <option value="2">Đã duyệt</option>
+                <option value="3">Đã từ chối</option>
+                <option value="4">Đã cho thuê</option>
+                <option value="5">Đã bán</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Từ ngày</label>
+            <input id="fromDate" type="date" class="border rounded px-3 py-2" />
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Đến ngày</label>
+            <input id="toDate" type="date" class="border rounded px-3 py-2" />
+        </div>
+        <div>
+            <button onclick="applyFilters()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Lọc</button>
+            <button onclick="resetFilters()" class="ml-2 bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">Đặt lại</button>
+        </div>
+    </div>
+    <div class="overflow-x-auto">
+    <table class="min-w-full border rounded-lg shadow bg-white" id="postTable">
+        <thead class="bg-blue-50">
+            <tr>
+                <th class="px-4 py-2 text-left">ID</th>
+                <th class="px-4 py-2 text-left">Tiêu đề</th>
+                <th class="px-4 py-2 text-left">Chủ nhà</th>
+                <th class="px-4 py-2 text-left">Ngày tạo</th>
+                <th class="px-4 py-2 text-center">Trạng thái</th>
+                <th class="px-4 py-2 text-center">Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Render bằng JS -->
+        </tbody>
+    </table>
+    </div>
+    <div id="paginationBar" class="mt-4"></div>
+</div>
+@section Scripts {
+<script>
+const ADMIN_API_BASE_URL = 'https://localhost:7031/api/Admin/PropertyPosts';
+const AdminPostService = {
+    async getPosts(status = '', page = 1, pageSize = 10) {
+        const res = await fetch(`${ADMIN_API_BASE_URL}?status=${status || ''}&page=${page}&pageSize=${pageSize}`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+        if (!res.ok) throw new Error('Không thể lấy danh sách bài đăng');
+        return await res.json();
+    }
+};
+let currentPage = 1, totalPages = 1, allPosts = [];
+let currentSearch = '', currentStatus = '', currentFromDate = '', currentToDate = '';
+async function loadPosts(page = 1, status = '', search = '', fromDate = '', toDate = '') {
+    try {
+        const data = await AdminPostService.getPosts(status, page, 10); // phân trang backend
+        allPosts = data.posts;
+        let filtered = [...allPosts];
+        // Lọc theo search (chỉ filter FE nếu search hoặc filter ngày, còn phân trang thì backend)
+        if (search) {
+            const s = search.toLowerCase();
+            filtered = filtered.filter(post =>
+                (post.title || (post.property && post.property.title) || '').toLowerCase().includes(s) ||
+                (post.name || (post.landlord && (post.landlord.fullName || post.landlord.name)) || '').toLowerCase().includes(s)
+            );
+        }
+        if (fromDate) {
+            const from = new Date(fromDate);
+            filtered = filtered.filter(post => post.createdAt && new Date(post.createdAt) >= from);
+        }
+        if (toDate) {
+            const to = new Date(toDate);
+            filtered = filtered.filter(post => post.createdAt && new Date(post.createdAt) <= to);
+        }
+        // Nếu không search/filter ngày thì dùng luôn data.posts, không cần filter FE
+        if (!search && !fromDate && !toDate) filtered = data.posts;
+        totalPages = data.totalPages || Math.ceil((data.total || filtered.length) / 10);
+        currentPage = data.page || page;
+        renderPostTable(filtered);
+        renderPagination(currentPage, totalPages);
+    } catch (err) {
+        document.querySelector('#postTable tbody').innerHTML = `<tr><td colspan='6' class='text-center text-red-500'>${err.message}</td></tr>`;
+    }
+}
+function applyFilters() {
+    currentSearch = document.getElementById('searchInput').value.trim();
+    currentStatus = document.getElementById('statusFilter').value;
+    currentFromDate = document.getElementById('fromDate').value;
+    currentToDate = document.getElementById('toDate').value;
+    loadPosts(1, currentStatus, currentSearch, currentFromDate, currentToDate);
+}
+function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('fromDate').value = '';
+    document.getElementById('toDate').value = '';
+    currentSearch = '';
+    currentStatus = '';
+    currentFromDate = '';
+    currentToDate = '';
+    loadPosts(1);
+}
+function getStatusBadge(status, statusDisplay) {
+    let color = 'bg-gray-200 text-gray-700';
+    let display = statusDisplay || status;
+    // Map số hoặc enum sang tên tiếng Việt
+    const statusMap = {
+        0: 'Bản nháp',
+        1: 'Chờ duyệt',
+        2: 'Đã duyệt',
+        3: 'Đã từ chối',
+        4: 'Đã cho thuê',
+        5: 'Đã bán',
+        'draft': 'Bản nháp',
+        'pending': 'Chờ duyệt',
+        'approved': 'Đã duyệt',
+        'rejected': 'Đã từ chối',
+        'rented': 'Đã cho thuê',
+        'sold': 'Đã bán'
+    };
+    if (statusMap[status] !== undefined) display = statusMap[status];
+    if (status === 'pending' || status === 1) color = 'bg-yellow-100 text-yellow-800';
+    else if (status === 'approved' || status === 2) color = 'bg-green-100 text-green-800';
+    else if (status === 'rejected' || status === 3) color = 'bg-red-100 text-red-800';
+    else if (status === 'rented' || status === 4) color = 'bg-blue-100 text-blue-800';
+    else if (status === 'sold' || status === 5) color = 'bg-gray-300 text-gray-800';
+    else if (status === 'draft' || status === 0) color = 'bg-gray-100 text-gray-700';
+    return `<span class="px-3 py-1 rounded-full text-xs font-semibold ${color}">${display}</span>`;
+}
+function renderPostTable(posts) {
+    const tbody = document.querySelector('#postTable tbody');
+    if (!posts || posts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan='6' class='text-center'>Không có dữ liệu</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = posts.map(post => `
+        <tr class="hover:bg-blue-50 transition">
+            <td class="px-4 py-2 font-medium text-gray-700">${post.id}</td>
+            <td class="px-4 py-2">
+                <a href="/Admin/PostDetail/${post.id}" class="text-blue-700 hover:underline font-semibold">
+                    ${post.title || (post.property && post.property.title) || ''}
+                </a>
+            </td>
+            <td class="px-4 py-2 text-gray-800">${post.name || (post.landlord && (post.landlord.fullName || post.landlord.name)) || post.landlordId || ''}</td>
+            <td class="px-4 py-2 text-gray-600">${post.createdAt ? new Date(post.createdAt).toLocaleDateString('vi-VN') : ''}</td>
+            <td class="px-4 py-2 text-center">${getStatusBadge(post.status, post.statusDisplay)}</td>
+            <td class="px-4 py-2 text-center">
+                <a href="/Admin/PostDetail/${post.id}" class="inline-block bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition">Chi tiết</a>
+            </td>
+        </tr>
+    `).join('');
+}
+function renderPagination(page, totalPages) {
+    // Nếu không có dữ liệu, chỉ hiện Trang 1 / 1
+    if (totalPages === 0) {
+        document.getElementById('paginationBar').innerHTML = `<div>Trang 1 / 1</div>`;
+        return;
+    }
+    let html = `<div>Trang ${page} / ${totalPages}</div><div class='space-x-1'>`;
+    if (page > 1) html += `<button onclick='loadPosts(${page-1}, currentStatus, currentSearch, currentFromDate, currentToDate)' class='px-3 py-1 border rounded'>&laquo; Trước</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === page) html += `<span class='px-3 py-1 border rounded bg-blue-600 text-white'>${i}</span>`;
+        else html += `<button onclick='loadPosts(${i}, currentStatus, currentSearch, currentFromDate, currentToDate)' class='px-3 py-1 border rounded'>${i}</button>`;
+    }
+    if (page < totalPages) html += `<button onclick='loadPosts(${page+1}, currentStatus, currentSearch, currentFromDate, currentToDate)' class='px-3 py-1 border rounded'>Sau &raquo;</button>`;
+    html += `</div>`;
+    document.getElementById('paginationBar').innerHTML = html;
+}
+// Khởi tạo
+loadPosts(1);
+</script>
+} 

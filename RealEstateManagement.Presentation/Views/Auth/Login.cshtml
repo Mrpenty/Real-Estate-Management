@@ -83,7 +83,7 @@
                 if (data.isAuthSuccessful) {
                     const user = authService.getCurrentUser();
                     if (user && user.role && user.role.toLowerCase() === 'admin') {
-                        window.location.href = '/AdminUser';
+                        window.location.href = '/Admin';
                     } else {
                         window.location.href = '/';
                     }
