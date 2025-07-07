@@ -17,6 +17,9 @@ using RealEstateManagement.Business.Repositories.Chat.Conversations;
 using RealEstateManagement.Business.Repositories.Chat.Messages;
 using RealEstateManagement.Business.Services.Chat.Messages;
 using RealEstateManagement.Business.Services.Chat.Conversations;
+using RealEstateManagement.Business.Repositories.Package;
+using RealEstateManagement.Business.Services.PromotionPackages;
+
 namespace RealEstateManagement.API.Extensions
 {
     public static class DependencyInjectionExtensions
@@ -40,16 +43,19 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IAddressRepository, AddressRepository>();
             services.AddScoped<ISearchProRepo, SearchProRepo>();
             services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+            services.AddScoped<IPromotionPackageRepository, PromotionPackageRepository>();
+            services.AddScoped<IPropertyPromotionRepository, PropertyPromotionRepository>();
             //Chat Repository
             services.AddScoped<IConversationRepository, ConversationRepository>();
             services.AddScoped<IMessageRepository,MessageRepository>();
+
+          
 
             //----Service----\\
 
             //Property Services
             services.AddScoped<IPropertyService, PropertyService>();
             services.AddScoped<IPropertyPostService, PropertyPostService>();
-            services.AddScoped<IPropertyImageService, PropertyImageService>();
             services.AddScoped<IPropertyImageService, PropertyImageService>();
             services.AddScoped<IOwnerPropertyService, OwnerPropertyService>();
             services.AddScoped<IRentalContractService, RentalContractService>();
@@ -64,10 +70,16 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IUploadPicService, UploadPicService>();
             services.AddScoped<ISearchProService, SearchProService>();
             services.AddScoped<IFavoriteService, FavoriteService>();
+            services.AddScoped<IPromotionPackageService, PromotionPackageService>();
+            services.AddScoped<IPropertyPromotionService, PropertyPromotionService>();
 
             //Chat Serivce
             services.AddScoped<IConversationService, ConversationService>();
             services.AddScoped<IMessageService, MessageService>();
+
+
+
+           
 
             return services;
         }

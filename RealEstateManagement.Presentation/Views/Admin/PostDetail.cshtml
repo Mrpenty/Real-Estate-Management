@@ -19,12 +19,12 @@
 
 @section Scripts {
 <script>
-const ADMIN_API_BASE_URL = 'https://localhost:7031';
+const POSTDETAIL_ADMIN_API_BASE_URL = 'https://localhost:7031';
 const postId = @postId;
 
 const AdminPostService = {
     async getPostDetail(id) {
-        const res = await fetch(`${ADMIN_API_BASE_URL}/api/Admin/PropertyPosts/${id}`, {
+        const res = await fetch(`${POSTDETAIL_ADMIN_API_BASE_URL}/api/Admin/PropertyPosts/${id}`, {
             method: 'GET',
             credentials: 'include'
         });
@@ -33,7 +33,7 @@ const AdminPostService = {
     },
     async updatePostStatus(id, status, rejectReason = null) {
         const body = rejectReason ? { status, rejectReason } : { status };
-        const res = await fetch(`${ADMIN_API_BASE_URL}/api/Admin/PropertyPosts/${id}/status`, {
+        const res = await fetch(`${POSTDETAIL_ADMIN_API_BASE_URL}/api/Admin/PropertyPosts/${id}/status`, {
             method: 'PUT',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -274,9 +274,9 @@ function renderPostDetail(post) {
                             <div class="grid grid-cols-2 gap-4">
                                 ${images.map((img, idx) => `
                                     <div class="relative group">
-                                        <img src="${img.url || '/image/no-image.png'}" alt="Property image" 
-                                             class="w-full h-40 object-cover rounded-lg shadow-md border-2 border-gray-200 group-hover:scale-105 transition-transform duration-200 cursor-pointer"
-                                             onclick="openImageModal('${img.url || '/image/no-image.png'}')">
+                                        <img src="${POSTDETAIL_ADMIN_API_BASE_URL + (img.url || '/image/no-image.png')}" alt="Property image" 
+                                       class="w-full h-40 object-cover rounded-lg shadow-md border-2 border-gray-200 group-hover:scale-105 transition-transform duration-200 cursor-pointer"
+                                        onclick="openImageModal('${POSTDETAIL_ADMIN_API_BASE_URL + (img.url || '/image/no-image.png')}')">
                                         <span class="absolute top-2 left-2 bg-white/80 text-xs px-2 py-1 rounded shadow">${idx+1}</span>
                                     </div>
                                 `).join('')}

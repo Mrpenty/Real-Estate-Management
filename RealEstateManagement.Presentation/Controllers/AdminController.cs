@@ -27,5 +27,12 @@ namespace RealEstateManagement.Presentation.Controllers
             ViewBag.PostId = id;
             return View();
         }
+
+        // GET: /Admin/PackageManagement
+        public IActionResult PackageManagement()
+        {
+            ViewBag.Title = "Quản lý gói khuyến mãi";
+            return View();
+        }
     }
 } 
