@@ -144,7 +144,7 @@
                     </label>
                     <div class="w-full" style="width:100%">
                         <div class="mt-1 flex rounded-md">
-                            <input type="number" id="area" name="area" required
+                            <input type="text" id="area" name="area" required
                                    class="flex-1 block w-full rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm" />
                             <span class="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 bg-gray-100 px-3 text-sm text-gray-700">
                                 m<sup>2</sup>
@@ -275,8 +275,8 @@
          $('#bedrooms').val(itemPropertyBody.bedrooms);
          $('#area').val(itemPropertyBody.area);
 
-         itemPropertyBody.amenities.forEach(id => {
-            const checkbox = document.querySelector(`input[name="AmenityIds"][value="${id}"]`);
+         itemPropertyBody.amenities.forEach(name => {
+            const checkbox = document.querySelector(`input[name="AmenityIds"][data-name="${name}"]`);
             if (checkbox) {
                 checkbox.checked = true;
             }
@@ -352,10 +352,10 @@
 
 
          updateMap();
-         if(imageFiles.length == 0){
-             alert('Cần cập nhật ảnh');
-             return;
-         }
+         // if(imageFiles.length == 0){
+         //     alert('Cần cập nhật ảnh');
+         //     return;
+         // }
          // Kiểm tra dữ liệu trước khi gửi
          // for (const key in propertyData) {
          //     if (propertyData[key] === undefined || propertyData[key] === null || propertyData[key] === '' || (Array.isArray(propertyData[key]) && propertyData[key].length === 0)) {
@@ -365,27 +365,37 @@
          // }
          // Gửi API tạo property
 
-         propertyData['location'] = await fetchLocationAndSetPropertyData();
+         //propertyData['location'] = await fetchLocationAndSetPropertyData();
          const token = localStorage.getItem('authToken');
-         const res = await fetch('https://localhost:7031/api/PropertyPosts', {
-             method: 'POST',
+         //console.log(propertyData);
+         let dto = {
+             title:propertyData.title,
+             description:propertyData.description,
+             price: propertyData.price,
+             area: propertyData.area,
+             bedrooms: propertyData.bedrooms
+         };
+         const res = await fetch(`https://localhost:7031/api/OwnerProperty/UpdateProperty?id=${@ViewBag.Id}`, {
+             method: 'PUT',
              headers: {
                  'Content-Type': 'application/json',
                  ...(token ? { 'Authorization': `Bearer ${token}` } : {})
              },
              credentials: 'include',
-             body: JSON.stringify(propertyData)
+             body: JSON.stringify(dto)
          });
          if (!res.ok) {
              const err = await res.json().catch(() => ({}));
-             alert('Tạo property thất bại! ' + (err.message || ''));
+             alert('Sửa property thất bại! ' + (err.message || ''));
              return;
          }
          const data = await res.json();
-         createdPropertyId = data.propertyId; // Sử dụng propertyId từ response
-         if(createdPropertyId){
-             uploadImages(createdPropertyId)
-         }
+         alert("Lưu thành công");
+         window.location.href = '/PostProperty/ListProperty';
+         // updatePropertyId = data.id; // Sử dụng propertyId từ response
+         // if(updatePropertyId){
+         //     uploadImages(updatePropertyId)
+         // }
      };
 
     async function fetchLocationAndSetPropertyData() {
@@ -463,7 +473,7 @@
                  }
 
                  alert('Lưu thông tin thành công');
-                 window.location.href = '/';
+                 window.location.href = '/PostProperty/ListProperty';
              }
          }
 
@@ -522,7 +532,7 @@
              listData.forEach(amenity => {
                     amenitiesContainer.append(`
                                  <div class="flex items-center mr-4">
-                                     <input type="checkbox" name="AmenityIds" value="${amenity.id}" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                     <input type="checkbox" name="AmenityIds" data-name="${amenity.name}" value="${amenity.id}" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                                      <label class="ml-2 block text-sm text-gray-900">${amenity.name}</label>
                                  </div>
                              `);

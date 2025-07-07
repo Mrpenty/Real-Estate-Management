@@ -35,6 +35,12 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 Location = entity.Location,
                 Bedrooms = entity.Bedrooms,
                 Area = entity.Area,
+                Province = entity.Address.Province.Name,
+                Ward = entity.Address.Ward.Name,
+                Street = entity.Address.Street.Name,
+                CreatedAt = entity.CreatedAt,
+                Type = entity.Type,
+                DetailedAddress = entity.Address.DetailedAddress,
                 Images = entity.Images?.Select(img => new OwnerPropertyImageDto
                 {
                     Id = img.Id,

@@ -23,6 +23,12 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         {
             return await _context.Properties
                 .Include(p => p.Images)
+                .Include(p => p.Address)
+                .ThenInclude(p => p.Province)
+                .Include(p => p.Address)
+                .ThenInclude(p => p.Street)
+                .Include(p => p.Address)
+                .ThenInclude(p => p.Ward)
                 .Where(p => p.LandlordId == landlordId)
                 .ToListAsync();
         }
