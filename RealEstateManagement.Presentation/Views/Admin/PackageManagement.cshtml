@@ -30,9 +30,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Cấp độ</label>
                 <select id="levelFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">Tất cả</option>
-                    <option value="1">Cấp 1</option>
-                    <option value="2">Cấp 2</option>
-                    <option value="3">Cấp 3</option>
+                    <!-- Option động sẽ được render bằng JS -->
                 </select>
             </div>
             <div class="flex items-end">
@@ -82,52 +80,59 @@
 
 <!-- Create/Edit Modal -->
 <div id="packageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="relative top-20 mx-auto p-5 border-t-8 border-orange-400 w-96 shadow-lg rounded-2xl bg-white">
         <div class="mt-3">
-            <h3 id="modalTitle" class="text-lg font-medium text-gray-900 mb-4">Thêm gói khuyến mãi</h3>
-            <form id="packageForm">
+            <h3 id="modalTitle" class="text-2xl font-bold text-orange-600 mb-6 flex items-center">
+                <i class="fas fa-gift mr-2"></i>Chỉnh sửa gói khuyến mãi
+            </h3>
+            <form id="packageForm" class="space-y-5">
                 <input type="hidden" id="packageId">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tên gói *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tên gói *</label>
                         <input type="text" id="packageName" required maxlength="100"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Mô tả *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Mô tả *</label>
                         <textarea id="packageDescription" required maxlength="500" rows="3"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50"></textarea>
+                        <div class="text-xs text-gray-500 mt-1 text-right">
+                            <span id="descriptionWordCount">0</span>/250 ký tự
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Giá (VNĐ) *</label>
-                        <input type="number" id="packagePrice" required min="0" step="1000"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Giá (VNĐ) </label>
+                            <input type="number" id="packagePrice" required min="0" step="1000"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Số ngày hiệu lực</label>
+                            <input type="number" id="packageDuration" required min="1" max="365"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50" />
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Thời gian hiệu lực (ngày) *</label>
-                        <input type="number" id="packageDuration" required min="1" max="365"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Cấp độ *</label>
-                        <input type="number" id="packageLevel" required min="1" max="10"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="flex items-center">
-                            <input type="checkbox" id="packageIsActive" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Cấp độ *</label>
+                            <input type="number" id="packageLevel" required min="1" max="10"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50" />
+                        </div>
+                        <div class="flex items-center h-full">
+                            <input type="checkbox" id="packageIsActive" class="rounded border-gray-300 text-orange-500 focus:ring-orange-400" />
                             <span class="ml-2 text-sm text-gray-700">Đang hoạt động</span>
-                        </label>
+                        </div>
                     </div>
                 </div>
                 <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" onclick="closeModal()" 
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                    <button type="button" onclick="closeModal()"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold">
                         Hủy
                     </button>
-                    <button type="submit" 
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                        Lưu
+                    <button type="submit"
+                            class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold shadow">
+                        <i class="fas fa-save mr-1"></i>Lưu
                     </button>
                 </div>
             </form>
@@ -217,12 +222,23 @@ async function loadPackages() {
     try {
         showLoading(true);
         packages = await PackageService.getAll();
+        renderLevelOptions(packages);
         renderPackages(packages);
     } catch (err) {
         showError(err.message);
     } finally {
         showLoading(false);
     }
+}
+
+function renderLevelOptions(packages) {
+    const levelSet = new Set();
+    packages.forEach(pkg => levelSet.add(pkg.level));
+    const levelFilter = document.getElementById('levelFilter');
+    levelFilter.innerHTML = '<option value="">Tất cả</option>';
+    Array.from(levelSet).sort((a, b) => a - b).forEach(level => {
+        levelFilter.innerHTML += `<option value="${level}">Cấp ${level}</option>`;
+    });
 }
 
 function renderPackages(packagesToRender) {
@@ -386,5 +402,14 @@ loadPackages();
 document.getElementById('searchInput').addEventListener('input', applyFilters);
 document.getElementById('statusFilter').addEventListener('change', applyFilters);
 document.getElementById('levelFilter').addEventListener('change', applyFilters);
+
+document.getElementById('packageDescription').addEventListener('input', function() {
+    const chars = this.value.length;
+    document.getElementById('descriptionWordCount').textContent = chars;
+    if (chars > 250) {
+        this.value = this.value.slice(0, 250);
+        document.getElementById('descriptionWordCount').textContent = 250;
+    }
+});
 </script>
 } 

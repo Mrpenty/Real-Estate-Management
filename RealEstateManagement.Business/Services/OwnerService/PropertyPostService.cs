@@ -174,11 +174,14 @@ namespace RealEstateManagement.Business.Services.OwnerService
 
         public async Task<object> GetPostsByStatusAsync(string status, int page, int pageSize)
         {
-            var statusEnum = Enum.Parse<PropertyPost.PropertyPostStatus>(status, true);
-            var query = _postRepository.GetAll()
+            IQueryable<RealEstateManagement.Data.Entity.PropertyEntity.PropertyPost> query = _postRepository.GetAll()
                 .Include(p => p.Property)
-                .Include(p => p.Landlord)
-                .Where(p => p.Status == statusEnum);
+                .Include(p => p.Landlord);
+            if (!string.IsNullOrEmpty(status))
+            {
+                var statusEnum = Enum.Parse<PropertyPost.PropertyPostStatus>(status, true);
+                query = query.Where(p => p.Status == statusEnum);
+            }
             int total = await query.CountAsync();
             var posts = await query
                 .OrderByDescending(p => p.CreatedAt)
@@ -186,7 +189,6 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 .Take(pageSize)
                 .Select(p => new {
                     p.Id,
-                    
                     p.Status,
                     p.CreatedAt,
                     p.Landlord.Name,

@@ -21,7 +21,7 @@ namespace RealEstateManagement.API.Controllers
 
         // GET: api/Admin/PropertyPosts?status=pending&page=1&pageSize=10
         [HttpGet]
-        public async Task<IActionResult> GetPosts([FromQuery] string status = "pending", [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetPosts([FromQuery] string? status = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             var result = await _propertyPostService.GetPostsByStatusAsync(status, page, pageSize);
             return Ok(result);
