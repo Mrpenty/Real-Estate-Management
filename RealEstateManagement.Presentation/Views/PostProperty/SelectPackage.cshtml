@@ -1,0 +1,121 @@
+@{
+    Layout = "../Shared/_Layout.cshtml";
+}
+<div class="section bg-white p-6 rounded-xl mx-auto mt-12 border mb-8 max-w-5xl shadow-lg">
+    <h2 class="text-2xl font-bold mb-8 text-center">Chọn gói quảng cáo cho bài đăng</h2>
+    <div class="flex items-center justify-center gap-4">
+        <button id="package-prev" type="button" class="p-2 rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none transition disabled:opacity-50" aria-label="Trước">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        </button>
+        <div id="package-list" class="flex gap-6"></div>
+        <button id="package-next" type="button" class="p-2 rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none transition disabled:opacity-50" aria-label="Sau">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        </button>
+    </div>
+    <button id="skip-package-btn" type="button" class="mt-8 px-8 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-semibold block mx-auto shadow">Bỏ qua</button>
+</div>
+<script>
+let packages = [];
+let currentIndex = 0;
+let propertyId = null;
+
+// Lấy propertyId từ query string
+function getPropertyIdFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('propertyId');
+}
+
+propertyId = getPropertyIdFromUrl();
+if (!propertyId) {
+    alert('Không tìm thấy propertyId!');
+    window.location.href = '/';
+}
+
+async function loadPackages() {
+    const res = await fetch('https://localhost:7031/api/PromotionPackage/GetAllPackage');
+    packages = await res.json();
+    renderPackages();
+}
+
+function renderPackages() {
+    const list = document.getElementById('package-list');
+    if (!list || packages.length === 0) return;
+    const total = packages.length;
+    const idxs = [
+        (currentIndex + total - 1) % total,
+        currentIndex % total,
+        (currentIndex + 1) % total
+    ];
+    list.innerHTML = idxs.map((idx, pos) => {
+        const pkg = packages[idx];
+        const isCenter = pos === 1;
+        return `
+        <div class="flex flex-col items-center rounded-2xl shadow-lg border transition-all duration-300 ${isCenter ? 'bg-blue-500 text-white border-blue-600 scale-105 z-10' : 'bg-white text-gray-900 border-gray-200 opacity-80 scale-95'}" style="min-width:300px; max-width:320px;">
+            <h3 class="text-xl font-bold mb-2 mt-6">${pkg.name}</h3>
+            <div class="text-3xl font-extrabold mb-2">${Number(pkg.price).toLocaleString('vi-VN')}<span class="text-base font-medium ${isCenter ? 'text-blue-200' : 'text-gray-400'}"> VNĐ /tháng</span></div>
+            <div class="mb-4 text-sm italic">${pkg.description || ''}</div>
+            <ul class="mb-6 w-11/12 text-sm">
+                <li class="flex justify-between py-1 border-b"><span>Thời hạn</span> <span>${pkg.durationInDays} ngày</span></li>
+                <li class="flex justify-between py-1 border-b"><span>Cấp độ</span> <span>${pkg.level}</span></li>
+            </ul>
+            <button type="button" class="w-10/12 mb-6 ${isCenter ? 'bg-white text-blue-600 border border-blue-600' : 'bg-blue-500 text-white'} font-semibold py-2 rounded-lg transition select-package-btn hover:bg-blue-600 hover:text-white" data-id="${pkg.id}">Sign Up Now</button>
+        </div>
+        `;
+    }).join('');
+    attachSignUpHandlers();
+}
+
+document.getElementById('package-prev').onclick = function() {
+    if (packages.length === 0) return;
+    currentIndex = (currentIndex + packages.length - 1) % packages.length;
+    renderPackages();
+};
+document.getElementById('package-next').onclick = function() {
+    if (packages.length === 0) return;
+    currentIndex = (currentIndex + 1) % packages.length;
+    renderPackages();
+};
+
+document.getElementById('skip-package-btn').onclick = function() {
+    window.location.href = '/';
+};
+
+function attachSignUpHandlers() {
+    document.querySelectorAll('.select-package-btn').forEach(btn => {
+        btn.onclick = async function() {
+            const packageId = this.getAttribute('data-id');
+            if (!propertyId) {
+                alert('Không tìm thấy propertyId!');
+                return;
+            }
+            const pkg = packages.find(p => p.id == packageId);
+            const startDate = new Date();
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + (pkg.durationInDays || 0));
+            const token = localStorage.getItem('authToken');
+            const res = await fetch('https://localhost:7031/api/PropertyPromotion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({
+                    propertyId: propertyId,
+                    packageId: packageId,
+                    startDate: startDate.toISOString(),
+                    endDate: endDate.toISOString()
+                })
+            });
+            if (res.ok) {
+                alert('Đăng ký gói thành công!');
+                window.location.href = '/';
+            } else {
+                const err = await res.json().catch(() => ({}));
+                alert('Đăng ký gói thất bại! ' + (err.message || ''));
+            }
+        };
+    });
+}
+
+loadPackages();
+</script> 

@@ -73,7 +73,13 @@ namespace RealEstateManagement.Business.Services.OwnerService
 
             // 5. Call Repository to save the post, property, and amenities
             // Repository now returns property ID
-            return await _postRepository.CreatePropertyPostAsync(property, post, dto.AmenityIds);
+            var propertyId = await _postRepository.CreatePropertyPostAsync(property, post, dto.AmenityIds);
+
+            // 6. Cập nhật lại PropertyId cho Address
+            address.PropertyId = propertyId;
+            await _addressRepository.SaveChangesAsync();
+
+            return propertyId;
         }
 
         public async Task<PropertyPost> GetPostByIdAsync(int postId)

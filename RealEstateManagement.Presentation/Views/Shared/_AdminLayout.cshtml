@@ -43,7 +43,7 @@
                 <div class="text-xl font-semibold">@ViewBag.Title</div>
                 <div class="flex items-center gap-4">
                     <span class="font-medium text-gray-700"><i class="fas fa-user-shield mr-1"></i> Admin</span>
-                    <a href="/Auth/Logout" class="text-red-500 hover:underline"><i class="fas fa-sign-out-alt mr-1"></i> Đăng xuất</a>
+                    <a href="#" onclick="handleLogout(event)" class="text-red-500 hover:underline"><i class="fas fa-sign-out-alt mr-1"></i> Đăng xuất</a>
                 </div>
             </header>
             <main class="flex-1 p-8">
@@ -52,5 +52,12 @@
         </div>
     </div>
     @RenderSection("Scripts", required: false)
+    <script>
+    async function handleLogout(event) {
+        event.preventDefault();
+        await authService.logout();
+        window.location.href = '/';
+    }
+    </script>
 </body>
 </html> 
