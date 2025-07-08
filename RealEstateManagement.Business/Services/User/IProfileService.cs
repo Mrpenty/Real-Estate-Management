@@ -15,5 +15,6 @@ namespace RealEstateManagement.Business.Services.User
         Task<IdentityResult> UpdateProfileAsync(int userId, UpdateProfileDto model);
         Task<ProfilePictureUploadResult> UploadProfilePictureAsync(int userId, IFormFile file);
         Task<ProfilePictureUploadResult> UploadCccdImageAsync(int userId, IFormFile file, bool isFront);
+        Task<IdentityResult> ResetPasswordAsync(int userId, ResetPasswordDto model);
     }
 }

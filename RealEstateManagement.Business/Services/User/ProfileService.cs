@@ -191,5 +191,16 @@ namespace RealEstateManagement.Business.Services.User
             else
                 return ProfilePictureUploadResult.Failure(updateResult.Errors.Select(e => e.Description));
         }
+
+        public async Task<IdentityResult> ResetPasswordAsync(int userId, ResetPasswordDto model)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "User not found." });
+            }
+            var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+            return result;
+        }
     }
 }

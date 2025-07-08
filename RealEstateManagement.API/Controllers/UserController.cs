@@ -234,6 +234,34 @@ namespace RealEstateManagement.API.Controllers
             return BadRequest(new { errors = result.Errors });
         }
 
+        [HttpPut("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var userId = GetUserIdFromToken();
+                if (userId == 0)
+                {
+                    return Unauthorized("Invalid user token");
+                }
+                var result = await _profileService.ResetPasswordAsync(userId, model);
+                if (result.Succeeded)
+                {
+                    return Ok(new { message = "Password reset successfully" });
+                }
+                return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while resetting password");
+                return StatusCode(500, "An error occurred while resetting the password");
+            }
+        }
+
         private int GetUserIdFromToken()
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;

@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
 
-namespace RealEstateManagement.API.Controllers
+namespace RealEstateManagement.API.Controllers.Admin
 {
-   // [Authorize(Roles = "Admin")]
+    // [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/Admin/PropertyPosts")]
     public class PropertyPostsController : ControllerBase
@@ -19,7 +19,7 @@ namespace RealEstateManagement.API.Controllers
             _logger = logger;
         }
 
-        // GET: api/Admin/PropertyPosts?status=pending&page=1&pageSize=10
+        // GET: api/Admin/PropertyPosts?status=&page=1&pageSize=10
         [HttpGet]
         public async Task<IActionResult> GetPosts([FromQuery] string? status = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
@@ -48,6 +48,6 @@ namespace RealEstateManagement.API.Controllers
 
     public class UpdatePostStatusDto
     {
-        public string Status { get; set; } = string.Empty; 
+        public string Status { get; set; } = string.Empty;
     }
-} 
+}
