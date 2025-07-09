@@ -81,8 +81,15 @@ const propertyService = {
 
     async getProperty(id) {
         try {
+            console.log(id)
+            const token = localStorage.getItem('authToken');
+            let userId = 0;
+            if (token) {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                userId = payload.id;
+            }
 
-            const response = await fetch(`${API_PROPERTY_BASE_URL}/${id}`, {
+            const response = await fetch(`${API_PROPERTY_BASE_URL}/${id}?userId=${userId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

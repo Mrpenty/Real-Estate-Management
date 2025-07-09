@@ -1,4 +1,5 @@
 ﻿using RealEstateManagement.Data.Entity.PropertyEntity;
+using RealEstateManagement.Data.Entity.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,7 @@ namespace RealEstateManagement.Business.Repositories.FavoriteRepository
 
         Task<bool> RemoveFavoritePropertyAsync(int userId, int propertyId);
         Task<IEnumerable<Property>> AllFavoritePropertyAsync(int userId);
+
+        Task<UserFavoriteProperty> GetFavoritePropertyByIdAsync(int userId,int propertyId);
     }
 }

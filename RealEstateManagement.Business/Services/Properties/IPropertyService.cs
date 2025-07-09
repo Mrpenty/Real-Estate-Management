@@ -16,7 +16,7 @@ namespace RealEstateManagement.Business.Services.Properties
         Task<IEnumerable<HomePropertyDTO>> GetAllPropertiesAsync(int? userId = 0);
         Task<IEnumerable<HomePropertyDTO>> GetPropertiesByUserAsync(int? userId);
         //Lấy 1 id
-        Task<PropertyDetailDTO> GetPropertyByIdAsync(int id);
+        Task<PropertyDetailDTO> GetPropertyByIdAsync(int id,int userId);
         Task<IEnumerable<HomePropertyDTO>> FilterByPriceAsync([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice);
         Task<IEnumerable<HomePropertyDTO>> FilterByAreaAsync([FromQuery] decimal? minArea, [FromQuery] decimal? maxArea);
 
