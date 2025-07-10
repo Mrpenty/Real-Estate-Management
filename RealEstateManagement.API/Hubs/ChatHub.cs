@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Nest;
+using RealEstateManagement.Business.DTO.Chat;
 using RealEstateManagement.Data.Entity.Messages;
 using System;
 
@@ -17,6 +18,7 @@ namespace RealEstateManagement.API.Hubs
         public async Task JoinConversation(string conversationId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, conversationId);
+            Console.WriteLine($"🟢 [JOIN] {Context.ConnectionId} JOINED {conversationId}");
             int userId = int.Parse(Context.UserIdentifier); 
             ChatConnectionManager.AddUser(conversationId, userId);
             await MarkAsRead(conversationId, userId.ToString());
@@ -50,7 +52,7 @@ namespace RealEstateManagement.API.Hubs
 
                 // 🔥 Chỉ gửi ID của tin nhắn cuối cùng đã đọc
                 var lastMessage = messages.Last();
-                await Clients.User(lastMessage.SenderId.ToString()).SendAsync(
+                await Clients.Group(conversationId).SendAsync(
                     "MessageRead",
                     convId,
                     uid,
@@ -101,11 +103,32 @@ namespace RealEstateManagement.API.Hubs
                 SentAt = message.SentAt,
                 SenderId = senderId
             });
-
-
-            // ✅ Nếu người nhận đang mở cuộc trò chuyện, thì gọi lại hàm MarkAsRead để trigger event "MessageRead"
             int receiverId = (conversation.RenterId == userId) ? conversation.LandlordId : conversation.RenterId;
             var connections = ChatConnectionManager.GetConnections(conversationId);
+            if (!connections.Contains(receiverId))
+            {
+                var senderName = await _context.Users
+                    .Where(u => u.Id == userId)
+                    .Select(u => u.Name)
+                    .FirstOrDefaultAsync();
+
+                var notifi = new NotifiDTO
+                {
+                    ConversationId = convId,
+                    SenderId = userId,
+                    SenderName = senderName ?? "Người dùng",
+                    ReceiverId = receiverId,
+                    Message = message.Content,
+                    SentAt = message.SentAt,
+                    IsRead = false
+                };
+
+                await Clients.User(receiverId.ToString())
+                    .SendAsync("ReceiveNotification", notifi);
+            }
+
+            // ✅ Nếu người nhận đang mở cuộc trò chuyện, thì gọi lại hàm MarkAsRead để trigger event "MessageRead"
+
             if (connections.Contains(receiverId))
             {
                 // ✅ gọi MarkAsRead để cập nhật toàn bộ logic
@@ -124,21 +147,11 @@ namespace RealEstateManagement.API.Hubs
 
             await base.OnDisconnectedAsync(exception);
         }
-        // Khi người dùng đang gõ
-        public async Task Typing(string conversationId, string senderId)
+        public async Task NotifyMessageDeleted(int conversationId, int messageId)
         {
-            // Gửi cho tất cả (trừ chính sender)
-            await Clients.GroupExcept(conversationId, Context.ConnectionId)
-                .SendAsync("ShowTyping", conversationId, int.Parse(senderId));
+            await Clients.Group(conversationId.ToString())
+                .SendAsync("MessageDeleted", conversationId, messageId);
         }
-
-        // Khi người dùng dừng gõ (sau timeout)
-        public async Task StopTyping(string conversationId, string senderId)
-        {
-            await Clients.GroupExcept(conversationId, Context.ConnectionId)
-                .SendAsync("HideTyping", conversationId, int.Parse(senderId));
-        }
-
     }
 
 

@@ -7,7 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\signalr.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <_ContentIncludedByDefault Remove="wwwroot\css\Chat.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\signalr.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\js\signalr.js" />
   </ItemGroup>
 
   <ItemGroup>

@@ -106,7 +106,7 @@
     </div>
 </div>
 
-<script src="~/js/propertyService.js"></script>
+<script src="~/js/propertyService.js" asp-append-version="true"></script>
 <script>
 
     let urlParams1 = new URLSearchParams(window.location.search);
@@ -142,6 +142,8 @@
         if (listProperty) { 
             let html = '';
             listProperty.forEach(item => {
+                console.log("📦 Property Item:", item);
+
                 html += `<div class="bg-white rounded-md shadow-sm overflow-hidden border border-gray-200" data-id="${item.id}">
 
                         <div class="relative">
@@ -192,9 +194,14 @@
                                            ${item.landlordName} <span class="text-gray-400">(${timeAgo(item.createdAt)})</span>
                                 </div>
                             </div>
-                            <a href="tel:${item.landlordPhoneNumber}" class="text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-1 rounded text-sm font-medium">
-                                ${item.landlordPhoneNumber}
-                            </a>
+                            <div class="flex flex-col gap-2 items-end">
+                                <a href="tel:${item.landlordPhoneNumber}" class="text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-1 rounded text-sm font-medium">
+                                    ${item.landlordPhoneNumber}
+                                </a>
+                                            <button onclick="startChatWithLandlord(parseInt('${item.landlordId}'))" class="bg-orange-500 text-white px-3 py-1 rounded text-sm font-medium hover:bg-orange-600 transition">
+                                    💬 Nhắn tin
+                                </button>
+                            </div>
                         </div>
                     </div>
                     `;
@@ -229,4 +236,56 @@
             else removeToFavorite(id);
         }
     }
+async function startChatWithLandlord(landlordId) {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+        window.location.href = "/Auth/Login";
+        return;
+    }
+
+    const renterId = parseInt(getUserIdFromToken(token));
+    const dto = {
+        renterId: parseInt(renterId),
+        landlordId: parseInt(landlordId),
+        propertyId: null
+    };
+
+    try {
+        const res = await fetch("https://localhost:7031/api/Chat/Create-Conversation", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(dto)
+        });
+
+        if (!res.ok) {
+            const err = await res.text();
+            alert("Không thể mở cuộc trò chuyện: " + err);
+            return;
+        }
+
+        const conversation = await res.json();
+        if (conversation && conversation.id) {
+            window.location.href = `/Chat/Index?conversationId=${conversation.id}`;
+        }
+    } catch (error) {
+        console.error("Lỗi khi tạo/mở cuộc trò chuyện:", error);
+    }
+}
+
+    function getUserIdFromToken(token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return parseInt(payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]);
+        } catch (error) {
+            console.error("Không thể giải mã token:", error);
+            return null;
+        }
+    }
+
+
+
+
 </script>

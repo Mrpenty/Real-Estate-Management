@@ -9,13 +9,13 @@ const pageSize = 20;
 let isLoading = false;
 let allMessagesLoaded = false;
 
-let typingTimeout;
-const TYPING_DELAY = 3000;
+let editingMessageId = null;
 // Kết nối tới hub SignalR
-connection.start().then(function () {
+connection.start().then(async function () {
     console.log("SignalR connected");
     if (currentConversationId) {
-        connection.invoke("JoinConversation", currentConversationId.toString());
+        await connection.invoke("JoinConversation", conversationId.toString());
+        await loadMessages(currentConversationId, 0, pageSize, false);
     }
     initializeChat();
 }).catch(function (err) {
@@ -31,10 +31,7 @@ connection.on("ReceiveMessage", function (message) {
     const div = document.createElement("div");
     div.className = "message " + (parseInt(message.senderId) === userId ? "right" : "left");
     div.setAttribute("data-id", message.id);
-    div.innerHTML = `
-        <div>${message.content}</div>
-        <small>${new Date(message.sentAt).toLocaleString()}</small>
-    `;
+    div.innerHTML = renderMessageHtml(message, false);
     container.appendChild(div);
 
     container.scrollTop = container.scrollHeight;
@@ -63,8 +60,8 @@ async function loadConversations() {
         }
         const conversations = await res.json();
         const listDiv = document.getElementById("conversationList");
-
-        listDiv.innerHTML = "";
+        const header = listDiv.querySelector(".conversation-header");
+        listDiv.innerHTML = header ? header.outerHTML : "";
 
         // Hàm cắt chuỗi (giới hạn 40 ký tự)
         const truncate = (text, maxLength = 10) => {
@@ -123,12 +120,14 @@ connection.on("ConversationUpdated", function (update) {
 connection.on("MessageRead", function (conversationId, readerId, messageId) {
     if (conversationId !== currentConversationId) return;
 
+    // ❗ Người đọc KHÔNG cần hiển thị "✔✔ đã đọc"
+    if (readerId === userId) return;
+
     const container = document.getElementById("messagesContainer");
 
-    // Xóa mọi icon đã đọc cũ
+    // ✅ Chỉ xóa icon cũ nếu mình là người gửi
     container.querySelectorAll(".message.right .read-icon").forEach(icon => icon.remove());
 
-    // Tìm đúng tin nhắn cuối đã đọc
     const lastMessage = container.querySelector(`.message.right[data-id='${messageId}']`);
     if (lastMessage) {
         const icon = document.createElement("span");
@@ -137,16 +136,15 @@ connection.on("MessageRead", function (conversationId, readerId, messageId) {
         lastMessage.appendChild(icon);
     }
 });
-connection.on("ShowTyping", function (conversationId, typingUserId) {
-    console.log("Nhận ShowTyping từ:", typingUserId, "trong conversation:", conversationId);
-    if (conversationId !== currentConversationId || typingUserId === userId) return;
-    document.getElementById("typingIndicator").style.display = "block";
+
+
+connection.on("MessageDeleted", function (conversationId, messageId) {
+    if (conversationId !== currentConversationId) return;
+
+    const msgEl = document.querySelector(`.message[data-id='${messageId}']`);
+    if (msgEl) msgEl.remove();
 });
 
-connection.on("HideTyping", function (conversationId, typingUserId) {
-    if (conversationId !== currentConversationId || typingUserId === userId) return;
-    document.getElementById("typingIndicator").style.display = "none";
-});
 
 window.loadMessages = async function (conversationId, skip = 0, take = 20, append = false) {
     currentConversationId = conversationId;
@@ -173,7 +171,6 @@ window.loadMessages = async function (conversationId, skip = 0, take = 20, appen
 
     const messages = await res.json(); // ✅ đúng vị trí, sau khi có `res`
 
-    console.log("Tin nhắn load:", messages.length, { skip, take });
 
     if (!append) {
         skipCount = messages.length;
@@ -194,12 +191,8 @@ window.loadMessages = async function (conversationId, skip = 0, take = 20, appen
         const div = document.createElement("div");
         div.className = "message " + (msg.senderId === userId ? "right" : "left");
         div.setAttribute("data-id", msg.id);
-        div.innerHTML = `
-            <div>${msg.content}</div>
-            <small>${new Date(msg.sentAt).toLocaleString()}</small>
-            ${lastMyReadMessage && msg.id === lastMyReadMessage.id
-                ? '<span class="read-icon">✔✔ Đã đọc</span>' : ''}
-        `;
+        const isLastRead = lastMyReadMessage && msg.id === lastMyReadMessage.id;
+        div.innerHTML = renderMessageHtml(msg, isLastRead);
         append ? container.prepend(div) : container.appendChild(div);
     });
 
@@ -230,38 +223,57 @@ window.loadMessages = async function (conversationId, skip = 0, take = 20, appen
 
 document.getElementById("sendButton").addEventListener("click", async function () {
     const content = document.getElementById("messageInput").value.trim();
-
     if (!content || currentConversationId === null) return;
 
-    try {
-        await connection.invoke("SendMessage", currentConversationId.toString(), userId.toString(), content);
-        document.getElementById("messageInput").value = "";
-    } catch (err) {
-        alert("Gửi tin nhắn thất bại: " + err.toString());
+    const token = localStorage.getItem("authToken");
+
+    if (editingMessageId) {
+        // 👉 Gửi API cập nhật
+        try {
+            const res = await fetch(`https://localhost:7031/api/Chat/edit-message/${editingMessageId}`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(content)
+            });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                alert("Lỗi khi cập nhật: " + errText);
+                return;
+            }
+
+            document.getElementById("messageInput").value = "";
+            editingMessageId = null;
+            document.getElementById("editBanner").style.display = "none";
+
+            document.getElementById("sendButton").textContent = "Gửi";
+        } catch (err) {
+            alert("Lỗi khi gọi API sửa: " + err.toString());
+        }
+
+    } else {
+        // 👉 Gửi tin nhắn mới qua SignalR
+        try {
+            await connection.invoke("SendMessage", currentConversationId.toString(), userId.toString(), content);
+            document.getElementById("messageInput").value = "";
+        } catch (err) {
+            alert("Gửi tin nhắn thất bại: " + err.toString());
+        }
     }
 });
 
+
 document.getElementById("messageInput").addEventListener("keydown", function (event) {
+    
     if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault(); // Ngăn việc xuống dòng
         document.getElementById("sendButton").click();
     }
 });
 
-document.getElementById("messageInput").addEventListener("input", function () {
-    if (!currentConversationId || !userId) return;
-
-    // Gửi "Typing" nếu đang nhập
-    connection.invoke("Typing", currentConversationId.toString(), userId.toString());
-
-    // Xóa timeout cũ, thiết lập timeout mới
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(() => {
-        connection.invoke("StopTyping", currentConversationId.toString(), userId.toString());
-    }, TYPING_DELAY);
-});
-
-//Lấy token
 function getUserIdFromToken(token) {
     const payload = JSON.parse(atob(token.split('.')[1]));
     return parseInt(payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]);
@@ -291,5 +303,172 @@ async function initializeChat() {
             isLoading = false;
         }
     });
+    // Sau khi loadConversations xong
+    document.getElementById("conversationSearchInput").addEventListener("input", function () {
+        const keyword = this.value.toLowerCase();
 
+        document.querySelectorAll(".conversation-item").forEach(item => {
+            const name = item.querySelector(".name")?.innerText.toLowerCase() || "";
+            const message = item.querySelector(".last-message")?.innerText.toLowerCase() || "";
+            const match = name.includes(keyword) || message.includes(keyword);
+            item.style.display = match ? "block" : "none";
+        });
+    });
+
+
+}
+function renderMessageHtml(msg, isLastRead) {
+    const isRight = msg.senderId === userId;
+
+    return `
+        <div class="message-row ${isRight ? 'right' : 'left'}">
+            ${isRight ? renderActions(msg.id, msg.sentAt) + renderMessageBubble(msg, isLastRead)
+            : renderMessageBubble(msg, isLastRead)}
+        </div>
+    `;
+}
+
+
+
+
+function renderMessageBubble(msg, isLastRead) {
+    return `
+        <div class="message-bubble">
+            ${msg.content}
+            <small class="message-time-inline">${new Date(msg.sentAt).toLocaleString()}</small>
+            ${isLastRead ? '<span class="read-icon">✔✔ Đã đọc</span>' : ''}
+        </div>
+    `;
+}
+
+function renderActions(messageId, sentAt) {
+    const sentTime = new Date(sentAt);
+    const now = new Date();
+    const diffMinutes = (now - sentTime) / (1000 * 60); // chênh lệch phút
+
+    const allowEdit = diffMinutes <= 15;
+
+    if (!allowEdit) return ""; 
+
+    return `
+        <div class="message-actions">
+            <button class="action-btn">⋮</button>
+            <div class="dropdown-menu">
+                <div onclick="editMessage(${messageId})">Edit</div>
+                <div onclick="deleteMessage(${messageId})">Delete</div>
+            </div>
+        </div>
+    `;
+}
+async function deleteMessage(messageId) {
+    const confirmDelete = confirm("Bạn có chắc muốn xóa tin nhắn này?");
+    if (!confirmDelete) return;
+
+    const token = localStorage.getItem("authToken");
+    try {
+        const res = await fetch(`https://localhost:7031/api/Chat/delete-message/${messageId}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        if (!res.ok) {
+            const errText = await res.text();
+            alert("Lỗi khi xóa: " + errText);
+            return;
+        }
+
+        // Xóa phần tử tin nhắn khỏi UI
+        const msgEl = document.querySelector(`.message[data-id='${messageId}']`);
+        if (msgEl) msgEl.remove();
+    } catch (err) {
+        alert("Xóa thất bại: " + err.toString());
+    }
+}
+
+function editMessage(messageId) {
+    const msgDiv = document.querySelector(`.message[data-id='${messageId}']`);
+    if (!msgDiv) return;
+
+    const bubble = msgDiv.querySelector(".message-bubble");
+    const textContent = bubble ? bubble.childNodes[0].textContent.trim() : "";
+
+    // Gán giá trị vào input
+    document.getElementById("messageInput").value = textContent;
+
+    // Gán ID đang chỉnh sửa
+    editingMessageId = messageId;
+
+    // Hiện banner
+    document.getElementById("editBanner").style.display = "flex";
+
+    // Focus ô nhập
+    document.getElementById("messageInput").focus();
+}
+
+
+
+connection.on("MessageEdited", function (messageId, newContent) {
+    const msgDiv = document.querySelector(`.message[data-id='${messageId}']`);
+    if (!msgDiv) return;
+
+    const bubble = msgDiv.querySelector(".message-bubble");
+    if (bubble) {
+        bubble.innerHTML = `
+            ${newContent}
+            <small class="message-time-inline">${new Date().toLocaleString()}</small>
+        `;
+    }
+});
+document.getElementById("cancelEditBtn").addEventListener("click", function () {
+    editingMessageId = null;
+    document.getElementById("messageInput").value = "";
+    document.getElementById("editBanner").style.display = "none";
+});
+
+
+
+connection.on("ReceiveNotification", function (notification) {
+    console.log("🔔 Nhận notification:", notification);
+
+    const dot = document.getElementById("chat-notification-dot");
+    if (dot) {
+        dot.classList.remove("hidden"); // ✅ Gỡ ẩn
+    }
+});
+
+async function startChatWithLandlord(landlordId, propertyid) {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+        window.location.href = "/Auth/Login";
+        return;
+    }
+
+    const renterId = getUserIdFromToken(token);
+    const dto = { renterId, landlordId, propertyid };
+
+    try {
+        const res = await fetch("https://localhost:7031/api/Chat/create-conversation", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(dto)
+        });
+
+        if (!res.ok) {
+            const err = await res.text();
+            alert("Không thể tạo hoặc mở cuộc trò chuyện: " + err);
+            return;
+        }
+
+        const data = await res.json();
+        if (data && data.id) {
+            window.location.href = `/Chat/Index?conversationId=${data.id}`;
+        }
+    } catch (err) {
+        console.error("Lỗi khi mở chat:", err);
+    }
 }
