@@ -15,6 +15,8 @@ namespace RealEstateManagement.Business.Services.OwnerService
         Task<object> GetPostDetailForAdminAsync(int postId);
         Task<object> GetPostsByStatusAsync(string status, int page, int pageSize);
         Task<bool> UpdatePostStatusAsync(int id, string status);
+
+        Task ContinueDraftPostAsync(ContinuePropertyPostDto dto, int landlordId);
     }
 
 }

@@ -10,7 +10,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
 {
     public interface IOwnerPropertyService
     {
-        Task<IEnumerable<OwnerPropertyDto>> GetPropertiesByLandlordAsync(int landlordId);
+        IQueryable<OwnerPropertyDto> GetPropertiesByLandlordQueryable(int landlordId);
         Task<OwnerPropertyDto> GetPropertyByIdAsync(int id, int landlordId);
         Task UpdatePropertyAsync(OwnerUpdatePropertyDto dto, int landlordId);
         Task DeletePropertyAsync(int id, int landlordId);

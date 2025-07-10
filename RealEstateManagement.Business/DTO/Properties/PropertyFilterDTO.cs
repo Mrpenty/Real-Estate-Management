@@ -23,9 +23,9 @@ namespace RealEstateManagement.Business.DTO.Properties
         public bool? IsVerified { get; set; }
         public string? SearchKeyword { get; set; }
         public int UserId { get; set; }
-        public List<int> Provinces { get; set; }
-        public List<int> Wards { get; set; }
-        public List<int> Streets { get; set; }
+        public List<int> Provinces { get; set; } = new();
+        public List<int> Wards { get; set; } = new();
+        public List<int> Streets { get; set; } = new();
     }
 
 }

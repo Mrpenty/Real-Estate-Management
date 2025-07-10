@@ -1,0 +1,94 @@
+﻿@{
+    Layout = "~/Views/Shared/_RenterLayout.cshtml";
+    ViewData["Title"] = "Đăng tin mới";
+}
+<div class="bg-white px-6 pt-6 border-b" style="position:fixed;width:100%;z-index:999">
+    <h1 class="text-2xl font-semibold mb-4">Danh sách tin đăng</h1>
+
+@*     <div class="flex space-x-6 text-sm font-medium">
+        <button data-scroll="AreaId" class="tab-btn text-orange-600 border-b-2 border-orange-600 pb-2">
+            Khu vực
+        </button>
+        <button data-scroll="DescriptionInformationId" class="tab-btn text-gray-600 hover:text-orange-600 pb-2">
+            Thông tin mô tả
+        </button>
+        <button data-scroll="ImageId" class="tab-btn text-gray-600 hover:text-orange-600 pb-2">
+            Hình ảnh
+        </button>
+        <button data-scroll="ContactId" class="tab-btn text-gray-600 hover:text-orange-600 pb-2">
+            Thông tin liên hệ
+        </button>
+    </div> *@
+</div>
+<div class="bg-white p-6 rounded ml-20 mr-20 mt-8 border mb-8" style="margin-top:9rem">
+
+
+    <div class="">
+        <div>
+            <table id="listProperty" class="w-full divide-y divide-gray-200 bg-white border">
+                <thead class="bg-gray-100 border">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiêu đề</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Danh mục</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase text-right tracking-wider">Diện tích (m<sup>2</sup>)</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase text-center tracking-wider">Địa chỉ</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase text-center tracking-wider">Ngày tạo</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="propertyList" class="divide-y divide-gray-200">
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+     let isAuthen = authService.isAuthenticated();
+     if(!isAuthen){
+         window.location.href = '/Auth/Login';
+     }
+
+    document.getElementById('ListPostId').classList.add('font-bold', 'text-blue-800');
+    getAllBylandlordProperty();
+    async function getAllBylandlordProperty(){
+        let list = await propertyRenterService.getAllBylandlordProperty();
+        $('#propertyList').html('');
+        let html = '';
+        list.forEach((item,index) => {
+            html += `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">${++index}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${item.title}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${item.price}đ</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">${item.type}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">${item.area}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${item.detailedAddress} ${item.street} <br/> ${item.ward} ${item.province}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${timeAgo(item.createdAt)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <button onclick="window.location.href = '/PostProperty/DetailProperty/${item.id}'" class="text-blue-500 hover:text-blue-700">Sửa</button>
+                            <button onclick="deleteProperty(${item.id})" class="ml-2 text-red-500 hover:text-red-700">Xóa</button>
+                        </td>
+                    </tr>
+            `;
+        });
+        $('#propertyList').html(html);
+        $('#listProperty').DataTable({
+          language: {
+            search: "Tìm kiếm:",
+            paginate: {
+              previous: "Trước",
+              next: "Sau"
+            }
+          }
+        });
+    }
+    
+    async function deleteProperty(id){
+        await propertyRenterService.deleteProperty(id);
+    }
+</script>

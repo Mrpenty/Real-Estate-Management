@@ -16,10 +16,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
     <script src="~/js/authService.js" asp-append-version="true"></script>
     <script src="~/js/postPropertyService.js"></script>
     <script src="~/js/helper.js" asp-append-version="true"></script>
+    <script src="~/js/compareProperty.js" asp-append-version="true"></script>
     <style>
         input[type="range"]::-webkit-slider-thumb {
             appearance: none;
@@ -44,6 +45,7 @@
     </style>
 </head>
 <body>
+    
     <header class="border-b" style="background-color:white;width:100%">
         <div class="w-full px-4 py-4 flex items-center justify-between">
             <div class="flex items-center" style="cursor:pointer" onclick="window.location.href='/'">
@@ -95,14 +97,67 @@
                 <button onclick="showFilterPopup('filter-popup')" class="ml-2 border rounded-full px-3 py-1 text-sm hover:bg-gray-100">
                     <i class="fas fa-filter mr-1"></i> Bộ lọc
                 </button>
+                <button onclick="showFilterPopup('compare-popup')" class="ml-2 border rounded-full px-3 py-1 text-sm hover:bg-gray-100">
+                    <i class="fas fa-window-restore mr-1"></i> So sánh
+                </button>
             </div>
 
+            <div class="flex items-center space-x-4 relative">
+                <!-- Tin đã lưu -->
+                <a href="#" onclick="getFavoriteList(event)" class="text-gray-700 hover:text-blue-600">
+                    <i class="far fa-heart mr-1"></i> Tin đã lưu
+                </a>
+
+                <!-- Đăng ký (nếu chưa đăng nhập) -->
+                <div id="authNavItems" class="flex items-center space-x-4">
+                    <a href="/Auth/Register" class="text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-user-plus mr-1"></i> Đăng ký
+                    </a>
+                    <a href="/Auth/Login" class="text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-sign-in-alt mr-1"></i> Đăng nhập
+                    </a>
+                </div>
+
+                <!-- Dropdown: Chào, Username -->
+                <div id="userProfileNavItem" class="relative hidden">
+                    <button onclick="toggleDropdown()" class="flex items-center text-gray-700 hover:text-blue-600 font-medium">
+                        <span id="userProfileLink"></span>
+                        <svg class="ml-1 h-4 w-4 fill-current" viewBox="0 0 20 20">
+                            <path d="M5.5 7l4.5 4 4.5-4z" />
+                        </svg>
+                    </button>
+
+                    <!-- Menu Dropdown -->
+                    <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 hidden z-50">
+                        <a href="/Chat/Index" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-comment-dots mr-2"></i>Tin nhắn
+                        </a>
+                        <a href="/Profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-user mr-2"></i>Trang cá nhân
+                        </a>
+                        <a href="#" onclick="handleLogout(event)" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Đăng xuất
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Đăng tin -->
+                <a href="#" onclick="createProperty(event)" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-1 rounded-full text-sm">
+                    <i class="fas fa-pen-alt mr-1"></i> Đăng tin
+                </a>
+            </div>
+
+@* 
             <div class="flex items-center space-x-4">
                 <a href="#" onclick="getFavoriteList(event)" class="text-gray-700 hover:text-blue-600"><i class="far fa-heart mr-1"></i> Tin đã lưu</a>
 
                 <!-- Authenticated User -->
                 <div id="userProfileNavItem" style="display: none;" class="flex items-center space-x-4">
-                    <a href="/Chat/Index" class="text-gray-700 hover:text-blue-600"><i class="fas fa-comment-dots"></i> Tin nhắn</a>
+                    <a href="/Chat/Index" class="relative">
+                        <i class="fas fa-comment-dots"></i> Tin nhắn
+                        <span id="messageNotificationDot" class="hidden absolute -top-1 -right-2 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+                    </a>
+
                     <a href="/Profile" id="userProfileLink" class="text-gray-700 hover:text-blue-600"></a>
                     <a href="#" onclick="handleLogout(event)" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-out-alt mr-1"></i> Đăng xuất</a>
                 </div>
@@ -116,7 +171,7 @@
 
 
                 <a href="#" onclick="createProperty(event)" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-1 rounded-full text-sm"><i class="fas fa-pen-alt mr-1"></i> Đăng tin</a>
-            </div>
+            </div> *@
         </div>
 
         <nav class="border-b border-gray-200 shadow-sm">
@@ -289,6 +344,30 @@
         </div>
     </div>
 
+    <div id="compare-popup" class="hidden fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-lg">
+
+            <div class="sticky top-0 bg-white z-10 px-4 pt-4 pb-3 rounded-t-lg shadow-sm border-b mb-2">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-semibold">So sánh</h2>
+                    <button onclick="hideFilterPopup('compare-popup')" class="text-2xl text-gray-500 hover:text-red-500">&times;</button>
+                </div>
+            </div>
+
+            <div class="px-4 overflow-y-auto h-[60vh]">
+                <div id="compare-table-container" class="overflow-x-auto">
+                    <table class="table-auto w-full text-sm text-gray-700 border" id="compare-table">
+                    </table>
+                </div>
+                <p id="compare-warning" class="text-red-500 text-sm mt-2 hidden">
+                    Vui lòng chọn ít nhất 2 và không quá 3 mục để so sánh.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+
     <div id="search-popup" class=" fixed inset-0 bg-black/30 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl w-full max-w-lg shadow-lg">
 
@@ -355,6 +434,10 @@
         const selectedLocationsEl = document.getElementById("location-selected-list");
         let selectedProvinceId = -1;
         let selectedLocationLists = [];
+
+        function toggleDropdown() {
+            document.getElementById("userDropdown").classList.toggle("hidden");
+        }
 
         function renderProvincesList(filter = "") {
               provinceList.innerHTML = "";
@@ -504,6 +587,9 @@
 
         function showFilterPopup(id) {
             document.getElementById(id).classList.remove('hidden');
+            if(id == 'compare-popup'){
+              renderComparePopup();
+            }
         }
         listSelectedSingleChoice();
 
@@ -873,7 +959,37 @@
 
                 updateRangeUI();
             }
+        window.getUserIdFromToken = function (token) {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return parseInt(payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]);
+        }
+
     </script>
-    @RenderSection("Scripts", required: false)
+ 
 </body>
 </html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js" asp-append-version="true"></script>
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js" asp-append-version="true"></script>
+
+    @* <script src="~/js/signalr.js" asp-append-version="true"></script> *@
+    <script src="~/js/site.js" asp-append-version="true"></script>
+}
+@* <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const token = localStorage.getItem("authToken");
+        if (!token) return;
+
+        startSignalRConnection(token, () => {
+            const conn = window.globalConnection;
+
+            conn.on("ReceiveNotification", (notification) => {
+                console.log("🔔 Nhận notification:", notification);
+                const dot = document.getElementById("messageNotificationDot");
+                if (dot) dot.classList.remove("hidden");
+            });
+        });
+    });
+</script> *@
+@RenderSection("Scripts", required: false)

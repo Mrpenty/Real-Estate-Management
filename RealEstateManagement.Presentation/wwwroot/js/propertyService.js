@@ -18,13 +18,13 @@ const propertyService = {
                 listLocationSelected = JSON.parse(listLocationSelected);
                 if (listLocationSelected.length != 0) {
                     listLocationSelected.forEach(item => {
-                        provinces.push(item.province.id);
+                        provinces.push(Number(item.province.id));
                         wards.push(item.ward.id);
                         streets.push(item.street.id);
                     });
                 }
                 else {
-                    provinces.push(provinceId);
+                    provinces.push(Number(provinceId));
                 }
 
             }
@@ -57,7 +57,6 @@ const propertyService = {
             $('#minInput').val(body.minRoom ?? 0);
             $('#maxInput').val(body.maxRoom ?? 15);
 
-            console.log(body);
             let response = await fetch(`${API_PROPERTY_BASE_URL}/filter-advanced`, {
                 method: 'POST',
                 headers: {

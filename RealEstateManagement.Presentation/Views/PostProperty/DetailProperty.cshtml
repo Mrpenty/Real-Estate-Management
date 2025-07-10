@@ -1,6 +1,6 @@
 @{
     Layout = "~/Views/Shared/_RenterLayout.cshtml";
-    ViewData["Title"] = "Đăng tin mới";
+    ViewData["Title"] = "Cập nhật tin";
 }
 
 <div class="bg-white px-6 pt-6 border-b" style="position:fixed;width:100%;z-index:999">
@@ -234,12 +234,85 @@
          window.location.href = '/Auth/Login';
      }
 
+     let itemPropertyBody = null;
+
      const apiBaseUrl = 'https://localhost:7031/api';
+     const baseUrl = 'https://localhost:7031';
      const provinceSelect = $('#province-select');
      const wardSelect = $('#ward-select');
      const streetSelect = $('#street-select');
      const addressInfo = $('#addressInfoId');
      const fullAddressInput = $('#open-address-modal');
+
+
+     getProperty();
+     async function getProperty(){
+         itemPropertyBody = await propertyService.getProperty(@ViewBag.Id);
+         console.log(itemPropertyBody);
+         $('#type').val(itemPropertyBody.type);
+         provinceSelect.val(itemPropertyBody.provinceId);
+         addressInfo.val(itemPropertyBody.detailedAddress);
+
+         wardSelect.empty().append('<option value="">Chọn Phường/Xã</option>');
+         streetSelect.empty().append('<option value="">Chọn Đường</option>');
+         if (itemPropertyBody.provinceId) {
+             $.get(`${apiBaseUrl}/Property/wards/${itemPropertyBody.provinceId}`,async function (data) {
+                     data.forEach(w => wardSelect.append(`<option value="${w.id}">${w.name}</option>`));
+             });
+         }
+
+
+         streetSelect.empty().append('<option value="">Chọn Đường</option>');
+         if (itemPropertyBody.wardId) {
+             $.get(`${apiBaseUrl}/Property/streets/${itemPropertyBody.wardId}`,async function (data) {
+                 data.forEach(s => streetSelect.append(`<option value="${s.id}">${s.name}</option>`));
+             });
+         }
+
+         $('#title').val(itemPropertyBody.title);
+         $('#description').val(itemPropertyBody.description);
+         $('#price').val(itemPropertyBody.price);
+         $('#bedrooms').val(itemPropertyBody.bedrooms);
+         $('#area').val(itemPropertyBody.area);
+
+         itemPropertyBody.amenities.forEach(name => {
+            const checkbox = document.querySelector(`input[name="AmenityIds"][data-name="${name}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+
+         });
+
+             itemPropertyBody.imageUrls.forEach(url =>{
+               const wrapper = document.createElement('div');
+               wrapper.className = "relative";
+
+               const img = document.createElement('img');
+               img.src = baseUrl + url;
+               img.className = "w-full h-32 object-cover rounded-md shadow";
+
+               const deleteBtn = document.createElement('button');
+               deleteBtn.innerHTML = "<span>&times;</span>";
+               deleteBtn.type = "button";
+               deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600";
+               deleteBtn.onclick = () => {
+                        wrapper.remove();
+               };
+
+               wrapper.appendChild(img);
+               wrapper.appendChild(deleteBtn);
+               previewContainer.appendChild(wrapper);
+         });
+
+         setTimeout(() => {
+             wardSelect.val(itemPropertyBody.wardId);
+             streetSelect.val(itemPropertyBody.streetId);
+
+             updateMap();
+         },500)
+
+     }
+
      $.get(`${apiBaseUrl}/Property/provinces`,async function (data) {
             provinceSelect.empty().append('<option value="">Chọn Tỉnh/Thành</option>');
             data.forEach(p => provinceSelect.append(`<option value="${p.id}">${p.name}</option>`));
@@ -274,15 +347,15 @@
              provinceId: provinceId,
              wardId: wardId,
              streetId: streetId,
-             detailedAddress: detailedAddress,
+             detailedAddress: detailedAddress
          };
 
 
          updateMap();
-         if(imageFiles.length == 0){
-             alert('Cần cập nhật ảnh');
-             return;
-         }
+         // if(imageFiles.length == 0){
+         //     alert('Cần cập nhật ảnh');
+         //     return;
+         // }
          // Kiểm tra dữ liệu trước khi gửi
          // for (const key in propertyData) {
          //     if (propertyData[key] === undefined || propertyData[key] === null || propertyData[key] === '' || (Array.isArray(propertyData[key]) && propertyData[key].length === 0)) {
@@ -292,30 +365,37 @@
          // }
          // Gửi API tạo property
 
-         propertyData['location'] = await fetchLocationAndSetPropertyData();
+         //propertyData['location'] = await fetchLocationAndSetPropertyData();
          const token = localStorage.getItem('authToken');
-         const res = await fetch('https://localhost:7031/api/PropertyPosts', {
-             method: 'POST',
+         //console.log(propertyData);
+         let dto = {
+             title:propertyData.title,
+             description:propertyData.description,
+             price: propertyData.price,
+             area: propertyData.area,
+             bedrooms: propertyData.bedrooms
+         };
+         const res = await fetch(`https://localhost:7031/api/OwnerProperty/UpdateProperty?id=${@ViewBag.Id}`, {
+             method: 'PUT',
              headers: {
                  'Content-Type': 'application/json',
                  ...(token ? { 'Authorization': `Bearer ${token}` } : {})
              },
              credentials: 'include',
-             body: JSON.stringify(propertyData)
+             body: JSON.stringify(dto)
          });
          if (!res.ok) {
              const err = await res.json().catch(() => ({}));
-             alert('Tạo property thất bại! ' + (err.message || ''));
+             alert('Sửa property thất bại! ' + (err.message || ''));
              return;
          }
          const data = await res.json();
-         createdPropertyId = data.propertyId; // Sử dụng propertyId từ response
-         if (createdPropertyId) {
-             await uploadImages(createdPropertyId); // Đợi upload xong ảnh
-             alert('Tạo bài và upload ảnh thành công!');
-             window.location.href = `/PostProperty/SelectPackage?propertyId=${createdPropertyId}`;
-             return;
-         }
+         alert("Lưu thành công");
+         window.location.href = '/PostProperty/ListProperty';
+         // updatePropertyId = data.id; // Sử dụng propertyId từ response
+         // if(updatePropertyId){
+         //     uploadImages(updatePropertyId)
+         // }
      };
 
     async function fetchLocationAndSetPropertyData() {
@@ -343,92 +423,80 @@
        return latlon ;
      }
 
-    async function uploadImages(propertyId) {
-        const token = localStorage.getItem('authToken');
-        for (let idx = 0; idx < imageFiles.length; idx++) {
-            const file = imageFiles[idx];
+         async function uploadImages(propertyId) {
+             const token = localStorage.getItem('authToken');
 
-            // Tạo FormData mới cho từng file
-            const formData = new FormData();
-            formData.append('file', file);
+             for (let idx = 0; idx < imageFiles.length; idx++) {
+                 const file = imageFiles[idx];
 
-            // Upload file lên server
-            const uploadResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/upload`, {
-                method: 'POST',
-                headers: {
-                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-                },
-                body: formData
-            });
+                 // Upload file lên server trước
+                 const formData = new FormData();
+                 formData.append('file', file);
 
-            if (!uploadResponse.ok) {
-                const error = await uploadResponse.text();
-                alert(`Upload ảnh thất bại: ${error}`);
-                return;
-            }
+                 const uploadResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/upload`, {
+                     method: 'POST',
+                     headers: {
+                         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                     },
+                     body: formData
+                 });
 
-            const uploadResult = await uploadResponse.json();
-            const imageUrl = uploadResult.imageUrl;
+                 if (!uploadResponse.ok) {
+                     const error = await uploadResponse.text();
+                     alert(`Upload ảnh thất bại: ${error}`);
+                     return;
+                 }
 
-            // Lưu thông tin ảnh vào database
-            const dto = {
-                url: imageUrl,
-                isPrimary: idx === primaryImageIndex,
-                order: idx
-            };
+                 const uploadResult = await uploadResponse.json();
+                 const imageUrl = uploadResult.imageUrl;
 
-            const saveResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-                },
-                body: JSON.stringify(dto)
-            });
+                 // Lưu thông tin ảnh vào database
+                 const dto = {
+                     url: imageUrl,
+                     isPrimary: idx === primaryImageIndex,
+                     order: idx
+                 };
 
-            if (!saveResponse.ok) {
-                const error = await saveResponse.text();
-                alert(`Lưu thông tin ảnh thất bại: ${error}`);
-                return;
-            }
-        }
-    }
+                 const saveResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images`, {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json',
+                         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                     },
+                     body: JSON.stringify(dto)
+                 });
+
+                 if (!saveResponse.ok) {
+                     const error = await saveResponse.text();
+                     alert(`Lưu thông tin ảnh thất bại: ${error}`);
+                     return;
+                 }
+
+                 alert('Lưu thông tin thành công');
+                 window.location.href = '/PostProperty/ListProperty';
+             }
+         }
 
 
-     // Thêm biến kiểm soát trạng thái form
-     let isFormActive = true;
-
-     provinceSelect.on('change', async function () {
-         if (!isFormActive) return;
+     provinceSelect.on('change',async function () {
          const provinceId = $(this).val();
-         if (!provinceId || provinceId.startsWith('--')) return;
          wardSelect.empty().append('<option value="">Chọn Phường/Xã</option>');
          streetSelect.empty().append('<option value="">Chọn Đường</option>');
-
-         if (provinceId) {
-               $.get(`${apiBaseUrl}/Property/wards/${provinceId}`,async function (data) {
-                   data.forEach(w => wardSelect.append(`<option value="${w.id}">${w.name}</option>`));
-              });
-         }
+             if (provinceId) {
+                   $.get(`${apiBaseUrl}/Property/wards/${provinceId}`,async function (data) {
+                       data.forEach(w => wardSelect.append(`<option value="${w.id}">${w.name}</option>`));
+                  });
+             }
      });
 
-     wardSelect.on('change', async function () {
-         if (!isFormActive) return;
+     wardSelect.on('change',async function () {
          const wardId = $(this).val();
-         if (!wardId || wardId.startsWith('--')) return;
          streetSelect.empty().append('<option value="">Chọn Đường</option>');
          if (wardId) {
              $.get(`${apiBaseUrl}/Property/streets/${wardId}`,async function (data) {
                  data.forEach(s => streetSelect.append(`<option value="${s.id}">${s.name}</option>`));
              });
          }
-     });
-
-     streetSelect.on('change', async function () {
-         if (!isFormActive) return;
-         const streetId = $(this).val();
-         if (!streetId || streetId.startsWith('--')) return;
-         // ... code cũ ...
      });
 
      function updateMap() {
@@ -464,7 +532,7 @@
              listData.forEach(amenity => {
                     amenitiesContainer.append(`
                                  <div class="flex items-center mr-4">
-                                     <input type="checkbox" name="AmenityIds" value="${amenity.id}" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                     <input type="checkbox" name="AmenityIds" data-name="${amenity.name}" value="${amenity.id}" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                                      <label class="ml-2 block text-sm text-gray-900">${amenity.name}</label>
                                  </div>
                              `);
@@ -550,77 +618,54 @@
      imageUpload.addEventListener('change', () => {
          try {
                  imageFiles = [];
-                 primaryImageIndex = 0;
                  previewContainer.innerHTML = "";
-                 const fileAlls = Array.from(imageUpload.files);
-                 if (fileAlls.length > 8) {
-                     alert("Chỉ được tải tối đa 8 ảnh!");
-                     imageUpload.value = "";
-                     return;
-                 }
+
+                  const fileAlls = Array.from(imageUpload.files);
+                  if (fileAlls.length > 8) {
+                      alert("Chỉ được tải tối đa 8 ảnh!");
+                      imageUpload.value = "";
+                      return;
+                  }
+
+
                  const files = fileAlls.slice(0, 8);
                  imageFiles = files;
                  for (const file of files) {
-                     if (file.size > 5 * 1024 * 1024) {
+                 if (file.size > 5 * 1024 * 1024) {
                          alert(`Ảnh "${file.name}" vượt quá 5MB. Vui lòng chọn ảnh nhẹ hơn.`);
                          imageUpload.value = "";
                          return;
                      }
                  }
-                 files.forEach((file, index) => {
-                     if (!file.type.startsWith("image/")) return;
-                     const reader = new FileReader();
-                     reader.onload = () => {
-                         const wrapper = document.createElement('div');
-                         wrapper.className = "relative group border-2 rounded-md" + (index === 0 ? ' border-blue-500' : ' border-transparent');
-                         wrapper.style.cursor = 'pointer';
-                         wrapper.setAttribute('data-index', index);
-                         const img = document.createElement('img');
-                         img.src = reader.result;
-                         img.className = "w-full h-32 object-cover rounded-md shadow";
-                         // Icon isPrimary
-                         const primaryIcon = document.createElement('div');
-                         primaryIcon.className = "absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full z-10";
-                         primaryIcon.innerHTML = index === 0 ? 'Ảnh đại diện' : '';
-                         primaryIcon.style.display = index === 0 ? 'block' : 'none';
-                         // Click chọn làm isPrimary
-                         wrapper.onclick = function() {
-                             primaryImageIndex = index;
-                             // Update border and icon for all
-                             Array.from(previewContainer.children).forEach((child, idx) => {
-                                 child.classList.remove('border-blue-500');
-                                 child.classList.add('border-transparent');
-                                 child.querySelector('div').style.display = 'none';
-                             });
-                             wrapper.classList.remove('border-transparent');
-                             wrapper.classList.add('border-blue-500');
-                             primaryIcon.style.display = 'block';
-                         };
-                         // Nút xóa ảnh
-                         const deleteBtn = document.createElement('button');
-                         deleteBtn.innerHTML = "<span>&times;</span>";
-                         deleteBtn.type = "button";
-                         deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600 z-20";
-                         deleteBtn.onclick = (e) => {
-                             e.stopPropagation();
-                             files.splice(index, 1);
-                             imageFiles = files;
-                             // Nếu xóa ảnh đại diện thì reset về 0
-                             if (primaryImageIndex === index) primaryImageIndex = 0;
-                             imageUpload.value = "";
-                             // Gọi lại event để render lại preview
-                             const dt = new DataTransfer();
-                             files.forEach(f => dt.items.add(f));
-                             imageUpload.files = dt.files;
-                             imageUpload.dispatchEvent(new Event('change'));
-                         };
-                         wrapper.appendChild(img);
-                         wrapper.appendChild(primaryIcon);
-                         wrapper.appendChild(deleteBtn);
-                         previewContainer.appendChild(wrapper);
-                     };
-                     reader.readAsDataURL(file);
-                 });
+
+
+
+                  files.forEach((file, index) => {
+                      if (!file.type.startsWith("image/")) return;
+
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                          const wrapper = document.createElement('div');
+                          wrapper.className = "relative";
+
+                          const img = document.createElement('img');
+                          img.src = reader.result;
+                          img.className = "w-full h-32 object-cover rounded-md shadow";
+
+                          const deleteBtn = document.createElement('button');
+                          deleteBtn.innerHTML = "<span>&times;</span>";
+                          deleteBtn.type = "button";
+                          deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600";
+                          deleteBtn.onclick = () => {
+                              wrapper.remove();
+                          };
+
+                          wrapper.appendChild(img);
+                          wrapper.appendChild(deleteBtn);
+                          previewContainer.appendChild(wrapper);
+                      };
+                      reader.readAsDataURL(file);
+                  });
          } catch (error) {
              console.log(error);
          }
