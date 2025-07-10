@@ -1,5 +1,3 @@
-
-
 html {
     font-size: 14px;
 }
@@ -39,6 +37,12 @@ a {
     a:hover {
         color: rgb(37 99 235 / var(--tw-text-opacity, 1)) !important;
     }
+
+/* Đảm bảo input trong .relative có chiều cao tối thiểu và padding đều để icon căn giữa */
+.relative input {
+    min-height: 2.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
 
 /* Notification red dot for chat */
 .chat-notification-dot {

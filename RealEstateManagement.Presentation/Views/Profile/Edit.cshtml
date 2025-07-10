@@ -38,6 +38,34 @@
                 <input type="tel" id="phoneNumber" name="phoneNumber" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
             </div>
 
+            <!-- CCCD Front -->
+            <div>
+                <label for="cccdFront" class="block text-sm font-medium text-gray-700">Ảnh CCCD mặt trước</label>
+                <input type="file" id="cccdFront" name="cccdFront" accept="image/*" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                <img id="cccdFrontPreview" class="max-h-32 mt-1" />
+            </div>
+            <!-- CCCD Back -->
+            <div>
+                <label for="cccdBack" class="block text-sm font-medium text-gray-700">Ảnh CCCD mặt sau</label>
+                <input type="file" id="cccdBack" name="cccdBack" accept="image/*" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                <img id="cccdBackPreview" class="max-h-32 mt-1" />
+            </div>
+            <!-- CCCD Number -->
+            <div>
+                <label for="citizenIdNumber" class="block text-sm font-medium text-gray-700">Số CCCD</label>
+                <input type="text" id="citizenIdNumber" name="citizenIdNumber" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <!-- CCCD Issued Date -->
+            <div>
+                <label for="citizenIdIssuedDate" class="block text-sm font-medium text-gray-700">Ngày cấp CCCD</label>
+                <input type="date" id="citizenIdIssuedDate" name="citizenIdIssuedDate" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <!-- CCCD Expiry Date -->
+            <div>
+                <label for="citizenIdExpiryDate" class="block text-sm font-medium text-gray-700">Ngày hết hạn CCCD</label>
+                <input type="date" id="citizenIdExpiryDate" name="citizenIdExpiryDate" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+
             <!-- Action Buttons -->
             <div class="flex justify-end space-x-4 pt-4">
                 <a href="/Profile" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-300">Hủy</a>
@@ -57,6 +85,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const loadingState = document.getElementById('loading-state');
     const avatarPreview = document.getElementById('avatar-preview');
     const profilePictureInput = document.getElementById('profilePicture');
+    const cccdFrontInput = document.getElementById('cccdFront');
+    const cccdBackInput = document.getElementById('cccdBack');
+    const cccdFrontPreview = document.getElementById('cccdFrontPreview');
+    const cccdBackPreview = document.getElementById('cccdBackPreview');
     
     function getCookie(name) {
         let value = '; ' + document.cookie;
@@ -80,7 +112,12 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('email').value = profile.email || '';
         document.getElementById('phoneNumber').value = profile.phoneNumber || '';
         avatarPreview.src = profile.profilePictureUrl ? `${apiBaseUrl}/${profile.profilePictureUrl}` : '/image/default-avatar.png';
-        
+        // Populate CCCD fields
+        document.getElementById('citizenIdNumber').value = profile.citizenIdNumber || '';
+        document.getElementById('citizenIdIssuedDate').value = profile.citizenIdIssuedDate ? profile.citizenIdIssuedDate.substring(0,10) : '';
+        document.getElementById('citizenIdExpiryDate').value = profile.citizenIdExpiryDate ? profile.citizenIdExpiryDate.substring(0,10) : '';
+        cccdFrontPreview.src = profile.citizenIdFrontImageUrl ? `${apiBaseUrl}/${profile.citizenIdFrontImageUrl}` : '';
+        cccdBackPreview.src = profile.citizenIdBackImageUrl ? `${apiBaseUrl}/${profile.citizenIdBackImageUrl}` : '';
         loadingState.classList.add('hidden');
         form.classList.remove('hidden');
     })
@@ -94,6 +131,24 @@ document.addEventListener('DOMContentLoaded', function () {
             const reader = new FileReader();
             reader.onload = function(e) {
                 avatarPreview.src = e.target.result;
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    });
+    cccdFrontInput.addEventListener('change', function(event) {
+        if (event.target.files && event.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                cccdFrontPreview.src = e.target.result;
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    });
+    cccdBackInput.addEventListener('change', function(event) {
+        if (event.target.files && event.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                cccdBackPreview.src = e.target.result;
             }
             reader.readAsDataURL(event.target.files[0]);
         }
@@ -112,23 +167,46 @@ document.addEventListener('DOMContentLoaded', function () {
             if (pictureFile) {
                 const pictureFormData = new FormData();
                 pictureFormData.append('file', pictureFile);
-
                 const picResponse = await fetch(`${apiBaseUrl}/api/User/profile-picture`, {
                     method: 'POST',
                     credentials: 'include',
                     body: pictureFormData
                 });
-
                 if (!picResponse.ok) throw new Error('Cập nhật ảnh đại diện thất bại.');
             }
-
+            // Step 3a.1: Upload CCCD front if changed
+            const cccdFrontFile = cccdFrontInput.files[0];
+            if (cccdFrontFile) {
+                const cccdFrontFormData = new FormData();
+                cccdFrontFormData.append('file', cccdFrontFile);
+                const cccdFrontRes = await fetch(`${apiBaseUrl}/api/User/upload-cccd-front`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: cccdFrontFormData
+                });
+                if (!cccdFrontRes.ok) throw new Error('Cập nhật ảnh CCCD mặt trước thất bại.');
+            }
+            // Step 3a.2: Upload CCCD back if changed
+            const cccdBackFile = cccdBackInput.files[0];
+            if (cccdBackFile) {
+                const cccdBackFormData = new FormData();
+                cccdBackFormData.append('file', cccdBackFile);
+                const cccdBackRes = await fetch(`${apiBaseUrl}/api/User/upload-cccd-back`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: cccdBackFormData
+                });
+                if (!cccdBackRes.ok) throw new Error('Cập nhật ảnh CCCD mặt sau thất bại.');
+            }
             // Step 3b: Update profile information
             const profileData = {
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
-                phoneNumber: document.getElementById('phoneNumber').value
+                phoneNumber: document.getElementById('phoneNumber').value,
+                citizenIdNumber: document.getElementById('citizenIdNumber').value,
+                citizenIdIssuedDate: document.getElementById('citizenIdIssuedDate').value,
+                citizenIdExpiryDate: document.getElementById('citizenIdExpiryDate').value
             };
-
             const profileResponse = await fetch(`${apiBaseUrl}/api/User/Update-profile`, {
                 method: 'PUT',
                 credentials: 'include',
@@ -137,15 +215,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 body: JSON.stringify(profileData)
             });
-
             if (!profileResponse.ok) {
                 const errorData = await profileResponse.json();
                 throw new Error(errorData.message || 'Cập nhật thông tin thất bại.');
             }
-            
             alert('Cập nhật thông tin thành công!');
             window.location.href = '/Profile';
-
         } catch (error) {
             alert(`Lỗi: ${error.message}`);
         } finally {

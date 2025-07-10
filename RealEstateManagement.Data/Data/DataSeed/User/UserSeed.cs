@@ -25,7 +25,13 @@ namespace RealEstateManagement.Data.Data.DataSeed.User
                     Name = "Admin User",
                     Role = "admin",
                     IsVerified = true,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.Now,
+                    CitizenIdNumber = "01234567890",
+                    CitizenIdIssuedDate = new DateTime(2020, 1, 1),
+                    CitizenIdExpiryDate = new DateTime(2030, 1, 1),
+                    CitizenIdFrontImageUrl = "https://example.com/cccd/admin_front.jpg",
+                    CitizenIdBackImageUrl = "https://example.com/cccd/admin_back.jpg",
+                    IsActive = true
                 },
                 new ApplicationUser
                 {
@@ -42,8 +48,14 @@ namespace RealEstateManagement.Data.Data.DataSeed.User
                     Role = "landlord",
                     ProfilePictureUrl = "https://th.bing.com/th/id/R.63d31ac6257157ef079f31bb32e342df?rik=63%2bkafQNo5seHg&pid=ImgRaw&r=0",
                     IsVerified = true,
-                    CreatedAt = DateTime.Now
-
+                    CreatedAt = DateTime.Now,
+                    CitizenIdNumber = "002345678901",
+                    CitizenIdImageUrl = "https://example.com/cccd/landlord.jpg",
+                    CitizenIdIssuedDate = new DateTime(2021, 2, 2),
+                    CitizenIdExpiryDate = new DateTime(2031, 2, 2),
+                    CitizenIdFrontImageUrl = "https://example.com/cccd/landlord_front.jpg",
+                    CitizenIdBackImageUrl = "https://example.com/cccd/landlord_back.jpg",
+                    IsActive = true
                 },
                 new ApplicationUser
                 {
@@ -59,7 +71,14 @@ namespace RealEstateManagement.Data.Data.DataSeed.User
                     Name = "Renter User",
                     Role = "renter",
                     IsVerified = true,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.Now,
+                    CitizenIdNumber = "003456789012",
+                    CitizenIdImageUrl = "https://example.com/cccd/renter.jpg",
+                    CitizenIdIssuedDate = new DateTime(2022, 3, 3),
+                    CitizenIdExpiryDate = new DateTime(2032, 3, 3),
+                    CitizenIdFrontImageUrl = "https://example.com/cccd/renter_front.jpg",
+                    CitizenIdBackImageUrl = "https://example.com/cccd/renter_back.jpg",
+                    IsActive = true
                 },
                 new ApplicationUser
                 {
@@ -73,7 +92,15 @@ namespace RealEstateManagement.Data.Data.DataSeed.User
                     Name = "Renter User 2",
                     Role = "renter",
                     IsVerified = true,
-                    CreatedAt = DateTime.Now.AddDays(-1)
+                    CreatedAt = DateTime.Now.AddDays(-1),
+                    CitizenIdNumber = "004567890123",
+                    CitizenIdImageUrl = "https://example.com/cccd/renter2.jpg",
+                    CitizenIdIssuedDate = new DateTime(2023, 4, 4),
+                    CitizenIdExpiryDate = new DateTime(2033, 4, 4),
+                    CitizenIdFrontImageUrl = "https://example.com/cccd/renter2_front.jpg",
+                    CitizenIdBackImageUrl = "https://example.com/cccd/renter2_back.jpg",
+                    VerificationRejectReason = "Ảnh CCCD mặt sau bị mờ, thiếu ngày cấp. Vui lòng bổ sung lại!",
+                    IsActive = false
                 }
             );
         }

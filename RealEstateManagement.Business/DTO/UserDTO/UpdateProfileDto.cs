@@ -18,6 +18,15 @@ namespace RealEstateManagement.Business.DTO.UserDTO
 
         public string? ProfilePictureUrl { get; set; }
 
-        
+        // Các trường cho admin
+        public bool? IsVerified { get; set; }
+        public bool? IsActive { get; set; }
+        public string? Role { get; set; }
+        public string? CitizenIdNumber { get; set; }
+        public string? CitizenIdFrontImageUrl { get; set; }
+        public string? CitizenIdBackImageUrl { get; set; }
+        public DateTime? CitizenIdIssuedDate { get; set; }
+        public DateTime? CitizenIdExpiryDate { get; set; }
+        public string? VerificationRejectReason { get; set; }
     }
 }

@@ -36,5 +36,13 @@ namespace RealEstateManagement.Data.Entity.User
         public ICollection<UserFavoriteProperty> FavoriteProperties { get; set; }
         public ICollection<Message> MessagesSent { get; set; }
 
+        public string? CitizenIdNumber { get; set; }
+        public DateTime? CitizenIdIssuedDate { get; set; }
+        public DateTime? CitizenIdExpiryDate { get; set; }
+        public bool IsActive { get; set; } = true; // true: active, false: banned
+        public string? CitizenIdImageUrl { get; set; } // URL to the citizen ID image
+        public string? CitizenIdFrontImageUrl { get; set; }
+        public string? CitizenIdBackImageUrl { get; set; }
+        public string? VerificationRejectReason { get; set; }
     }
 }
