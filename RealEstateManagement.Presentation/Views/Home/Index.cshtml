@@ -143,8 +143,8 @@
             let html = '';
             listProperty.forEach(item => {
                 console.log("📦 Property Item:", item);
-
                 html += `<div class="bg-white rounded-md shadow-sm overflow-hidden border border-gray-200" data-id="${item.id}">
+
 
                         <div class="relative">
                                 <img onerror="handleImageError(this)" src="${item.primaryImageUrl}" alt="${item.type}" class="w-full h-60 object-cover">
@@ -153,7 +153,10 @@
                                 15 ảnh
                             </div> *@
 
-
+                                <button id="btn-compare-${item.id}" onclick="addToCompare(${item.id})"
+                                        class="absolute bottom-2 right-2 bg-white text-gray-700 border border-gray-300 px-3 py-1 text-sm rounded shadow opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition">
+                                    So sánh
+                                </button>
                                 <button id="btnFavourite" onclick="updateFavorite(${item.id},${item.isFavorite})" class="absolute top-2 right-2 p-2 bg-white rounded-full shadow hover:bg-red-100 transition">
                                     ${item.isFavorite ?
                         `
@@ -218,6 +221,7 @@
         sessionStorage.setItem('filterData',JSON.stringify(body));
         window.location.reload();
     }
+
 
     function filterArea(event,minArea,maxArea){
         event.preventDefault();

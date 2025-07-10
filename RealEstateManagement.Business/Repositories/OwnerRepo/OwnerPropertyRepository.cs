@@ -19,10 +19,16 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
             _context = context;
         }
 
-        public async Task<IEnumerable<Property>> GetByLandlordAsync(int landlordId)
+        public IQueryable<Property> GetByLandlordQueryable(int landlordId)
         {
-            return await _context.Properties
+            return _context.Properties
                 .Include(p => p.Images)
+                .Include(p => p.Address)
+                .ThenInclude(p => p.Province)
+                .Include(p => p.Address)
+                .ThenInclude(p => p.Street)
+                .Include(p => p.Address)
+                .ThenInclude(p => p.Ward)
                 .Where(p => p.LandlordId == landlordId)
                 .ToListAsync();
         }

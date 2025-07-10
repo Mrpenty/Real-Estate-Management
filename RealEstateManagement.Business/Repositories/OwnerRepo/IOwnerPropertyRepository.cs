@@ -10,7 +10,7 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
 {
     public interface IOwnerPropertyRepository : IRepositoryAsync<Property>
     {
-        Task<IEnumerable<Property>> GetByLandlordAsync(int landlordId);
+        IQueryable<Property> GetByLandlordQueryable(int landlordId);
         Task<Property> GetByIdAsync(int id, int landlordId);
         Task DeleteAsync(Property property);
     }
