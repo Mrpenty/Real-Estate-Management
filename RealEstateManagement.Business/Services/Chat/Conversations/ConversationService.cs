@@ -54,6 +54,21 @@ namespace RealEstateManagement.Business.Services.Chat.Conversations
                 LandlordName = userId == c.RenterId ? c.Landlord.Name ?? c.Landlord.Email : null
             });
         }
+        public async Task<IEnumerable<ConversationDTO?>> FilterConversationAsync(int userId, string searchTerm, int skip = 0, int take = 5)
+        {
+            var conversations = await _repository.FilterConversationAsync(userId, searchTerm, skip, take);
+
+            return conversations.Select(c => new ConversationDTO
+            {
+                Id = c.Id,
+                PropertyId = c.PropertyId,
+                RenterId = c.RenterId,
+                LandlordId = c.LandlordId,
+                RenterName = c.Renter?.Name,
+                LandlordName = c.Landlord?.Name,
+
+            });
+        }
 
     }
 }

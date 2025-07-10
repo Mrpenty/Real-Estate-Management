@@ -12,5 +12,8 @@ namespace RealEstateManagement.Business.Services.Chat.Messages
     {
         Task<Message> SendMessageAsync(MessageDTO dto, int senderId);
         Task<IEnumerable<MessageViewDTO>> GetMessagesByConversationAsync(int conversationId, int skip = 0, int take = 20);
+        Task<Message> GetMessageByIdAsync(int id);
+        Task DeleteMessageAsync(int id);
+        Task UpdateMessageAsync(Message message);
     }
 }
