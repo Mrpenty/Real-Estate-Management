@@ -1,6 +1,6 @@
 @{
     Layout = "~/Views/Shared/_RenterLayout.cshtml";
-    ViewData["Title"] = "Đăng tin mới";
+    ViewData["Title"] = "Cập nhật tin";
 }
 
 <div class="bg-white px-6 pt-6 border-b" style="position:fixed;width:100%;z-index:999">
@@ -234,12 +234,85 @@
          window.location.href = '/Auth/Login';
      }
 
+     let itemPropertyBody = null;
+
      const apiBaseUrl = 'https://localhost:7031/api';
+     const baseUrl = 'https://localhost:7031';
      const provinceSelect = $('#province-select');
      const wardSelect = $('#ward-select');
      const streetSelect = $('#street-select');
      const addressInfo = $('#addressInfoId');
      const fullAddressInput = $('#open-address-modal');
+
+
+     getProperty();
+     async function getProperty(){
+         itemPropertyBody = await propertyService.getProperty(@ViewBag.Id);
+         console.log(itemPropertyBody);
+         $('#type').val(itemPropertyBody.type);
+         provinceSelect.val(itemPropertyBody.provinceId);
+         addressInfo.val(itemPropertyBody.detailedAddress);
+
+         wardSelect.empty().append('<option value="">Chọn Phường/Xã</option>');
+         streetSelect.empty().append('<option value="">Chọn Đường</option>');
+         if (itemPropertyBody.provinceId) {
+             $.get(`${apiBaseUrl}/Property/wards/${itemPropertyBody.provinceId}`,async function (data) {
+                     data.forEach(w => wardSelect.append(`<option value="${w.id}">${w.name}</option>`));
+             });
+         }
+
+
+         streetSelect.empty().append('<option value="">Chọn Đường</option>');
+         if (itemPropertyBody.wardId) {
+             $.get(`${apiBaseUrl}/Property/streets/${itemPropertyBody.wardId}`,async function (data) {
+                 data.forEach(s => streetSelect.append(`<option value="${s.id}">${s.name}</option>`));
+             });
+         }
+
+         $('#title').val(itemPropertyBody.title);
+         $('#description').val(itemPropertyBody.description);
+         $('#price').val(itemPropertyBody.price);
+         $('#bedrooms').val(itemPropertyBody.bedrooms);
+         $('#area').val(itemPropertyBody.area);
+
+         itemPropertyBody.amenities.forEach(name => {
+            const checkbox = document.querySelector(`input[name="AmenityIds"][data-name="${name}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+
+         });
+
+             itemPropertyBody.imageUrls.forEach(url =>{
+               const wrapper = document.createElement('div');
+               wrapper.className = "relative";
+
+               const img = document.createElement('img');
+               img.src = baseUrl + url;
+               img.className = "w-full h-32 object-cover rounded-md shadow";
+
+               const deleteBtn = document.createElement('button');
+               deleteBtn.innerHTML = "<span>&times;</span>";
+               deleteBtn.type = "button";
+               deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600";
+               deleteBtn.onclick = () => {
+                        wrapper.remove();
+               };
+
+               wrapper.appendChild(img);
+               wrapper.appendChild(deleteBtn);
+               previewContainer.appendChild(wrapper);
+         });
+
+         setTimeout(() => {
+             wardSelect.val(itemPropertyBody.wardId);
+             streetSelect.val(itemPropertyBody.streetId);
+
+             updateMap();
+         },500)
+
+     }
+
      $.get(`${apiBaseUrl}/Property/provinces`,async function (data) {
             provinceSelect.empty().append('<option value="">Chọn Tỉnh/Thành</option>');
             data.forEach(p => provinceSelect.append(`<option value="${p.id}">${p.name}</option>`));
@@ -279,10 +352,10 @@
 
 
          updateMap();
-         if(imageFiles.length == 0){
-             alert('Cần cập nhật ảnh');
-             return;
-         }
+         // if(imageFiles.length == 0){
+         //     alert('Cần cập nhật ảnh');
+         //     return;
+         // }
          // Kiểm tra dữ liệu trước khi gửi
          // for (const key in propertyData) {
          //     if (propertyData[key] === undefined || propertyData[key] === null || propertyData[key] === '' || (Array.isArray(propertyData[key]) && propertyData[key].length === 0)) {
@@ -292,27 +365,37 @@
          // }
          // Gửi API tạo property
 
-         propertyData['location'] = await fetchLocationAndSetPropertyData();
+         //propertyData['location'] = await fetchLocationAndSetPropertyData();
          const token = localStorage.getItem('authToken');
-         const res = await fetch('https://localhost:7031/api/PropertyPosts', {
-             method: 'POST',
+         //console.log(propertyData);
+         let dto = {
+             title:propertyData.title,
+             description:propertyData.description,
+             price: propertyData.price,
+             area: propertyData.area,
+             bedrooms: propertyData.bedrooms
+         };
+         const res = await fetch(`https://localhost:7031/api/OwnerProperty/UpdateProperty?id=${@ViewBag.Id}`, {
+             method: 'PUT',
              headers: {
                  'Content-Type': 'application/json',
                  ...(token ? { 'Authorization': `Bearer ${token}` } : {})
              },
              credentials: 'include',
-             body: JSON.stringify(propertyData)
+             body: JSON.stringify(dto)
          });
          if (!res.ok) {
              const err = await res.json().catch(() => ({}));
-             alert('Tạo property thất bại! ' + (err.message || ''));
+             alert('Sửa property thất bại! ' + (err.message || ''));
              return;
          }
          const data = await res.json();
-         createdPropertyId = data.propertyId; // Sử dụng propertyId từ response
-         if(createdPropertyId){
-             uploadImages(createdPropertyId)
-         }
+         alert("Lưu thành công");
+         window.location.href = '/PostProperty/ListProperty';
+         // updatePropertyId = data.id; // Sử dụng propertyId từ response
+         // if(updatePropertyId){
+         //     uploadImages(updatePropertyId)
+         // }
      };
 
     async function fetchLocationAndSetPropertyData() {
@@ -396,14 +479,14 @@
 
 
      provinceSelect.on('change',async function () {
-     const provinceId = $(this).val();
-     wardSelect.empty().append('<option value="">Chọn Phường/Xã</option>');
-     streetSelect.empty().append('<option value="">Chọn Đường</option>');
-         if (provinceId) {
-               $.get(`${apiBaseUrl}/Property/wards/${provinceId}`,async function (data) {
-                   data.forEach(w => wardSelect.append(`<option value="${w.id}">${w.name}</option>`));
-              });
-         }
+         const provinceId = $(this).val();
+         wardSelect.empty().append('<option value="">Chọn Phường/Xã</option>');
+         streetSelect.empty().append('<option value="">Chọn Đường</option>');
+             if (provinceId) {
+                   $.get(`${apiBaseUrl}/Property/wards/${provinceId}`,async function (data) {
+                       data.forEach(w => wardSelect.append(`<option value="${w.id}">${w.name}</option>`));
+                  });
+             }
      });
 
      wardSelect.on('change',async function () {
@@ -449,7 +532,7 @@
              listData.forEach(amenity => {
                     amenitiesContainer.append(`
                                  <div class="flex items-center mr-4">
-                                     <input type="checkbox" name="AmenityIds" value="${amenity.id}" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                     <input type="checkbox" name="AmenityIds" data-name="${amenity.name}" value="${amenity.id}" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                                      <label class="ml-2 block text-sm text-gray-900">${amenity.name}</label>
                                  </div>
                              `);

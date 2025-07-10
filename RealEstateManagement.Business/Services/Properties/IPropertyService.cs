@@ -14,6 +14,7 @@ namespace RealEstateManagement.Business.Services.Properties
     public interface IPropertyService
     {
         Task<IEnumerable<HomePropertyDTO>> GetAllPropertiesAsync(int? userId = 0);
+        Task<IEnumerable<HomePropertyDTO>> GetPropertiesByUserAsync(int? userId);
         //Lấy 1 id
         Task<PropertyDetailDTO> GetPropertyByIdAsync(int id);
         Task<IEnumerable<HomePropertyDTO>> FilterByPriceAsync([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice);

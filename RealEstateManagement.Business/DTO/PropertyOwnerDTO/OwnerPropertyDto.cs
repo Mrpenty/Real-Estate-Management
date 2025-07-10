@@ -14,6 +14,17 @@
 
         public List<OwnerPropertyImageDto> Images { get; set; }
         public List<OwnerPropertyPostDto> Posts { get; set; }
+
+        //them
+        public string Type { get; set; }
+        public int? ProvinceId { get; set; }
+        public string Province { get; set; }
+        public int? WardId { get; set; }
+        public string Ward { get; set; }
+        public int? StreetId { get; set; }
+        public string Street { get; set; }
+        public string DetailedAddress { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public class OwnerPropertyImageDto

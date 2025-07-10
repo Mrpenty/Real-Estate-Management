@@ -166,6 +166,19 @@ namespace RealEstateManagement.API.Controllers
             return Ok(results);
         }
 
+        [HttpGet("properties-renter")]
+        [Authorize(Roles = "Renter")]
+        public async Task<IActionResult> GetPropertiesByRenter()
+        {
+            var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(accessToken);
+            var userIdClaim = token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized("Đăng nhập trước lấy danh sách");
+            var result = await _propertyService.GetPropertiesByUserAsync(userId);
+            return Ok(result);
+        }
 
 
         [HttpGet("provinces")]

@@ -57,13 +57,17 @@ namespace RealEstateManagement.Business.Repositories.Properties
         {
             return await _context.Properties
                 .Include(p => p.Images)
+                .Include(p => p.Landlord)
+                .Include(p => p.PropertyAmenities)
+                    .ThenInclude(pa => pa.Amenity)
+                .Include(p => p.PropertyPromotions)
+                    .ThenInclude(pp => pp.PromotionPackage)
                 .Include(p => p.Address)
                     .ThenInclude(pa => pa.Province)
                 .Include(p => p.Address)
                     .ThenInclude(pa => pa.Ward)
                 .Include(p => p.Address)
                     .ThenInclude(pa => pa.Street)
-                .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities)
                     .ThenInclude(pa => pa.Amenity)
                 .Include(p=>p.Posts)
