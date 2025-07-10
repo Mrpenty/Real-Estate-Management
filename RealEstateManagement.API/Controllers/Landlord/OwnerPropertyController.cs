@@ -3,6 +3,7 @@ using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using System.Security.Claims;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.Authorization;
 
 namespace RealEstateManagement.API.Controllers.Landlord
@@ -34,11 +35,11 @@ namespace RealEstateManagement.API.Controllers.Landlord
 
         // READ: Lấy danh sách BĐS của landlord
         [HttpGet]
-        public async Task<IActionResult> GetMyProperties()
+        [EnableQuery]
+        public IQueryable<OwnerPropertyDto> GetMyProperties()
         {
             var landlordId = GetCurrentLandlordId();
-            var properties = await _ownerPropertyService.GetPropertiesByLandlordAsync(landlordId);
-            return Ok(properties);
+            return _ownerPropertyService.GetPropertiesByLandlordQueryable(landlordId);
         }
 
         // READ: Lấy chi tiết 1 BĐS của landlord

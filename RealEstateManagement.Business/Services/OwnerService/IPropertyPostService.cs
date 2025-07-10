@@ -12,6 +12,8 @@ namespace RealEstateManagement.Business.Services.OwnerService
     {
         Task<int> CreatePropertyPostAsync(PropertyCreateRequestDto dto, int landlordId);
         Task<PropertyPost> GetPostByIdAsync(int postId);
+
+        Task ContinueDraftPostAsync(ContinuePropertyPostDto dto, int landlordId);
     }
 
 }

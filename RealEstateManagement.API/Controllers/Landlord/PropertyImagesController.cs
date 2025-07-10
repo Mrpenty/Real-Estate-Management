@@ -3,6 +3,7 @@ using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
 using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Business.Services.UploadPicService;
 using Microsoft.Extensions.Logging;
+using RealEstateManagement.Data.Entity.PropertyEntity;
 
 namespace RealEstateManagement.API.Controllers.Landlord
 {
@@ -21,6 +22,7 @@ namespace RealEstateManagement.API.Controllers.Landlord
             _logger = logger;
         }
 
+        //Bước 2 của quá trình tạo bài đăng: Upload ảnh và đổi status từ Draft thành Pending
         [HttpPost("upload")]
         public async Task<IActionResult> UploadImageFile(int propertyId, IFormFile file)
         {
@@ -51,6 +53,7 @@ namespace RealEstateManagement.API.Controllers.Landlord
             }
         }
 
+        //Thêm ảnh vào Database
         [HttpPost]
         public async Task<IActionResult> UploadImage(int propertyId, [FromBody] PropertyImageCreateDto dto)
         {
@@ -75,6 +78,18 @@ namespace RealEstateManagement.API.Controllers.Landlord
                 return StatusCode(500, "An error occurred while saving the image");
             }
         }
+
+        //Cập nhật ảnh mới
+        [HttpPut("{imageId}")]
+        public async Task<IActionResult> UpdateImage(int propertyId, int imageId, [FromBody] PropertyImage dto)
+        {
+            if (dto.Id != imageId || dto.PropertyId != propertyId)
+                return BadRequest("ID mismatch");
+
+            var updated = await _imageService.UpdateImageAsync(dto);
+            return Ok(updated);
+        }
+
     }
 
 }

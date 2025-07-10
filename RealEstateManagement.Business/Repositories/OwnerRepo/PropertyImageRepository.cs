@@ -58,6 +58,41 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
                 throw;
             }
         }
+
+        public async Task<PropertyImage> UpdateImageAsync(PropertyImage updatedImage)
+        {
+            try
+            {
+
+                var existingImage = await _context.PropertyImages.FirstOrDefaultAsync(x => x.PropertyId == updatedImage.PropertyId);
+
+                if (existingImage == null)
+                {
+                    _logger.LogWarning("PropertyImage with ID {ImageId} not found", updatedImage.PropertyId);
+                    throw new Exception("PropertyImage not found.");
+                }
+
+                existingImage.Url = updatedImage.Url;
+                existingImage.IsPrimary = updatedImage.IsPrimary;
+                existingImage.Order = updatedImage.Order;
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("PropertyImage with ID {ImageId} updated successfully", updatedImage.PropertyId);
+                return existingImage;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating PropertyImage with ID: {ImageId}", updatedImage.PropertyId);
+                throw;
+            }
+        }
+
+        public async Task<bool> HasAnyImage(int propertyId)
+        {
+            return await _context.PropertyImages.AnyAsync(x => x.PropertyId == propertyId);
+        }
+
     }
 
 }

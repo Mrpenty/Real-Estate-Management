@@ -93,6 +93,10 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 throw;
             }
         }
+        public async Task<PropertyImage> UpdateImageAsync(PropertyImage updatedImage)
+        {
+            return await _imageRepo.UpdateImageAsync(updatedImage);
+        }
 
     }
 
