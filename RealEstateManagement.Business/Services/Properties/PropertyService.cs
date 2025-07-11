@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Twilio.Rest.Api.V2010.Account;
 
 namespace RealEstateManagement.Business.Services.Properties
 {
@@ -80,7 +81,7 @@ namespace RealEstateManagement.Business.Services.Properties
             return result;
 
         }
-        public async Task<PropertyDetailDTO> GetPropertyByIdAsync(int id)
+        public async Task<PropertyDetailDTO> GetPropertyByIdAsync(int id,int userId = 0)
         {
             var p = await _repository.GetPropertyByIdAsync(id);
             var rentalContract = p.Posts
@@ -90,6 +91,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 throw new KeyNotFoundException($"Property with ID = {id} not found.");
             }
 
+            var isFavorite = await _repositoryFavorite.GetFavoritePropertyByIdAsync(userId, id);
             return new PropertyDetailDTO
             {
                 Id = p.Id,
@@ -104,6 +106,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 Location = p.Location,
                 CreatedAt = p.CreatedAt,
                 ViewsCount = p.ViewsCount,
+                IsFavorite = isFavorite == null ? false : true,
                 PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
                 ImageUrls = p.Images?.Select(c => c.Url).ToList(),
                 LandlordName = p.Landlord?.Name,

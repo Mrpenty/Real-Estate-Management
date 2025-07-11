@@ -39,7 +39,7 @@ function timeAgo(dateInput) {
 
 function handleImageError(img) {
     img.onerror = null;
-    img.src = './image/no-image.png'; 
+    img.src = '/image/no-image.png'; 
 }
 
 function formatVietnameseNumber(num) {

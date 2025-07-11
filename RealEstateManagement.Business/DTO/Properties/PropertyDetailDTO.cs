@@ -45,5 +45,6 @@ namespace RealEstateManagement.Business.DTO.Properties
         public int? ProvinceId { get; set; }
         public int? WardId { get; set; }
         public int? StreetId { get; set; }
+        public bool IsFavorite { get; set; }
     }
 }

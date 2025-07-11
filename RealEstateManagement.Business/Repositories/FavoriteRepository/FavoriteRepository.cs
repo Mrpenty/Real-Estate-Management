@@ -92,5 +92,13 @@ namespace RealEstateManagement.Business.Repositories.FavoriteRepository
                 .ToListAsync();
             return properties;
         }
+
+        public async Task<UserFavoriteProperty> GetFavoritePropertyByIdAsync(int userId, int propertyId)
+        {
+            var property = await _context.UserFavoriteProperties
+                .Where(pro => pro.UserId == userId && pro.PropertyId == propertyId)
+                .FirstOrDefaultAsync();
+            return property;
+        }
     }
 }
