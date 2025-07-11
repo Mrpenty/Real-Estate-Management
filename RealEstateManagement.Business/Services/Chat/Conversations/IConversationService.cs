@@ -13,6 +13,7 @@ namespace RealEstateManagement.Business.Services.Chat.Conversations
         Task<Conversation> CreateConversationAsync(CreateConversationDTO dto);
         //Task<Conversation> GetDetailsAsync(int id);
         Task<IEnumerable<ConversationDTO>> GetAllByUserIdAsync(int userId);
+        Task<IEnumerable<ConversationDTO?>> FilterConversationAsync(int userId, string searchTerm, int skip = 0, int take = 5);
 
     }
 }

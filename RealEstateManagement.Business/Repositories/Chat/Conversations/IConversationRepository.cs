@@ -13,5 +13,6 @@ namespace RealEstateManagement.Business.Repositories.Chat.Conversations
         Task<Conversation> GetByUsersAsync(int renterId, int landlordId, int? propertyId);
         //Task<Conversation> GetByIdWithDetailsAsync(int id);
         Task<IEnumerable<Conversation>> GetAllByUserIdAsync(int userId);
+        Task<IEnumerable<Conversation>> FilterConversationAsync(int userId, string searchTerm, int skip = 0, int take = 5);
     }
 }

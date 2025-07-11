@@ -18,13 +18,13 @@ const propertyService = {
                 listLocationSelected = JSON.parse(listLocationSelected);
                 if (listLocationSelected.length != 0) {
                     listLocationSelected.forEach(item => {
-                        provinces.push(item.province.id);
+                        provinces.push(Number(item.province.id));
                         wards.push(item.ward.id);
                         streets.push(item.street.id);
                     });
                 }
                 else {
-                    provinces.push(provinceId);
+                    provinces.push(Number(provinceId));
                 }
 
             }

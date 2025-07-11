@@ -7,6 +7,31 @@
     </div>
 </div>
 
+<div id="change-password-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative">
+        <button id="close-modal-btn" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        <h2 class="text-xl font-bold mb-4">Đổi mật khẩu</h2>
+        <form id="change-password-form" class="space-y-4">
+            <div>
+                <label for="oldPassword" class="block text-gray-700">Mật khẩu cũ</label>
+                <input type="password" id="oldPassword" name="oldPassword" class="w-full border rounded px-3 py-2 mt-1" required />
+            </div>
+            <div>
+                <label for="newPassword" class="block text-gray-700">Mật khẩu mới</label>
+                <input type="password" id="newPassword" name="newPassword" class="w-full border rounded px-3 py-2 mt-1" required />
+            </div>
+            <div>
+                <label for="confirmPassword" class="block text-gray-700">Nhập lại mật khẩu mới</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" class="w-full border rounded px-3 py-2 mt-1" required />
+            </div>
+            <div id="change-password-error" class="text-red-600 text-sm"></div>
+            <div class="flex justify-end">
+                <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg">Xác nhận</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @section Scripts {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -80,10 +105,116 @@ document.addEventListener('DOMContentLoaded', function() {
                      <a href="/Profile/Edit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
                         Chỉnh sửa thông tin
                     </a>
+                    <button id="btn-change-password" class="ml-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                        Đổi mật khẩu
+                    </button>
                 </div>
             </div>
         `;
         document.getElementById('profile-container').innerHTML = profileHtml;
+
+        // Modal logic: Gán sự kiện sau khi render profileHtml
+        const btnChangePassword = document.getElementById('btn-change-password');
+        const modal = document.getElementById('change-password-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        btnChangePassword.addEventListener('click', function() {
+            modal.classList.remove('hidden');
+        });
+        closeModalBtn.addEventListener('click', function() {
+            modal.classList.add('hidden');
+            document.getElementById('change-password-form').reset();
+            document.getElementById('change-password-error').textContent = '';
+        });
+        window.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                document.getElementById('change-password-form').reset();
+                document.getElementById('change-password-error').textContent = '';
+            }
+        });
+
+        // Hiện/ẩn mật khẩu
+        function addTogglePassword(id) {
+            const input = document.getElementById(id);
+            input.classList.add('pr-10');
+            const wrapper = input.parentElement;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.tabIndex = -1;
+            btn.className = 'absolute right-3 top-1/2 -translate-y flex items-center text-gray-400 hover:text-gray-700';
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>';
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                input.type = input.type === 'password' ? 'text' : 'password';
+            });
+            wrapper.classList.add('relative');
+            wrapper.appendChild(btn);
+        }
+        addTogglePassword('oldPassword');
+        addTogglePassword('newPassword');
+        addTogglePassword('confirmPassword');
+
+        // Validation mật khẩu mạnh
+        function validatePassword(password) {
+            // Require: 6 ký tự, 1 số, 1 ký tự đặc biệt, 1 chữ hoa, 1 chữ thường
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/;
+            return regex.test(password);
+        }
+
+        // Submit form đổi mật khẩu
+        document.getElementById('change-password-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorDiv = document.getElementById('change-password-error');
+            errorDiv.textContent = '';
+
+            // Validate các rule
+            if (oldPassword === newPassword) {
+                errorDiv.textContent = 'Mật khẩu mới không được trùng mật khẩu cũ.';
+                return;
+            }
+            if (!validatePassword(newPassword)) {
+                errorDiv.textContent = 'Mật khẩu mới phải tối thiểu 6 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt.';
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                errorDiv.textContent = 'Nhập lại mật khẩu mới không khớp.';
+                return;
+            }
+
+            // Gọi API đổi mật khẩu
+            fetch(`${apiBaseUrl}/api/User/reset-password`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    //'Authorization': 'Bearer ' + token, // Nếu cần
+                },
+                body: JSON.stringify({ oldPassword, newPassword })
+            })
+            .then(res => res.json().then(data => ({ ok: res.ok, data })))
+            .then(({ ok, data }) => {
+                if (ok) {
+                    errorDiv.classList.remove('text-red-600');
+                    errorDiv.classList.add('text-green-600');
+                    errorDiv.textContent = 'Đổi mật khẩu thành công!';
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        document.getElementById('change-password-form').reset();
+                        errorDiv.textContent = '';
+                        errorDiv.classList.remove('text-green-600');
+                        errorDiv.classList.add('text-red-600');
+                    }, 1500);
+                } else {
+                    errorDiv.textContent = (data.errors && Array.isArray(data.errors)) ? data.errors.join(', ') : (data.message || 'Đổi mật khẩu thất bại!');
+                }
+            })
+            .catch(() => {
+                errorDiv.textContent = 'Có lỗi xảy ra, vui lòng thử lại sau.';
+            });
+        });
     })
     .catch(err => {
         document.getElementById('profile-container').innerHTML = `<div class="text-center p-12 bg-red-50 text-red-700 rounded-lg"><p>${err.message}</p></div>`;

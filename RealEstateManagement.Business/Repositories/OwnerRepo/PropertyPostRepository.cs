@@ -17,6 +17,7 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
             _context = context;
         }
 
+        //Landlord tạo 1 bài đăng mới với status Draft
         public async Task<int> CreatePropertyPostAsync(Property property, PropertyPost post, List<int> amenityIds)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -66,6 +67,37 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         {
             return await _context.PropertyPosts.FirstOrDefaultAsync(p => p.Id == postId);
         }
+
+        public IQueryable<PropertyPost> GetAll()
+        {
+            return _context.PropertyPosts.AsQueryable();
+        }
+        public async Task<PropertyPost> GetPropertyPostByIdAsync(int id, int landlordId)
+        {
+            return await _context.PropertyPosts
+                .FirstOrDefaultAsync(p => p.Id == id && p.LandlordId == landlordId);
+        }
+
+        public async Task UpdatePropertyAmenities(int propertyId, List<int> amenityIds)
+        {
+            var existing = await _context.PropertyAmenities
+                .Where(a => a.PropertyId == propertyId)
+                .ToListAsync();
+
+            _context.PropertyAmenities.RemoveRange(existing);
+
+            foreach (var id in amenityIds)
+            {
+                _context.PropertyAmenities.Add(new PropertyAmenity
+                {
+                    PropertyId = propertyId,
+                    AmenityId = id
+                });
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
     }
 
 }

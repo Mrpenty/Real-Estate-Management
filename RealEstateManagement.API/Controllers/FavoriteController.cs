@@ -19,7 +19,9 @@ namespace RealEstateManagement.API.Controllers
             _favoriteService = favorteService;
         }
         [HttpPost("add-favorite")]
-        [Authorize]
+
+        //[Authorize(Roles = "Renter")]
+
         public async Task<IActionResult> AddToFavorite([FromBody] FavoritePropertyDTO dto)
         {
             var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
@@ -37,7 +39,9 @@ namespace RealEstateManagement.API.Controllers
 
         }
         [HttpDelete("favorite")]
-        [Authorize]
+
+        //[Authorize(Roles = "Renter")]
+
         public async Task<IActionResult> RemoveFavoriteProperty([FromBody] FavoritePropertyDTO dto)
         {
             var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
@@ -51,7 +55,9 @@ namespace RealEstateManagement.API.Controllers
             return Ok("Đã xóa bất động sản khỏi danh sách yêu thích.");
         }
         [HttpGet("all-favorite")]
-        [Authorize]
+
+        //[Authorize(Roles = "Renter")]
+
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetAllFavorites()
         {
             var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");

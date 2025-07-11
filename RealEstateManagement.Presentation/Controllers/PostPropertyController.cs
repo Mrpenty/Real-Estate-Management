@@ -130,5 +130,12 @@ namespace RealEstateManagement.Presentation.Controllers
             ViewBag.PropertyPostId = propertyPostId;
             return View();
         }
+
+        [HttpGet]
+        public IActionResult SelectPackage(int propertyId)
+        {
+            ViewBag.PropertyId = propertyId;
+            return View();
+        }
     }
 } 

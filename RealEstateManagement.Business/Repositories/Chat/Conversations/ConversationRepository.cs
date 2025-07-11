@@ -48,5 +48,24 @@ namespace RealEstateManagement.Business.Repositories.Chat.Conversations
                 .Include(c => c.Property)
                 .ToListAsync();
         }   
+        public async Task<IEnumerable<Conversation>> FilterConversationAsync(int userId, string searchTerm, int skip = 0, int take = 5)
+        {
+            IQueryable<Conversation> query = _context.Conversation
+                .Where(c => c.RenterId == userId || c.LandlordId == userId)
+                .Include(c => c.Renter)
+                .Include(c => c.Landlord);
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(a => 
+                    a.Renter.Name.Contains(searchTerm) ||
+                    a.Landlord.Name.Contains(searchTerm));
+            }
+            return await query
+                .OrderByDescending(c => c.LastSentAt ?? c.CreatedAt)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+        }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
 using RealEstateManagement.Business.Services.OwnerService;
+using RealEstateManagement.Data.Entity.PropertyEntity;
 using System.Security.Claims;
 
 namespace RealEstateManagement.API.Controllers.Landlord
@@ -13,6 +15,7 @@ namespace RealEstateManagement.API.Controllers.Landlord
     {
         private readonly IPropertyPostService _propertyPostService;
         private readonly ILogger<PropertyPostsController> _logger;
+        private readonly RentalDbContext _context;
 
         public PropertyPostsController(IPropertyPostService propertyPostService, ILogger<PropertyPostsController> logger)
         {
@@ -20,8 +23,8 @@ namespace RealEstateManagement.API.Controllers.Landlord
             _logger = logger;
         }
 
+        //Landlord tạo 1 bài đăng mới với status Draft
         [HttpPost]
-        //[Authorize(Roles = "Landlord")]
         public async Task<IActionResult> CreatePropertyPost([FromBody] PropertyCreateRequestDto dto)
         {
             try
@@ -57,5 +60,20 @@ namespace RealEstateManagement.API.Controllers.Landlord
                 return NotFound();
             return Ok(new { id = post.Id, propertyId = post.PropertyId });
         }
+
+        [HttpPut("{postId}/continue")]
+        public async Task<IActionResult> ContinueDraft(int postId, [FromBody] ContinuePropertyPostDto dto)
+        {
+            var userIdClaim = User.FindFirst("id");
+            if (userIdClaim == null)
+                return Unauthorized("Không tìm thấy thông tin người dùng");
+
+            if (!int.TryParse(userIdClaim.Value, out var landlordId))
+                return Unauthorized("ID người dùng không hợp lệ");
+            dto.PostId = postId; // Bắt buộc fix
+            await _propertyPostService.ContinueDraftPostAsync(dto, landlordId);
+            return NoContent();
+        }
+
     }
 }

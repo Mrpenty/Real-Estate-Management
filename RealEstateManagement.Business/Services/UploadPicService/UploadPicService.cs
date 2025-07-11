@@ -33,10 +33,11 @@ namespace RealEstateManagement.Business.Services.UploadPicService
                 }
 
                 var fileExtension = Path.GetExtension(file.FileName);
-                var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+                var timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                var random = Guid.NewGuid().ToString().Substring(0, 6);
                 var fileName = string.IsNullOrEmpty(prefix) 
-                    ? $"image_{timestamp}{fileExtension}"
-                    : $"{prefix}_{timestamp}{fileExtension}";
+                    ? $"image_{timestamp}_{random}{fileExtension}"
+                    : $"{prefix}_{timestamp}_{random}{fileExtension}";
                 
                 var filePath = Path.Combine(uploadsDir, fileName);
 

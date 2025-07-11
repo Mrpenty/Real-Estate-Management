@@ -19,38 +19,34 @@ namespace RealEstateManagement.Business.Services.OwnerService
         {
             _ownerPropertyRepo = ownerPropertyRepo;
         }
-
-        public async Task<IEnumerable<OwnerPropertyDto>> GetPropertiesByLandlordAsync(int landlordId)
+        public IQueryable<OwnerPropertyDto> GetPropertiesByLandlordQueryable(int landlordId)
         {
-            var entities = await _ownerPropertyRepo.GetByLandlordAsync(landlordId);
-
-            return entities.Select(entity => new OwnerPropertyDto
-            {
-                Id = entity.Id,
-                Title = entity.Title,
-                Description = entity.Description,
-                Price = entity.Price,
-                IsPromoted = entity.IsPromoted,
-                IsVerified = entity.IsVerified,
-                Location = entity.Location,
-                Bedrooms = entity.Bedrooms,
-                Area = entity.Area,
-                Province = entity.Address.Province.Name,
-                Ward = entity.Address.Ward.Name,
-                Street = entity.Address.Street.Name,
-                CreatedAt = entity.CreatedAt,
-                Type = entity.Type,
-                DetailedAddress = entity.Address.DetailedAddress,
-                Images = entity.Images?.Select(img => new OwnerPropertyImageDto
+            return _ownerPropertyRepo.GetByLandlordQueryable(landlordId)
+                .Select(entity => new OwnerPropertyDto
                 {
-                    Id = img.Id,
-                    Url = img.Url,
-                    IsPrimary = img.IsPrimary
-                }).ToList(),
-                Posts = null // nếu không cần Posts cho list thì bỏ luôn
-            });
+                    Id = entity.Id,
+                    Title = entity.Title,
+                    Description = entity.Description,
+                    Price = entity.Price,
+                    IsPromoted = entity.IsPromoted,
+                    IsVerified = entity.IsVerified,
+                    Location = entity.Location,
+                    Bedrooms = entity.Bedrooms,
+                    Area = entity.Area,
+                    Province = entity.Address.Province.Name,
+                    Ward = entity.Address.Ward.Name,
+                    Street = entity.Address.Street.Name,
+                    CreatedAt = entity.CreatedAt,
+                    Type = entity.Type,
+                    DetailedAddress = entity.Address.DetailedAddress,
+                    Images = entity.Images.Select(img => new OwnerPropertyImageDto
+                    {
+                        Id = img.Id,
+                        Url = img.Url,
+                        IsPrimary = img.IsPrimary
+                    }).ToList()
+                });
         }
-
 
         public async Task<OwnerPropertyDto> GetPropertyByIdAsync(int id, int landlordId)
         {
