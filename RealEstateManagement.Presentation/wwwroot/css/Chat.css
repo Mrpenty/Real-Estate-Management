@@ -203,9 +203,10 @@ button:hover {
     color: #000;
     opacity: 0.8;
     display: inline-block;
-    margin-top: 4px;
+    margin-top: 2px;
     text-align: right;
     width: 100%;
+    padding: 0;
 }
 .action-btn {
     background: transparent;
@@ -250,6 +251,7 @@ button:hover {
 
     .message-row.right {
         justify-content: flex-end;
+        margin-bottom: 2px;
     }
 
 
