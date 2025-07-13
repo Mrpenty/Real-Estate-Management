@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Google.Apis.Util.Store;
 using Google.Apis.Auth.OAuth2;
 using RealEstateManagement.Data.Entity.User;
+using RealEstateManagement.Business.Services.Wallet;
 
 namespace RealEstateManagement.Business.Services.Auth
 {
@@ -25,7 +26,8 @@ namespace RealEstateManagement.Business.Services.Auth
         private readonly ISmsService _smsService; 
         private readonly ILogger<AuthService> _logger;
         private readonly IConfiguration _configuration;
-        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IHttpContextAccessor httpContextAccessor, ITokenRepository tokenRepository, IMailService mailService,ISmsService smsService, ILogger<AuthService> logger, IConfiguration configuration)
+        private readonly WalletService _walletService;
+        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IHttpContextAccessor httpContextAccessor, ITokenRepository tokenRepository, IMailService mailService,ISmsService smsService, ILogger<AuthService> logger, IConfiguration configuration, WalletService walletService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -35,6 +37,7 @@ namespace RealEstateManagement.Business.Services.Auth
             _smsService = smsService; 
             _logger = logger;
             _configuration = configuration;
+            _walletService = walletService;
         }
 
         public async Task<AuthMessDTO> LoginAsync(LoginDTO loginDTO)
@@ -101,6 +104,9 @@ namespace RealEstateManagement.Business.Services.Auth
                 await _userManager.DeleteAsync(user);
                 return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = string.Join(", ", roleResult.Errors.Select(e => e.Description)) };
             }
+
+            // Tạo ví cho user mới
+            await _walletService.CreateWalletAsync(user.Id);
 
             var confirmationCode = _tokenRepository.GenerateConfirmationCode();
             user.ConfirmationCode = confirmationCode;

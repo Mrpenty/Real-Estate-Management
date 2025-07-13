@@ -26,8 +26,8 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
 
 
     // DbSets for Functionality
-    public DbSet<Payment> Payments { get; set; }
-    public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<Wallet> Wallets { get; set; }
+    public DbSet<WalletTransaction> WalletTransactions { get; set; }
     public DbSet<Conversation> Conversation { get; set; }
     public DbSet<Message> Message { get; set; }
     public DbSet<Review> Reviews { get; set; }
@@ -62,8 +62,8 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
         modelBuilder.ApplyConfiguration(new AddressConfiguration());
 
         // Configure function entities
-        modelBuilder.ApplyConfiguration(new PaymentConfiguration());
-        modelBuilder.ApplyConfiguration(new TransactionConfiguration());
+        modelBuilder.ApplyConfiguration(new WalletConfiguration());
+        modelBuilder.ApplyConfiguration(new WalletTransactionConfiguration());
         modelBuilder.ApplyConfiguration(new ReviewConfiguration());
         modelBuilder.ApplyConfiguration(new ConversationConfiguration());
         modelBuilder.ApplyConfiguration(new MessageConfiguration());

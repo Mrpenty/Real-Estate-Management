@@ -343,63 +343,67 @@
        return latlon ;
      }
 
+    async function uploadImages(propertyId) {
+        const token = localStorage.getItem('authToken');
+        for (let idx = 0; idx < imageFiles.length; idx++) {
+            const file = imageFiles[idx];
 
-         async function uploadImages(propertyId) {
-             const token = localStorage.getItem('authToken');
+            // Tạo FormData mới cho từng file
+            const formData = new FormData();
+            formData.append('file', file);
 
-             for (let idx = 0; idx < imageFiles.length; idx++) {
-                 const file = imageFiles[idx];
+            // Upload file lên server
+            const uploadResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/upload`, {
+                method: 'POST',
+                headers: {
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: formData
+            });
 
-                 // Upload file lên server trước
-                 const formData = new FormData();
-                 formData.append('file', file);
+            if (!uploadResponse.ok) {
+                const error = await uploadResponse.text();
+                alert(`Upload ảnh thất bại: ${error}`);
+                return;
+            }
 
-                 const uploadResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/upload`, {
-                     method: 'POST',
-                     headers: {
-                         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-                     },
-                     body: formData
-                 });
+            const uploadResult = await uploadResponse.json();
+            const imageUrl = uploadResult.imageUrl;
 
-                 if (!uploadResponse.ok) {
-                     const error = await uploadResponse.text();
-                     alert(`Upload ảnh thất bại: ${error}`);
-                     return;
-                 }
+            // Lưu thông tin ảnh vào database
+            const dto = {
+                url: imageUrl,
+                isPrimary: idx === primaryImageIndex,
+                order: idx
+            };
 
-                 const uploadResult = await uploadResponse.json();
-                 const imageUrl = uploadResult.imageUrl;
+            const saveResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify(dto)
+            });
 
-                 // Lưu thông tin ảnh vào database
-                 const dto = {
-                     url: imageUrl,
-                     isPrimary: idx === primaryImageIndex,
-                     order: idx
-                 };
-
-                 const saveResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images`, {
-                     method: 'POST',
-                     headers: {
-                         'Content-Type': 'application/json',
-                         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-                     },
-                     body: JSON.stringify(dto)
-                 });
-
-                 if (!saveResponse.ok) {
-                     const error = await saveResponse.text();
-                     alert(`Lưu thông tin ảnh thất bại: ${error}`);
-                     return;
-                 }
-
-             }
-         
-             alert('Lưu thông tin thành công');
-             window.location.href = '/PostProperty/ListProperty';
-         }
+            if (!saveResponse.ok) {
+                const error = await saveResponse.text();
+                alert(`Lưu thông tin ảnh thất bại: ${error}`);
+                return;
+            }
+        }
+    }
 
 
+     // Thêm biến kiểm soát trạng thái form
+     let isFormActive = true;
+
+     provinceSelect.on('change', async function () {
+         if (!isFormActive) return;
+         const provinceId = $(this).val();
+         if (!provinceId || provinceId.startsWith('--')) return;
+         wardSelect.empty().append('<option value="">Chọn Phường/Xã</option>');
+         streetSelect.empty().append('<option value="">Chọn Đường</option>');
 
          if (provinceId) {
                $.get(`${apiBaseUrl}/Property/wards/${provinceId}`,async function (data) {
@@ -622,3 +626,4 @@
          }
      });
 </script>
+

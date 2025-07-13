@@ -1,5 +1,7 @@
+using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Business.DTO.PromotionPackageDTO;
 using RealEstateManagement.Business.Repositories.Package;
+using RealEstateManagement.Data.Entity.Payment;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +12,11 @@ namespace RealEstateManagement.Business.Services.Properties
     public class PropertyPromotionService : IPropertyPromotionService
     {
         private readonly IPropertyPromotionRepository _repo;
-        public PropertyPromotionService(IPropertyPromotionRepository repo)
+        private readonly RentalDbContext _context;
+        public PropertyPromotionService(IPropertyPromotionRepository repo, RentalDbContext context)
         {
             _repo = repo;
+            _context = context;
         }
 
         public async Task<IEnumerable<ViewPropertyPromotionDTO>> GetAllAsync()
@@ -44,8 +48,24 @@ namespace RealEstateManagement.Business.Services.Properties
             };
         }
 
-        public async Task<ViewPropertyPromotionDTO> CreateAsync(CreatePropertyPromotionDTO dto)
+        public async Task<ViewPropertyPromotionDTO> CreateAsync(CreatePropertyPromotionDTO dto, int userId)
         {
+            // 1. Lấy Wallet
+            var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == userId);
+            if (wallet == null) throw new Exception("Không tìm thấy ví");
+
+            // 2. Lấy Package
+            var package = await _context.promotionPackages.FirstOrDefaultAsync(p => p.Id == dto.PackageId && p.IsActive);
+            if (package == null) throw new Exception("Không tìm thấy gói hoặc gói không còn hoạt động");
+
+            // 3. Check tiền
+            if (wallet.Balance < package.Price)
+                throw new Exception("Số dư ví không đủ");
+
+            // 4. Trừ tiền
+            wallet.Balance -= package.Price;
+
+            // 5. Tạo PropertyPromotion
             var entity = new PropertyPromotion
             {
                 PropertyId = dto.PropertyId,
@@ -54,6 +74,22 @@ namespace RealEstateManagement.Business.Services.Properties
                 EndDate = dto.EndDate
             };
             await _repo.AddAsync(entity);
+
+            // 6. Log WalletTransaction
+            var walletTransaction = new WalletTransaction
+            {
+                WalletId = wallet.Id,
+                Amount = -package.Price,
+                Type = "Non",
+                Description = $"Đăng ký gói {package.Name} cho PropertyId={dto.PropertyId}",
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.WalletTransactions.Add(walletTransaction);
+
+            // 7. Save all
+            await _context.SaveChangesAsync();
+
+            // 8. Return DTO
             return new ViewPropertyPromotionDTO
             {
                 Id = entity.Id,

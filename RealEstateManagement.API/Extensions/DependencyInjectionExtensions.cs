@@ -19,6 +19,7 @@ using RealEstateManagement.Business.Services.Chat.Messages;
 using RealEstateManagement.Business.Services.Chat.Conversations;
 using RealEstateManagement.Business.Repositories.Package;
 using RealEstateManagement.Business.Services.PromotionPackages;
+using RealEstateManagement.Business.Services.Wallet;
 
 namespace RealEstateManagement.API.Extensions
 {
@@ -77,9 +78,9 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IConversationService, ConversationService>();
             services.AddScoped<IMessageService, MessageService>();
 
-
-
-           
+            //Wallet
+            services.AddScoped<WalletService>();
+            services.AddScoped<QRCodeService>();
 
             return services;
         }
