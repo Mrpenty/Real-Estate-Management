@@ -59,9 +59,8 @@ async function loadConversations() {
             return;
         }
         const conversations = await res.json();
-        const listDiv = document.getElementById("conversationList");
-        const header = listDiv.querySelector(".conversation-header");
-        listDiv.innerHTML = header ? header.outerHTML : "";
+        const listDiv = document.getElementById("conversationItemsContainer");
+        listDiv.innerHTML = ""; // Xoá hết item cũ (không đụng vào header)
 
         // Hàm cắt chuỗi (giới hạn 40 ký tự)
         const truncate = (text, maxLength = 10) => {
@@ -96,7 +95,7 @@ async function loadConversations() {
 }
 connection.on("ConversationUpdated", function (update) {
     const { conversationId, lastMessage, sentAt, senderId } = update;
-    const listDiv = document.getElementById("conversationList");
+    const listDiv = document.getElementById("conversationItemsContainer");
 
     const item = listDiv.querySelector(`[data-conv-id="${conversationId}"]`);
 
@@ -322,9 +321,9 @@ function renderMessageHtml(msg, isLastRead) {
 
     return `
         <div class="message-row ${isRight ? 'right' : 'left'}">
-            ${isRight ? renderActions(msg.id, msg.sentAt) + renderMessageBubble(msg, isLastRead)
-            : renderMessageBubble(msg, isLastRead)}
+            ${isRight ? renderActions(msg.id, msg.sentAt) + renderMessageBubble(msg) : renderMessageBubble(msg)}
         </div>
+        ${isRight && isLastRead ? '<div class="read-icon" style="text-align: right; padding: 0px; font-size: 13px;">✔✔ Đã đọc</div>' : ''}
     `;
 }
 
@@ -336,7 +335,6 @@ function renderMessageBubble(msg, isLastRead) {
         <div class="message-bubble">
             ${msg.content}
             <small class="message-time-inline">${new Date(msg.sentAt).toLocaleString()}</small>
-            ${isLastRead ? '<span class="read-icon">✔✔ Đã đọc</span>' : ''}
         </div>
     `;
 }
