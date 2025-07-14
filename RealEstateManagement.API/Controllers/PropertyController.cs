@@ -40,9 +40,9 @@ namespace RealEstateManagement.API.Controllers
         //Lấy property theo id
         [HttpGet("{id}")]
         //[Authorize(Roles = "Renter")]
-        public async Task<ActionResult> GetPropertyById(int id)
+        public async Task<ActionResult> GetPropertyById(int id, [FromQuery] int userId = 0)
         {
-            var property = await _propertyService.GetPropertyByIdAsync(id);
+            var property = await _propertyService.GetPropertyByIdAsync(id, userId);
             if (property == null)
             {
                 return NotFound("Không tìm thấy bất động sản nào");

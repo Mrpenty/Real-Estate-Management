@@ -186,7 +186,7 @@ if (searchBtn) {
 
 <script src="~/js/propertyService.js" asp-append-version="true"></script>
 <script>
-
+    let urlBase = "https://localhost:7031";
     let urlParams1 = new URLSearchParams(window.location.search);
     let type1 = urlParams1.get('type');
     if (type1 == null || type1 == undefined) type1 = "room";
@@ -216,7 +216,7 @@ if (searchBtn) {
 
     async function getAllProperty() { 
         let listProperty = await propertyService.getAllproperty();
-        //console.log(listProperty);
+        console.log(listProperty);
         if (listProperty) { 
             let html = '';
             listProperty.forEach(item => {
@@ -225,11 +225,8 @@ if (searchBtn) {
 
 
                         <div class="relative">
-                                <img onerror="handleImageError(this)" src="${item.primaryImageUrl}" alt="${item.type}" class="w-full h-60 object-cover">
+                                <img onerror="handleImageError(this)" src="${item.primaryImageUrl?.includes('http') ?item.primaryImageUrl : urlBase + item.primaryImageUrl}" alt="${item.type}" class="w-full h-60 object-cover">
 
-    @*  <div class="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-sm px-2 py-1 rounded">
-                                15 ảnh
-                            </div> *@
 
                                 <button id="btn-compare-${item.id}" onclick="addToCompare(${item.id})"
                                         class="absolute bottom-2 right-2 bg-white text-gray-700 border border-gray-300 px-3 py-1 text-sm rounded shadow opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition">
@@ -269,7 +266,7 @@ if (searchBtn) {
                         <div class="flex items-center justify-between px-4 pb-4">
                             <div class="flex items-center gap-2">
                                 <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                                        <img onerror="handleImageError(this)" class="w-full h-full rounded-full" src="${item.landlordProfilePictureUrl}" alt="landlordProfilePictureUrl"/>
+                                        <img onerror="handleImageError(this)" class="w-full h-full rounded-full" src="${item.landlordProfilePictureUrl?.includes('http') ? item.landlordProfilePictureUrl : urlBase + item.landlordProfilePictureUrl}" alt="landlordProfilePictureUrl"/>
                                 </div>
                                 <div class="text-sm text-gray-700">
                                            ${item.landlordName} <span class="text-gray-400">(${timeAgo(item.createdAt)})</span>

@@ -29,8 +29,7 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
                 .ThenInclude(p => p.Street)
                 .Include(p => p.Address)
                 .ThenInclude(p => p.Ward)
-                .Where(p => p.LandlordId == landlordId)
-                .ToListAsync();
+                .Where(p => p.LandlordId == landlordId);
         }
 
         public async Task<Property> GetByIdAsync(int id, int landlordId)

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.DTO.PromotionPackageDTO;
 using RealEstateManagement.Business.Services.Properties;
 using System.Threading.Tasks;
@@ -34,7 +34,12 @@ namespace RealEstateManagement.API.Controllers
         public async Task<IActionResult> Create([FromBody] CreatePropertyPromotionDTO dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var created = await _service.CreateAsync(dto);
+            // Lấy ID từ token
+            var userIdClaim = User.FindFirst("id") ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) return Unauthorized("Không tìm thấy thông tin người dùng");
+            if (!int.TryParse(userIdClaim.Value, out var userId)) return Unauthorized("ID người dùng không hợp lệ");
+
+            var created = await _service.CreateAsync(dto, userId);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
