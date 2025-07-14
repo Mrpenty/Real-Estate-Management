@@ -8,6 +8,14 @@
         color: rgb(249 115 22 / var(--tw-text-opacity, 1)) !important;
     }
 
+    .d-none{
+        display:none;
+    }
+
+    .imgDetail{
+        cursor:pointer;
+    }
+
     a {
         color: black !important;
     }
@@ -18,31 +26,28 @@
         }
 </style>
 @* <h1 class="text-xl font-bold mb-4">Kênh thông tin Phòng Trọ số 1 Việt Nam</h1> *@
-<nav class="text-sm text-blue-600 space-x-1 mb-2">
+@* <nav class="text-sm text-blue-600 space-x-1 mb-2">
     <a href="#" class="hover:underline">Cho thuê phòng trọ</a> /
     <a href="#" class="hover:underline">Hồ Chí Minh</a> /
     <a href="#" class="hover:underline">Quận 7</a> /
     <span class="text-gray-700">Pass phòng cửa sổ lớn 175 Nguyễn Thị Thập</span>
-</nav>
+</nav> *@
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
     <div class="md:col-span-2">
         <div class="grid gap-6">
             <div class="bg-white rounded-md shadow-sm p-4">
-                <div class="relative aspect-video w-full bg-black rounded-md overflow-hidden">
-                    <img src="" id="imgPrimaryUrl" onerror="handleImageError(this)" alt="preview" class="object-cover w-full h-full">
+                <div class="relative aspect-video w-full bg-white rounded-md overflow-hidden">
+                    <img src="" id="imgPrimaryUrl" onerror="handleImageError(this)" alt="preview" class="object-cover w-full h-full"/>
 @*                     <div class="absolute bottom-2 left-2 text-white text-xs bg-black/70 px-2 py-1 rounded">0:00 / 0:34</div> *@
                 </div>
 
-                <div class="flex space-x-2 mt-4 overflow-x-auto">
-                    <div class="border-2 border-red-500 rounded p-1">
+                <div id="listImgs" class="flex space-x-2 mt-4 overflow-x-auto">
+@*                     <div class="border-2 border-red-500 rounded p-1">
                         <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" class="w-20 h-16 object-cover" />
                     </div>
-                    <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" class="w-20 h-16 object-cover rounded" />
-                    <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" class="w-20 h-16 object-cover rounded" />
-                    <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" class="w-20 h-16 object-cover rounded" />
-                    <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" class="w-20 h-16 object-cover rounded" />
+                    <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" class="w-20 h-16 object-cover rounded" /> *@
                 </div>
             </div>
 
@@ -87,13 +92,15 @@
                 </div>
                 <h2 class="text-lg font-semibold text-gray-700 mb-2 mt-3">Thông tin liên hệ</h2>
                 <div class="flex items-start space-x-4">
-                    <div class="w-14 h-14 bg-gray-200 rounded-full flex-shrink-0"></div>
+                    <div class="w-14 h-14 bg-gray-200 rounded-full flex-shrink-0">
+                         <img class="landlordUrl" style="border-radius:5rem;height:100%;width:100%"/>
+                    </div>
                     <div class="flex-1">
                         <div class="flex items-center space-x-2">
                             <p class="font-semibold text-gray-800 contactName"></p>
-                            <span class="text-green-600 text-xs font-medium">● Đang hoạt động</span>
+                            <span style="display:none" class="text-green-600 text-xs font-medium">● Đang hoạt động</span>
                         </div>
-                        <p class="text-sm text-gray-500">1 tin đăng • Tham gia từ: 19/06/2025</p>
+                        <p style="display:none" class="text-sm text-gray-500">1 tin đăng • Tham gia từ: 19/06/2025</p>
                         <div class="flex space-x-2 mt-2">
                             <a href="tel:0369864430" class="bg-green-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-green-600">
                                 📞 <span class="contactPhone"></span>
@@ -111,19 +118,17 @@
         <div style="height: max-content;" class="w-full max-w-xs bg-white p-4 rounded-md shadow-sm space-y-4 text-sm">
             <div class="space-y-4 text-center">
                 <div class="w-20 h-20 mx-auto rounded-full border bg-gray-100 flex items-center justify-center">
-                    <svg class="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v1.2h19.2v-1.2c0-3.2-6.4-4.8-9.6-4.8z" />
-                    </svg>
+                    <img class="landlordUrl" style="border-radius:5rem;height:100%;width:100%"/>
                 </div>
 
                 <div>
                     <p class="font-semibold text-gray-800 contactName"></p>
-                    <p class="text-sm text-gray-500">
+                    <p style="display:none" class="text-sm text-gray-500">
                         <span class="text-green-500">●</span> Đang hoạt động
                     </p>
                 </div>
 
-                <p class="text-sm text-gray-500">1 tin đăng • Tham gia từ: 19/06/2025</p>
+                <p style="display:none" class="text-sm text-gray-500">1 tin đăng • Tham gia từ: 19/06/2025</p>
 
                 <div class="space-y-2">
                     <a href="tel:0369864430" id="contactPhone" class="block w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold">
@@ -135,8 +140,11 @@
                 </div>
 
                 <div class="flex justify-around text-sm text-gray-600 pt-2 border-t">
-                    <button class="flex items-center space-x-1 hover:text-blue-600">
+                    <button id="addFavoriteDetail" onclick="addToFavourite(@ViewBag.Id);" class="d-none flex items-center space-x-1 hover:text-blue-600">
                         <span>♡</span><span>Lưu tin</span>
+                    </button>
+                    <button id="removeFavoriteDetail" onclick="removeToFavorite(@ViewBag.Id);" style="color:red" class="d-none flex items-center space-x-1 hover:text-blue-600">
+                        <span>♡</span><span>Bỏ lưu tin</span>
                     </button>
                     <button class="flex items-center space-x-1 hover:text-blue-600">
                         <span>🔗</span><span>Chia sẻ</span>
@@ -191,15 +199,18 @@
 
 <script src="~/js/propertyService.js"></script>
 <script>
-    document.getElementById('listPostId').classList.add("text-orange-500");
-    document.getElementById('listPostId').classList.replace("border-gray-200", "border-orange-500");
+    let urlBase = "https://localhost:7031";
+    //document.getElementById('listPostId').classList.add("text-orange-500");
+    //document.getElementById('listPostId').classList.replace("border-gray-200", "border-orange-500");
     let id = @ViewBag.Id;
     getProperty();
     async function getProperty(){
         let prop = await propertyService.getProperty(id);
         let addressInfo = prop.detailedAddress + ", " + prop.street + ", " + prop.ward + ", " + prop.province;
         $('.titleId').html(prop.title);
-        $('#imgPrimaryUrl').html(prop.primaryImageUrl);
+        
+        $('.landlordUrl').prop('src',prop.landlordProfilePictureUrl?.includes('http') ? prop.landlordProfilePictureUrl : urlBase + prop.landlordProfilePictureUrl)
+        $('#imgPrimaryUrl').prop('src',prop.primaryImageUrl.includes("http") ? prop.primaryImageUrl : urlBase + prop.primaryImageUrl);
         $('.areaId').html(prop.area);
         $('.addressId').html(addressInfo);
         $('.priceId').html(formatVietnameseNumber(prop.price));
@@ -211,6 +222,24 @@
         $('#createTimeId').html(formatVietnameseDateTime(prop.createdAt));
         $('.contactPhone').html(prop.landlordPhoneNumber);
         $('.contactName').html(prop.landlordName);
+        if(!prop.isFavorite) $('#addFavoriteDetail').removeClass('d-none');
+        else $('#removeFavoriteDetail').removeClass('d-none');
+        let htmlUrl = "";
+        $('#listImgs').html('');
+        if(prop.imageUrls != null){
+            prop.imageUrls.forEach((url,index) => {
+                var src = url.includes("http") ? url : urlBase + url;
+                if(index == 0) htmlUrl += `<div onclick="selectImg(this)" class="border-2 border-red-500 rounded p-1 imgDetail">
+                                <img src="${src}" onerror="handleImageError(this)" class="w-20 h-16 object-cover" />
+                            </div>`;
+                else htmlUrl += `
+                                 <div onclick="selectImg(this)" class="border-2 border-white rounded p-1 imgDetail">
+                                    <img src="${src}" onerror="handleImageError(this)" class="w-20 h-16 object-cover" />
+                                 </div>`;
+            });
+            $('#listImgs').html(htmlUrl);
+        }
+
         if (prop.location != null) {
             let lCoor = prop.location.split(',');
             const lat = lCoor[0];
@@ -223,7 +252,16 @@
             $('#mapFrame').attr('src', `https://www.google.com/maps?q=${encodedLocation}&output=embed`);
         }
 
-        //console.log(prop);
+        console.log(prop);
+    }
+
+    function selectImg(el1){
+        document.querySelectorAll('.imgDetail').forEach(function(el) {
+            el.classList.replace("border-red-500", "border-white");
+        });
+        el1.classList.replace("border-white", "border-red-500");
+        const img = el1.querySelector('img');
+        document.getElementById('imgPrimaryUrl').src = img.src;
     }
 
 </script>

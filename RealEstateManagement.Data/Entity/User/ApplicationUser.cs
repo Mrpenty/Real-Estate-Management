@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.VisualBasic;
 using RealEstateManagement.Data.Entity.Messages;
+using RealEstateManagement.Data.Entity.Payment;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using Property = RealEstateManagement.Data.Entity.PropertyEntity.Property;
 
@@ -35,6 +36,8 @@ namespace RealEstateManagement.Data.Entity.User
         public ICollection<Conversation> ConversationsAsLandlord { get; set; }
         public ICollection<UserFavoriteProperty> FavoriteProperties { get; set; }
         public ICollection<Message> MessagesSent { get; set; }
+
+        public Wallet Wallet { get; set; }
 
         public string? CitizenIdNumber { get; set; }
         public DateTime? CitizenIdIssuedDate { get; set; }

@@ -8,7 +8,7 @@ namespace RealEstateManagement.Business.Services.Properties
     {
         Task<IEnumerable<ViewPropertyPromotionDTO>> GetAllAsync();
         Task<ViewPropertyPromotionDTO?> GetByIdAsync(int id);
-        Task<ViewPropertyPromotionDTO> CreateAsync(CreatePropertyPromotionDTO dto);
+        Task<ViewPropertyPromotionDTO> CreateAsync(CreatePropertyPromotionDTO dto, int userId);
         Task<ViewPropertyPromotionDTO?> UpdateAsync(int id, UpdatePropertyPromotionDTO dto);
         Task<bool> DeleteAsync(int id);
     }

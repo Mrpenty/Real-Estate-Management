@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Data.Data.DataSeed;
 using RealEstateManagement.Data.Data.DataSeed.AddressSeed;
 using RealEstateManagement.Data.Data.DataSeed.PaymentSeed;
-using RealEstateManagement.Data.Data.DataSeed.PaymentSeed.PaymentSeed;
-using RealEstateManagement.Data.Data.DataSeed.PaymentsSeed;
 using RealEstateManagement.Data.Data.DataSeed.PropertySeed;
 using RealEstateManagement.Data.Data.DataSeed.User;
 
@@ -29,8 +27,8 @@ namespace RealEstateManagement.Data.Data
             PropertyPostSeed.SeedPropertyPosts(modelBuilder);
 
             //Payment and transaction seeding
-            PaymentSeed.SeedPayments(modelBuilder);
-            TransactionSeed.SeedTransactions(modelBuilder);
+            WalletSeed.SeedWallets(modelBuilder);
+            WalletTransactionSeed.SeedWalletTransactions(modelBuilder);
             ReviewSeed.SeedReviews(modelBuilder);
             PackageSeed.SeedPackage(modelBuilder);
             PropertyPromotionSeed.SeedPromotionProperty(modelBuilder);
