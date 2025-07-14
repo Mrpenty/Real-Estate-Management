@@ -16,10 +16,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
     <script src="~/js/authService.js" asp-append-version="true"></script>
     <script src="~/js/postPropertyService.js"></script>
     <script src="~/js/helper.js" asp-append-version="true"></script>
+    <script src="~/js/compareProperty.js" asp-append-version="true"></script>
     <style>
         input[type="range"]::-webkit-slider-thumb {
             appearance: none;
@@ -44,6 +45,7 @@
     </style>
 </head>
 <body>
+    
     <header class="border-b" style="background-color:white;width:100%">
         <div class="w-full px-4 py-4 flex items-center justify-between">
             <div class="flex items-center" style="cursor:pointer" onclick="window.location.href='/'">
@@ -232,6 +234,30 @@
         </div>
     </div>
 
+    <div id="compare-popup" class="hidden fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-lg">
+
+            <div class="sticky top-0 bg-white z-10 px-4 pt-4 pb-3 rounded-t-lg shadow-sm border-b mb-2">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-semibold">So sánh</h2>
+                    <button onclick="hideFilterPopup('compare-popup')" class="text-2xl text-gray-500 hover:text-red-500">&times;</button>
+                </div>
+            </div>
+
+            <div class="px-4 overflow-y-auto h-[60vh]">
+                <div id="compare-table-container" class="overflow-x-auto">
+                    <table class="table-auto w-full text-sm text-gray-700 border" id="compare-table">
+                    </table>
+                </div>
+                <p id="compare-warning" class="text-red-500 text-sm mt-2 hidden">
+                    Vui lòng chọn ít nhất 2 và không quá 3 mục để so sánh.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+
     <div id="search-popup" class=" fixed inset-0 bg-black/30 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-2xl w-full max-w-lg shadow-lg">
 
@@ -298,6 +324,10 @@
         const selectedLocationsEl = document.getElementById("location-selected-list");
         let selectedProvinceId = -1;
         let selectedLocationLists = [];
+
+        function toggleDropdown() {
+            document.getElementById("userDropdown").classList.toggle("hidden");
+        }
 
         function renderProvincesList(filter = "") {
               provinceList.innerHTML = "";
@@ -447,6 +477,9 @@
 
         function showFilterPopup(id) {
             document.getElementById(id).classList.remove('hidden');
+            if(id == 'compare-popup'){
+              renderComparePopup();
+            }
         }
         listSelectedSingleChoice();
 
@@ -816,7 +849,37 @@
 
                 updateRangeUI();
             }
+        window.getUserIdFromToken = function (token) {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return parseInt(payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]);
+        }
+
     </script>
-    @RenderSection("Scripts", required: false)
+ 
 </body>
 </html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js" asp-append-version="true"></script>
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js" asp-append-version="true"></script>
+
+    @* <script src="~/js/signalr.js" asp-append-version="true"></script> *@
+    <script src="~/js/site.js" asp-append-version="true"></script>
+}
+@* <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const token = localStorage.getItem("authToken");
+        if (!token) return;
+
+        startSignalRConnection(token, () => {
+            const conn = window.globalConnection;
+
+            conn.on("ReceiveNotification", (notification) => {
+                console.log("🔔 Nhận notification:", notification);
+                const dot = document.getElementById("messageNotificationDot");
+                if (dot) dot.classList.remove("hidden");
+            });
+        });
+    });
+</script> *@
+@RenderSection("Scripts", required: false)

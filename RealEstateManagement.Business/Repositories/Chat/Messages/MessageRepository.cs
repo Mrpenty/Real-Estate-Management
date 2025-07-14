@@ -35,5 +35,21 @@ namespace RealEstateManagement.Business.Repositories.Chat.Messages
             messages.Reverse();
             return messages;
         }
+        public async Task<Message?> GetByIdAsync(int id)
+        {
+            return await _context.Message
+                .Include(m => m.Sender)
+                .FirstOrDefaultAsync(m => m.Id == id);
+        }
+        public async Task DeleteAsync(Message message)
+        {
+            _context.Message.Remove(message);
+            await _context.SaveChangesAsync();
+        }
+        public async Task UpdateAsync(Message message)
+        {
+            _context.Message.Update(message);
+            await _context.SaveChangesAsync();
+        }
     }
 }

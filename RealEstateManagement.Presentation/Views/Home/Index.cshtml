@@ -184,7 +184,7 @@ if (searchBtn) {
 }
 </script>
 
-<script src="~/js/propertyService.js"></script>
+<script src="~/js/propertyService.js" asp-append-version="true"></script>
 <script>
 
     let urlParams1 = new URLSearchParams(window.location.search);
@@ -220,7 +220,9 @@ if (searchBtn) {
         if (listProperty) { 
             let html = '';
             listProperty.forEach(item => {
+                console.log("📦 Property Item:", item);
                 html += `<div class="bg-white rounded-md shadow-sm overflow-hidden border border-gray-200" data-id="${item.id}">
+
 
                         <div class="relative">
                                 <img onerror="handleImageError(this)" src="${item.primaryImageUrl}" alt="${item.type}" class="w-full h-60 object-cover">
@@ -229,7 +231,10 @@ if (searchBtn) {
                                 15 ảnh
                             </div> *@
 
-
+                                <button id="btn-compare-${item.id}" onclick="addToCompare(${item.id})"
+                                        class="absolute bottom-2 right-2 bg-white text-gray-700 border border-gray-300 px-3 py-1 text-sm rounded shadow opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition">
+                                    So sánh
+                                </button>
                                 <button id="btnFavourite" onclick="updateFavorite(${item.id},${item.isFavorite})" class="absolute top-2 right-2 p-2 bg-white rounded-full shadow hover:bg-red-100 transition">
                                     ${item.isFavorite ?
                         `
@@ -270,9 +275,14 @@ if (searchBtn) {
                                            ${item.landlordName} <span class="text-gray-400">(${timeAgo(item.createdAt)})</span>
                                 </div>
                             </div>
-                            <a href="tel:${item.landlordPhoneNumber}" class="text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-1 rounded text-sm font-medium">
-                                ${item.landlordPhoneNumber}
-                            </a>
+                            <div class="flex flex-col gap-2 items-end">
+                                <a href="tel:${item.landlordPhoneNumber}" class="text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-1 rounded text-sm font-medium">
+                                    ${item.landlordPhoneNumber}
+                                </a>
+                                            <button onclick="startChatWithLandlord(parseInt('${item.landlordId}'))" class="bg-orange-500 text-white px-3 py-1 rounded text-sm font-medium hover:bg-orange-600 transition">
+                                    💬 Nhắn tin
+                                </button>
+                            </div>
                         </div>
                     </div>
                     `;
@@ -290,6 +300,7 @@ if (searchBtn) {
         window.location.reload();
     }
 
+
     function filterArea(event,minArea,maxArea){
         event.preventDefault();
         let body = {
@@ -306,6 +317,12 @@ if (searchBtn) {
             if (!isFavorite) addToFavourite(id);
             else removeToFavorite(id);
         }
+    }
+async function startChatWithLandlord(landlordId) {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+        window.location.href = "/Auth/Login";
+        return;
     }
 async function startChatWithLandlord(landlordId) {
     const token = localStorage.getItem("authToken");

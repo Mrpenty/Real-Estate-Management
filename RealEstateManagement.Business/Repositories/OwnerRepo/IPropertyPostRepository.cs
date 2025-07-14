@@ -16,6 +16,11 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         Task<PropertyPost> GetByIdAsync(int postId);
         IQueryable <PropertyPost> GetAll();
 
+
+
+        Task<PropertyPost> GetPropertyPostByIdAsync(int id, int landlordId);
+
+        Task UpdatePropertyAmenities(int propertyId, List<int> amenityIds);
     }
 
 }

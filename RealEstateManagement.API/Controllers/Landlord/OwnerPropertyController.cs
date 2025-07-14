@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using RealEstateManagement.Business.Services.OwnerService;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
+using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using System.Security.Claims;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.Authorization;
 
 namespace RealEstateManagement.API.Controllers.Landlord
@@ -34,11 +37,11 @@ namespace RealEstateManagement.API.Controllers.Landlord
 
         // READ: Lấy danh sách BĐS của landlord
         [HttpGet]
-        public async Task<IActionResult> GetMyProperties()
+        [EnableQuery]
+        public IQueryable<OwnerPropertyDto> GetMyProperties()
         {
             var landlordId = GetCurrentLandlordId();
-            var properties = await _ownerPropertyService.GetPropertiesByLandlordAsync(landlordId);
-            return Ok(properties);
+            return _ownerPropertyService.GetPropertiesByLandlordQueryable(landlordId);
         }
 
         // READ: Lấy chi tiết 1 BĐS của landlord
@@ -52,18 +55,18 @@ namespace RealEstateManagement.API.Controllers.Landlord
 
         // UPDATE: Cập nhật BĐS
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProperty(int id, [FromBody] OwnerUpdatePropertyDto dto)
+        public async Task<IActionResult> UpdateProperty([FromQuery] int id, [FromBody] OwnerUpdatePropertyDto dto)
         {
             var landlordId = GetCurrentLandlordId();
             dto.Id = id; // Bắt buộc gán lại để fix ID từ route
             await _ownerPropertyService.UpdatePropertyAsync(dto, landlordId);
-            return NoContent();
+            return Ok(new { id });
         }
 
 
         // DELETE: Xoá BĐS
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProperty(int id)
+        public async Task<IActionResult> DeleteProperty([FromQuery] int id)
         {
             var landlordId = GetCurrentLandlordId();
             await _ownerPropertyService.DeletePropertyAsync(id, landlordId);

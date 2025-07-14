@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.OData;
+using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.API.Extensions;
 using RealEstateManagement.API.Hubs;
 using RealEstateManagement.API.Middleware;
@@ -8,9 +9,14 @@ using RealEstateManagement.Business.Services.Properties;
 var builder = WebApplication.CreateBuilder(args);
 //signalr để chat
 builder.Services.AddSignalR()
-    .AddMessagePackProtocol(); 
+    .AddMessagePackProtocol();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddOData(opt =>
+    {
+        opt.EnableQueryFeatures(); // bật filter, search, orderby, top, skip...
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDatabaseServices(builder.Configuration);
 builder.Services.AddIdentityServices();
@@ -21,6 +27,8 @@ builder.Services.AddCorsServices(builder.Configuration, builder.Environment);
 builder.Services.AddSwaggerServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDependencyInjectionServices();
+
+
 
 builder.Services.AddElasticsearch(builder.Configuration);
 

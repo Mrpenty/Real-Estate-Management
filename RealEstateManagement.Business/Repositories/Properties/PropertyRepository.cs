@@ -25,45 +25,41 @@ namespace RealEstateManagement.Business.Repositories.Properties
         //Lấy tất cả property
         public async Task<IEnumerable<Property>> GetAllAsync()
         {
-            return await _context.Properties
+            var properties = await _context.Properties
                 .Include(p => p.Images)
                 .Include(p => p.Landlord)
-                .Include(p => p.Address)
-                    .ThenInclude(pa => pa.Province)
-                .Include(p => p.Address)
-                    .ThenInclude(pa => pa.Ward)
-                .Include(p => p.Address)
-                    .ThenInclude(pa => pa.Street)
-                .Include(p => p.PropertyAmenities)
-                    .ThenInclude(pa => pa.Amenity)
-                .Include(p => p.PropertyPromotions)
-                    .ThenInclude(pp => pp.PromotionPackage)
-                .Select(p => new
-                {
-                    Property = p,
-                    // Nếu có bất kỳ gói khuyến mãi nào, lấy mức cao nhất; nếu không thì bằng 0.
-                    PromotionLevel = p.PropertyPromotions.Any()
-                                        ? p.PropertyPromotions.Max(pp => pp.PromotionPackage.Level)
-                                        : 0
-                })
-                .OrderByDescending(x => x.PromotionLevel)
-                .ThenByDescending(x => x.Property.CreatedAt)
-                .ThenByDescending(x => x.Property.ViewsCount)
-                .Select(x => x.Property)
+                .Include(p => p.Address).ThenInclude(a => a.Province)
+                .Include(p => p.Address).ThenInclude(a => a.Ward)
+                .Include(p => p.Address).ThenInclude(a => a.Street)
+                .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
+                .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
+                .AsNoTracking()
                 .ToListAsync();
+
+            return properties
+                .OrderByDescending(p => p.PropertyPromotions.Any()
+                    ? p.PropertyPromotions.Max(pp => pp.PromotionPackage.Level)
+                    : 0)
+                .ThenByDescending(p => p.CreatedAt)
+                .ThenByDescending(p => p.ViewsCount);
+
         }
         //Lấy property theo Id
         public async Task<Property> GetPropertyByIdAsync(int id)
         {
             return await _context.Properties
                 .Include(p => p.Images)
+                .Include(p => p.Landlord)
+                .Include(p => p.PropertyAmenities)
+                    .ThenInclude(pa => pa.Amenity)
+                .Include(p => p.PropertyPromotions)
+                    .ThenInclude(pp => pp.PromotionPackage)
                 .Include(p => p.Address)
                     .ThenInclude(pa => pa.Province)
                 .Include(p => p.Address)
                     .ThenInclude(pa => pa.Ward)
                 .Include(p => p.Address)
                     .ThenInclude(pa => pa.Street)
-                .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities)
                     .ThenInclude(pa => pa.Amenity)
                 .Include(p=>p.Posts)
@@ -133,6 +129,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
         public async Task<IEnumerable<Property>> FilterAdvancedAsync(PropertyFilterDTO filter)
         {
             var query = _context.Properties
+                .Include(p=>p.Landlord)
                 .Include(p => p.Address)
                     .ThenInclude(pa => pa.Province)
                 .Include(p => p.Address)
@@ -145,7 +142,10 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
                 .AsQueryable();
 
-            query = query.Where(p => p.Type == filter.Type);
+            if (!string.IsNullOrWhiteSpace(filter.Type))
+            {
+                query = query.Where(p => p.Type == filter.Type);
+            }
 
             if (filter.MinPrice.HasValue)
             {

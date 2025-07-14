@@ -11,6 +11,8 @@ namespace RealEstateManagement.Business.Services.OwnerService
     public interface IPropertyImageService
     {
         Task<PropertyImage> AddImageAsync(int propertyId, PropertyImageCreateDto dto);
+
+        Task<PropertyImage> UpdateImageAsync(PropertyImage updatedImage);
     }
 
 }
