@@ -89,8 +89,9 @@ function getListCompare() {
 }
 
 function addToCompare(id) {
-    $('#card-property-'+id).toggleClass("border-orange-400", "border-gray-200");
-    //console.log("abc");
+    $('#card-property-' + id).toggleClass("border-orange-400", "border-gray-200");
+    $('#btn-compare-' + id).toggleClass("bg-orange-600", "bg-white");
+    $('#btn-compare-' + id).toggleClass("text-white", "text-gray-700");
     if (compareList.indexOf(id) != -1) {
         $('#btn-compare-'+id).html('So sánh');
         compareList = compareList.filter(ID => ID !== id);
