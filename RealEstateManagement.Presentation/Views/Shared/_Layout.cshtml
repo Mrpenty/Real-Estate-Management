@@ -33,6 +33,10 @@
             pointer-events: all;
         }
 
+        .filterProperty input{
+            min-height: auto !important;
+        }
+
         input[type="range"]::-moz-range-thumb {
             height: 16px;
             width: 16px;
@@ -200,7 +204,7 @@
                 </div>
             </div>
 
-            <div class="px-4 overflow-y-auto h-[60vh]">
+            <div class="px-4 overflow-y-auto filterProperty h-[60vh]">
                 <div style="display:none" class="mb-6">
                     <h3 class="font-semibold mb-2">Lọc theo khu vực</h3>
                     <div class="grid grid-cols-3 gap-2">
@@ -692,7 +696,7 @@
             if (selectedStreet.id != "") $('#filterStreetId').val(selectedStreet.id);
 
             // const filterAmenity = urlParamParents.get('filterAmenity') ?? "";
-            // await fillDataAmenity(filterAmenity);
+            await fillDataAmenity("");
 
             //console.log(locations);
         }
@@ -829,6 +833,7 @@
                 alert('Không tìm thấy tỉnh thành tương ứng');
                 return;
             }
+            sessionStorage.removeItem('filterData');
             sessionStorage.setItem('provinceId', provinceId);
             sessionStorage.setItem('provinceName',searchInput.value);
             sessionStorage.setItem('selectedLocationLists',JSON.stringify(selectedLocationLists));
