@@ -81,7 +81,6 @@ function formatVietnameseDateTime(dateInput) {
 
 async function getAllAmenities() {
     try {
-
         const response = await fetch(`${API_PROPERTY_LOCATION_BASE_URL}/amenities`, {
             method: 'GET',
             headers: {
