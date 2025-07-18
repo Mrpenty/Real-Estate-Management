@@ -1,4 +1,4 @@
-﻿@{
+﻿﻿@{
     // ViewData["Title"] = "Home Page";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -19,170 +19,92 @@
 
 <h1 class="text-xl font-bold mb-4" id="titleHomePage"></h1>
 <div class="flex flex-wrap gap-2 mb-6" id="locationSelected">
-@*     <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Hồ Chí Minh</button>
+    @*     <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Hồ Chí Minh</button>
     <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Hà Nội</button>
     <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Đà Nẵng</button>
     <button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">Bình Dương</button> *@
     @* <button class="bg-gray-100 text-gray-700 px-3 py-1 rounded">Tất cả</button> *@
 </div>
 
-<!-- Large Slider with Overlaid Search Bar -->
-<div class="relative w-full h-[420px] flex items-center justify-center bg-gray-900">
-    <!-- Slider Images -->
-    <div class="absolute inset-0 w-full h-full overflow-hidden z-0">
-        <div id="main-slider" class="flex transition-transform duration-500 h-full" style="transform: translateX(0%);">
-            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80" class="w-full h-full object-cover" alt="Banner 1">
-            <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1600&q=80" class="w-full h-full object-cover" alt="Banner 2">
-            <img src="https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=1600&q=80" class="w-full h-full object-cover" alt="Banner 3">
-        </div>
-        <!-- Dots -->
-        <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-            <button class="w-3 h-3 rounded-full bg-white border border-orange-500" onclick="moveMainSlider(0)"></button>
-            <button class="w-3 h-3 rounded-full bg-white border border-orange-500" onclick="moveMainSlider(1)"></button>
-            <button class="w-3 h-3 rounded-full bg-white border border-orange-500" onclick="moveMainSlider(2)"></button>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <div class="md:col-span-2">
+
+
+        <div class="grid gap-6" id="listPropertyId">
         </div>
     </div>
-    <!-- Overlay for darken effect -->
-    <div class="absolute inset-0 bg-black bg-opacity-60 z-10"></div>
-    <!-- Search Bar Overlay -->
-    <div class="relative z-20 w-full max-w-4xl mx-auto">
-        <div class="bg-gray-800 bg-opacity-95 rounded-lg shadow-xl px-8 py-6 flex flex-col gap-4">
-            <div class="flex flex-col md:flex-row items-center gap-4">
-                <!-- Địa điểm -->
-                <div class="flex items-center w-full md:w-1/4">
-                    <span class="text-gray-300 mr-2"><i class="fas fa-map-marker-alt"></i></span>
-                    <select class="w-full border rounded px-3 py-2 focus:outline-none bg-gray-700 text-white">
-                        <option>Hà Nội</option>
-                        <option>TP. Hồ Chí Minh</option>
-                        <option>Đà Nẵng</option>
-                    </select>
-                </div>
-                <!-- Nhập địa điểm/dự án -->
-                <div class="flex items-center w-full md:w-1/2">
-                    <span class="text-gray-300 mr-2"><i class="fas fa-search"></i></span>
-                    <input type="text" class="w-full border rounded px-3 py-2 focus:outline-none bg-gray-700 text-white" placeholder="Nhập tối đa 5 địa điểm, dự án. Ví dụ: Quận Hoàn Kiếm, Quận Đống Đa" />
-                </div>
-                <!-- Nút tìm kiếm -->
-                <button class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-2 rounded w-full md:w-auto">Tìm kiếm</button>
+
+    <div>
+        <div style="height: max-content;" class="w-full max-w-xs bg-white p-4 rounded-md shadow-sm space-y-4 text-sm">
+            <div>
+                <h3 class="font-semibold text-gray-800 mb-2">Xem theo khoảng giá</h3>
+                <ul class="space-y-1">
+                    <li><a href="#" onclick="filterPrice(event,0,1)" class="text-orange-500 hover:underline">Dưới 1 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,1,2)" class="text-orange-500 hover:underline">Từ 1 - 2 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,2,3)" class="text-orange-500 hover:underline">Từ 2 - 3 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,3,5)" class="text-orange-500 hover:underline">Từ 3 - 5 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,5,7)" class="text-orange-500 hover:underline">Từ 5 - 7 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,7,10)" class="text-orange-500 hover:underline">Từ 7 - 10 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,10,15)" class="text-orange-500 hover:underline">Từ 10 - 15 triệu</a></li>
+                    <li><a href="#" onclick="filterPrice(event,15,100)" class="text-orange-500 hover:underline">Trên 15 triệu</a></li>
+                </ul>
             </div>
-            <!-- Bộ lọc nâng cao -->
-            <div class="flex flex-col md:flex-row gap-4">
-                <select class="w-full md:w-1/3 border rounded px-3 py-2 focus:outline-none bg-gray-700 text-white">
-                    <option>Loại hình dự án</option>
-                    <option>Chung cư</option>
-                    <option>Biệt thự</option>
-                </select>
-                <select class="w-full md:w-1/3 border rounded px-3 py-2 focus:outline-none bg-gray-700 text-white">
-                    <option>Mức giá</option>
-                    <option>Dưới 1 tỷ</option>
-                    <option>1-3 tỷ</option>
-                </select>
-                <select class="w-full md:w-1/3 border rounded px-3 py-2 focus:outline-none bg-gray-700 text-white">
-                    <option>Trạng thái</option>
-                    <option>Đang mở bán</option>
-                    <option>Đã bàn giao</option>
-                </select>
+
+            <div>
+                <h3 class="font-semibold text-gray-800 mb-2">Xem theo diện tích</h3>
+                <ul class="space-y-1">
+                    <li><a href="#" onclick="filterArea(event,0,20)" class="text-orange-500 hover:underline">Dưới 20 m²</a></li>
+                    <li><a href="#" onclick="filterArea(event,20,30)" class="text-orange-500 hover:underline">Từ 20 - 30 m²</a></li>
+                    <li><a href="#" onclick="filterArea(event,30,50)" class="text-orange-500 hover:underline">Từ 30 - 50 m²</a></li>
+                    <li><a href="#" onclick="filterArea(event,50,70)" class="text-orange-500 hover:underline">Từ 50 - 70 m²</a></li>
+                    <li><a href="#" onclick="filterArea(event,70,90)" class="text-orange-500 hover:underline">Từ 70 - 90 m²</a></li>
+                    <li><a href="#" onclick="filterArea(event,90,200)" class="text-orange-500 hover:underline">Trên 90 m²</a></li>
+                </ul>
+            </div>
+        </div>
+        <div style="height: max-content;" class="w-full mt-4 max-w-xs bg-white p-4 rounded-md shadow-sm space-y-4 text-sm">
+            <h3 class="font-semibold text-gray-800 mb-2">Tin mới đăng</h3>
+            <div class="space-y-4">
+
+                <div class="flex gap-2 items-start">
+                    <img src="https://pt123.cdn.static123.com/images/thumbs/450x300/fit/2025/06/13/z6700095844028-186681c11699e9a986e980c6cfa79e61_1749801645.jpg" alt="tin" class="w-20 h-14 rounded object-cover" />
+                    <div>
+                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
+                            Cho thuê phòng trọ có gác, giá rẻ gần ĐH Công Thương...
+                        </div>
+                        <div class="text-green-600 font-semibold text-sm">2.8 triệu/tháng</div>
+                        <div class="text-xs text-gray-500">27 giây trước</div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 items-start">
+                    <img src="https://pt123.cdn.static123.com/images/thumbs/450x300/fit/2025/06/13/z6700095844028-186681c11699e9a986e980c6cfa79e61_1749801645.jpg" alt="tin" class="w-20 h-14 rounded object-cover" />
+                    <div>
+                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
+                            CHO THUÊ NHÀ NGUYÊN CĂN TRẦN QUỐC TOẢN Gần nhà sách...
+                        </div>
+                        <div class="text-green-600 font-semibold text-sm">13 triệu/tháng</div>
+                        <div class="text-xs text-gray-500">5 phút trước</div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 items-start">
+                    <img src="https://pt123.cdn.static123.com/images/thumbs/450x300/fit/2025/06/13/z6700095844028-186681c11699e9a986e980c6cfa79e61_1749801645.jpg" alt="tin" class="w-20 h-14 rounded object-cover" />
+                    <div>
+                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
+                            Cho Thuê Phòng Có Gác, Nhà Mới Thang Máy, Thoáng Mát
+                        </div>
+                        <div class="text-green-600 font-semibold text-sm">5.5 triệu/tháng</div>
+                        <div class="text-xs text-gray-500">15 phút trước</div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 </div>
-<script>
-// Main slider logic
-let mainCurrentSlide = 0;
-function moveMainSlider(idx) {
-  const slider = document.getElementById('main-slider');
-  mainCurrentSlide = idx;
-  slider.style.transform = `translateX(-${idx * 100}%)`;
-}
-</script>
-
-
-<!-- Real Estate Posts Section -->
-<section class="mt-10">
-  <div class="flex justify-between items-center mb-6">
-    <h2 class="text-2xl font-bold">Bất động sản dành cho bạn</h2>
-    <div class="text-gray-500 text-sm space-x-2">
-      <a href="#" class="hover:text-orange-500">Tin nhà đất bán mới nhất</a> |
-      <a href="#" class="hover:text-orange-500">Tin nhà đất cho thuê mới nhất</a>
-    </div>
-  </div>
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="listPropertyId">
-    <!-- Các bài post sẽ được render ở đây bằng JS -->
-  </div>
-  <div class="flex justify-center mt-8">
-    <button class="px-6 py-2 bg-gray-100 rounded-full text-gray-700 font-semibold hover:bg-orange-100 transition">Mở rộng</button>
-  </div>
-</section>
-<script>
-// Helper function
-function formatVietnameseNumber(num) {
-  if (!num && num !== 0) return '';
-  if (typeof num === 'string') num = Number(num);
-  if (isNaN(num)) return '';
-  if (num >= 1e9) return (num / 1e9).toFixed(2) + ' tỷ';
-  if (num >= 1e6) return (num / 1e6).toFixed(2) + ' triệu';
-  return num.toLocaleString('vi-VN');
-}
-function timeAgo(dateString) {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  const now = new Date();
-  const diff = Math.floor((now - date) / 1000);
-  if (diff < 60) return 'Vừa đăng';
-  if (diff < 3600) return Math.floor(diff / 60) + ' phút trước';
-  if (diff < 86400) return Math.floor(diff / 3600) + ' giờ trước';
-  return date.toLocaleDateString('vi-VN');
-}
-async function renderProperties() {
-  const container = document.getElementById('listPropertyId');
-  container.innerHTML = '<div class="col-span-full text-center text-gray-400 py-8">Đang tải dữ liệu...</div>';
-  try {
-    const posts = await propertyService.getAllproperty();
-    if (!posts || posts.length === 0) {
-      container.innerHTML = '<div class="col-span-full text-center text-gray-400 py-8">Không có bất động sản nào phù hợp.</div>';
-      return;
-    }
-    container.innerHTML = posts.map(post => `
-      <div class="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden border group">
-        <div class="relative">
-          <img src="${post.primaryImageUrl ? (post.primaryImageUrl.startsWith('http') ? post.primaryImageUrl : 'https://localhost:7031' + post.primaryImageUrl) : 'https://via.placeholder.com/400x300?text=No+Image'}" alt="Bất động sản" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
-          <button class="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-2 text-gray-600 hover:text-red-500 cursor-pointer shadow">
-            <i class="${post.isFavorite ? 'fas' : 'far'} fa-heart"></i>
-          </button>
-          <span class="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
-            ${(post.imageUrls && post.imageUrls.length) ? post.imageUrls.length + ' ảnh' : ''}
-          </span>
-        </div>
-        <div class="p-4">
-          <h3 class="font-semibold text-base mb-1 line-clamp-2 hover:text-orange-500 cursor-pointer" onclick="window.location.href='/Home/Detail/${post.id}'">
-            ${post.title || ''}
-          </h3>
-          <div class="flex items-center text-red-600 font-bold text-lg mb-1">
-            ${formatVietnameseNumber(post.price)} <span class="mx-2 text-gray-400">·</span> <span class="text-orange-500">${post.area ? post.area + ' m²' : ''}</span>
-          </div>
-          <div class="text-gray-500 text-sm mb-2 flex items-center">
-            <i class="fas fa-map-marker-alt mr-1"></i> ${post.detailedAddress || ''}${post.street ? ', ' + post.street : ''}${post.ward ? ', ' + post.ward : ''}${post.province ? ', ' + post.province : ''}
-          </div>
-          <div class="text-xs text-gray-400">${timeAgo(post.createdAt)}</div>
-        </div>
-      </div>
-    `).join('');
-  } catch (err) {
-    container.innerHTML = '<div class="col-span-full text-center text-red-400 py-8">Lỗi tải dữ liệu.</div>';
-  }
-}
-// Gọi khi trang load
-renderProperties();
-// Xử lý nút tìm kiếm
-const searchBtn = document.querySelector('.bg-orange-500');
-if (searchBtn) {
-  searchBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-    // Có thể lưu lại filter vào sessionStorage nếu muốn
-    renderProperties();
-  });
-}
-</script>
 
 <script src="~/js/propertyService.js" asp-append-version="true"></script>
 <script>
@@ -193,7 +115,7 @@ if (searchBtn) {
 
     document.getElementById(type1).classList.add("text-orange-500");
     document.getElementById(type1).classList.replace("border-gray-200", "border-orange-500");
-    
+
     let listLocationSelected = sessionStorage.getItem('selectedLocationLists');
     let provinceId = sessionStorage.getItem('provinceId');
     let provinceName = sessionStorage.getItem('provinceName');
@@ -205,104 +127,104 @@ if (searchBtn) {
                 html += `<button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">${item.locationName}</button>`;
             });
         }
-        else if(provinceId != 0 && provinceId != -1){
+        else if (provinceId != 0 && provinceId != -1) {
             html += `<button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">${provinceName}</button>`
         }
 
         $('#locationSelected').html(html);
     }
-    
+
     getAllProperty();
 
-    async function getAllProperty() { 
+    async function getAllProperty() {
         let listProperty = await propertyService.getAllproperty();
         console.log(listProperty);
-        if (listProperty) { 
+        if (listProperty) {
             let html = '';
             listProperty.forEach(item => {
-                     html += `<div id="card-property-${item.id}" class="bg-white rounded-md shadow-sm overflow-hidden border border-gray-200" data-id="${item.id}">
+                html += `<div id="card-property-${item.id}" class="bg-white rounded-md shadow-sm overflow-hidden border border-gray-200" data-id="${item.id}">
 
 
-                        <div class="relative">
-                                <img onerror="handleImageError(this)" src="${item.primaryImageUrl?.includes('http') ?item.primaryImageUrl : urlBase + item.primaryImageUrl}" alt="${item.type}" class="w-full h-60 object-cover">
+                            <div class="relative">
+                                    <img onerror="handleImageError(this)" src="${item.primaryImageUrl?.includes('http') ? item.primaryImageUrl : urlBase + item.primaryImageUrl}" alt="${item.type}" class="w-full h-60 object-cover">
 
 
-                                <button id="btn-compare-${item.id}" style="cursor:pointer" onclick="addToCompare(${item.id})"
-                                        class="absolute bottom-2 right-2 bg-white text-gray-700 border border-gray-300 px-3 py-1 text-sm rounded shadow opacity-1 transition">
-                                    So sánh
-                                </button>
-                                <button id="btnFavourite" onclick="updateFavorite(${item.id},${item.isFavorite})" class="absolute top-2 right-2 p-2 bg-white rounded-full shadow hover:bg-red-100 transition">
-                                    ${item.isFavorite ?
+                                    <button id="btn-compare-${item.id}" style="cursor:pointer" onclick="addToCompare(${item.id})"
+                                            class="absolute bottom-2 right-2 bg-white text-gray-700 border border-gray-300 px-3 py-1 text-sm rounded shadow opacity-1 transition">
+                                        So sánh
+                                    </button>
+                                    <button id="btnFavourite" onclick="updateFavorite(${item.id},${item.isFavorite})" class="absolute top-2 right-2 p-2 bg-white rounded-full shadow hover:bg-red-100 transition">
+                                        ${item.isFavorite ?
                         `
-                                                <svg id="heart-icon-${item.id}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-red-500">
+                                                    <svg id="heart-icon-${item.id}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-red-500">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
+                                                    </svg>
+                                            ` :
+                        `
+                                                        <svg id="heart-icon-${item.id}"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-red-500">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
                                                 </svg>
-                                        ` :
-                        `
-                                                    <svg id="heart-icon-${item.id}"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-red-500">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
-                                            </svg>
-                                        `}
-                                </button>
-                        </div>
-
-
-                        <div class="px-4 py-3">
-                            <h3 onclick="window.location.href='/Home/Detail/${item.id}'" style="cursor:pointer" class="font-bold text-red-600 text-base uppercase leading-snug">
-                                ${item.title}
-                            </h3>
-
-                             <div class="text-green-600 font-semibold mt-2">${formatVietnameseNumber(item.price)} / tháng</div>
-                            <div class="text-sm text-gray-600 mt-1">
-                                   ${item.area} m² · ${item.detailedAddress}, ${item.street}, ${item.ward}, ${item.province}
+                                            `}
+                                    </button>
                             </div>
 
-                            <p class="text-sm text-gray-700 mt-2 line-clamp-2">
-                                ${item.description}
-                            </p>
-                        </div>
 
-                        <div class="flex items-center justify-between px-4 pb-4">
-                            <div class="flex items-center gap-2">
-                                <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                                        <img onerror="handleImageError(this)" class="w-full h-full rounded-full" src="${item.landlordProfilePictureUrl?.includes('http') ? item.landlordProfilePictureUrl : urlBase + item.landlordProfilePictureUrl}" alt="landlordProfilePictureUrl"/>
+                            <div class="px-4 py-3">
+                                <h3 onclick="window.location.href='/Home/Detail/${item.id}'" style="cursor:pointer" class="font-bold text-red-600 text-base uppercase leading-snug">
+                                    ${item.title}
+                                </h3>
+
+                                 <div class="text-green-600 font-semibold mt-2">${formatVietnameseNumber(item.price)} / tháng</div>
+                                <div class="text-sm text-gray-600 mt-1">
+                                       ${item.area} m² · ${item.detailedAddress}, ${item.street}, ${item.ward}, ${item.province}
                                 </div>
-                                <div class="text-sm text-gray-700">
-                                           ${item.landlordName} <span class="text-gray-400">(${timeAgo(item.createdAt)})</span>
+
+                                <p class="text-sm text-gray-700 mt-2 line-clamp-2">
+                                    ${item.description}
+                                </p>
+                            </div>
+
+                            <div class="flex items-center justify-between px-4 pb-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+                                            <img onerror="handleImageError(this)" class="w-full h-full rounded-full" src="${item.landlordProfilePictureUrl?.includes('http') ? item.landlordProfilePictureUrl : urlBase + item.landlordProfilePictureUrl}" alt="landlordProfilePictureUrl"/>
+                                    </div>
+                                    <div class="text-sm text-gray-700">
+                                               ${item.landlordName} <span class="text-gray-400">(${timeAgo(item.createdAt)})</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-2 items-end">
+                                    <a href="tel:${item.landlordPhoneNumber}" class="text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-1 rounded text-sm font-medium">
+                                        ${item.landlordPhoneNumber}
+                                    </a>
+                                                <button onclick="startChatWithLandlord(parseInt('${item.landlordId}'))" class="bg-orange-500 text-white px-3 py-1 rounded text-sm font-medium hover:bg-orange-600 transition">
+                                        💬 Nhắn tin
+                                    </button>
                                 </div>
                             </div>
-                            <div class="flex flex-col gap-2 items-end">
-                                <a href="tel:${item.landlordPhoneNumber}" class="text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-1 rounded text-sm font-medium">
-                                    ${item.landlordPhoneNumber}
-                                </a>
-                                            <button onclick="startChatWithLandlord(parseInt('${item.landlordId}'))" class="bg-orange-500 text-white px-3 py-1 rounded text-sm font-medium hover:bg-orange-600 transition">
-                                    💬 Nhắn tin
-                                </button>
-                            </div>
                         </div>
-                    </div>
-                    `;
+                        `;
             });
             document.getElementById('listPropertyId').innerHTML = html;
         }
     }
 
-    function filterPrice(event,minPrice,maxPrice){
+    function filterPrice(event, minPrice, maxPrice) {
         event.preventDefault();
         let body = {
-            minPrice,maxPrice
+            minPrice, maxPrice
         };
-        sessionStorage.setItem('filterData',JSON.stringify(body));
+        sessionStorage.setItem('filterData', JSON.stringify(body));
         window.location.reload();
     }
 
 
-    function filterArea(event,minArea,maxArea){
+    function filterArea(event, minArea, maxArea) {
         event.preventDefault();
         let body = {
-            minArea,maxArea
+            minArea, maxArea
         };
-        sessionStorage.setItem('filterData',JSON.stringify(body));
+        sessionStorage.setItem('filterData', JSON.stringify(body));
         window.location.reload();
     }
 
@@ -314,44 +236,44 @@ if (searchBtn) {
             else removeToFavorite(id);
         }
     }
-async function startChatWithLandlord(landlordId) {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-        window.location.href = "/Auth/Login";
-        return;
-    }
-
-    const renterId = parseInt(getUserIdFromToken(token));
-    const dto = {
-        renterId: parseInt(renterId),
-        landlordId: parseInt(landlordId),
-        propertyId: null
-    };
-
-    try {
-        const res = await fetch("https://localhost:7031/api/Chat/Create-Conversation", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(dto)
-        });
-
-        if (!res.ok) {
-            const err = await res.text();
-            alert("Không thể mở cuộc trò chuyện: " + err);
+    async function startChatWithLandlord(landlordId) {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+            window.location.href = "/Auth/Login";
             return;
         }
 
-        const conversation = await res.json();
-        if (conversation && conversation.id) {
-            window.location.href = `/Chat/Index?conversationId=${conversation.id}`;
+        const renterId = parseInt(getUserIdFromToken(token));
+        const dto = {
+            renterId: parseInt(renterId),
+            landlordId: parseInt(landlordId),
+            propertyId: null
+        };
+
+        try {
+            const res = await fetch("https://localhost:7031/api/Chat/Create-Conversation", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(dto)
+            });
+
+            if (!res.ok) {
+                const err = await res.text();
+                alert("Không thể mở cuộc trò chuyện: " + err);
+                return;
+            }
+
+            const conversation = await res.json();
+            if (conversation && conversation.id) {
+                window.location.href = `/Chat/Index?conversationId=${conversation.id}`;
+            }
+        } catch (error) {
+            console.error("Lỗi khi tạo/mở cuộc trò chuyện:", error);
         }
-    } catch (error) {
-        console.error("Lỗi khi tạo/mở cuộc trò chuyện:", error);
     }
-}
 
     function getUserIdFromToken(token) {
         try {
@@ -362,6 +284,7 @@ async function startChatWithLandlord(landlordId) {
             return null;
         }
     }
+
 
 
 
