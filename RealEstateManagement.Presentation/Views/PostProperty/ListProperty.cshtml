@@ -61,7 +61,7 @@
         let html = '';
         list.forEach((item,index) => {
             html += `
-                    <tr>
+                    <tr style='border-bottom:1px solid;${item.status == 0 ? 'background-color:#ffae0042' : ''}'>
                         <td class="px-6 py-4 whitespace-nowrap">${++index}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${item.title}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${item.price}đ</td>
@@ -77,7 +77,19 @@
             `;
         });
         $('#propertyList').html(html);
+
+        $.fn.dataTable.ext.type.order['time-ago'] = function (data) {
+            return parseAgoTime(data);
+        };
+
         $('#listProperty').DataTable({
+            order: [[6, 'asc']],
+            columnDefs: [
+                {
+                    targets: 6, 
+                    type: 'time-ago'
+                }
+            ],
           language: {
             search: "Tìm kiếm:",
             paginate: {
@@ -86,6 +98,23 @@
             }
           }
         });
+    }
+
+    function parseAgoTime(str) {
+        if (!str) return 0;
+        const matched = str.match(/(\d+)\s*(giây|phút|giờ|ngày)/);
+        if (!matched) return 0;
+
+        const value = parseInt(matched[1]);
+        const unit = matched[2];
+
+        switch (unit) {
+            case 'giây': return value;
+            case 'phút': return value * 60;
+            case 'giờ': return value * 3600;
+            case 'ngày': return value * 86400;
+            default: return 0;
+        }
     }
     
     async function deleteProperty(id){

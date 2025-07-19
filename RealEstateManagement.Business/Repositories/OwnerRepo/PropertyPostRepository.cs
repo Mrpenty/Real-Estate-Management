@@ -75,6 +75,8 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         public async Task<PropertyPost> GetPropertyPostByIdAsync(int id, int landlordId)
         {
             return await _context.PropertyPosts
+                .Include(p => p.Property)
+                .ThenInclude(p => p.Address)
                 .FirstOrDefaultAsync(p => p.Id == id && p.LandlordId == landlordId);
         }
 

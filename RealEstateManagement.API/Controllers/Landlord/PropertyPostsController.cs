@@ -62,7 +62,7 @@ namespace RealEstateManagement.API.Controllers.Landlord
         }
 
         [HttpPut("{postId}/continue")]
-        public async Task<IActionResult> ContinueDraft(int postId, [FromBody] ContinuePropertyPostDto dto)
+        public async Task<IActionResult> ContinueDraft([FromQuery] int postId, [FromBody] ContinuePropertyPostDto dto)
         {
             var userIdClaim = User.FindFirst("id");
             if (userIdClaim == null)
@@ -70,7 +70,7 @@ namespace RealEstateManagement.API.Controllers.Landlord
 
             if (!int.TryParse(userIdClaim.Value, out var landlordId))
                 return Unauthorized("ID người dùng không hợp lệ");
-            dto.PostId = postId; // Bắt buộc fix
+            //dto.PostId = postId; // Bắt buộc fix
             await _propertyPostService.ContinueDraftPostAsync(dto, landlordId);
             return NoContent();
         }

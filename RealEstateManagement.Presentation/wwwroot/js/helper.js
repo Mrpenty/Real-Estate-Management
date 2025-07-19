@@ -5,7 +5,7 @@ const API_FAVORITE_BASE_URL = 'https://localhost:7031/api/Favorite';
 function timeAgo(dateInput) {
     const date = new Date(dateInput);
     const now = new Date();
-    const diff = now - date; 
+    const diff = now - date - (7 * 60 * 60 * 1000); 
 
     const msPerMinute = 60 * 1000;
     const msPerHour = msPerMinute * 60;

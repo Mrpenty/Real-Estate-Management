@@ -1,4 +1,6 @@
-﻿using System;
+﻿using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
+using RealEstateManagement.Data.Entity.PropertyEntity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,6 +30,7 @@ namespace RealEstateManagement.Business.DTO.Properties
         public string? PromotionPackageName { get; set; }
         public List<string> Amenities { get; set; }
         public List<string> ImageUrls { get; set; }
+        public List<PropertyImageCreateDto> Images { get; set; }
         // Contract Details
         public decimal? ContractDeposit { get; set; }
         public decimal? ContractMonthlyRent { get; set; }

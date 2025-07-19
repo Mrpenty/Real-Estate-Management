@@ -64,7 +64,7 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
             try
             {
 
-                var existingImage = await _context.PropertyImages.FirstOrDefaultAsync(x => x.PropertyId == updatedImage.PropertyId);
+                var existingImage = await _context.PropertyImages.FirstOrDefaultAsync(x => x.PropertyId == updatedImage.PropertyId && x.Id == updatedImage.Id);
 
                 if (existingImage == null)
                 {

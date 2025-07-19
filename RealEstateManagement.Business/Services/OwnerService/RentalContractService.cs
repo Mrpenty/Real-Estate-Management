@@ -60,8 +60,8 @@ namespace RealEstateManagement.Business.Services.OwnerService
             if (string.IsNullOrWhiteSpace(dto.ContactInfo))
                 throw new ArgumentException("Thông tin liên hệ không được để trống.");
 
-            if (string.IsNullOrWhiteSpace(dto.PaymentMethod))
-                throw new ArgumentException("Phương thức thanh toán không được để trống.");
+            //if (string.IsNullOrWhiteSpace(dto.PaymentMethod))
+            //    throw new ArgumentException("Phương thức thanh toán không được để trống.");
 
             if (dto.PaymentDayOfMonth < 1 || dto.PaymentDayOfMonth > 31)
                 throw new ArgumentException("Ngày thanh toán phải nằm trong khoảng từ 1 đến 31.");
@@ -126,8 +126,8 @@ namespace RealEstateManagement.Business.Services.OwnerService
             if (string.IsNullOrWhiteSpace(dto.ContactInfo))
                 throw new ArgumentException("Thông tin liên hệ không được để trống.");
 
-            if (string.IsNullOrWhiteSpace(dto.PaymentMethod))
-                throw new ArgumentException("Phương thức thanh toán không được để trống.");
+            //if (string.IsNullOrWhiteSpace(dto.PaymentMethod))
+            //    throw new ArgumentException("Phương thức thanh toán không được để trống.");
 
             if (dto.PaymentDayOfMonth < 1 || dto.PaymentDayOfMonth > 31)
                 throw new ArgumentException("Ngày thanh toán phải nằm trong khoảng từ 1 đến 31.");

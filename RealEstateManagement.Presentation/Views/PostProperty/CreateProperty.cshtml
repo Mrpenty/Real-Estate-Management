@@ -31,7 +31,6 @@
                     Danh mục <span class="text-red-600 font-bold">(∗)</span>
                 </label>
                 <select required id="type" name="type" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>-- Chọn danh mục --</option>
                     <option selected value="room">Phòng trọ</option>
                     <option value="house">Nhà nguyên căn</option>
                     <option value="apartment">Căn hộ</option>
@@ -234,6 +233,7 @@
          window.location.href = '/Auth/Login';
      }
 
+     const propertyForm = document.getElementById('property-form');
      const apiBaseUrl = 'https://localhost:7031/api';
      const provinceSelect = $('#province-select');
      const wardSelect = $('#ward-select');
@@ -249,10 +249,55 @@
      let createdPropertyId = null;
      let imageFiles = [];
      let primaryImageIndex = 0;
+     
+     createDraft();
+     async function createDraft(){
+         const provinceId = 1;
+         const wardId = 2;
+         const streetId = 1;
+         const detailedAddress = '';
+         const propertyData = {
+             title: 'draft',
+             description: '',
+             type: 'room',
+             area: 1,
+             bedrooms: 1,
+             price: 1,
+             location: '',
+             amenityIds: [],
+             provinceId: provinceId,
+             wardId: wardId,
+             streetId: streetId,
+             detailedAddress: detailedAddress,
+         };
+         const token = localStorage.getItem('authToken');
+         const res = await fetch('https://localhost:7031/api/PropertyPosts', {
+             method: 'POST',
+             headers: {
+                 'Content-Type': 'application/json',
+                 ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+             },
+             credentials: 'include',
+             body: JSON.stringify(propertyData)
+         });
+         if (!res.ok) {
+             const err = await res.json().catch(() => ({}));
+             alert('Tạo draft property thất bại! ' + (err.message || ''));
+             return;
+         }
+         const data = await res.json();
+         createdPropertyId = data.propertyId;
+         window.location.href = `/PostProperty/DetailProperty/${createdPropertyId}`;
+         console.log(createdPropertyId);
+     }
 
-     const propertyForm = document.getElementById('property-form');
+
      propertyForm.onsubmit = async function(e) {
          e.preventDefault();
+         await createPostProperty();
+     };
+
+    async function createPostProperty(){
          // Thu thập dữ liệu property từ form
          const formData = new FormData(propertyForm);
          //console.log(Object.fromEntries(formData.entries()));
@@ -313,10 +358,10 @@
          if (createdPropertyId) {
              await uploadImages(createdPropertyId); // Đợi upload xong ảnh
              alert('Tạo bài và upload ảnh thành công!');
-             window.location.href = `/PostProperty/SelectPackage?propertyId=${createdPropertyId}`;
+             //window.location.href = `/PostProperty/SelectPackage?propertyId=${createdPropertyId}`;
              return;
          }
-     };
+    }
 
     async function fetchLocationAndSetPropertyData() {
        const location = `${addressInfo.val()} ${streetSelect.find("option:selected").text()} ${wardSelect.find("option:selected").text()} ${provinceSelect.find("option:selected").text()}`;

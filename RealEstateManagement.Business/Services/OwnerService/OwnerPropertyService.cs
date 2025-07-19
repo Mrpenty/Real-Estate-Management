@@ -34,6 +34,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                     Bedrooms = entity.Bedrooms,
                     Area = entity.Area,
                     Province = entity.Address.Province.Name,
+                    Status = entity.Posts.First().Status,
                     Ward = entity.Address.Ward.Name,
                     Street = entity.Address.Street.Name,
                     CreatedAt = entity.CreatedAt,

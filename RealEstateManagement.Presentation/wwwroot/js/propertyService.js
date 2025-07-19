@@ -81,7 +81,6 @@ const propertyService = {
 
     async getProperty(id) {
         try {
-            console.log(id)
             const token = localStorage.getItem('authToken');
             let userId = 0;
             if (token) {

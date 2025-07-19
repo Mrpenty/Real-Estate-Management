@@ -130,6 +130,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
         {
             var query = _context.Properties
                 .Include(p=>p.Landlord)
+                .Include(p => p.Posts)
                 .Include(p => p.Address)
                     .ThenInclude(pa => pa.Province)
                 .Include(p => p.Address)
@@ -141,6 +142,8 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
                 .AsQueryable();
+
+            query = query.Where(p => p.Posts != null && p.Posts.First().Status == PropertyPost.PropertyPostStatus.Approved);
 
             if (!string.IsNullOrWhiteSpace(filter.Type))
             {

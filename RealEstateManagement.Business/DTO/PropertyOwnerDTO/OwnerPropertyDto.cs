@@ -1,4 +1,6 @@
-﻿namespace RealEstateManagement.Business.DTO.PropertyOwnerDTO
+﻿using static RealEstateManagement.Data.Entity.PropertyEntity.PropertyPost;
+
+namespace RealEstateManagement.Business.DTO.PropertyOwnerDTO
 {
     public class OwnerPropertyDto
     {
@@ -25,6 +27,7 @@
         public string Street { get; set; }
         public string DetailedAddress { get; set; }
         public DateTime CreatedAt { get; set; }
+        public PropertyPostStatus Status { get; set; }
     }
 
     public class OwnerPropertyImageDto

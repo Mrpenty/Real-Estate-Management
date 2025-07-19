@@ -22,6 +22,7 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         public IQueryable<Property> GetByLandlordQueryable(int landlordId)
         {
             return _context.Properties
+                .Include(p => p.Posts)
                 .Include(p => p.Images)
                 .Include(p => p.Address)
                 .ThenInclude(p => p.Province)

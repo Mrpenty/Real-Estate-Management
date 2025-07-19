@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Nest;
 using RealEstateManagement.Business.DTO.Location;
 using RealEstateManagement.Business.DTO.Properties;
+using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
 using RealEstateManagement.Business.Repositories.FavoriteRepository;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Data.Entity;
@@ -109,6 +110,14 @@ namespace RealEstateManagement.Business.Services.Properties
                 IsFavorite = isFavorite == null ? false : true,
                 PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
                 ImageUrls = p.Images?.Select(c => c.Url).ToList(),
+                Images = p.Images.Select(c => new PropertyImageCreateDto
+                {
+                    Id = c.Id,
+                    Url = c.Url,
+                    IsPrimary = c.IsPrimary,
+                    Order = c.Order,
+                    PropertyId = c.PropertyId
+                }).ToList(),
                 LandlordName = p.Landlord?.Name,
                 LandlordPhoneNumber = p.Landlord?.PhoneNumber,
                 LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,

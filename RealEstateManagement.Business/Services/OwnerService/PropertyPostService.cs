@@ -278,33 +278,36 @@ namespace RealEstateManagement.Business.Services.OwnerService
             await _postRepository.UpdatePropertyAmenities(property.Id, dto.AmenityIds);
 
             // Update Images
-            if (dto.Images == null || !dto.Images.Any())
-                throw new Exception("Phải có ít nhất 1 ảnh.");
+            //if (dto.Images == null || !dto.Images.Any())
+            //    throw new Exception("Phải có ít nhất 1 ảnh.");
 
-            foreach (var imgDto in dto.Images)
+            if(dto.Images != null && dto.Images.Any())
             {
-                // Nếu Id > 0: Cập nhật
-                if (imgDto.Id > 0)
+                foreach (var imgDto in dto.Images)
                 {
-                    await _imageRepository.UpdateImageAsync(new PropertyImage
+                    // Nếu Id > 0: Cập nhật
+                    if (imgDto.Id > 0)
                     {
-                        Id = imgDto.Id,
-                        PropertyId = property.Id,
-                        Url = imgDto.Url,
-                        IsPrimary = imgDto.IsPrimary,
-                        Order = imgDto.Order
-                    });
-                }
-                else
-                {
-                    // Nếu là ảnh mới: Thêm
-                    await _imageRepository.AddImageAsync(new PropertyImage
+                        await _imageRepository.UpdateImageAsync(new PropertyImage
+                        {
+                            Id = imgDto.Id,
+                            PropertyId = property.Id,
+                            Url = imgDto.Url,
+                            IsPrimary = imgDto.IsPrimary,
+                            Order = imgDto.Order
+                        });
+                    }
+                    else
                     {
-                        PropertyId = property.Id,
-                        Url = imgDto.Url,
-                        IsPrimary = imgDto.IsPrimary,
-                        Order = imgDto.Order
-                    });
+                        // Nếu là ảnh mới: Thêm
+                        await _imageRepository.AddImageAsync(new PropertyImage
+                        {
+                            PropertyId = property.Id,
+                            Url = imgDto.Url,
+                            IsPrimary = imgDto.IsPrimary,
+                            Order = imgDto.Order
+                        });
+                    }
                 }
             }
 
@@ -314,7 +317,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 throw new Exception("BĐS phải có ít nhất 1 ảnh.");
 
             // Đổi Status & UpdatedAt
-            post.Status = PropertyPost.PropertyPostStatus.Pending;
+            //post.Status = PropertyPost.PropertyPostStatus.Pending;
             post.UpdatedAt = DateTime.UtcNow;
 
             await _postRepository.UpdateAsync(post);
