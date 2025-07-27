@@ -11,11 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSignalR()
     .AddMessagePackProtocol();
 
-builder.Services.AddControllers()
-    .AddOData(opt =>
-    {
-        opt.EnableQueryFeatures(); // bật filter, search, orderby, top, skip...
-    });
+
+builder.Services.AddControllersServices();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDatabaseServices(builder.Configuration);
@@ -50,7 +47,7 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
-    endpoints.MapHub<ChatHub>("/chatHub");     // 👈 Map SignalR Hub
+    endpoints.MapHub<ChatHub>("/chatHub");     
 });
 app.MapControllers();
 app.UseSwaggerServices(app.Environment);

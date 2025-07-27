@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Services.Favorite;
 using RealEstateManagement.Business.Services.Properties;
@@ -20,7 +21,7 @@ namespace RealEstateManagement.API.Controllers
         }
 
         [HttpGet("homepage-allproperty")]
-        //[Authorize(Roles = "Renter")]
+        [EnableQuery(PageSize = 100)]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetHomepageProperties()
         {
             try
@@ -39,7 +40,6 @@ namespace RealEstateManagement.API.Controllers
         }
         //Lấy property theo id
         [HttpGet("{id}")]
-        //[Authorize(Roles = "Renter")]
         public async Task<ActionResult> GetPropertyById(int id, [FromQuery] int userId = 0)
         {
             var property = await _propertyService.GetPropertyByIdAsync(id, userId);
@@ -52,7 +52,6 @@ namespace RealEstateManagement.API.Controllers
         // Sắp xếp theo price
         [HttpGet("filter-by-price")]
 
-        //[Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByPrice([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice)
         {
             if (!minPrice.HasValue || !maxPrice.HasValue)
@@ -75,8 +74,6 @@ namespace RealEstateManagement.API.Controllers
         }
         //Sắp xếp theo diện tích
         [HttpGet("filter-by-area")]
-
-        //[Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByArea([FromQuery] decimal? minArea, [FromQuery] decimal? maxArea)
         {
             if (!minArea.HasValue || !maxArea.HasValue)
