@@ -33,7 +33,9 @@
         }
     </script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/search-bar.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/RealEstateManagement.Presentation.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #ffffff 0%, #fff7ed 100%);
@@ -223,6 +225,11 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/authService.js"></script>
+    <script src="~/js/postPropertyService.js"></script>
+    <script src="~/js/helper.js" asp-append-version="true"></script>
+    <script src="~/js/compareProperty.js" asp-append-version="true"></script>
+
+
     <script>
         // Function to update navigation based on auth status
         function updateNavigation() {
