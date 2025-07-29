@@ -19,10 +19,9 @@ namespace RealEstateManagement.API.Controllers
         {
             _propertyService = propertyService;
         }
-
         [HttpGet("homepage-allproperty")]
-        [EnableQuery(PageSize = 100)]
-        public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetHomepageProperties()
+        [EnableQuery]
+        public async Task<IActionResult> GetHomepageProperties()
         {
             try
             {
@@ -31,7 +30,28 @@ namespace RealEstateManagement.API.Controllers
                 if (properties == null || !properties.Any())
                     return NotFound("Không tìm thấy bất động sản nào");
 
-                return Ok(properties);
+                return Ok(properties.AsQueryable());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("homepage-paginated")]
+        public async Task<IActionResult> GetPaginatedProperties([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                if (page < 1) page = 1;
+                if (pageSize < 1 || pageSize > 100) pageSize = 10;
+
+                var result = await _propertyService.GetPaginatedPropertiesAsync(page, pageSize);
+
+                if (result == null || !result.Data.Any())
+                    return NotFound("Không tìm thấy bất động sản nào");
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
