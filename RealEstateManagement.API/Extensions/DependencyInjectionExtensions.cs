@@ -20,6 +20,8 @@ using RealEstateManagement.Business.Services.Chat.Conversations;
 using RealEstateManagement.Business.Repositories.Package;
 using RealEstateManagement.Business.Services.PromotionPackages;
 using RealEstateManagement.Business.Services.Wallet;
+using RealEstateManagement.Business.Repositories.NotificationRepository;
+using RealEstateManagement.Business.Services.NotificationService;
 
 namespace RealEstateManagement.API.Extensions
 {
@@ -50,6 +52,9 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IConversationRepository, ConversationRepository>();
             services.AddScoped<IMessageRepository,MessageRepository>();
 
+            //Notification Repository
+            services.AddScoped<INotificationRepository, NotificationRepository>();
+
           
 
             //----Service----\\
@@ -77,6 +82,9 @@ namespace RealEstateManagement.API.Extensions
             //Chat Serivce
             services.AddScoped<IConversationService, ConversationService>();
             services.AddScoped<IMessageService, MessageService>();
+
+            //Notification Service
+            services.AddScoped<INotificationService, NotificationService>();
 
             //Wallet
             services.AddScoped<WalletService>();

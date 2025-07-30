@@ -33,7 +33,6 @@
         }
     </script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/search-bar.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/RealEstateManagement.Presentation.styles.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
     <style>
@@ -56,6 +55,13 @@
         .nav-link.active {
             border-bottom-color: #f97316;
             color: #f97316;
+        }
+
+        /* Position notification dropdown below the bell icon */
+        #notificationDropdown {
+            left: 50%; /* Căn giữa theo chiều ngang */
+            transform: translateX(-50%); /* Điều chỉnh để căn giữa chính xác */
+            top: 100%; /* Đặt ngay dưới phần tử cha */
         }
     </style>
 </head>
@@ -106,7 +112,20 @@
                         <i class="fas fa-heart text-lg"></i>
                         @* <span class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"></span> *@
                     </a>
+                    <!-- Notification -->
+                    <a href="#" onclick="getNotificationList(event)" class="relative p-2 text-gray-600 hover:text-orange-600 transition-colors duration-200 hover-lift">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span id="notificationCount" class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"></span>
+                    </a>
 
+                    <!-- Notification Dropdown -->
+                    <div id="notificationDropdown" class="absolute mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 hidden z-50 overflow-y-auto max-h-96">
+                        <div class="p-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900">Thông báo</h3>
+                        </div>
+                        <div id="notificationList" class="p-2 space-y-2"></div>
+                    </div>
+                    
                     <!-- Auth Buttons -->
                     <div class="flex items-center space-x-3">
                         <a id="registerNavItem" href="/Auth/Register" class="text-gray-700 hover:text-orange-600 font-medium transition-colors duration-200 flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-orange-50">
@@ -278,11 +297,25 @@
             try {
                 await authService.logout();
                 updateNavigation();
-                window.location.href = '/';
+                showSuccessMessage('Đăng xuất thành công!');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1200); // Wait 1.2s for user to see the message
             } catch (error) {
                 console.error('Logout failed:', error);
                 alert('Logout failed. Please try again.');
             }
+        }
+
+        // Simple success message function (add to your script section)
+        function showSuccessMessage(message) {
+            let msgDiv = document.createElement('div');
+            msgDiv.innerText = message;
+            msgDiv.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg z-50';
+            document.body.appendChild(msgDiv);
+            setTimeout(() => {
+                msgDiv.remove();
+            }, 1000);
         }
 
         // Get favorite list
@@ -325,6 +358,129 @@
             if (activeLink) {
                 activeLink.classList.add('active');
             }
+        });
+
+
+        // Get notification list
+        async function getNotificationList(event) {
+            event.preventDefault();
+            const isAuthenticated = authService.isAuthenticated();
+            if (!isAuthenticated) {
+                window.location.href = '/Auth/Login';
+                return;
+            }
+
+            const dropdown = document.getElementById('notificationDropdown');
+            const notificationList = document.getElementById('notificationList');
+            const notificationCount = document.getElementById('notificationCount');
+
+            try {
+                // Fetch notifications from API
+                const response = await fetch('https://localhost:7031/api/Notification/all', {
+                    method: 'GET',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch notifications');
+                }
+
+                const data = await response.json();
+                const notifications = data.data || [];
+
+                // Update unread count
+                const unreadCount = notifications.filter(n => !n.isRead).length;
+                notificationCount.textContent = unreadCount > 0 ? unreadCount : '';
+
+                // Clear previous notifications
+                notificationList.innerHTML = '';
+
+                // Render notifications
+                if (notifications.length === 0) {
+                    notificationList.innerHTML = '<p class="text-gray-500 text-center p-2">Không có thông báo nào.</p>';
+                } else {
+                    notifications.forEach(notification => {
+                        const div = document.createElement('div');
+                        div.className = 'p-3 bg-white hover:bg-orange-50 rounded-lg cursor-pointer transition-colors duration-200';
+                        div.onclick = () => showNotificationDetail(notification); // Gọi chi tiết khi nhấp
+                        div.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-900">${notification.title}</h4>
+                                    <p class="text-xs text-gray-600 mt-1">${notification.content}</p>
+                                    <p class="text-xs text-gray-400 mt-1">${new Date(notification.createdAt).toLocaleString('vi-VN')}</p>
+                                </div>
+                                <span class="text-xs font-medium ${notification.type === 'info' ? 'text-blue-500' : notification.type === 'warning' ? 'text-yellow-500' : 'text-red-500'}">
+                                    ${notification.type.toUpperCase()}
+                                </span>
+                            </div>
+                            ${!notification.isRead ? '<div class="w-2 h-2 bg-orange-500 rounded-full mt-1"></div>' : ''}
+                        `;
+                        notificationList.appendChild(div);
+                    });
+                }
+
+                // Toggle dropdown
+                dropdown.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+                notificationList.innerHTML = '<p class="text-red-500 text-center p-2">Lỗi khi tải thông báo.</p>';
+            }
+        }
+
+        // Show notification detail within dropdown
+        async function showNotificationDetail(notification) {
+            const notificationList = document.getElementById('notificationList');
+
+            try {
+                const response = await fetch(`https://localhost:7031/api/Notification/${notification.id}`, {
+                    method: 'GET',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch notification detail');
+                }
+
+                const data = await response.json();
+                const detail = data.data;
+
+                // Replace list with detail view
+                notificationList.innerHTML = `
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">${detail.title}</h3>
+                            <button id="backToList" class="text-orange-500 hover:text-orange-600 font-medium">Quay lại</button>
+                        </div>
+                        <p class="text-gray-600 mb-4">${detail.content}</p>
+                        <p class="text-sm text-gray-400 mb-2">Loại: ${detail.type.toUpperCase()}</p>
+                        <p class="text-sm text-gray-400">Thời gian: ${new Date(detail.createdAt).toLocaleString('vi-VN')}</p>
+                    </div>
+                `;
+
+                const backToList = document.getElementById('backToList');
+                  backToList.onclick = (e) => {
+                  e.stopPropagation(); 
+                  getNotificationList({ preventDefault: () => {} }); // Reload the list
+        };
+            } catch (error) {
+                console.error('Error fetching notification detail:', error);
+                notificationList.innerHTML = '<p class="text-red-500 text-center p-2">Không thể tải chi tiết thông báo.</p>';
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('notificationDropdown');
+            const notificationIcon = document.querySelector('a[onclick="getNotificationList(event)"]');
+
+            if (dropdown && !notificationIcon.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Update navigation and notification count on load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNavigation();
+            getNotificationList({ preventDefault: () => {} }); // Load initial count
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
