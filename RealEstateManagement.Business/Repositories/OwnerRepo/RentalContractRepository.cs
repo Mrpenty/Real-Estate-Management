@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static RealEstateManagement.Data.Entity.PropertyEntity.PropertyPost;
 
 namespace RealEstateManagement.Business.Repositories.OwnerRepo
 {
@@ -30,9 +31,8 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
             return await _context.RentalContracts.FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task AddAsync(RentalContract contract)
+        public async Task AddAsync(RentalContract contract, int ownerId, int propertyPostId)
         {
-            contract.CreatedAt = DateTime.UtcNow;
             await _context.RentalContracts.AddAsync(contract);
             await _context.SaveChangesAsync();
         }

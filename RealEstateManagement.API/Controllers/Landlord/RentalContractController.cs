@@ -30,14 +30,21 @@ namespace RealEstateManagement.API.Controllers.Landlord
 
 
         // POST: api/owner/rental-contracts
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] RentalContractCreateDto dto)
+        [HttpPost("{ownerId}/{propertyPostId}")]
+        public async Task<IActionResult> Create([FromBody] RentalContractCreateDto dto, int ownerId,int propertyPostId)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await _rentalContractService.AddAsync(dto);
-            return StatusCode(201);
+            try
+            {
+                await _rentalContractService.AddAsync(dto, ownerId, propertyPostId);
+                return StatusCode(201);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         // PUT: api/owner/rental-contracts/{id}
