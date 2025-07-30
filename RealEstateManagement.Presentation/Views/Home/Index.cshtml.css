@@ -230,6 +230,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
+    z-index: 1000; /* Đảm bảo dropdown không bị che bởi các phần khác */
 }
 
     .dropdown-select:focus {
@@ -438,4 +439,23 @@
     .search-button {
         width: 100%;
     }
+}
+
+
+.group:hover .group-hover\:opacity-90 {
+    opacity: 0.9;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
