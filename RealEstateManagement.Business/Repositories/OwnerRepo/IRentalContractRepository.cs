@@ -11,7 +11,7 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
     {
         Task<RentalContract> GetByPostIdAsync(int id); //Xem hợp đồng của bài Post đó
         Task<RentalContract> GetByRentalContractIdAsync(int id); // Lấy RentalContract Id
-        Task AddAsync(RentalContract contract);
+        Task AddAsync(RentalContract contract, int owner, int propertyPost);
         Task UpdateContractAsync(RentalContract contract );
         Task DeleteAsync(int id);
 

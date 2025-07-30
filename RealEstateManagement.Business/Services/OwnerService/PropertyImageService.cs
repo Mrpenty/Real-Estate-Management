@@ -72,20 +72,10 @@ namespace RealEstateManagement.Business.Services.OwnerService
 
                 _logger.LogInformation("Created PropertyImage entity for property {PropertyId}, URL: {Url}", propertyId, dto.Url);
 
-                var savedImage = await _imageRepo.AddImageAsync(image);
+                return await _imageRepo.AddImageAsync(image);
+                
+               // _logger.LogInformation("Image saved to database for property {PropertyId}, ImageId: {ImageId}", propertyId, savedImage.Id);
 
-                _logger.LogInformation("Image saved to database for property {PropertyId}, ImageId: {ImageId}", propertyId, savedImage.Id);
-
-                // ✅ Nếu bài đăng đang ở trạng thái Nháp => chuyển sang Chờ duyệt
-                var post = await _postRepo.GetByPropertyIdAsync(propertyId);
-                if (post != null && post.Status == PropertyPostStatus.Draft)
-                {
-                    _logger.LogInformation("Updating post status from Draft to Pending for property {PropertyId}", propertyId);
-                    post.Status = PropertyPostStatus.Pending;
-                    await _postRepo.UpdateAsync(post);
-                }
-
-                return savedImage;
             }
             catch (Exception ex)
             {
