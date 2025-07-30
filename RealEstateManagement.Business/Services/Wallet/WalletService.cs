@@ -18,6 +18,7 @@ namespace RealEstateManagement.Business.Services.Wallet
             _context = context;
         }
 
+        //Xem tiền của mình
         public async Task<decimal> GetBalanceAsync(int userId)
         {
             var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == userId);
@@ -31,6 +32,16 @@ namespace RealEstateManagement.Business.Services.Wallet
             return wallet.Balance;
         }
 
+        //Lấy WalletId
+        public async Task<int?> GetWalletIdByUserIdAsync(int userId)
+        {
+            return await _context.Wallets
+                .Where(w => w.UserId == userId)
+                .Select(w => (int?)w.Id)
+                .FirstOrDefaultAsync();
+        }
+
+        //Tạo ví tiền khi tạo tài khoản
         public async Task CreateWalletAsync(int userId)
         {
             var wallet = new RealEstateManagement.Data.Entity.Payment.Wallet
@@ -43,5 +54,17 @@ namespace RealEstateManagement.Business.Services.Wallet
             await _context.SaveChangesAsync();
         }
 
+        //User Xem lịch sử giao dịch
+        public async Task<List<WalletTransaction>> ViewTransactionHistory(int walletId)
+        {
+            var list = await _context.WalletTransactions
+                .Where(d => d.WalletId == walletId)
+                .ToListAsync();
+            if (list == null || list.Count == 0)
+            {
+                throw new Exception("Tài khoản này chưa từng giao dịch tiền");
+            }
+            return list;
+        }
     }
 }

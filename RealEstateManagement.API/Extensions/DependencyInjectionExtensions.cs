@@ -94,7 +94,6 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<WalletService>();
             services.AddScoped<QRCodeService>();
 
-
             return services;
         }
     }
