@@ -24,6 +24,8 @@ using RealEstateManagement.Business.Repositories.TenantInteraction;
 using RealEstateManagement.Business.Services.TenantInteraction;
 
 using RealEstateManagement.Business.Services.Wallet;
+using RealEstateManagement.Business.Repositories.NotificationRepository;
+using RealEstateManagement.Business.Services.NotificationService;
 
 
 namespace RealEstateManagement.API.Extensions
@@ -51,9 +53,13 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IFavoriteRepository, FavoriteRepository>();
             services.AddScoped<IPromotionPackageRepository, PromotionPackageRepository>();
             services.AddScoped<IPropertyPromotionRepository, PropertyPromotionRepository>();
+            services.AddScoped<ISliderRepository, SliderRepository>();
             //Chat Repository
             services.AddScoped<IConversationRepository, ConversationRepository>();
             services.AddScoped<IMessageRepository,MessageRepository>();
+
+            //Notification Repository
+            services.AddScoped<INotificationRepository, NotificationRepository>();
 
           
 
@@ -65,6 +71,7 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IPropertyImageService, PropertyImageService>();
             services.AddScoped<IOwnerPropertyService, OwnerPropertyService>();
             services.AddScoped<IRentalContractService, RentalContractService>();
+            services.AddScoped<ISliderService, SliderService>();
 
             //user and auth services
             services.AddScoped<IAuthService, AuthService>();
@@ -84,11 +91,15 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IMessageService, MessageService>();
 
 
+            //Notification Service
+            services.AddScoped<INotificationService, NotificationService>();
+
+
             // Tenant Interaction Service
             services.AddScoped<IInteractionService, InteractionService>();
             services.AddScoped<IInteractionRepository, InteractionRepository>();
 
-           
+
 
             //Wallet
             services.AddScoped<WalletService>();

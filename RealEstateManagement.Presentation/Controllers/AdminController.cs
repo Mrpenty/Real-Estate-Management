@@ -34,5 +34,12 @@ namespace RealEstateManagement.Presentation.Controllers
             ViewBag.Title = "Quản lý gói khuyến mãi";
             return View();
         }
+
+        // GET: /Admin/NotificationManagement
+        public IActionResult NotificationManagement()
+        {
+            ViewBag.Title = "Quản lý thông báo";
+            return View();
+        }
     }
 } 

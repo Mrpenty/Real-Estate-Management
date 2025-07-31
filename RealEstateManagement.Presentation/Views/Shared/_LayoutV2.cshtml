@@ -1,0 +1,500 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SREM.AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'orange': {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            300: '#fdba74',
+                            400: '#fb923c',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                        }
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/RealEstateManagement.Presentation.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #ffffff 0%, #fff7ed 100%);
+        }
+        .shadow-soft {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            border-bottom-color: #f97316;
+            color: #f97316;
+        }
+
+        /* Position notification dropdown below the bell icon */
+        #notificationDropdown {
+            left: 50%; /* Căn giữa theo chiều ngang */
+            transform: translateX(-50%); /* Điều chỉnh để căn giữa chính xác */
+            top: 100%; /* Đặt ngay dưới phần tử cha */
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg shadow-soft sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <div class="flex items-center space-x-3" style="cursor:pointer" onclick="window.location.href='/'">
+                        <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                            <i class="fas fa-home text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
+                                SREM.AI
+                            </h1>
+                            <p class="text-xs text-gray-500 -mt-1">Smart Real Estate Management</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="/" class="text-gray-700 hover:text-orange-600 font-medium transition-colors duration-200 flex items-center space-x-2">
+                        <i class="fas fa-home text-sm"></i>
+                        <span>Trang chủ</span>
+                    </a>
+                    <a href="#" class="text-gray-700 hover:text-orange-600 font-medium transition-colors duration-200 flex items-center space-x-2">
+                        <i class="fas fa-building text-sm"></i>
+                        <span>Bất động sản</span>
+                    </a>
+                    <a href="#" class="text-gray-700 hover:text-orange-600 font-medium transition-colors duration-200 flex items-center space-x-2">
+                        <i class="fas fa-info-circle text-sm"></i>
+                        <span>Giới thiệu</span>
+                    </a>
+                    <a href="#" class="text-gray-700 hover:text-orange-600 font-medium transition-colors duration-200 flex items-center space-x-2">
+                        <i class="fas fa-phone text-sm"></i>
+                        <span>Liên hệ</span>
+                    </a>
+                </nav>
+
+                <!-- User Actions -->
+                <div class="flex items-center space-x-4">
+                    <!-- Favorites -->
+                    <a href="#" onclick="getFavoriteList(event)" class="relative p-2 text-gray-600 hover:text-orange-600 transition-colors duration-200 hover-lift">
+                        <i class="fas fa-heart text-lg"></i>
+                        @* <span class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"></span> *@
+                    </a>
+                    <!-- Notification -->
+                    <a href="#" onclick="getNotificationList(event)" class="relative p-2 text-gray-600 hover:text-orange-600 transition-colors duration-200 hover-lift">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span id="notificationCount" class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"></span>
+                    </a>
+
+                    <!-- Notification Dropdown -->
+                    <div id="notificationDropdown" class="absolute mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 hidden z-50 overflow-y-auto max-h-96">
+                        <div class="p-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900">Thông báo</h3>
+                        </div>
+                        <div id="notificationList" class="p-2 space-y-2"></div>
+                    </div>
+                    
+                    <!-- Auth Buttons -->
+                    <div class="flex items-center space-x-3">
+                        <a id="registerNavItem" href="/Auth/Register" class="text-gray-700 hover:text-orange-600 font-medium transition-colors duration-200 flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-orange-50">
+                            <i class="fas fa-user-plus text-sm"></i>
+                            <span>Đăng ký</span>
+                        </a>
+                        <a id="loginNavItem" href="/Auth/Login" class="text-gray-700 hover:text-orange-600 font-medium transition-colors duration-200 flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-orange-50">
+                            <i class="fas fa-sign-in-alt text-sm"></i>
+                            <span>Đăng nhập</span>
+                        </a>
+                        
+                        <!-- User Profile Dropdown -->
+                        <div id="userProfileNavItem" class="relative hidden">
+                            <button onclick="toggleDropdown()" class="flex items-center text-gray-700 hover:text-orange-600 font-medium px-4 py-2 rounded-lg hover:bg-orange-50 transition-colors duration-200">
+                                <span id="userProfileLink"></span>
+                                <svg class="ml-1 h-4 w-4 fill-current" viewBox="0 0 20 20">
+                                    <path d="M5.5 7l4.5 4 4.5-4z" />
+                                </svg>
+                            </button>
+
+                            <!-- Menu Dropdown -->
+                            <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 hidden z-50">
+                                <a href="/Chat/Index" class="block px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors duration-200">
+                                    <i class="fas fa-comment-dots mr-2"></i>Tin nhắn
+                                </a>
+                                <a href="/Profile" class="block px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors duration-200">
+                                    <i class="fas fa-user mr-2"></i>Trang cá nhân
+                                </a>
+                                <a href="#" onclick="handleLogout(event)" class="block px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors duration-200">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Đăng xuất
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Post Property Button -->
+                    <a href="#" onclick="createProperty(event)" class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover-lift transition-all duration-200 flex items-center space-x-2">
+                        <i class="fas fa-plus text-sm"></i>
+                        <span>Đăng tin</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+       
+        
+    </header>
+
+    <!-- Main Content -->
+    <main class="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50">
+        <div class="container mx-auto px-6 py-8">
+            @RenderBody()
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-16">
+        <div class="container mx-auto px-6 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Company Info -->
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-home text-white text-sm"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">SREM.AI</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4 max-w-md">
+                        Nền tảng quản lý bất động sản thông minh, kết nối chủ nhà và người thuê một cách hiệu quả và an toàn.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-orange-600 transition-colors duration-200">
+                            <i class="fab fa-facebook text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-orange-600 transition-colors duration-200">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-orange-600 transition-colors duration-200">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-orange-600 transition-colors duration-200">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Liên kết nhanh</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-600 hover:text-orange-600 transition-colors duration-200">Về chúng tôi</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-orange-600 transition-colors duration-200">Dịch vụ</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-orange-600 transition-colors duration-200">Tin tức</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-orange-600 transition-colors duration-200">Liên hệ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Hỗ trợ</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-600 hover:text-orange-600 transition-colors duration-200">Trung tâm trợ giúp</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-orange-600 transition-colors duration-200">Điều khoản sử dụng</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-orange-600 transition-colors duration-200">Chính sách bảo mật</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-orange-600 transition-colors duration-200">FAQ</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-200 mt-8 pt-8 text-center">
+                <p class="text-gray-500">&copy; 2024 SREM.AI. Tất cả quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/authService.js"></script>
+    <script src="~/js/postPropertyService.js"></script>
+    <script src="~/js/helper.js" asp-append-version="true"></script>
+    <script src="~/js/compareProperty.js" asp-append-version="true"></script>
+
+
+    <script>
+        // Function to update navigation based on auth status
+        function updateNavigation() {
+            const isAuthenticated = authService.isAuthenticated();
+            const loginNavItem = document.getElementById('loginNavItem');
+            const registerNavItem = document.getElementById('registerNavItem');
+            const userProfileNavItem = document.getElementById('userProfileNavItem');
+            const userProfileLink = document.getElementById('userProfileLink');
+            const notificationBell = document.querySelector('a[onclick="getNotificationList(event)"]'); // Thêm dòng này
+
+            if (isAuthenticated) {
+                if (loginNavItem) loginNavItem.style.display = 'none';
+                if (registerNavItem) registerNavItem.style.display = 'none';
+                if (userProfileNavItem) userProfileNavItem.style.display = 'flex';
+                if (notificationBell) notificationBell.style.display = 'inline-flex'; // Hiện chuông
+                
+                // Set user name in dropdown
+                const user = authService.getCurrentUser();
+                if (user && user.name && userProfileLink) {
+                    userProfileLink.innerText = `Chào, ${user.name}`;
+                }
+            } else {
+                if (loginNavItem) loginNavItem.style.display = 'flex';
+                if (registerNavItem) registerNavItem.style.display = 'flex';
+                if (userProfileNavItem) userProfileNavItem.style.display = 'none';
+                if (notificationBell) notificationBell.style.display = 'none'; // Ẩn chuông
+            }
+        }
+
+        // Toggle dropdown
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('userDropdown');
+            const userProfileNavItem = document.getElementById('userProfileNavItem');
+            
+            if (!userProfileNavItem.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Handle logout
+        async function handleLogout(event) {
+            event.preventDefault();
+            try {
+                await authService.logout();
+                updateNavigation();
+                showSuccessMessage('Đăng xuất thành công!');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1200); // Wait 1.2s for user to see the message
+            } catch (error) {
+                console.error('Logout failed:', error);
+                alert('Logout failed. Please try again.');
+            }
+        }
+
+        // Simple success message function (add to your script section)
+        function showSuccessMessage(message) {
+            let msgDiv = document.createElement('div');
+            msgDiv.innerText = message;
+            msgDiv.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg z-50';
+            document.body.appendChild(msgDiv);
+            setTimeout(() => {
+                msgDiv.remove();
+            }, 1000);
+        }
+
+        // Get favorite list
+        function getFavoriteList(event) {
+            event.preventDefault();
+            const isAuthenticated = authService.isAuthenticated();
+            if (isAuthenticated) {
+                window.location.href = '/Home/ListFavorite';
+            } else {
+                window.location.href = '/Auth/Login';
+            }
+        }
+
+        // Create property
+        function createProperty(event) {
+            event.preventDefault();
+            const isAuthenticated = authService.isAuthenticated();
+            if (isAuthenticated) {
+                window.location.href = '/PostProperty/CreateProperty';
+            } else {
+                window.location.href = '/Auth/Login';
+            }
+        }
+
+        // Hàm cập nhật số lượng thông báo chưa đọc khi vào trang
+        async function updateNotificationCount() {
+            const notificationCount = document.getElementById('notificationCount');
+            if (!authService.isAuthenticated()) {
+                if (notificationCount) notificationCount.textContent = '';
+                return;
+            }
+            try {
+                const response = await fetch('https://localhost:7031/api/Notification/all', { method: 'GET' });
+                if (!response.ok) throw new Error('Failed to fetch notifications');
+                const data = await response.json();
+                const notifications = data.data || [];
+                const unreadCount = notifications.filter(n => !n.isRead).length;
+                notificationCount.textContent = unreadCount > 0 ? unreadCount : '';
+            } catch {
+                if (notificationCount) notificationCount.textContent = '';
+            }
+        }
+
+        // Update navigation when page loads
+        document.addEventListener('DOMContentLoaded', updateNavigation);
+
+        // Set active navigation based on URL parameters
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const type = urlParams.get('type') || 'room';
+            
+            // Remove active class from all nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Add active class to current type
+            const activeLink = document.getElementById(type);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        });
+
+
+        // Sửa getNotificationList để toggle modal
+        async function getNotificationList(event) {
+            event.preventDefault();
+            const isAuthenticated = authService.isAuthenticated();
+            if (!isAuthenticated) {
+                window.location.href = '/Auth/Login';
+                return;
+            }
+            const dropdown = document.getElementById('notificationDropdown');
+            // Nếu dropdown đang mở thì ẩn đi (toggle)
+            if (!dropdown.classList.contains('hidden')) {
+                dropdown.classList.add('hidden');
+                return;
+            }
+            // Nếu dropdown đang ẩn thì load và hiện
+            const notificationList = document.getElementById('notificationList');
+            const notificationCount = document.getElementById('notificationCount');
+            try {
+                const response = await fetch('https://localhost:7031/api/Notification/all', { method: 'GET' });
+                if (!response.ok) throw new Error('Failed to fetch notifications');
+                const data = await response.json();
+                const notifications = data.data || [];
+                // Update unread count
+                const unreadCount = notifications.filter(n => !n.isRead).length;
+                notificationCount.textContent = unreadCount > 0 ? unreadCount : '';
+                // Render notifications
+                notificationList.innerHTML = '';
+                if (notifications.length === 0) {
+                    notificationList.innerHTML = '<p class="text-gray-500 text-center p-2">Không có thông báo nào.</p>';
+                } else {
+                    notifications.forEach(notification => {
+                        const div = document.createElement('div');
+                        div.className = 'p-3 bg-white hover:bg-orange-50 rounded-lg cursor-pointer transition-colors duration-200';
+                        div.onclick = () => showNotificationDetail(notification);
+                        div.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-900">${notification.title}</h4>
+                                    <p class="text-xs text-gray-600 mt-1">${notification.content}</p>
+                                    <p class="text-xs text-gray-400 mt-1">${new Date(notification.createdAt).toLocaleString('vi-VN')}</p>
+                                </div>
+                                <span class="text-xs font-medium ${notification.type === 'info' ? 'text-blue-500' : notification.type === 'warning' ? 'text-yellow-500' : 'text-red-500'}">
+                                    ${notification.type.toUpperCase()}
+                                </span>
+                            </div>
+                            ${!notification.isRead ? '<div class="w-2 h-2 bg-orange-500 rounded-full mt-1"></div>' : ''}
+                        `;
+                        notificationList.appendChild(div);
+                    });
+                }
+                dropdown.classList.remove('hidden');
+            } catch (error) {
+                notificationList.innerHTML = '<p class="text-red-500 text-center p-2">Lỗi khi tải thông báo.</p>';
+            }
+        }
+
+        // Show notification detail within dropdown
+        async function showNotificationDetail(notification) {
+            const notificationList = document.getElementById('notificationList');
+
+            try {
+                const response = await fetch(`https://localhost:7031/api/Notification/${notification.id}`, {
+                    method: 'GET',
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch notification detail');
+                }
+
+                const data = await response.json();
+                const detail = data.data;
+
+                // Replace list with detail view
+                notificationList.innerHTML = `
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">${detail.title}</h3>
+                            <button id="backToList" class="text-orange-500 hover:text-orange-600 font-medium">Quay lại</button>
+                        </div>
+                        <p class="text-gray-600 mb-4">${detail.content}</p>
+                        <p class="text-sm text-gray-400 mb-2">Loại: ${detail.type.toUpperCase()}</p>
+                        <p class="text-sm text-gray-400">Thời gian: ${new Date(detail.createdAt).toLocaleString('vi-VN')}</p>
+                    </div>
+                `;
+
+                const backToList = document.getElementById('backToList');
+                  backToList.onclick = (e) => {
+                  e.stopPropagation(); 
+                  getNotificationList({ preventDefault: () => {} }); // Reload the list
+        };
+            } catch (error) {
+                console.error('Error fetching notification detail:', error);
+                notificationList.innerHTML = '<p class="text-red-500 text-center p-2">Không thể tải chi tiết thông báo.</p>';
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('notificationDropdown');
+            const notificationIcon = document.querySelector('a[onclick="getNotificationList(event)"]');
+
+            if (dropdown && !notificationIcon.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Update navigation and notification count on load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNavigation();
+            updateNotificationCount();
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

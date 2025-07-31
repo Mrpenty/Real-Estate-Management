@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Services.Favorite;
 using RealEstateManagement.Business.Services.Properties;
@@ -18,10 +19,9 @@ namespace RealEstateManagement.API.Controllers
         {
             _propertyService = propertyService;
         }
-
         [HttpGet("homepage-allproperty")]
-        //[Authorize(Roles = "Renter")]
-        public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetHomepageProperties()
+        [EnableQuery]
+        public async Task<IActionResult> GetHomepageProperties()
         {
             try
             {
@@ -30,7 +30,29 @@ namespace RealEstateManagement.API.Controllers
                 if (properties == null || !properties.Any())
                     return NotFound("Không tìm thấy bất động sản nào");
 
-                return Ok(properties);
+                return Ok(properties.AsQueryable());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("homepage-paginated")]
+        [EnableQuery]
+        public async Task<IActionResult> GetPaginatedProperties([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                if (page < 1) page = 1;
+                if (pageSize < 1 || pageSize > 100) pageSize = 10;
+
+                var result = await _propertyService.GetPaginatedPropertiesAsync(page, pageSize);
+
+                if (result == null || !result.Data.Any())
+                    return NotFound("Không tìm thấy bất động sản nào");
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -39,7 +61,6 @@ namespace RealEstateManagement.API.Controllers
         }
         //Lấy property theo id
         [HttpGet("{id}")]
-        //[Authorize(Roles = "Renter")]
         public async Task<ActionResult> GetPropertyById(int id, [FromQuery] int userId = 0)
         {
             var property = await _propertyService.GetPropertyByIdAsync(id, userId);
@@ -52,7 +73,6 @@ namespace RealEstateManagement.API.Controllers
         // Sắp xếp theo price
         [HttpGet("filter-by-price")]
 
-        //[Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByPrice([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice)
         {
             if (!minPrice.HasValue || !maxPrice.HasValue)
@@ -75,8 +95,6 @@ namespace RealEstateManagement.API.Controllers
         }
         //Sắp xếp theo diện tích
         [HttpGet("filter-by-area")]
-
-        //[Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByArea([FromQuery] decimal? minArea, [FromQuery] decimal? maxArea)
         {
             if (!minArea.HasValue || !maxArea.HasValue)
