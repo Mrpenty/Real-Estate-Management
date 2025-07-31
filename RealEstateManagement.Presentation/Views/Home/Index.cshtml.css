@@ -95,21 +95,25 @@
     transform: translateX(-50%);
     width: 90%;
     z-index: 20; /* Tăng z-index để hiển thị trên slider */
+    padding: 30px;
 }
 
-/* Dropdown menu */
 .dropdown-menu {
-    position: fixed; /* Giữ fixed để tránh bị che */
+    position: absolute; /* Thay fixed bằng absolute */
+    top: 100%; /* Hiển thị ngay dưới nút dropdown */
+    left: 0;
     background: white;
     border: 2px solid #e1e8ed;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    z-index: 1001; /* Tăng z-index cao hơn */
-    max-height: 0;
-    overflow: hidden;
+    z-index: 1001;
+    max-height: 300px; /* Giới hạn chiều cao */
+    overflow-y: auto; /* Cho phép cuộn nếu nội dung dài */
     opacity: 0;
     pointer-events: none;
     transition: all 0.3s ease;
+    width: 100%; /* Đảm bảo chiều rộng khớp với nút */
+    margin-top: 5px; /* Khoảng cách từ nút */
 }
 
     .dropdown-menu.active {
@@ -118,6 +122,8 @@
         pointer-events: auto;
         margin-top: 5px;
     }
+
+
 
 /* Các phần còn lại giữ nguyên */
 .tab-navigation {
@@ -254,6 +260,7 @@
 
 .custom-dropdown {
     position: relative;
+    width: 100%;
 }
 
 .dropdown-button {
@@ -269,6 +276,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    z-index: 1002; /* Đảm bảo nút đứng trên dropdown */
 }
 
     .dropdown-button:hover {
@@ -410,8 +418,9 @@
     }
 
 .location-dropdown {
-    max-height: 200px;
-    overflow-y: auto;
+    max-height: 250px; /* Giới hạn chiều cao nội dung */
+    overflow-y: auto; /* Cho phép cuộn */
+    padding: 10px 0;
 }
 
 .location-item {
@@ -451,6 +460,15 @@
 
     .search-button {
         width: 100%;
+    }
+
+    .dropdown-menu {
+        max-height: 200px; /* Giảm chiều cao trên mobile */
+    }
+
+    .search-container {
+        width: 95%; /* Tăng chiều rộng trên mobile */
+        padding: 15px;
     }
 }
 

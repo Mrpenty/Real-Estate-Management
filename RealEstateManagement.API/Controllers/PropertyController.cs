@@ -39,6 +39,7 @@ namespace RealEstateManagement.API.Controllers
         }
 
         [HttpGet("homepage-paginated")]
+        [EnableQuery]
         public async Task<IActionResult> GetPaginatedProperties([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
