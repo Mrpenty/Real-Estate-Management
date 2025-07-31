@@ -10,11 +10,15 @@ using RealEstateManagement.Data.Entity.User;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using RealEstateManagement.Data.Entity.Payment;
 using RealEstateManagement.Data.Entity.Messages;
+using RealEstateManagement.Data.Data.Configurations.UserConfig;
 
 public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
 {
     // DbSets for Identity
     public DbSet<UserPreference> UserPreferences { get; set; }
+    // DbSets for Admin Management
+    public DbSet<News> News { get; set; }
+    public DbSet<NewsImage> NewsImages { get; set; }
 
     // DbSets for Property Management
     public DbSet<Property> Properties { get; set; }
@@ -48,7 +52,9 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
+        // Configure News
+        modelBuilder.ApplyConfiguration(new NewsConfiguration());
+        modelBuilder.ApplyConfiguration(new NewsImageConfiguration());
         // Configure Identity
         modelBuilder.ApplyConfiguration(new ApplicationUserConfiguration());
         modelBuilder.ApplyConfiguration(new UserPreferenceConfiguration());
@@ -71,6 +77,7 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
         modelBuilder.ApplyConfiguration(new RentalContractConfiguration());
         modelBuilder.ApplyConfiguration(new PropertyPromotionConfiguration());
         modelBuilder.ApplyConfiguration(new PromotionPackageConfiguration());
+        modelBuilder.ApplyConfiguration(new InterestedPropertyConfiguration());
 
         MainDataSeed.SeedData(modelBuilder);
     }

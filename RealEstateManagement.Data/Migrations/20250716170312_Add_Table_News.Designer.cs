@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace RealEstateManagement.Data.Migrations
 {
     [DbContext(typeof(RentalDbContext))]
-    [Migration("20250712150924_NewInit")]
-    partial class NewInit
+    [Migration("20250716170312_Add_Table_News")]
+    partial class Add_Table_News
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -675,6 +675,124 @@ namespace RealEstateManagement.Data.Migrations
                     b.ToTable("Message");
                 });
 
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.News", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AuthorName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<bool>("IsPublished")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Slug")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Source")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Summary")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("News");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AuthorName = "Admin",
+                            Content = "Dưới đây là 5 điều bạn nên cân nhắc khi thuê nhà trọ...",
+                            CreatedAt = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsPublished = true,
+                            PublishedAt = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Slug = "5-luu-y-khi-thue-nha-tro-tai-tphcm",
+                            Summary = "Các lưu ý quan trọng khi thuê trọ tại TP.HCM",
+                            Title = "5 lưu ý khi thuê nhà trọ tại TP.HCM"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AuthorName = "AI Bot",
+                            Content = "Giá thuê nhà ở hai thành phố lớn có sự chênh lệch như thế nào...",
+                            CreatedAt = new DateTime(2025, 7, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsPublished = true,
+                            PublishedAt = new DateTime(2025, 7, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Slug = "so-sanh-gia-thue-nha-giua-tphcm-va-ha-noi",
+                            Source = "Vietnamnet.vn",
+                            Summary = "Giá thuê nhà giữa TP.HCM và Hà Nội có gì khác biệt?",
+                            Title = "So sánh giá thuê nhà giữa TP.HCM và Hà Nội"
+                        });
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.NewsImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("NewsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NewsId");
+
+                    b.ToTable("NewsImages");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ImageUrl = "/uploads/news/news1-img1.jpg",
+                            NewsId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ImageUrl = "/uploads/news/news2-img1.jpg",
+                            NewsId = 2
+                        });
+                });
+
             modelBuilder.Entity("RealEstateManagement.Data.Entity.Payment.PromotionPackage", b =>
                 {
                     b.Property<int>("Id")
@@ -724,7 +842,7 @@ namespace RealEstateManagement.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9752),
+                            CreatedAt = new DateTime(2025, 7, 17, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(4114),
                             Description = "Basic promotion package for property listings.",
                             DurationInDays = 30,
                             IsActive = true,
@@ -735,7 +853,7 @@ namespace RealEstateManagement.Data.Migrations
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9754),
+                            CreatedAt = new DateTime(2025, 7, 17, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(4116),
                             Description = "Premium promotion package for property listings.",
                             DurationInDays = 60,
                             IsActive = true,
@@ -746,7 +864,7 @@ namespace RealEstateManagement.Data.Migrations
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9756),
+                            CreatedAt = new DateTime(2025, 7, 17, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(4119),
                             Description = "Ultimate promotion package for property listings.",
                             DurationInDays = 90,
                             IsActive = true,
@@ -785,8 +903,8 @@ namespace RealEstateManagement.Data.Migrations
                         {
                             Id = 1,
                             Balance = 0m,
-                            CreatedAt = new DateTime(2025, 7, 12, 15, 9, 23, 324, DateTimeKind.Utc).AddTicks(9466),
-                            UserId = 1
+                            CreatedAt = new DateTime(2025, 7, 16, 17, 3, 10, 365, DateTimeKind.Utc).AddTicks(3957),
+                            UserId = 2
                         });
                 });
 
@@ -828,7 +946,7 @@ namespace RealEstateManagement.Data.Migrations
                         {
                             Id = 1,
                             Amount = 100000m,
-                            CreatedAt = new DateTime(2025, 7, 12, 15, 9, 23, 324, DateTimeKind.Utc).AddTicks(9565),
+                            CreatedAt = new DateTime(2025, 7, 16, 17, 3, 10, 365, DateTimeKind.Utc).AddTicks(4030),
                             Description = "Nạp thử",
                             Type = "Deposit",
                             WalletId = 1
@@ -918,7 +1036,7 @@ namespace RealEstateManagement.Data.Migrations
                             AddressId = 1,
                             Area = 50.5m,
                             Bedrooms = 2,
-                            CreatedAt = new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9265),
+                            CreatedAt = new DateTime(2025, 7, 17, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(3688),
                             Description = "Modern apartment with 2 bedrooms in the heart of HCMC.",
                             IsPromoted = false,
                             IsVerified = true,
@@ -936,7 +1054,7 @@ namespace RealEstateManagement.Data.Migrations
                             AddressId = 2,
                             Area = 20.0m,
                             Bedrooms = 1,
-                            CreatedAt = new DateTime(2025, 7, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9270),
+                            CreatedAt = new DateTime(2025, 7, 16, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(3691),
                             Description = "Cozy shared room for students.",
                             IsPromoted = false,
                             IsVerified = true,
@@ -954,7 +1072,7 @@ namespace RealEstateManagement.Data.Migrations
                             AddressId = 3,
                             Area = 80.0m,
                             Bedrooms = 3,
-                            CreatedAt = new DateTime(2025, 7, 10, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9273),
+                            CreatedAt = new DateTime(2025, 7, 15, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(3695),
                             Description = "Spacious house with 3 bedrooms.",
                             IsPromoted = true,
                             IsVerified = true,
@@ -1130,31 +1248,31 @@ namespace RealEstateManagement.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9423),
+                            CreatedAt = new DateTime(2025, 7, 17, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(3906),
                             LandlordId = 2,
                             PropertyId = 1,
                             Status = "Approved",
-                            VerifiedAt = new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9424),
+                            VerifiedAt = new DateTime(2025, 7, 17, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(3906),
                             VerifiedBy = 1
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2025, 7, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9427),
+                            CreatedAt = new DateTime(2025, 7, 16, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(3909),
                             LandlordId = 2,
                             PropertyId = 2,
                             Status = "Approved",
-                            VerifiedAt = new DateTime(2025, 7, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9428),
+                            VerifiedAt = new DateTime(2025, 7, 16, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(3910),
                             VerifiedBy = 1
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2025, 7, 10, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9430),
+                            CreatedAt = new DateTime(2025, 7, 15, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(3912),
                             LandlordId = 2,
                             PropertyId = 3,
                             Status = "Approved",
-                            VerifiedAt = new DateTime(2025, 7, 10, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9431),
+                            VerifiedAt = new DateTime(2025, 7, 15, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(3912),
                             VerifiedBy = 1
                         });
                 });
@@ -1191,26 +1309,26 @@ namespace RealEstateManagement.Data.Migrations
                         new
                         {
                             Id = 1,
-                            EndDate = new DateTime(2025, 8, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9792),
+                            EndDate = new DateTime(2025, 8, 16, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(4268),
                             PackageId = 1,
                             PropertyId = 1,
-                            StartDate = new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9791)
+                            StartDate = new DateTime(2025, 7, 17, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(4267)
                         },
                         new
                         {
                             Id = 2,
-                            EndDate = new DateTime(2025, 8, 10, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9795),
+                            EndDate = new DateTime(2025, 8, 15, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(4270),
                             PackageId = 2,
                             PropertyId = 2,
-                            StartDate = new DateTime(2025, 7, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9794)
+                            StartDate = new DateTime(2025, 7, 16, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(4269)
                         },
                         new
                         {
                             Id = 3,
-                            EndDate = new DateTime(2025, 10, 8, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9797),
+                            EndDate = new DateTime(2025, 10, 13, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(4272),
                             PackageId = 3,
                             PropertyId = 3,
-                            StartDate = new DateTime(2025, 7, 10, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9796)
+                            StartDate = new DateTime(2025, 7, 15, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(4271)
                         });
                 });
 
@@ -1283,10 +1401,10 @@ namespace RealEstateManagement.Data.Migrations
                         new
                         {
                             Id = 1,
-                            ConfirmedAt = new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9877),
+                            ConfirmedAt = new DateTime(2025, 7, 17, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(4325),
                             ContactInfo = "renter@example.com | 03345678910",
                             ContractDurationMonths = 12,
-                            CreatedAt = new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9876),
+                            CreatedAt = new DateTime(2025, 7, 17, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(4325),
                             DepositAmount = 2000000m,
                             LandlordId = 2,
                             MonthlyRent = 5000000m,
@@ -1303,7 +1421,7 @@ namespace RealEstateManagement.Data.Migrations
                             Id = 2,
                             ContactInfo = "renter2@example.com | 0322222222",
                             ContractDurationMonths = 6,
-                            CreatedAt = new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9924),
+                            CreatedAt = new DateTime(2025, 7, 17, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(4336),
                             DepositAmount = 1500000m,
                             LandlordId = 2,
                             MonthlyRent = 2000000m,
@@ -1364,7 +1482,7 @@ namespace RealEstateManagement.Data.Migrations
                         {
                             Id = 1,
                             Comment = "Great location and clean apartment!",
-                            CreatedAt = new DateTime(2025, 7, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9602),
+                            CreatedAt = new DateTime(2025, 7, 16, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(4071),
                             IsApproved = true,
                             PropertyId = 1,
                             Rating = 4,
@@ -1511,8 +1629,8 @@ namespace RealEstateManagement.Data.Migrations
                             CitizenIdFrontImageUrl = "https://example.com/cccd/admin_front.jpg",
                             CitizenIdIssuedDate = new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CitizenIdNumber = "01234567890",
-                            ConcurrencyStamp = "424909f1-2a0a-41d0-b0e4-516cef6d4133",
-                            CreatedAt = new DateTime(2025, 7, 12, 22, 9, 23, 60, DateTimeKind.Local).AddTicks(3861),
+                            ConcurrencyStamp = "85f69b30-2c2f-4a3d-b433-85c9e120e422",
+                            CreatedAt = new DateTime(2025, 7, 17, 0, 3, 10, 149, DateTimeKind.Local).AddTicks(5143),
                             Email = "admin@example.com",
                             EmailConfirmed = false,
                             IsActive = true,
@@ -1521,11 +1639,11 @@ namespace RealEstateManagement.Data.Migrations
                             Name = "Admin User",
                             NormalizedEmail = "ADMIN@EXAMPLE.COM",
                             NormalizedUserName = "ADMIN@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEABdLF+n0+Pbe5o27W+/gqpvDJOVnSMW2PxzydMX9xtMxg3WnfDhxiW6qEoSXaWfhA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAELe0uP4N0vDaCb9pvHwGWe6Kb3qYTI+TyWFA0+DO9m8YOiYb0Rv6cuDhDf3Pb+xY3g==",
                             PhoneNumber = "+841234567891",
                             PhoneNumberConfirmed = true,
                             Role = "admin",
-                            SecurityStamp = "db18075b-9ca9-4759-9877-5e231b589b80",
+                            SecurityStamp = "c0790dc8-6932-4f99-a5d4-927ff735775d",
                             TwoFactorEnabled = false,
                             UserName = "admin@example.com"
                         },
@@ -1539,8 +1657,8 @@ namespace RealEstateManagement.Data.Migrations
                             CitizenIdImageUrl = "https://example.com/cccd/landlord.jpg",
                             CitizenIdIssuedDate = new DateTime(2021, 2, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CitizenIdNumber = "002345678901",
-                            ConcurrencyStamp = "8096638a-fc01-4aa8-a475-92085d126e0a",
-                            CreatedAt = new DateTime(2025, 7, 12, 22, 9, 23, 152, DateTimeKind.Local).AddTicks(4444),
+                            ConcurrencyStamp = "f67d8439-d399-429e-9860-083651c4e05a",
+                            CreatedAt = new DateTime(2025, 7, 17, 0, 3, 10, 219, DateTimeKind.Local).AddTicks(2177),
                             Email = "landlord@example.com",
                             EmailConfirmed = false,
                             IsActive = true,
@@ -1549,12 +1667,12 @@ namespace RealEstateManagement.Data.Migrations
                             Name = "Landlord User",
                             NormalizedEmail = "LANDLORD@EXAMPLE.COM",
                             NormalizedUserName = "LANDLORD@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAELDx2YpLBzRD4M9pl7TZv03G61yxar5pbF/LQH7loD1JP260Wrmfzsbd+Uyau0WpCQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAELkBPLGTyievy7jAxrupX5oMuP8aUdwEWpQZwVMzh/4gUqSu1Dq8htxDfmZY++AnpA==",
                             PhoneNumber = "+842345678910",
                             PhoneNumberConfirmed = true,
                             ProfilePictureUrl = "https://th.bing.com/th/id/R.63d31ac6257157ef079f31bb32e342df?rik=63%2bkafQNo5seHg&pid=ImgRaw&r=0",
                             Role = "landlord",
-                            SecurityStamp = "04b4cf68-3413-41e0-aa66-5e850de9fabd",
+                            SecurityStamp = "f1706dcd-670c-42c2-b912-da06c63821a0",
                             TwoFactorEnabled = false,
                             UserName = "landlord@example.com"
                         },
@@ -1568,8 +1686,8 @@ namespace RealEstateManagement.Data.Migrations
                             CitizenIdImageUrl = "https://example.com/cccd/renter.jpg",
                             CitizenIdIssuedDate = new DateTime(2022, 3, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CitizenIdNumber = "003456789012",
-                            ConcurrencyStamp = "8253dc22-e9a4-4af6-8ca6-801d61d82948",
-                            CreatedAt = new DateTime(2025, 7, 12, 22, 9, 23, 230, DateTimeKind.Local).AddTicks(8906),
+                            ConcurrencyStamp = "eb437f3a-0ae5-4600-903b-4ac4406194b5",
+                            CreatedAt = new DateTime(2025, 7, 17, 0, 3, 10, 296, DateTimeKind.Local).AddTicks(1242),
                             Email = "renter@example.com",
                             EmailConfirmed = false,
                             IsActive = true,
@@ -1578,11 +1696,11 @@ namespace RealEstateManagement.Data.Migrations
                             Name = "Renter User",
                             NormalizedEmail = "RENTER@EXAMPLE.COM",
                             NormalizedUserName = "RENTER@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEL9OvBXKJ4ifB/n0FtIfXiBoT5UB2B5Tz/cyE+HFj3qr1RAON9/zYfj2MLW5jr6Dyw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFMj4DJqpJqBn/WTiP2z7xh40NFSiFo4kLpImVQiUgECV3fE3jJvJNnzlMuuyTPJuw==",
                             PhoneNumber = "+843345678910",
                             PhoneNumberConfirmed = true,
                             Role = "renter",
-                            SecurityStamp = "03266972-131c-414c-b818-1badb2d2eeac",
+                            SecurityStamp = "0b0b9977-66fd-4267-b94a-76ac81e214f3",
                             TwoFactorEnabled = false,
                             UserName = "renter@example.com"
                         },
@@ -1596,8 +1714,8 @@ namespace RealEstateManagement.Data.Migrations
                             CitizenIdImageUrl = "https://example.com/cccd/renter2.jpg",
                             CitizenIdIssuedDate = new DateTime(2023, 4, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CitizenIdNumber = "004567890123",
-                            ConcurrencyStamp = "3d59fbfc-e023-46da-b143-02b638a7f888",
-                            CreatedAt = new DateTime(2025, 7, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(8316),
+                            ConcurrencyStamp = "c69a901b-c09d-4ce1-96f9-fac32b5b3e97",
+                            CreatedAt = new DateTime(2025, 7, 16, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(2597),
                             Email = "renter2@example.com",
                             EmailConfirmed = false,
                             IsActive = false,
@@ -1606,10 +1724,10 @@ namespace RealEstateManagement.Data.Migrations
                             Name = "Renter User 2",
                             NormalizedEmail = "RENTER2@EXAMPLE.COM",
                             NormalizedUserName = "RENTER2@EXAMPLE.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEIxbGWRQ0naQlm5A728dyTnVYdVE+rqEyrTSlccer7/pqj6GAPFwochqZ4dsVs2mMg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHUOy86nFeouIP8aLcUPTdpIYir1WoQRqd+l6KgOzk7e/w0ECXxeYvJ8KnBR5FtuAw==",
                             PhoneNumberConfirmed = false,
                             Role = "renter",
-                            SecurityStamp = "a094b9bf-74d6-4e39-88c0-baca4e9645f2",
+                            SecurityStamp = "4ca037d1-dcc7-4255-bf77-4c5aa7ce225a",
                             TwoFactorEnabled = false,
                             UserName = "renter2@example.com",
                             VerificationRejectReason = "Ảnh CCCD mặt sau bị mờ, thiếu ngày cấp. Vui lòng bổ sung lại!"
@@ -1698,7 +1816,7 @@ namespace RealEstateManagement.Data.Migrations
                         {
                             Id = 1,
                             Amenities = "WiFi,Parking",
-                            CreatedAt = new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9041),
+                            CreatedAt = new DateTime(2025, 7, 17, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(3303),
                             Location = "District 1",
                             PriceRangeMax = 6000000m,
                             PriceRangeMin = 3000000m,
@@ -1708,7 +1826,7 @@ namespace RealEstateManagement.Data.Migrations
                         {
                             Id = 2,
                             Amenities = "WiFi",
-                            CreatedAt = new DateTime(2025, 7, 10, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9044),
+                            CreatedAt = new DateTime(2025, 7, 15, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(3307),
                             Location = "Go Vap",
                             PriceRangeMax = 3000000m,
                             PriceRangeMin = 1500000m,
@@ -1718,7 +1836,7 @@ namespace RealEstateManagement.Data.Migrations
                         {
                             Id = 3,
                             Amenities = "AC",
-                            CreatedAt = new DateTime(2025, 7, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9051),
+                            CreatedAt = new DateTime(2025, 7, 16, 0, 3, 10, 365, DateTimeKind.Local).AddTicks(3309),
                             Location = "Tan Binh",
                             PriceRangeMax = 4000000m,
                             PriceRangeMin = 2000000m,
@@ -1861,6 +1979,17 @@ namespace RealEstateManagement.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.NewsImage", b =>
+                {
+                    b.HasOne("RealEstateManagement.Data.Entity.News", "News")
+                        .WithMany("Images")
+                        .HasForeignKey("NewsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("News");
                 });
 
             modelBuilder.Entity("RealEstateManagement.Data.Entity.Payment.Wallet", b =>
@@ -2083,6 +2212,11 @@ namespace RealEstateManagement.Data.Migrations
             modelBuilder.Entity("RealEstateManagement.Data.Entity.Messages.Conversation", b =>
                 {
                     b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("RealEstateManagement.Data.Entity.News", b =>
+                {
+                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("RealEstateManagement.Data.Entity.Payment.PromotionPackage", b =>

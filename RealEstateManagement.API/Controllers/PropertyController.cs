@@ -14,9 +14,11 @@ namespace RealEstateManagement.API.Controllers
     public class PropertyController : ControllerBase
     {
         private readonly IPropertyService _propertyService;
-        public PropertyController(IPropertyService propertyService)
+        private readonly IFavoriteService _favoriteService;
+        public PropertyController(IPropertyService propertyService, IFavoriteService favoriteService)
         {
             _propertyService = propertyService;
+            _favoriteService = favoriteService;
         }
 
         [HttpGet("homepage-allproperty")]
@@ -231,6 +233,29 @@ namespace RealEstateManagement.API.Controllers
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+        }
+        [HttpGet("{userId}/profile-with-properties")]
+        public async Task<IActionResult> GetUserProfileWithProperties(int userId)
+        {
+            // Lấy access token từ header
+            var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+            int currentId = 0;
+
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var token = handler.ReadJwtToken(accessToken);
+                var userIdClaim = token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+                int.TryParse(userIdClaim, out currentId);
+            }
+
+            // Truyền currentId vào service (nếu không login, currentId = 0)
+            var result = await _propertyService.GetUserProfileWithPropertiesAsync(userId, currentId == 0 ? null : (int?)currentId);
+
+            if (result == null)
+                return NotFound("Không tìm thấy người dùng hoặc người dùng không có bất động sản nào.");
+            return Ok(result);
         }
     }
 }
