@@ -3,7 +3,6 @@
     Layout = "~/Views/Shared/_LayoutV2.cshtml";
 }
 
-
 <!-- Search Bar chồng lên Slider -->
 <div class="slider">
     <div class="search-container">
@@ -190,19 +189,27 @@
     let slideIndex = 0;
     let slides = [];
 
-    getAllProperty();
+    getAllData();
 
-    async function getAllProperty() {
+    async function getAllData() {
         try {
-            const data = await propertyService.getAllproperty();
-            if (data && data.length > 0) {
-                // Phân chia danh sách
-                const featuredProperties = data.filter(item => item.promotionPackageName != null);
-                const recommendedProperties = data.filter(item => item.promotionPackageName == null)
-                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            const [properties, sliders] = await Promise.all([
+                propertyService.getAllproperty(),
+                fetch(`${urlBase}/api/admin/slider`).then(res => res.json())
+            ]);
 
-                // Cập nhật slider với featuredProperties
-                updateSlider(featuredProperties);
+            if (sliders && sliders.length > 0) {
+                // Cập nhật slider với dữ liệu từ API slider
+                updateSlider(sliders);
+            } else {
+                document.getElementById('sliderContainer').innerHTML = '<p>Không có slider để hiển thị.</p>';
+            }
+
+            if (properties && properties.length > 0) {
+                // Phân chia danh sách
+                const featuredProperties = properties.filter(item => item.promotionPackageName != null);
+                const recommendedProperties = properties.filter(item => item.promotionPackageName == null)
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
                 // Hiển thị Bất động sản nổi bật
                 let featuredHtml = '';
@@ -220,21 +227,24 @@
             } else {
                 document.getElementById('featuredProperties').innerHTML = '<p>Không có bất động sản nổi bật.</p>';
                 document.getElementById('recommendedProperties').innerHTML = '<p>Không có bất động sản dành cho bạn.</p>';
-                document.getElementById('sliderContainer').innerHTML = '<p>Không có hình ảnh nổi bật.</p>';
             }
         } catch (error) {
-            console.error('Lỗi khi lấy danh sách bất động sản:', error);
+            console.error('Lỗi khi lấy dữ liệu:', error);
             document.getElementById('featuredProperties').innerHTML = '<p>Lỗi khi tải dữ liệu.</p>';
             document.getElementById('recommendedProperties').innerHTML = '<p>Lỗi khi tải dữ liệu.</p>';
-            document.getElementById('sliderContainer').innerHTML = '<p>Lỗi khi tải hình ảnh.</p>';
+            document.getElementById('sliderContainer').innerHTML = '<p>Lỗi khi tải slider.</p>';
         }
     }
 
-    function updateSlider(featuredProperties) {
+       function updateSlider(sliders) {
         const sliderContainer = document.getElementById('sliderContainer');
         const sliderDots = document.getElementById('sliderDots');
-        slides = featuredProperties.map(item => `
-            <img src="${item.primaryImageUrl?.includes('http') ? item.primaryImageUrl : urlBase + item.primaryImageUrl}" alt="${item.title}" class="slider-item">
+
+      
+        slides = sliders.map(item => `
+            <div class="slider-item-wrapper">
+                <img src="${item.imageUrl?.includes('http') ? item.imageUrl : urlBase + item.imageUrl}" alt="${item.title}" class="slider-item">
+            </div>
         `);
         sliderContainer.innerHTML = slides.join('');
         sliderDots.innerHTML = slides.map((_, index) => `<span class="slider-dot" onclick="currentSlide(${index})"></span>`).join('');
@@ -261,7 +271,7 @@
         showSlides(slideIndex = n);
     }
 
-       function createPropertyCard(item) {
+    function createPropertyCard(item) {
         return `
             <div id="card-property-${item.id}" class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300" data-id="${item.id}">
                 <!-- Image and Buttons -->
@@ -545,9 +555,6 @@
         window.location.reload();
     }
 
- 
- 
-
     function filterPrice(event, minPrice, maxPrice) {
         event.preventDefault();
         let body = {
@@ -556,7 +563,6 @@
         sessionStorage.setItem('filterData', JSON.stringify(body));
         window.location.reload();
     }
-
 
     function filterArea(event, minArea, maxArea) {
         event.preventDefault();
@@ -575,6 +581,7 @@
             else removeToFavorite(id);
         }
     }
+
     async function startChatWithLandlord(landlordId) {
         const token = localStorage.getItem("authToken");
         if (!token) {
@@ -623,8 +630,4 @@
             return null;
         }
     }
-
-
-
-
 </script>

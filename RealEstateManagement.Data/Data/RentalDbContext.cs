@@ -49,6 +49,8 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<ApplicationUserNotification> ApplicationUserNotifications { get; set; }
 
+    public DbSet<Slider> Sliders { get; set; }
+
     public RentalDbContext(DbContextOptions<RentalDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

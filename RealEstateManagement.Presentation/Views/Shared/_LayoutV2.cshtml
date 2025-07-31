@@ -257,11 +257,13 @@
             const registerNavItem = document.getElementById('registerNavItem');
             const userProfileNavItem = document.getElementById('userProfileNavItem');
             const userProfileLink = document.getElementById('userProfileLink');
+            const notificationBell = document.querySelector('a[onclick="getNotificationList(event)"]'); // Thêm dòng này
 
             if (isAuthenticated) {
                 if (loginNavItem) loginNavItem.style.display = 'none';
                 if (registerNavItem) registerNavItem.style.display = 'none';
                 if (userProfileNavItem) userProfileNavItem.style.display = 'flex';
+                if (notificationBell) notificationBell.style.display = 'inline-flex'; // Hiện chuông
                 
                 // Set user name in dropdown
                 const user = authService.getCurrentUser();
@@ -272,6 +274,7 @@
                 if (loginNavItem) loginNavItem.style.display = 'flex';
                 if (registerNavItem) registerNavItem.style.display = 'flex';
                 if (userProfileNavItem) userProfileNavItem.style.display = 'none';
+                if (notificationBell) notificationBell.style.display = 'none'; // Ẩn chuông
             }
         }
 
@@ -340,6 +343,25 @@
             }
         }
 
+        // Hàm cập nhật số lượng thông báo chưa đọc khi vào trang
+        async function updateNotificationCount() {
+            const notificationCount = document.getElementById('notificationCount');
+            if (!authService.isAuthenticated()) {
+                if (notificationCount) notificationCount.textContent = '';
+                return;
+            }
+            try {
+                const response = await fetch('https://localhost:7031/api/Notification/all', { method: 'GET' });
+                if (!response.ok) throw new Error('Failed to fetch notifications');
+                const data = await response.json();
+                const notifications = data.data || [];
+                const unreadCount = notifications.filter(n => !n.isRead).length;
+                notificationCount.textContent = unreadCount > 0 ? unreadCount : '';
+            } catch {
+                if (notificationCount) notificationCount.textContent = '';
+            }
+        }
+
         // Update navigation when page loads
         document.addEventListener('DOMContentLoaded', updateNavigation);
 
@@ -361,7 +383,7 @@
         });
 
 
-        // Get notification list
+        // Sửa getNotificationList để toggle modal
         async function getNotificationList(event) {
             event.preventDefault();
             const isAuthenticated = authService.isAuthenticated();
@@ -369,39 +391,32 @@
                 window.location.href = '/Auth/Login';
                 return;
             }
-
             const dropdown = document.getElementById('notificationDropdown');
+            // Nếu dropdown đang mở thì ẩn đi (toggle)
+            if (!dropdown.classList.contains('hidden')) {
+                dropdown.classList.add('hidden');
+                return;
+            }
+            // Nếu dropdown đang ẩn thì load và hiện
             const notificationList = document.getElementById('notificationList');
             const notificationCount = document.getElementById('notificationCount');
-
             try {
-                // Fetch notifications from API
-                const response = await fetch('https://localhost:7031/api/Notification/all', {
-                    method: 'GET',
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch notifications');
-                }
-
+                const response = await fetch('https://localhost:7031/api/Notification/all', { method: 'GET' });
+                if (!response.ok) throw new Error('Failed to fetch notifications');
                 const data = await response.json();
                 const notifications = data.data || [];
-
                 // Update unread count
                 const unreadCount = notifications.filter(n => !n.isRead).length;
                 notificationCount.textContent = unreadCount > 0 ? unreadCount : '';
-
-                // Clear previous notifications
-                notificationList.innerHTML = '';
-
                 // Render notifications
+                notificationList.innerHTML = '';
                 if (notifications.length === 0) {
                     notificationList.innerHTML = '<p class="text-gray-500 text-center p-2">Không có thông báo nào.</p>';
                 } else {
                     notifications.forEach(notification => {
                         const div = document.createElement('div');
                         div.className = 'p-3 bg-white hover:bg-orange-50 rounded-lg cursor-pointer transition-colors duration-200';
-                        div.onclick = () => showNotificationDetail(notification); // Gọi chi tiết khi nhấp
+                        div.onclick = () => showNotificationDetail(notification);
                         div.innerHTML = `
                             <div class="flex justify-between items-start">
                                 <div>
@@ -418,11 +433,8 @@
                         notificationList.appendChild(div);
                     });
                 }
-
-                // Toggle dropdown
                 dropdown.classList.remove('hidden');
             } catch (error) {
-                console.error('Error fetching notifications:', error);
                 notificationList.innerHTML = '<p class="text-red-500 text-center p-2">Lỗi khi tải thông báo.</p>';
             }
         }
@@ -480,7 +492,7 @@
         // Update navigation and notification count on load
         document.addEventListener('DOMContentLoaded', () => {
             updateNavigation();
-            getNotificationList({ preventDefault: () => {} }); // Load initial count
+            updateNotificationCount();
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)

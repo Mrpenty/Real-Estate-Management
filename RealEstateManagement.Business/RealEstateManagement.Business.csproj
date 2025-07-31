@@ -19,4 +19,8 @@
     <ProjectReference Include="..\RealEstateManagement.Data\RealEstateManagement.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\Sliders\" />
+  </ItemGroup>
+
 </Project>

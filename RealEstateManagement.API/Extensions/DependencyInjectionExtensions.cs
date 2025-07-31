@@ -48,6 +48,7 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IFavoriteRepository, FavoriteRepository>();
             services.AddScoped<IPromotionPackageRepository, PromotionPackageRepository>();
             services.AddScoped<IPropertyPromotionRepository, PropertyPromotionRepository>();
+            services.AddScoped<ISliderRepository, SliderRepository>();
             //Chat Repository
             services.AddScoped<IConversationRepository, ConversationRepository>();
             services.AddScoped<IMessageRepository,MessageRepository>();
@@ -65,6 +66,7 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IPropertyImageService, PropertyImageService>();
             services.AddScoped<IOwnerPropertyService, OwnerPropertyService>();
             services.AddScoped<IRentalContractService, RentalContractService>();
+            services.AddScoped<ISliderService, SliderService>();
 
             //user and auth services
             services.AddScoped<IAuthService, AuthService>();
