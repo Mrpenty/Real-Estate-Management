@@ -20,10 +20,10 @@ using RealEstateManagement.Business.Services.Chat.Conversations;
 using RealEstateManagement.Business.Repositories.Package;
 using RealEstateManagement.Business.Services.PromotionPackages;
 
-using RealEstateManagement.Business.Repositories.TenantInteraction;
-using RealEstateManagement.Business.Services.TenantInteraction;
 
 using RealEstateManagement.Business.Services.Wallet;
+using RealEstateManagement.Business.Repositories.NewsRepository;
+using RealEstateManagement.Business.Services.NewsService;
 
 
 namespace RealEstateManagement.API.Extensions
@@ -53,9 +53,9 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IPropertyPromotionRepository, PropertyPromotionRepository>();
             //Chat Repository
             services.AddScoped<IConversationRepository, ConversationRepository>();
-            services.AddScoped<IMessageRepository,MessageRepository>();
+            services.AddScoped<IMessageRepository, MessageRepository>();
 
-          
+
 
             //----Service----\\
 
@@ -82,13 +82,14 @@ namespace RealEstateManagement.API.Extensions
             //Chat Serivce
             services.AddScoped<IConversationService, ConversationService>();
             services.AddScoped<IMessageService, MessageService>();
+            // News
+            services.AddScoped<INewsRepository, NewsRepository>();
+            services.AddScoped<INewsService, NewsService>();
+            services.AddScoped<INewsImageRepository, NewsImageRepository>();
+            services.AddScoped<INewImageService, NewImageService>();
 
 
-            // Tenant Interaction Service
-            services.AddScoped<IInteractionService, InteractionService>();
-            services.AddScoped<IInteractionRepository, InteractionRepository>();
 
-           
 
             //Wallet
             services.AddScoped<WalletService>();
