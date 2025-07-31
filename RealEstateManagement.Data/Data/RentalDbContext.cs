@@ -15,6 +15,9 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
 {
     // DbSets for Identity
     public DbSet<UserPreference> UserPreferences { get; set; }
+    // DbSets for Admin Management
+    public DbSet<News> News { get; set; }
+    public DbSet<NewsImage> NewsImages { get; set; }
 
     // DbSets for Property Management
     public DbSet<Property> Properties { get; set; }
@@ -33,7 +36,7 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     public DbSet<Review> Reviews { get; set; }
     public DbSet<UserFavoriteProperty> UserFavoriteProperties { get; set; }
 
-    public DbSet <PromotionPackage> promotionPackages { get; set; }
+    public DbSet<PromotionPackage> promotionPackages { get; set; }
     public DbSet<PropertyPromotion> PropertyPromotions { get; set; }
 
 
@@ -48,7 +51,9 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
+        // Configure News
+        modelBuilder.ApplyConfiguration(new NewsConfiguration());
+        modelBuilder.ApplyConfiguration(new NewsImageConfiguration());
         // Configure Identity
         modelBuilder.ApplyConfiguration(new ApplicationUserConfiguration());
         modelBuilder.ApplyConfiguration(new UserPreferenceConfiguration());
@@ -71,6 +76,7 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
         modelBuilder.ApplyConfiguration(new RentalContractConfiguration());
         modelBuilder.ApplyConfiguration(new PropertyPromotionConfiguration());
         modelBuilder.ApplyConfiguration(new PromotionPackageConfiguration());
+        //modelBuilder.ApplyConfiguration(new PromotionPackageConfiguration());
 
         MainDataSeed.SeedData(modelBuilder);
     }
