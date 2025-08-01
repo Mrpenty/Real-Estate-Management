@@ -22,6 +22,8 @@ using RealEstateManagement.Business.Services.PromotionPackages;
 
 
 using RealEstateManagement.Business.Services.Wallet;
+using RealEstateManagement.Business.Repositories.NewsRepository;
+using RealEstateManagement.Business.Services.NewsService;
 
 using RealEstateManagement.Business.Repositories.NewsRepository;
 using RealEstateManagement.Business.Services.NewsService;
@@ -103,13 +105,12 @@ namespace RealEstateManagement.API.Extensions
 
 
 
+
             //Notification Service
             services.AddScoped<INotificationService, NotificationService>();
 
 
-            // Tenant Interaction Service
-            services.AddScoped<IInteractionService, InteractionService>();
-            services.AddScoped<IInteractionRepository, InteractionRepository>();
+
 
 
 

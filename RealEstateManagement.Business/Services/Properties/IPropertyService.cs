@@ -37,6 +37,8 @@ namespace RealEstateManagement.Business.Services.Properties
         Task<IEnumerable<Amenity>> GetAmenitiesAsync();
 
         Task<IEnumerable<HomePropertyDTO>> FilterByTypeAsync(string type);
+        // Lấy tất cả property theo landlordId
+        Task<UserProfileWithPropertiesDTO?> GetUserProfileWithPropertiesAsync(int userId, int? currentId = null);
 
     }
 }

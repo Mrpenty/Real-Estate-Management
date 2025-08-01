@@ -11,6 +11,7 @@ using RealEstateManagement.Data.Entity.User;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using RealEstateManagement.Data.Entity.Payment;
 using RealEstateManagement.Data.Entity.Messages;
+using RealEstateManagement.Data.Data.Configurations.UserConfig;
 
 public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
 {
@@ -85,7 +86,8 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
         modelBuilder.ApplyConfiguration(new RentalContractConfiguration());
         modelBuilder.ApplyConfiguration(new PropertyPromotionConfiguration());
         modelBuilder.ApplyConfiguration(new PromotionPackageConfiguration());
-        //modelBuilder.ApplyConfiguration(new PromotionPackageConfiguration());
+        modelBuilder.ApplyConfiguration(new InterestedPropertyConfiguration());
+
 
         MainDataSeed.SeedData(modelBuilder);
     }
