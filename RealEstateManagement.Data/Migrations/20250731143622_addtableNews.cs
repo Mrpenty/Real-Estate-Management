@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RealEstateManagement.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class NewInit : Migration
+    public partial class addtableNews : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -83,6 +83,28 @@ namespace RealEstateManagement.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "News",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Slug = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Summary = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    PublishedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    AuthorName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Source = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    IsPublished = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_News", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -264,6 +286,28 @@ namespace RealEstateManagement.Data.Migrations
                         name: "FK_Wallets_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "NewsImages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    NewsId = table.Column<int>(type: "int", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    IsPrimary = table.Column<bool>(type: "bit", nullable: false),
+                    Order = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NewsImages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_NewsImages_News_NewsId",
+                        column: x => x.NewsId,
+                        principalTable: "News",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -699,10 +743,19 @@ namespace RealEstateManagement.Data.Migrations
                 columns: new[] { "Id", "AccessFailedCount", "CitizenIdBackImageUrl", "CitizenIdExpiryDate", "CitizenIdFrontImageUrl", "CitizenIdImageUrl", "CitizenIdIssuedDate", "CitizenIdNumber", "ConcurrencyStamp", "ConfirmationCode", "ConfirmationCodeExpiry", "CreatedAt", "Email", "EmailConfirmed", "IsActive", "IsVerified", "LockoutEnabled", "LockoutEnd", "Name", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "ProfilePictureUrl", "RefreshToken", "RefreshTokenExpiryTime", "Role", "SecurityStamp", "TwoFactorEnabled", "UserName", "VerificationRejectReason" },
                 values: new object[,]
                 {
-                    { 1, 0, "https://example.com/cccd/admin_back.jpg", new DateTime(2030, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "https://example.com/cccd/admin_front.jpg", null, new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "01234567890", "424909f1-2a0a-41d0-b0e4-516cef6d4133", null, null, new DateTime(2025, 7, 12, 22, 9, 23, 60, DateTimeKind.Local).AddTicks(3861), "admin@example.com", false, true, true, false, null, "Admin User", "ADMIN@EXAMPLE.COM", "ADMIN@EXAMPLE.COM", "AQAAAAIAAYagAAAAEABdLF+n0+Pbe5o27W+/gqpvDJOVnSMW2PxzydMX9xtMxg3WnfDhxiW6qEoSXaWfhA==", "+841234567891", true, null, null, null, "admin", "db18075b-9ca9-4759-9877-5e231b589b80", false, "admin@example.com", null },
-                    { 2, 0, "https://example.com/cccd/landlord_back.jpg", new DateTime(2031, 2, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), "https://example.com/cccd/landlord_front.jpg", "https://example.com/cccd/landlord.jpg", new DateTime(2021, 2, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), "002345678901", "8096638a-fc01-4aa8-a475-92085d126e0a", null, null, new DateTime(2025, 7, 12, 22, 9, 23, 152, DateTimeKind.Local).AddTicks(4444), "landlord@example.com", false, true, true, false, null, "Landlord User", "LANDLORD@EXAMPLE.COM", "LANDLORD@EXAMPLE.COM", "AQAAAAIAAYagAAAAELDx2YpLBzRD4M9pl7TZv03G61yxar5pbF/LQH7loD1JP260Wrmfzsbd+Uyau0WpCQ==", "+842345678910", true, "https://th.bing.com/th/id/R.63d31ac6257157ef079f31bb32e342df?rik=63%2bkafQNo5seHg&pid=ImgRaw&r=0", null, null, "landlord", "04b4cf68-3413-41e0-aa66-5e850de9fabd", false, "landlord@example.com", null },
-                    { 3, 0, "https://example.com/cccd/renter_back.jpg", new DateTime(2032, 3, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), "https://example.com/cccd/renter_front.jpg", "https://example.com/cccd/renter.jpg", new DateTime(2022, 3, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), "003456789012", "8253dc22-e9a4-4af6-8ca6-801d61d82948", null, null, new DateTime(2025, 7, 12, 22, 9, 23, 230, DateTimeKind.Local).AddTicks(8906), "renter@example.com", false, true, true, false, null, "Renter User", "RENTER@EXAMPLE.COM", "RENTER@EXAMPLE.COM", "AQAAAAIAAYagAAAAEL9OvBXKJ4ifB/n0FtIfXiBoT5UB2B5Tz/cyE+HFj3qr1RAON9/zYfj2MLW5jr6Dyw==", "+843345678910", true, null, null, null, "renter", "03266972-131c-414c-b818-1badb2d2eeac", false, "renter@example.com", null },
-                    { 4, 0, "https://example.com/cccd/renter2_back.jpg", new DateTime(2033, 4, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "https://example.com/cccd/renter2_front.jpg", "https://example.com/cccd/renter2.jpg", new DateTime(2023, 4, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "004567890123", "3d59fbfc-e023-46da-b143-02b638a7f888", null, null, new DateTime(2025, 7, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(8316), "renter2@example.com", false, false, true, false, null, "Renter User 2", "RENTER2@EXAMPLE.COM", "RENTER2@EXAMPLE.COM", "AQAAAAIAAYagAAAAEIxbGWRQ0naQlm5A728dyTnVYdVE+rqEyrTSlccer7/pqj6GAPFwochqZ4dsVs2mMg==", null, false, null, null, null, "renter", "a094b9bf-74d6-4e39-88c0-baca4e9645f2", false, "renter2@example.com", "Ảnh CCCD mặt sau bị mờ, thiếu ngày cấp. Vui lòng bổ sung lại!" }
+                    { 1, 0, "https://example.com/cccd/admin_back.jpg", new DateTime(2030, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "https://example.com/cccd/admin_front.jpg", null, new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "01234567890", "6de59c84-f67b-4cff-8535-2d4f47981be3", null, null, new DateTime(2025, 7, 31, 21, 36, 21, 262, DateTimeKind.Local).AddTicks(7694), "admin@example.com", false, true, true, false, null, "Admin User", "ADMIN@EXAMPLE.COM", "ADMIN@EXAMPLE.COM", "AQAAAAIAAYagAAAAEF6mo088LT+n3BHh0CnsKc2s3X1ED3fRil1TWg1V+jFzpbtIHcQ/iI2JZik/+WViAQ==", "+841234567891", true, null, null, null, "admin", "9e734099-4cdc-47f3-88a7-962c0ed3af2f", false, "admin@example.com", null },
+                    { 2, 0, "https://example.com/cccd/landlord_back.jpg", new DateTime(2031, 2, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), "https://example.com/cccd/landlord_front.jpg", "https://example.com/cccd/landlord.jpg", new DateTime(2021, 2, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), "002345678901", "4d44a447-1d10-4808-8ea3-aecac2d07d95", null, null, new DateTime(2025, 7, 31, 21, 36, 21, 318, DateTimeKind.Local).AddTicks(2241), "landlord@example.com", false, true, true, false, null, "Landlord User", "LANDLORD@EXAMPLE.COM", "LANDLORD@EXAMPLE.COM", "AQAAAAIAAYagAAAAEC7klAAfvNTJIt84uLWZC+HRtKWhJs688lfUJqQ3UGCA0gX9QG5V0TmAoTMsYQuVeg==", "+842345678910", true, "https://th.bing.com/th/id/R.63d31ac6257157ef079f31bb32e342df?rik=63%2bkafQNo5seHg&pid=ImgRaw&r=0", null, null, "landlord", "4845ad2f-8949-4cbe-9cdc-dafeda6508f8", false, "landlord@example.com", null },
+                    { 3, 0, "https://example.com/cccd/renter_back.jpg", new DateTime(2032, 3, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), "https://example.com/cccd/renter_front.jpg", "https://example.com/cccd/renter.jpg", new DateTime(2022, 3, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), "003456789012", "75240af5-f6f1-4254-b529-1dbd012aa558", null, null, new DateTime(2025, 7, 31, 21, 36, 21, 373, DateTimeKind.Local).AddTicks(6099), "renter@example.com", false, true, true, false, null, "Renter User", "RENTER@EXAMPLE.COM", "RENTER@EXAMPLE.COM", "AQAAAAIAAYagAAAAEOrrjh4lpAKSuE4HHxDiSdLqXx+kXt2zaVv9dBi2K9/PnkQI0pmy4BZWRDd7OQqj0w==", "+843345678910", true, null, null, null, "renter", "dab44b42-9ac6-4fea-aafd-285e9a485e75", false, "renter@example.com", null },
+                    { 4, 0, "https://example.com/cccd/renter2_back.jpg", new DateTime(2033, 4, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "https://example.com/cccd/renter2_front.jpg", "https://example.com/cccd/renter2.jpg", new DateTime(2023, 4, 4, 0, 0, 0, 0, DateTimeKind.Unspecified), "004567890123", "1df72936-84a6-4f39-ab6a-8968bb76c590", null, null, new DateTime(2025, 7, 30, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(3448), "renter2@example.com", false, false, true, false, null, "Renter User 2", "RENTER2@EXAMPLE.COM", "RENTER2@EXAMPLE.COM", "AQAAAAIAAYagAAAAELWgiDK+zouj85C1Z9FMlQ1PYo3ymX3w0ZpnuXvFCBIMD7WAF0V5Ip2PvK66uugVHg==", null, false, null, null, null, "renter", "4f38537d-9235-4a09-a538-035f4fe76bdd", false, "renter2@example.com", "Ảnh CCCD mặt sau bị mờ, thiếu ngày cấp. Vui lòng bổ sung lại!" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "News",
+                columns: new[] { "Id", "AuthorName", "Content", "CreatedAt", "IsPublished", "PublishedAt", "Slug", "Source", "Summary", "Title", "UpdatedAt" },
+                values: new object[,]
+                {
+                    { 1, "Admin", "Dưới đây là 5 điều bạn nên cân nhắc khi thuê nhà trọ...", new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "5-luu-y-khi-thue-nha-tro-tai-tphcm", null, "Các lưu ý quan trọng khi thuê trọ tại TP.HCM", "5 lưu ý khi thuê nhà trọ tại TP.HCM", null },
+                    { 2, "AI Bot", "Giá thuê nhà ở hai thành phố lớn có sự chênh lệch như thế nào...", new DateTime(2025, 7, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), true, new DateTime(2025, 7, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), "so-sanh-gia-thue-nha-giua-tphcm-va-ha-noi", "Vietnamnet.vn", "Giá thuê nhà giữa TP.HCM và Hà Nội có gì khác biệt?", "So sánh giá thuê nhà giữa TP.HCM và Hà Nội", null }
                 });
 
             migrationBuilder.InsertData(
@@ -719,9 +772,9 @@ namespace RealEstateManagement.Data.Migrations
                 columns: new[] { "Id", "CreatedAt", "Description", "DurationInDays", "IsActive", "Level", "Name", "Price", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9752), "Basic promotion package for property listings.", 30, true, 1, "Basic Promotion", 1000000m, null },
-                    { 2, new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9754), "Premium promotion package for property listings.", 60, true, 2, "Premium Promotion", 2000000m, null },
-                    { 3, new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9756), "Ultimate promotion package for property listings.", 90, true, 3, "Ultimate Promotion", 3000000m, null }
+                    { 1, new DateTime(2025, 7, 31, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4945), "Basic promotion package for property listings.", 30, true, 1, "Basic Promotion", 1000000m, null },
+                    { 2, new DateTime(2025, 7, 31, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4947), "Premium promotion package for property listings.", 60, true, 2, "Premium Promotion", 2000000m, null },
+                    { 3, new DateTime(2025, 7, 31, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4948), "Ultimate promotion package for property listings.", 90, true, 3, "Ultimate Promotion", 3000000m, null }
                 });
 
             migrationBuilder.InsertData(
@@ -736,19 +789,28 @@ namespace RealEstateManagement.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "NewsImages",
+                columns: new[] { "Id", "ImageUrl", "IsPrimary", "NewsId", "Order" },
+                values: new object[,]
+                {
+                    { 1, "/uploads/news/news1-img1.jpg", false, 1, 0 },
+                    { 2, "/uploads/news/news2-img1.jpg", false, 2, 0 }
+                });
+
+            migrationBuilder.InsertData(
                 table: "UserPreferences",
                 columns: new[] { "Id", "Amenities", "CreatedAt", "Location", "PriceRangeMax", "PriceRangeMin", "UserId" },
                 values: new object[,]
                 {
-                    { 1, "WiFi,Parking", new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9041), "District 1", 6000000m, 3000000m, 3 },
-                    { 2, "WiFi", new DateTime(2025, 7, 10, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9044), "Go Vap", 3000000m, 1500000m, 3 },
-                    { 3, "AC", new DateTime(2025, 7, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9051), "Tan Binh", 4000000m, 2000000m, 4 }
+                    { 1, "WiFi,Parking", new DateTime(2025, 7, 31, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4369), "District 1", 6000000m, 3000000m, 3 },
+                    { 2, "WiFi", new DateTime(2025, 7, 29, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4371), "Go Vap", 3000000m, 1500000m, 3 },
+                    { 3, "AC", new DateTime(2025, 7, 30, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4373), "Tan Binh", 4000000m, 2000000m, 4 }
                 });
 
             migrationBuilder.InsertData(
                 table: "Wallets",
                 columns: new[] { "Id", "Balance", "CreatedAt", "UserId" },
-                values: new object[] { 1, 0m, new DateTime(2025, 7, 12, 15, 9, 23, 324, DateTimeKind.Utc).AddTicks(9466), 1 });
+                values: new object[] { 1, 0m, new DateTime(2025, 7, 31, 14, 36, 21, 429, DateTimeKind.Utc).AddTicks(4809), 2 });
 
             migrationBuilder.InsertData(
                 table: "Wards",
@@ -802,7 +864,7 @@ namespace RealEstateManagement.Data.Migrations
             migrationBuilder.InsertData(
                 table: "WalletTransactions",
                 columns: new[] { "Id", "Amount", "CreatedAt", "Description", "Type", "WalletId" },
-                values: new object[] { 1, 100000m, new DateTime(2025, 7, 12, 15, 9, 23, 324, DateTimeKind.Utc).AddTicks(9565), "Nạp thử", "Deposit", 1 });
+                values: new object[] { 1, 100000m, new DateTime(2025, 7, 31, 14, 36, 21, 429, DateTimeKind.Utc).AddTicks(4880), "Nạp thử", "Deposit", 1 });
 
             migrationBuilder.InsertData(
                 table: "Addresses",
@@ -819,14 +881,14 @@ namespace RealEstateManagement.Data.Migrations
                 columns: new[] { "Id", "AddressId", "Area", "Bedrooms", "CreatedAt", "Description", "IsVerified", "LandlordId", "Location", "Price", "Status", "Title", "Type" },
                 values: new object[,]
                 {
-                    { 1, 1, 50.5m, 2, new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9265), "Modern apartment with 2 bedrooms in the heart of HCMC.", true, 2, "10.7769,106.7009", 5000000m, "available", "2BR Apartment in District 1", "apartment" },
-                    { 2, 2, 20.0m, 1, new DateTime(2025, 7, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9270), "Cozy shared room for students.", true, 2, "10.8505,106.6737", 2000000m, "available", "Shared Room in Go Vap", "room" }
+                    { 1, 1, 50.5m, 2, new DateTime(2025, 7, 31, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4600), "Modern apartment with 2 bedrooms in the heart of HCMC.", true, 2, "10.7769,106.7009", 5000000m, "available", "2BR Apartment in District 1", "apartment" },
+                    { 2, 2, 20.0m, 1, new DateTime(2025, 7, 30, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4602), "Cozy shared room for students.", true, 2, "10.8505,106.6737", 2000000m, "available", "Shared Room in Go Vap", "room" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Properties",
                 columns: new[] { "Id", "AddressId", "Area", "Bedrooms", "CreatedAt", "Description", "IsPromoted", "IsVerified", "LandlordId", "Location", "Price", "Status", "Title", "Type" },
-                values: new object[] { 3, 3, 80.0m, 3, new DateTime(2025, 7, 10, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9273), "Spacious house with 3 bedrooms.", true, true, 2, "10.7982,106.6582", 8000000m, "available", "3BR House in Tan Binh", "house" });
+                values: new object[] { 3, 3, 80.0m, 3, new DateTime(2025, 7, 29, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4605), "Spacious house with 3 bedrooms.", true, true, 2, "10.7982,106.6582", 8000000m, "available", "3BR House in Tan Binh", "house" });
 
             migrationBuilder.InsertData(
                 table: "PropertyAmenities",
@@ -865,9 +927,9 @@ namespace RealEstateManagement.Data.Migrations
                 columns: new[] { "Id", "ArchiveDate", "CreatedAt", "LandlordId", "PropertyId", "Status", "UpdatedAt", "VerifiedAt", "VerifiedBy" },
                 values: new object[,]
                 {
-                    { 1, null, new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9423), 2, 1, "Approved", null, new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9424), 1 },
-                    { 2, null, new DateTime(2025, 7, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9427), 2, 2, "Approved", null, new DateTime(2025, 7, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9428), 1 },
-                    { 3, null, new DateTime(2025, 7, 10, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9430), 2, 3, "Approved", null, new DateTime(2025, 7, 10, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9431), 1 }
+                    { 1, null, new DateTime(2025, 7, 31, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4762), 2, 1, "Approved", null, new DateTime(2025, 7, 31, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4763), 1 },
+                    { 2, null, new DateTime(2025, 7, 30, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4769), 2, 2, "Approved", null, new DateTime(2025, 7, 30, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4769), 1 },
+                    { 3, null, new DateTime(2025, 7, 29, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4771), 2, 3, "Approved", null, new DateTime(2025, 7, 29, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4771), 1 }
                 });
 
             migrationBuilder.InsertData(
@@ -875,15 +937,15 @@ namespace RealEstateManagement.Data.Migrations
                 columns: new[] { "Id", "EndDate", "PackageId", "PropertyId", "StartDate" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2025, 8, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9792), 1, 1, new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9791) },
-                    { 2, new DateTime(2025, 8, 10, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9795), 2, 2, new DateTime(2025, 7, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9794) },
-                    { 3, new DateTime(2025, 10, 8, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9797), 3, 3, new DateTime(2025, 7, 10, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9796) }
+                    { 1, new DateTime(2025, 8, 30, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4980), 1, 1, new DateTime(2025, 7, 31, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4979) },
+                    { 2, new DateTime(2025, 8, 29, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4982), 2, 2, new DateTime(2025, 7, 30, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4981) },
+                    { 3, new DateTime(2025, 10, 27, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4984), 3, 3, new DateTime(2025, 7, 29, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4983) }
                 });
 
             migrationBuilder.InsertData(
                 table: "Reviews",
                 columns: new[] { "Id", "Comment", "CreatedAt", "IsApproved", "PropertyId", "Rating", "RenterId" },
-                values: new object[] { 1, "Great location and clean apartment!", new DateTime(2025, 7, 11, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9602), true, 1, 4, 3 });
+                values: new object[] { 1, "Great location and clean apartment!", new DateTime(2025, 7, 30, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(4912), true, 1, 4, 3 });
 
             migrationBuilder.InsertData(
                 table: "UserFavoriteProperties",
@@ -900,8 +962,8 @@ namespace RealEstateManagement.Data.Migrations
                 columns: new[] { "Id", "ConfirmedAt", "ContactInfo", "ContractDurationMonths", "CreatedAt", "DepositAmount", "LandlordId", "MonthlyRent", "PaymentCycle", "PaymentDayOfMonth", "PaymentMethod", "PropertyPostId", "RenterId", "StartDate", "Status" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9877), "renter@example.com | 03345678910", 12, new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9876), 2000000m, 2, 5000000m, 0, 5, "Bank Transfer", 1, 3, new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1 },
-                    { 2, null, "renter2@example.com | 0322222222", 6, new DateTime(2025, 7, 12, 22, 9, 23, 324, DateTimeKind.Local).AddTicks(9924), 1500000m, 2, 2000000m, 1, 10, "Momo", 2, 4, new DateTime(2025, 8, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0 }
+                    { 1, new DateTime(2025, 7, 31, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(5024), "renter@example.com | 03345678910", 12, new DateTime(2025, 7, 31, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(5024), 2000000m, 2, 5000000m, 0, 5, "Bank Transfer", 1, 3, new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1 },
+                    { 2, null, "renter2@example.com | 0322222222", 6, new DateTime(2025, 7, 31, 21, 36, 21, 429, DateTimeKind.Local).AddTicks(5034), 1500000m, 2, 2000000m, 1, 10, "Momo", 2, 4, new DateTime(2025, 8, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 0 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -987,6 +1049,11 @@ namespace RealEstateManagement.Data.Migrations
                 name: "IX_Message_SentAt",
                 table: "Message",
                 column: "SentAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NewsImages_NewsId",
+                table: "NewsImages",
+                column: "NewsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Properties_AddressId",
@@ -1119,6 +1186,9 @@ namespace RealEstateManagement.Data.Migrations
                 name: "Message");
 
             migrationBuilder.DropTable(
+                name: "NewsImages");
+
+            migrationBuilder.DropTable(
                 name: "PropertyAmenities");
 
             migrationBuilder.DropTable(
@@ -1147,6 +1217,9 @@ namespace RealEstateManagement.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Conversation");
+
+            migrationBuilder.DropTable(
+                name: "News");
 
             migrationBuilder.DropTable(
                 name: "Amenities");

@@ -20,12 +20,15 @@ using RealEstateManagement.Business.Services.Chat.Conversations;
 using RealEstateManagement.Business.Repositories.Package;
 using RealEstateManagement.Business.Services.PromotionPackages;
 
-using RealEstateManagement.Business.Repositories.TenantInteraction;
-using RealEstateManagement.Business.Services.TenantInteraction;
 
 using RealEstateManagement.Business.Services.Wallet;
+
+using RealEstateManagement.Business.Repositories.NewsRepository;
+using RealEstateManagement.Business.Services.NewsService;
+
 using RealEstateManagement.Business.Repositories.NotificationRepository;
 using RealEstateManagement.Business.Services.NotificationService;
+
 
 
 namespace RealEstateManagement.API.Extensions
@@ -56,12 +59,15 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<ISliderRepository, SliderRepository>();
             //Chat Repository
             services.AddScoped<IConversationRepository, ConversationRepository>();
-            services.AddScoped<IMessageRepository,MessageRepository>();
+            services.AddScoped<IMessageRepository, MessageRepository>();
+
+
 
             //Notification Repository
             services.AddScoped<INotificationRepository, NotificationRepository>();
 
           
+
 
             //----Service----\\
 
@@ -89,6 +95,12 @@ namespace RealEstateManagement.API.Extensions
             //Chat Serivce
             services.AddScoped<IConversationService, ConversationService>();
             services.AddScoped<IMessageService, MessageService>();
+            // News
+            services.AddScoped<INewsRepository, NewsRepository>();
+            services.AddScoped<INewsService, NewsService>();
+            services.AddScoped<INewsImageRepository, NewsImageRepository>();
+            services.AddScoped<INewImageService, NewImageService>();
+
 
 
             //Notification Service
