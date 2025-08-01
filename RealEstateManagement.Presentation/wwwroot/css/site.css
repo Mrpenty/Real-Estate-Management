@@ -8,11 +8,15 @@ html {
     }
 }
 
-.nav-link{
-    font-size:14px;
-    padding-left:0;
-    padding-right:0;
+.slider-item{
+    height:100%;
+    min-width:100%;
+}
 
+.nav-link {
+    font-size: 14px;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {

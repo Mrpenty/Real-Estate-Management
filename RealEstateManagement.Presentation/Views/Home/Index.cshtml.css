@@ -4,9 +4,10 @@
     width: 100vw;
     left: 50%;
     right: 0;
+    margin: 0 auto;
     transform: translateX(-50%);
     margin-bottom: 20px;
-    height: 450px; /* Kích thước cố định của slider */
+    height: 650px; /* Kích thước cố định của slider */
     background: #fff;
     z-index: 1;
     overflow: hidden; /* Đảm bảo chỉ hiển thị một slide */
@@ -20,7 +21,7 @@
 }
 
 .slider-item-wrapper {
-    min-width: 100%; /* Đảm bảo mỗi item wrapper chiếm đúng 100% chiều rộng của container cha */
+    width: 100%; /* Đảm bảo mỗi item wrapper chiếm đúng 100% chiều rộng của container cha */
     height: 100%;
     flex-shrink: 0; /* Ngăn co lại */
     display: flex;
@@ -89,7 +90,7 @@
     background: white;
     border-radius: 16px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
+    overflow: visible;
     position: fixed; /* Sử dụng fixed để cố định trên trang */
     top: 20px;
     left: 50%;
