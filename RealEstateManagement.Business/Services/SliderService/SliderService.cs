@@ -1,9 +1,12 @@
-using RealEstateManagement.Business.Services.UploadPicService;
 using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using RealEstateManagement.Data.Entity;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Nest;
 using RealEstateManagement.Business.DTO.SliderDTO;
+using RealEstateManagement.Business.Services.UploadPicService;
+using RealEstateManagement.Data.Entity;
+using System.Collections.Generic;
+using System.Net.WebSockets;
+using System.Threading.Tasks;
 
 public class SliderService : ISliderService
 {
@@ -18,7 +21,35 @@ public class SliderService : ISliderService
 
     public async Task<IEnumerable<Slider>> GetAllAsync()
     {
-        return await _sliderRepository.GetAsync() ?? Enumerable.Empty<Slider>();
+        var list = new List<Slider>()
+        {
+            new Slider
+                {
+                    Id = 1,
+                    ImageUrl = "https://localhost:7160/image/slider1.jpg",
+                    Title = "slider1",
+                    Description = "slider1",
+                    CreatedAt = DateTime.Now
+                },
+                new Slider
+                {
+                    Id = 2,
+                    ImageUrl = "https://localhost:7160/image/slider2.jpg",
+                    Title = "slider2",
+                    Description = "slider2",
+                    CreatedAt = DateTime.Now
+                },
+                new Slider
+                {
+                    Id = 3,
+                    ImageUrl = "https://localhost:7160/image/slider3.jpg",
+                    Title = "slider3",
+                    Description = "slider3",
+                    CreatedAt = DateTime.Now
+                }
+        };
+        //return await _sliderRepository.GetAsync() ?? list;
+        return list;
     }
 
     public async Task<Slider> GetByIdAsync(int id)

@@ -41,8 +41,6 @@ namespace RealEstateManagement.Data.Data
             StreetSeed.SeedStreets(modelBuilder);
 
 
-
-
         }
     }
 }
