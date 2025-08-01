@@ -51,6 +51,12 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
             }
         }
 
+        //Kiểm tra Bài viết tương ứng với chủ nhà
+        public async Task<PropertyPost> GetByPropertyIdAndOwnerIdAsync(int propertyId, int ownerId)
+        {
+            return await _context.PropertyPosts
+                .FirstOrDefaultAsync(p => p.PropertyId == propertyId && p.LandlordId == ownerId);
+        }
         public async Task<PropertyPost> GetByPropertyIdAsync(int propertyId)
         {
             return await _context.PropertyPosts

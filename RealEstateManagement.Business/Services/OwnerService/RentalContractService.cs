@@ -1,20 +1,24 @@
 ﻿using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Data.Entity;
+using RealEstateManagement.Data.Entity.PropertyEntity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static RealEstateManagement.Data.Entity.PropertyEntity.PropertyPost;
 
 namespace RealEstateManagement.Business.Services.OwnerService
 {
     public class RentalContractService : IRentalContractService
     {
         private readonly IRentalContractRepository _repository;
+        private readonly IPropertyPostRepository _propertyPostRepo;
 
-        public RentalContractService(IRentalContractRepository repository)
+        public RentalContractService(IRentalContractRepository repository, IPropertyPostRepository propertyPost)
         {
             _repository = repository;
+            _propertyPostRepo = propertyPost;
         }
 
         //Xem hợp đồng của bài Post đó
@@ -42,14 +46,9 @@ namespace RealEstateManagement.Business.Services.OwnerService
             };
         }
 
-        public async Task AddAsync(RentalContractCreateDto dto)
+        public async Task AddAsync(RentalContractCreateDto dto, int ownerId, int propertyPostId)
         {
             // ✅ Kiểm tra dữ liệu đầu vào
-            if (dto.PropertyPostId <= 0)
-                throw new ArgumentException("Bài đăng bất động sản không hợp lệ.");
-
-            if (dto.LandlordId <= 0)
-                throw new ArgumentException("Chủ nhà không hợp lệ.");
 
             if (dto.DepositAmount < 0 || dto.MonthlyRent <= 0)
                 throw new ArgumentException("Số tiền đặt cọc hoặc tiền thuê hàng tháng không hợp lệ.");
@@ -69,11 +68,14 @@ namespace RealEstateManagement.Business.Services.OwnerService
             if (!Enum.IsDefined(typeof(RentalContract.PaymentCycleType), dto.PaymentCycle))
                 throw new ArgumentException("Kiểu thanh toán không hợp lệ (phải là Monthly, Quarterly hoặc Yearly).");
 
+            var propertyPost = await _propertyPostRepo.GetByPropertyIdAndOwnerIdAsync(propertyPostId, ownerId);
+            if (propertyPost == null)
+                throw new ArgumentException("Không tìm thấy bài đăng bất động sản hợp lệ cho chủ nhà này.");
 
             var contract = new RentalContract
             {
-                PropertyPostId = dto.PropertyPostId,
-                LandlordId = dto.LandlordId,
+                PropertyPostId = propertyPostId,
+                LandlordId = ownerId,
                 DepositAmount = dto.DepositAmount,
                 MonthlyRent = dto.MonthlyRent,
                 ContractDurationMonths = dto.ContractDurationMonths,
@@ -86,8 +88,10 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 CreatedAt = DateTime.Now
             };
 
-
-            await _repository.AddAsync(contract);
+            propertyPost.Status = PropertyPost.PropertyPostStatus.Pending;
+            propertyPost.UpdatedAt = DateTime.UtcNow;
+            await _propertyPostRepo.UpdateAsync(propertyPost);
+            await _repository.AddAsync(contract,ownerId, propertyPostId);
         }
 
         public async Task UpdateStatusAsync(RentalContractStatusDto statusDto)

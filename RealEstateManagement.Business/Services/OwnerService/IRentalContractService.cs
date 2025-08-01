@@ -11,7 +11,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
     public interface IRentalContractService
     {
         Task<RentalContractViewDto> GetByPostIdAsync(int id);
-        Task AddAsync(RentalContractCreateDto dto);
+        Task AddAsync(RentalContractCreateDto dto, int ownerId, int propertyPostId);
         Task UpdateStatusAsync(RentalContractStatusDto statusDto);
         Task UpdateContractAsync(int contractId, RentalContractUpdateDto dto);
         Task DeleteAsync(int id);

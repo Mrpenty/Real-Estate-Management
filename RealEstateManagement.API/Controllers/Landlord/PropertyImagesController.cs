@@ -28,7 +28,6 @@ namespace RealEstateManagement.API.Controllers.Landlord
         {
             try
             {
-                _logger.LogInformation("Starting upload for property {PropertyId}, file: {FileName}", propertyId, file?.FileName);
 
                 if (file == null || file.Length == 0)
                 {
@@ -39,16 +38,13 @@ namespace RealEstateManagement.API.Controllers.Landlord
 
                 if (!uploadResult.Succeeded)
                 {
-                    _logger.LogError("Upload failed for property {PropertyId}: {Error}", propertyId, uploadResult.ErrorMessage);
                     return BadRequest(uploadResult.ErrorMessage);
                 }
 
-                _logger.LogInformation("Upload successful for property {PropertyId}, URL: {ImageUrl}", propertyId, uploadResult.ImageUrl);
                 return Ok(new { imageUrl = uploadResult.ImageUrl });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while uploading image for property {PropertyId}", propertyId);
                 return StatusCode(500, "An error occurred while uploading the image");
             }
         }
