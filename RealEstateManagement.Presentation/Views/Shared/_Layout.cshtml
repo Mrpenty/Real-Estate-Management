@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -33,6 +34,11 @@
             pointer-events: all;
         }
 
+        .filterProperty input {
+
+            min-height: auto !important;
+        }
+
         input[type="range"]::-moz-range-thumb {
             height: 16px;
             width: 16px;
@@ -45,7 +51,7 @@
     </style>
 </head>
 <body>
-    
+
     <header class="border-b" style="background-color:white;width:100%">
         <div class="w-full px-4 py-4 flex items-center justify-between">
             <div class="flex items-center" style="cursor:pointer" onclick="window.location.href='/'">
@@ -147,30 +153,30 @@
                 </a>
             </div>
 
-@* 
+            @*
             <div class="flex items-center space-x-4">
-                <a href="#" onclick="getFavoriteList(event)" class="text-gray-700 hover:text-blue-600"><i class="far fa-heart mr-1"></i> Tin đã lưu</a>
+            <a href="#" onclick="getFavoriteList(event)" class="text-gray-700 hover:text-blue-600"><i class="far fa-heart mr-1"></i> Tin đã lưu</a>
 
-                <!-- Authenticated User -->
-                <div id="userProfileNavItem" style="display: none;" class="flex items-center space-x-4">
-                    <a href="/Chat/Index" class="relative">
-                        <i class="fas fa-comment-dots"></i> Tin nhắn
-                        <span id="messageNotificationDot" class="hidden absolute -top-1 -right-2 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
-                    </a>
+            <!-- Authenticated User -->
+            <div id="userProfileNavItem" style="display: none;" class="flex items-center space-x-4">
+            <a href="/Chat/Index" class="relative">
+            <i class="fas fa-comment-dots"></i> Tin nhắn
+            <span id="messageNotificationDot" class="hidden absolute -top-1 -right-2 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+            </a>
 
-                    <a href="/Profile" id="userProfileLink" class="text-gray-700 hover:text-blue-600"></a>
-                    <a href="#" onclick="handleLogout(event)" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-out-alt mr-1"></i> Đăng xuất</a>
-                </div>
+            <a href="/Profile" id="userProfileLink" class="text-gray-700 hover:text-blue-600"></a>
+            <a href="#" onclick="handleLogout(event)" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-out-alt mr-1"></i> Đăng xuất</a>
+            </div>
 
-                <!-- Unauthenticated User -->
-                <div id="authNavItems">
-                    <a href="/Auth/Register" class="text-gray-700 hover:text-blue-600"><i class="fas fa-user-plus mr-1"></i> Đăng ký</a>
-                    <a href="/Auth/Login" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-in-alt mr-1"></i> Đăng nhập</a>
+            <!-- Unauthenticated User -->
+            <div id="authNavItems">
+            <a href="/Auth/Register" class="text-gray-700 hover:text-blue-600"><i class="fas fa-user-plus mr-1"></i> Đăng ký</a>
+            <a href="/Auth/Login" class="text-gray-700 hover:text-blue-600"><i class="fas fa-sign-in-alt mr-1"></i> Đăng nhập</a>
 
-                </div>
+            </div>
 
 
-                <a href="#" onclick="createProperty(event)" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-1 rounded-full text-sm"><i class="fas fa-pen-alt mr-1"></i> Đăng tin</a>
+            <a href="#" onclick="createProperty(event)" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-1 rounded-full text-sm"><i class="fas fa-pen-alt mr-1"></i> Đăng tin</a>
             </div> *@
         </div>
 
@@ -200,7 +206,7 @@
                 </div>
             </div>
 
-            <div class="px-4 overflow-y-auto h-[60vh]">
+            <div class="px-4 overflow-y-auto filterProperty h-[60vh]">
                 <div style="display:none" class="mb-6">
                     <h3 class="font-semibold mb-2">Lọc theo khu vực</h3>
                     <div class="grid grid-cols-3 gap-2">
@@ -692,7 +698,7 @@
             if (selectedStreet.id != "") $('#filterStreetId').val(selectedStreet.id);
 
             // const filterAmenity = urlParamParents.get('filterAmenity') ?? "";
-            // await fillDataAmenity(filterAmenity);
+            await fillDataAmenity("");
 
             //console.log(locations);
         }
@@ -829,13 +835,14 @@
                 alert('Không tìm thấy tỉnh thành tương ứng');
                 return;
             }
+            sessionStorage.removeItem('filterData');
             sessionStorage.setItem('provinceId', provinceId);
             sessionStorage.setItem('provinceName',searchInput.value);
             sessionStorage.setItem('selectedLocationLists',JSON.stringify(selectedLocationLists));
             const urlParams = new URLSearchParams(window.location.search);
             let type = urlParams.get('type');
             if (type == null || type == undefined) type = "room";
-            
+
             window.location.href = `/?type=${type}`;
         }
 
@@ -870,7 +877,7 @@
             maxValue: 100,
             labelInfo: 'triệu'
         });
-        
+
 
         setupDoubleRangeSlider({
             rangeMinId: "rangeMin",
@@ -917,7 +924,7 @@
 
                     if (minVal > maxVal) {
                         minVal = maxVal;
-                        rangeMin.value = maxVal; 
+                        rangeMin.value = maxVal;
                     }
                     updateRangeUI();
                 });
@@ -965,7 +972,7 @@
         }
 
     </script>
- 
+
 </body>
 </html>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>

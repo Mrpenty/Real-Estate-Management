@@ -15,7 +15,10 @@ namespace RealEstateManagement.Data.Data.DataSeed.PaymentSeed
                     Amount = 100000,
                     Type = "Deposit",
                     Description = "Nạp thử",
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = new DateTime(2025, 01, 01),
+                    Status = "Success",
+                    PayOSOrderCode = "",
+                    CheckoutUrl = ""
                 }
             );
         }

@@ -6,6 +6,7 @@ using RealEstateManagement.Data.Entity;
 using static ApplicationUserConfiguration;
 using RealEstateManagement.Data.Data.Configurations;
 using RealEstateManagement.Data.Entity.AddressEnity;
+using RealEstateManagement.Data.Entity.Notification;
 using RealEstateManagement.Data.Entity.User;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using RealEstateManagement.Data.Entity.Payment;
@@ -37,7 +38,7 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     public DbSet<Review> Reviews { get; set; }
     public DbSet<UserFavoriteProperty> UserFavoriteProperties { get; set; }
 
-    public DbSet <PromotionPackage> promotionPackages { get; set; }
+    public DbSet<PromotionPackage> promotionPackages { get; set; }
     public DbSet<PropertyPromotion> PropertyPromotions { get; set; }
 
 
@@ -46,6 +47,13 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     public DbSet<Province> Provinces { get; set; }
     public DbSet<Ward> Wards { get; set; }
     public DbSet<Street> Streets { get; set; }
+
+
+    // DbSets for Notifications
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<ApplicationUserNotification> ApplicationUserNotifications { get; set; }
+
+    public DbSet<Slider> Sliders { get; set; }
 
     public RentalDbContext(DbContextOptions<RentalDbContext> options) : base(options) { }
 
@@ -58,6 +66,7 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
         // Configure Identity
         modelBuilder.ApplyConfiguration(new ApplicationUserConfiguration());
         modelBuilder.ApplyConfiguration(new UserPreferenceConfiguration());
+        modelBuilder.ApplyConfiguration(new NotificationConfiguration());
 
         // Configure property entities
         modelBuilder.ApplyConfiguration(new PropertyConfiguration());
@@ -78,6 +87,7 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
         modelBuilder.ApplyConfiguration(new PropertyPromotionConfiguration());
         modelBuilder.ApplyConfiguration(new PromotionPackageConfiguration());
         modelBuilder.ApplyConfiguration(new InterestedPropertyConfiguration());
+
 
         MainDataSeed.SeedData(modelBuilder);
     }

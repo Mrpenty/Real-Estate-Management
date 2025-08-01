@@ -45,8 +45,10 @@ namespace RealEstateManagement.Data.Data
             NewsSeed.SeedNews(modelBuilder);
             NewsImageSeed.SeedNewsImages(modelBuilder);
 
+
             //Interested Property
             InterestedPropertySeed.SeedInterestedProperties(modelBuilder);
+
         }
     }
 }

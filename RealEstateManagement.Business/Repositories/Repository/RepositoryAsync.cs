@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RealEstateManagement.Data.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;

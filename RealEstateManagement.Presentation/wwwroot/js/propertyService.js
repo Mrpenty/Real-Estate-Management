@@ -1,10 +1,8 @@
 ﻿const API_PROPERTY_BASE_URL = 'https://localhost:7031/api/Property';
 
 const propertyService = {
-
     async getAllproperty() {
         try {
-
             const urlParams = new URLSearchParams(window.location.search);
             let type = urlParams.get('type');
             if (type == null || type == undefined) type = "room";
@@ -22,13 +20,10 @@ const propertyService = {
                         wards.push(item.ward.id);
                         streets.push(item.street.id);
                     });
-                }
-                else {
+                } else {
                     provinces.push(Number(provinceId));
                 }
-
             }
-            //else provinces.push(provinceId);
 
             const token = localStorage.getItem('authToken');
             let userId = 0;
@@ -40,30 +35,39 @@ const propertyService = {
             let body = sessionStorage.getItem('filterData');
             if (body != null && body != undefined) {
                 body = JSON.parse(body);
+            } else {
+                body = {};
             }
-            else body = {};
             body['provinces'] = provinces;
             body['wards'] = wards;
             body['streets'] = streets;
             body['type'] = type;
             body['userId'] = userId;
 
-            $('#minInputPrice').val(body.minPrice ?? 0);
-            $('#maxInputPrice').val(body.maxPrice ?? 100);
+            // Gửi bộ lọc qua query string cho endpoint paginated
+            const queryParams = new URLSearchParams({
+                page: '1',
+                pageSize: '10',
+                type: type,
+                provinces: provinces.join(','),
+                wards: wards.join(','),
+                streets: streets.join(','),
+                userId: userId,
+                minPrice: body.minPrice ?? 0,
+                maxPrice: body.maxPrice ?? 100,
+                minArea: body.minArea ?? 0,
+                maxArea: body.maxArea ?? 100,
+                minRoom: body.minRoom ?? 0,
+                maxRoom: body.maxRoom ?? 15
+            }).toString();
 
-            $('#minInputArea').val(body.minArea ?? 0);
-            $('#maxInputArea').val(body.maxArea ?? 100);
-
-            $('#minInput').val(body.minRoom ?? 0);
-            $('#maxInput').val(body.maxRoom ?? 15);
-
-            let response = await fetch(`${API_PROPERTY_BASE_URL}/filter-advanced`, {
-                method: 'POST',
+            let response = await fetch(`${API_PROPERTY_BASE_URL}/homepage-paginated?${queryParams}`, {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(body)
+                    'Accept': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : ''
+                }
             });
 
             let data = await response.json();
@@ -72,7 +76,7 @@ const propertyService = {
                 throw new Error(data.message || data.errorMessage || 'Get property failed');
             }
 
-            return data;
+            return data.data; // Trả về mảng data từ phản hồi
         } catch (error) {
             console.error('Get property error:', error);
             throw error;
@@ -81,7 +85,6 @@ const propertyService = {
 
     async getProperty(id) {
         try {
-            console.log(id)
             const token = localStorage.getItem('authToken');
             let userId = 0;
             if (token) {
@@ -109,7 +112,6 @@ const propertyService = {
             throw error;
         }
     },
-
 };
 
 // Export the service
@@ -118,4 +120,4 @@ window.propertyService = propertyService;
 // Initialize navigation on page load
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Page loaded, initializing navigation');
-}); 
+});

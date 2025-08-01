@@ -14,6 +14,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
     public interface IPropertyRepository
     {
         Task<IEnumerable<Property>> GetAllAsync();
+
         //Lấy 1 property theo id
         Task<Property> GetPropertyByIdAsync(int id);
         Task<IEnumerable<Property>> FilterByPriceAsync([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice);
