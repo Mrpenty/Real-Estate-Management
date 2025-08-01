@@ -44,10 +44,31 @@ namespace RealEstateManagement.API.Controllers.Admin
             if (!result) return BadRequest("Cập nhật trạng thái thất bại");
             return Ok(new { message = "Cập nhật trạng thái thành công" });
         }
+
+        [HttpPut("ban/{propertyId}/{adminId}")]
+        public async Task<IActionResult> BanOrUnbanPost(int propertyId, int adminId, [FromBody] BanPropertyRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Action) || (request.Action.ToLower() != "ban" && request.Action.ToLower() != "unban"))
+            {
+                return BadRequest("Hành động không hợp lệ. Chỉ hỗ trợ 'ban' và 'unban'.");
+            }
+
+            var result = await _propertyPostService.BanPropertyPost(propertyId, request.Action, adminId, request.AdminNote);
+
+            if (!result)
+                return NotFound("Không tìm thấy bài đăng hoặc bài đăng không hợp lệ.");
+
+            return Ok(new { message = $"Đã {request.Action} bài đăng thành công." });
+        }
     }
 
     public class UpdatePostStatusDto
     {
         public string Status { get; set; } = string.Empty;
+    }
+    public class BanPropertyRequest
+    {
+        public string Action { get; set; } = ""; // "ban" hoặc "unban"
+        public string? AdminNote { get; set; }
     }
 }
