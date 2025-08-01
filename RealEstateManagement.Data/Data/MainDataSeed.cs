@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Data.Data.DataSeed;
 using RealEstateManagement.Data.Data.DataSeed.AddressSeed;
+using RealEstateManagement.Data.Data.DataSeed.NewsSeed;
 using RealEstateManagement.Data.Data.DataSeed.PaymentSeed;
 using RealEstateManagement.Data.Data.DataSeed.PropertySeed;
 using RealEstateManagement.Data.Data.DataSeed.User;
@@ -40,8 +41,13 @@ namespace RealEstateManagement.Data.Data
             WardSeed.SeedWards(modelBuilder);
             StreetSeed.SeedStreets(modelBuilder);
 
+            //News
+            NewsSeed.SeedNews(modelBuilder);
+            NewsImageSeed.SeedNewsImages(modelBuilder);
 
 
+            //Interested Property
+            InterestedPropertySeed.SeedInterestedProperties(modelBuilder);
 
         }
     }

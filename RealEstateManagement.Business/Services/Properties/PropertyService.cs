@@ -7,6 +7,7 @@ using RealEstateManagement.Business.Repositories.FavoriteRepository;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.AddressEnity;
+using RealEstateManagement.Data.Entity.PropertyEntity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -80,6 +81,81 @@ namespace RealEstateManagement.Business.Services.Properties
             }
             return result;
 
+        }
+
+        public async Task<PaginatedResponseDTO<HomePropertyDTO>> GetPaginatedPropertiesAsync(int page = 1, int pageSize = 10, int? userId = 0)
+        {
+            var properties = await _repository.GetAllAsync();
+            var favoriteUsers = await _context.UserFavoriteProperties.Where(c => c.UserId == userId).ToListAsync();
+
+            var result = new List<HomePropertyDTO>();
+
+            foreach (var p in properties)
+            {
+                try
+                {
+                    result.Add(new HomePropertyDTO
+                    {
+                        Id = p.Id,
+                        Title = p.Title,
+                        Description = p.Description,
+                        Type = p.Type,
+                        AddressID = p.AddressId,
+                        StreetId = p.Address?.StreetId,
+                        Street = p.Address?.Street?.Name,
+                        ProvinceId = p.Address?.ProvinceId,
+                        Province = p.Address?.Province?.Name,
+                        WardId = p.Address?.WardId,
+                        Ward = p.Address?.Ward?.Name,
+                        DetailedAddress = p.Address?.DetailedAddress,
+                        Area = p.Area,
+                        Bedrooms = p.Bedrooms,
+                        IsFavorite = favoriteUsers.Any(c => c.PropertyId == p.Id),
+                        Price = p.Price,
+                        Status = p.Status,
+                        Location = p.Location,
+                        CreatedAt = p.CreatedAt,
+                        ViewsCount = p.ViewsCount,
+                        PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
+                        LandlordId = p.Landlord?.Id ?? 0,
+                        LandlordName = p.Landlord?.Name,
+                        LandlordPhoneNumber = p.Landlord?.PhoneNumber,
+                        LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
+                        Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                        PromotionPackageName = p.PropertyPromotions?
+                                                .OrderByDescending(pp => pp.PromotionPackage.Level)
+                                                .Select(pp => pp.PromotionPackage.Name)
+                                                .FirstOrDefault()
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Lỗi khi xử lý Property Id = {p.Id}: {ex.Message}");
+                }
+            }
+
+            var totalCount = result.Count;
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            
+            // Đảm bảo page không vượt quá totalPages
+            page = Math.Max(1, Math.Min(page, totalPages));
+            
+            var pagedData = result
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PaginatedResponseDTO<HomePropertyDTO>
+            {
+                Data = pagedData,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = totalPages,
+                HasNextPage = page < totalPages,
+                HasPreviousPage = page > 1
+            };
         }
         public async Task<PropertyDetailDTO> GetPropertyByIdAsync(int id,int userId = 0)
         {
@@ -395,7 +471,6 @@ namespace RealEstateManagement.Business.Services.Properties
                     .FirstOrDefault()
             });
         }
-
         public async Task<IEnumerable<HomePropertyDTO>> GetPropertiesByUserAsync(int? userId)
         {
             var properties = await _repository.GetAllAsync();
@@ -431,6 +506,59 @@ namespace RealEstateManagement.Business.Services.Properties
                                         .Select(pp => pp.PromotionPackage.Name)
                                         .FirstOrDefault()
             });
+        }
+        public async Task<UserProfileWithPropertiesDTO?> GetUserProfileWithPropertiesAsync(int userId, int? currentId = null)
+        {
+            var user = await _repository.GetUserByIdAsync(userId);
+            if (user == null) return null;
+            var properties = await _repository.GetPropertiesByLandlordIdAsync(userId);
+            var favoriteProperties = new List<Property>();
+            if (currentId.HasValue && currentId.Value > 0)
+            {
+                favoriteProperties = (await _repositoryFavorite.AllFavoritePropertyAsync(currentId.Value)).ToList();
+            }
+            var propertyDtos = properties.Select(p => new HomePropertyDTO
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Description = p.Description,
+                Type = p.Type,
+                AddressID = p.AddressId,
+                Area = p.Area,
+                Bedrooms = p.Bedrooms,
+                Price = p.Price,
+                Status = p.Status,
+                Location = p.Address?.Province?.Name + " - " + p.Address?.Ward?.Name + " - " + p.Address?.Street?.Name,
+                DetailedAddress = p.Address?.DetailedAddress ?? "",
+                PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
+                CreatedAt = p.CreatedAt,
+                ViewsCount = p.ViewsCount,
+                LandlordId = p.LandlordId,
+                LandlordName = user.Name,
+                LandlordPhoneNumber = user.PhoneNumber,
+                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                PromotionPackageName = p.PropertyPromotions?
+                    .OrderByDescending(pp => pp.PromotionPackage.Level)
+                    .Select(pp => pp.PromotionPackage.Name)
+                    .FirstOrDefault(),
+                ProvinceId = p.Address?.ProvinceId,
+                Province = p.Address?.Province?.Name,
+                WardId = p.Address?.WardId,
+                Ward = p.Address?.Ward?.Name,
+                StreetId = p.Address?.StreetId,
+                Street = p.Address?.Street?.Name,
+                IsFavorite = favoriteProperties.Any(fav => fav.Id == p.Id)
+            }).ToList();
+
+            return new UserProfileWithPropertiesDTO
+            {
+                UserId = user.Id,
+                Name = user.Name,
+                PhoneNumber = user.PhoneNumber,
+                Email = user.Email,
+                AvatarUrl = user.ProfilePictureUrl,
+                Properties = propertyDtos
+            };
         }
     }
 }

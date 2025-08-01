@@ -7,7 +7,6 @@ using RealEstateManagement.Business.Repositories.Package;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Business.Repositories.Repository;
 using RealEstateManagement.Business.Repositories.SearchProperties;
-using RealEstateManagement.Business.Repositories.TenantInteraction;
 using RealEstateManagement.Business.Repositories.Token;
 using RealEstateManagement.Business.Services;
 using RealEstateManagement.Business.Services.Auth;
@@ -19,12 +18,13 @@ using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Business.Services.PromotionPackages;
 using RealEstateManagement.Business.Services.Properties;
 using RealEstateManagement.Business.Services.SearchProperties;
-using RealEstateManagement.Business.Services.TenantInteraction;
 using RealEstateManagement.Business.Services.UploadPicService;
 using RealEstateManagement.Business.Services.User;
 using RealEstateManagement.Business.Services.Wallet;
-
-
+using RealEstateManagement.Business.Repositories.NewsRepository;
+using RealEstateManagement.Business.Services.NewsService;
+using RealEstateManagement.Business.Repositories.NotificationRepository;
+using RealEstateManagement.Business.Services.NotificationService;
 namespace RealEstateManagement.API.Extensions
 {
     public static class DependencyInjectionExtensions
@@ -50,11 +50,13 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IFavoriteRepository, FavoriteRepository>();
             services.AddScoped<IPromotionPackageRepository, PromotionPackageRepository>();
             services.AddScoped<IPropertyPromotionRepository, PropertyPromotionRepository>();
+            services.AddScoped<ISliderRepository, SliderRepository>();
             //Chat Repository
             services.AddScoped<IConversationRepository, ConversationRepository>();
-            services.AddScoped<IMessageRepository,MessageRepository>();
+            services.AddScoped<IMessageRepository, MessageRepository>();
 
-          
+            //Notification Repository
+            services.AddScoped<INotificationRepository, NotificationRepository>();
 
             //----Service----\\
 
@@ -64,6 +66,7 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IPropertyImageService, PropertyImageService>();
             services.AddScoped<IOwnerPropertyService, OwnerPropertyService>();
             services.AddScoped<IRentalContractService, RentalContractService>();
+            services.AddScoped<ISliderService, SliderService>();
 
             //user and auth services
             services.AddScoped<IAuthService, AuthService>();
@@ -81,13 +84,17 @@ namespace RealEstateManagement.API.Extensions
             //Chat Serivce
             services.AddScoped<IConversationService, ConversationService>();
             services.AddScoped<IMessageService, MessageService>();
+            // News
+            services.AddScoped<INewsRepository, NewsRepository>();
+            services.AddScoped<INewsService, NewsService>();
+            services.AddScoped<INewsImageRepository, NewsImageRepository>();
+            services.AddScoped<INewImageService, NewImageService>();
 
 
-            // Tenant Interaction Service
-            services.AddScoped<IInteractionService, InteractionService>();
-            services.AddScoped<IInteractionRepository, InteractionRepository>();
 
-            services.AddHostedService<ExpirePostBackgroundService>();
+
+            //Notification Service
+            services.AddScoped<INotificationService, NotificationService>();
 
             //Wallet
             services.AddScoped<WalletService>();

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Services.Favorite;
 using RealEstateManagement.Business.Services.Properties;
@@ -14,14 +15,15 @@ namespace RealEstateManagement.API.Controllers
     public class PropertyController : ControllerBase
     {
         private readonly IPropertyService _propertyService;
-        public PropertyController(IPropertyService propertyService)
+        private readonly IFavoriteService _favoriteService;
+        public PropertyController(IPropertyService propertyService, IFavoriteService favoriteService)
         {
             _propertyService = propertyService;
+            _favoriteService = favoriteService;
         }
-
         [HttpGet("homepage-allproperty")]
-        //[Authorize(Roles = "Renter")]
-        public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> GetHomepageProperties()
+        [EnableQuery]
+        public async Task<IActionResult> GetHomepageProperties()
         {
             try
             {
@@ -30,7 +32,29 @@ namespace RealEstateManagement.API.Controllers
                 if (properties == null || !properties.Any())
                     return NotFound("Không tìm thấy bất động sản nào");
 
-                return Ok(properties);
+                return Ok(properties.AsQueryable());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("homepage-paginated")]
+        [EnableQuery]
+        public async Task<IActionResult> GetPaginatedProperties([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                if (page < 1) page = 1;
+                if (pageSize < 1 || pageSize > 100) pageSize = 10;
+
+                var result = await _propertyService.GetPaginatedPropertiesAsync(page, pageSize);
+
+                if (result == null || !result.Data.Any())
+                    return NotFound("Không tìm thấy bất động sản nào");
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -39,7 +63,6 @@ namespace RealEstateManagement.API.Controllers
         }
         //Lấy property theo id
         [HttpGet("{id}")]
-        //[Authorize(Roles = "Renter")]
         public async Task<ActionResult> GetPropertyById(int id, [FromQuery] int userId = 0)
         {
             var property = await _propertyService.GetPropertyByIdAsync(id, userId);
@@ -52,7 +75,6 @@ namespace RealEstateManagement.API.Controllers
         // Sắp xếp theo price
         [HttpGet("filter-by-price")]
 
-        //[Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByPrice([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice)
         {
             if (!minPrice.HasValue || !maxPrice.HasValue)
@@ -75,8 +97,6 @@ namespace RealEstateManagement.API.Controllers
         }
         //Sắp xếp theo diện tích
         [HttpGet("filter-by-area")]
-
-        //[Authorize(Roles = "Renter")]
         public async Task<ActionResult<IEnumerable<HomePropertyDTO>>> FilterByArea([FromQuery] decimal? minArea, [FromQuery] decimal? maxArea)
         {
             if (!minArea.HasValue || !maxArea.HasValue)
@@ -231,6 +251,29 @@ namespace RealEstateManagement.API.Controllers
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+        }
+        [HttpGet("{userId}/profile-with-properties")]
+        public async Task<IActionResult> GetUserProfileWithProperties(int userId)
+        {
+            // Lấy access token từ header
+            var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+            int currentId = 0;
+
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var token = handler.ReadJwtToken(accessToken);
+                var userIdClaim = token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+                int.TryParse(userIdClaim, out currentId);
+            }
+
+            // Truyền currentId vào service (nếu không login, currentId = 0)
+            var result = await _propertyService.GetUserProfileWithPropertiesAsync(userId, currentId == 0 ? null : (int?)currentId);
+
+            if (result == null)
+                return NotFound("Không tìm thấy người dùng hoặc người dùng không có bất động sản nào.");
+            return Ok(result);
         }
     }
 }

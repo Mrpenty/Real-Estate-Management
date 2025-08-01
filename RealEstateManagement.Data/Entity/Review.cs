@@ -8,7 +8,7 @@ namespace RealEstateManagement.Data.Entity
         public int Id { get; set; }
         public int PropertyId { get; set; }
         public int RenterId { get; set; }
-        public int Rating { get; set; }
+        public int Rating { get; set; } //1-5
         public string Comment { get; set; }
         public bool IsApproved { get; set; }
         public DateTime CreatedAt { get; set; }

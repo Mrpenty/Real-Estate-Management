@@ -14,6 +14,7 @@ namespace RealEstateManagement.Business.Services.Properties
     public interface IPropertyService
     {
         Task<IEnumerable<HomePropertyDTO>> GetAllPropertiesAsync(int? userId = 0);
+        Task<PaginatedResponseDTO<HomePropertyDTO>> GetPaginatedPropertiesAsync(int page = 1, int pageSize = 10, int? userId = 0);
         Task<IEnumerable<HomePropertyDTO>> GetPropertiesByUserAsync(int? userId);
         //Lấy 1 id
         Task<PropertyDetailDTO> GetPropertyByIdAsync(int id,int userId);
@@ -36,6 +37,8 @@ namespace RealEstateManagement.Business.Services.Properties
         Task<IEnumerable<Amenity>> GetAmenitiesAsync();
 
         Task<IEnumerable<HomePropertyDTO>> FilterByTypeAsync(string type);
+        // Lấy tất cả property theo landlordId
+        Task<UserProfileWithPropertiesDTO?> GetUserProfileWithPropertiesAsync(int userId, int? currentId = null);
 
     }
 }

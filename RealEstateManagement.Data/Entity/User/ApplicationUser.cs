@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.VisualBasic;
 using RealEstateManagement.Data.Entity.Messages;
+using RealEstateManagement.Data.Entity.Notification;
 using RealEstateManagement.Data.Entity.Payment;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using RealEstateManagement.Data.Entity.ReportEntity;
@@ -48,9 +49,10 @@ namespace RealEstateManagement.Data.Entity.User
         public DateTime? CitizenIdIssuedDate { get; set; }
         public DateTime? CitizenIdExpiryDate { get; set; }
         public bool IsActive { get; set; } = true; // true: active, false: banned
-        public string? CitizenIdImageUrl { get; set; } // URL to the citizen ID image
         public string? CitizenIdFrontImageUrl { get; set; }
         public string? CitizenIdBackImageUrl { get; set; }
         public string? VerificationRejectReason { get; set; }
+
+        public ICollection<ApplicationUserNotification> Notifications { get; set; }
     }
 }
