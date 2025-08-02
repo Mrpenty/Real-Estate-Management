@@ -117,7 +117,9 @@ namespace RealEstateManagement.API.Extensions
             //Wallet
             services.AddScoped<WalletService>();
             services.AddScoped<QRCodeService>();
-
+            //Interested Property
+            services.AddScoped<IInterestedPropertyRepository, InterestedPropertyRepository>();
+            services.AddScoped<IInterestedPropertyService, InterestedPropertyService>();
             return services;
         }
     }

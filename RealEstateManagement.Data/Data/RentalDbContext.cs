@@ -22,6 +22,7 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     public DbSet<NewsImage> NewsImages { get; set; }
 
     // DbSets for Property Management
+    public DbSet<InterestedProperty> InterestedProperties { get; set; }
     public DbSet<Property> Properties { get; set; }
     public DbSet<Amenity> Amenities { get; set; }
     public DbSet<RentalContract> RentalContracts { get; set; }

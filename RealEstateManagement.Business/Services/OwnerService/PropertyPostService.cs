@@ -244,7 +244,14 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 _ => status.ToString()
             };
         }
-
+        public async Task<bool> UpdatePostStatusByPropertyIdAsync(int propertyId, string status)
+        {
+            var post = await _postRepository.GetByPropertyIdAsync(propertyId);
+            if (post == null) return false;
+            post.Status = Enum.Parse<PropertyPost.PropertyPostStatus>(status, true);
+            await _postRepository.UpdateAsync(post);
+            return true;
+        }
         public async Task ContinueDraftPostAsync(ContinuePropertyPostDto dto, int landlordId)
         {
             // Tìm Post & Property liên quan

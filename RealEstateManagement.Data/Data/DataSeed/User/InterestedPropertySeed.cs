@@ -21,7 +21,9 @@ namespace RealEstateManagement.Data.Data.DataSeed.User
                     InterestedAt = DateTime.Now.AddHours(-24),
                     Status = (InterestedStatus)1, // WaitingForRenterReply
                     RenterReplyAt = null,
-                    LandlordReplyAt = null
+                    LandlordReplyAt = null,
+                    RenterConfirmed = false,
+                    LandlordConfirmed = false
                 },
                 new InterestedProperty
                 {
@@ -31,7 +33,9 @@ namespace RealEstateManagement.Data.Data.DataSeed.User
                     InterestedAt = DateTime.Now.AddHours(-12),
                     Status = (InterestedStatus)2, // RenterWantToRent
                     RenterReplyAt = DateTime.Now.AddHours(-10),
-                    LandlordReplyAt = null
+                    LandlordReplyAt = null,
+                    RenterConfirmed = false,
+                    LandlordConfirmed = false
                 },
                 new InterestedProperty
                 {
@@ -41,7 +45,9 @@ namespace RealEstateManagement.Data.Data.DataSeed.User
                     InterestedAt = DateTime.Now.AddHours(-5),
                     Status = (InterestedStatus)3, // RenterNotRent
                     RenterReplyAt = DateTime.Now.AddHours(-3),
-                    LandlordReplyAt = null
+                    LandlordReplyAt = null,
+                    RenterConfirmed = false,
+                    LandlordConfirmed = false
                 }
             );
         }
