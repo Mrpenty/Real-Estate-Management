@@ -41,5 +41,14 @@ namespace RealEstateManagement.Presentation.Controllers
             ViewBag.Title = "Quản lý thông báo";
             return View();
         }
+
+        /// <summary>
+        /// Admin Dashboard - Thống kê tổng quan
+        /// </summary>
+        [HttpGet]
+        public IActionResult Dashboard()
+        {
+            return View();
+        }
     }
 } 

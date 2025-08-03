@@ -22,6 +22,8 @@ using RealEstateManagement.Business.Services.PromotionPackages;
 using RealEstateManagement.Business.Services.Wallet;
 using RealEstateManagement.Business.Repositories.NotificationRepository;
 using RealEstateManagement.Business.Services.NotificationService;
+using RealEstateManagement.Business.Repositories.Admin;
+using RealEstateManagement.Business.Services.Admin;
 
 namespace RealEstateManagement.API.Extensions
 {
@@ -56,6 +58,9 @@ namespace RealEstateManagement.API.Extensions
             //Notification Repository
             services.AddScoped<INotificationRepository, NotificationRepository>();
 
+            //Admin Dashboard Repository
+            services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
+
           
 
             //----Service----\\
@@ -87,6 +92,14 @@ namespace RealEstateManagement.API.Extensions
 
             //Notification Service
             services.AddScoped<INotificationService, NotificationService>();
+
+            //Admin Dashboard Service
+            services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+
+
+
+
+
 
             //Wallet
             services.AddScoped<WalletService>();
