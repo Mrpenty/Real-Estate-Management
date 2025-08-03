@@ -19,11 +19,16 @@ using RealEstateManagement.Business.Services.Chat.Messages;
 using RealEstateManagement.Business.Services.Chat.Conversations;
 using RealEstateManagement.Business.Repositories.Package;
 using RealEstateManagement.Business.Services.PromotionPackages;
+
+using RealEstateManagement.Business.Repositories.TenantInteraction;
+using RealEstateManagement.Business.Services.TenantInteraction;
+
 using RealEstateManagement.Business.Services.Wallet;
 using RealEstateManagement.Business.Repositories.NotificationRepository;
 using RealEstateManagement.Business.Services.NotificationService;
 using RealEstateManagement.Business.Repositories.Admin;
 using RealEstateManagement.Business.Services.Admin;
+
 
 namespace RealEstateManagement.API.Extensions
 {
@@ -90,6 +95,7 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IConversationService, ConversationService>();
             services.AddScoped<IMessageService, MessageService>();
 
+
             //Notification Service
             services.AddScoped<INotificationService, NotificationService>();
 
@@ -98,6 +104,13 @@ namespace RealEstateManagement.API.Extensions
 
 
 
+
+
+
+
+            // Tenant Interaction Service
+            services.AddScoped<IInteractionService, InteractionService>();
+            services.AddScoped<IInteractionRepository, InteractionRepository>();
 
 
 

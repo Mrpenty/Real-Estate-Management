@@ -1,5 +1,5 @@
 ﻿@{
-
+    Layout = null;
     ViewBag.Title = "Chat";
 }
 
@@ -14,17 +14,13 @@
     <div class="chat-container">
 
         <div class="conversation-list" id="conversationList">
-@*             <div class="conversation-header">
-                <a href="/" class="back-button">← Quay về trang chủ</a>
-            </div> *@
             <div class="conversation-header" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px;">
-                <h1 class="text-xl font-bold" style="margin: 0;">
-                    <span onclick="window.location.href='/'" class="text-blue-700" style="cursor: pointer;">RealEstate</span>
-                </h1>
+                <h2 class="text-xl font-bold" style="margin: 0;">
+                    <span onclick="window.location.href='/'" class="text-blue-700" style="cursor: pointer;padding: 6px 0 ;color: rgb(29 78 216 / var(--tw-text-opacity, 1))">RealEstate</span>
+                </h2>
                 <input type="text" id="conversationSearchInput" placeholder="Tìm kiếm..." style="flex-grow: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px;" />
             </div>
-
-            <!-- Các cuộc trò chuyện sẽ được render động vào đây -->
+            <div id="conversationItemsContainer"></div>
         </div>
         <div class="message-panel">
             <div id="messagesContainer">
@@ -45,14 +41,18 @@
             </div>
         </div>
     </div>
+    <link rel="stylesheet" href="~/css/chat.css" asp-append-version="true" />
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/signalr.js" asp-append-version="true"></script>
+    <script src="~/js/chat.js" asp-append-version="true"></script>
 </body>
 </html>
 
-
+@* 
 <link rel="stylesheet" href="~/css/chat.css" asp-append-version="true" />
 @section Scripts {
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
     <script src="~/js/signalr.js" asp-append-version="true"></script>
     <script src="~/js/chat.js" asp-append-version="true"></script>
 
-}
+} *@
