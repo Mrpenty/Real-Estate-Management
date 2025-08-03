@@ -17,6 +17,8 @@ namespace RealEstateManagement.Business.Services.OwnerService
         Task<bool> UpdatePostStatusAsync(int id, string status);
 
         Task ContinueDraftPostAsync(ContinuePropertyPostDto dto, int landlordId);
+
+        Task<bool> BanPropertyPost(int propertyId, string action, int adminId, string? adminNote);
     }
 
 }

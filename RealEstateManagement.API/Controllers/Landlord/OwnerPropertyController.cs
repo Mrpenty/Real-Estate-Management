@@ -73,5 +73,17 @@ namespace RealEstateManagement.API.Controllers.Landlord
             return NoContent();
         }
 
+        //Gia hạn 1 bài đăng đã hết hạn
+        [HttpPut("extend/{postId}/{landlordId}")]
+        //[Authorize(Roles = "Landlord")]
+        public async Task<IActionResult> ExtendPost(int postId, [FromQuery] int days, int landlordId)
+        {
+            var result = await _ownerPropertyService.ExtendPostAsync(postId, days, landlordId);
+            if (!result.IsSuccess)
+                return BadRequest(result.Message);
+
+            return Ok(result.Message);
+        }
+
     }
 }

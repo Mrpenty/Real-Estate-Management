@@ -1,4 +1,7 @@
-﻿using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
+﻿using Microsoft.EntityFrameworkCore;
+using Nest;
+using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
+using RealEstateManagement.Business.Repositories.AddressRepo;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Data.Entity.AddressEnity;
 using RealEstateManagement.Data.Entity.PropertyEntity;
@@ -7,22 +10,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RealEstateManagement.Business.Repositories.AddressRepo;
-using Microsoft.EntityFrameworkCore;
 
 namespace RealEstateManagement.Business.Services.OwnerService
 {
     public class PropertyPostService : IPropertyPostService
     {
         private readonly IPropertyPostRepository _postRepository;
-        private readonly IAddressRepository _addressRepository; 
+        private readonly IAddressRepository _addressRepository;
         private readonly IPropertyImageRepository _imageRepository;
+        private readonly RentalDbContext _context;
 
-        public PropertyPostService(IPropertyPostRepository postRepository, IAddressRepository addressRepository, IPropertyImageRepository imageRepository)
+        public PropertyPostService(IPropertyPostRepository postRepository, IAddressRepository addressRepository, IPropertyImageRepository imageRepository, RentalDbContext context)
         {
             _postRepository = postRepository;
             _addressRepository = addressRepository;
             _imageRepository = imageRepository;
+            _context = context;
         }
 
         //Landlord tạo 1 bài đăng mới với status Draft
@@ -33,7 +36,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 throw new ArgumentException("Tiêu đề không được để trống.");
             if (dto.Area <= 0 || dto.Price <= 0)
                 throw new ArgumentException("Diện tích và giá phải lớn hơn 0.");
-            if (dto.ProvinceId <= 0 || dto.WardId <= 0 || dto.StreetId <=0)
+            if (dto.ProvinceId <= 0 || dto.WardId <= 0 || dto.StreetId <= 0)
                 throw new ArgumentException("Vui lòng chọn đầy đủ thông tin địa chỉ.");
 
             // 2. Luôn tạo mới Address cho mỗi Property
@@ -71,7 +74,8 @@ namespace RealEstateManagement.Business.Services.OwnerService
             {
                 LandlordId = landlordId,
                 Status = PropertyPost.PropertyPostStatus.Draft,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                ArchiveDate = DateTime.UtcNow.AddDays(90)
             };
 
             // 5. Call Repository to save the post, property, and amenities
@@ -180,7 +184,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
             };
         }
 
-      
+
 
         public async Task<object> GetPostsByStatusAsync(string status, int page, int pageSize)
         {
@@ -197,12 +201,14 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 .OrderByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(p => new {
+                .Select(p => new
+                {
                     p.Id,
                     p.Status,
                     p.CreatedAt,
                     p.Landlord.Name,
-                    Property = p.Property == null ? null : new {
+                    Property = p.Property == null ? null : new
+                    {
                         p.Property.Id,
                         p.Property.Title,
                         p.Property.Address,
@@ -214,7 +220,8 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 .ToListAsync();
 
             int totalPages = (int)Math.Ceiling((double)total / pageSize);
-            return new {
+            return new
+            {
                 total,
                 page,
                 pageSize,
@@ -228,7 +235,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
             var post = await _postRepository.GetByIdAsync(id);
             if (post == null) return false;
             post.Status = Enum.Parse<PropertyPost.PropertyPostStatus>(status, true);
-           
+
             await _postRepository.UpdateAsync(post);
             return true;
         }
@@ -327,7 +334,52 @@ namespace RealEstateManagement.Business.Services.OwnerService
             await _postRepository.UpdateAsync(post);
         }
 
-        
+        //Admin Ban và UnBan PropertyPost
+        public async Task<bool> BanPropertyPost(int propertyId, string action, int adminId, string? adminNote)
+        {
+            var post = await _context.PropertyPosts
+           .Include(p => p.Property)
+           .FirstOrDefaultAsync(p => p.Id == propertyId);
 
+            if (post == null || post.Property == null)
+                return false;
+
+            var reports = await _context.Reports
+          .Where(r => r.TargetType == "PropertyPost" && r.TargetId == propertyId)
+          .ToListAsync();
+
+            if (action.ToLower() == "ban")
+            {
+                post.Property.Status = "inactive";
+                post.ArchiveDate = DateTime.UtcNow;
+
+                foreach (var report in reports.Where(r => r.Status == "Pending"))
+                {
+                    report.Status = "Resolved";
+                    report.ResolvedAt = DateTime.UtcNow;
+                    report.ResolvedByUserId = adminId;
+                    report.AdminNote = adminNote ?? "Bài đăng bị ban.";
+                }
+            }
+            else if (action.ToLower() == "unban")
+            {
+                post.Property.Status = "active";
+                post.ArchiveDate = null;
+
+                foreach (var report in reports.Where(r => r.Status == "Resolved"))
+                {
+                    report.Status = "Ignored";
+                    report.ResolvedAt = DateTime.UtcNow;
+                    report.ResolvedByUserId = adminId;
+                    report.AdminNote = adminNote ?? "Bài đăng đã được phục hồi.";
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Hành động không hợp lệ. Chỉ hỗ trợ 'ban' và 'unban'.");
+            }
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
