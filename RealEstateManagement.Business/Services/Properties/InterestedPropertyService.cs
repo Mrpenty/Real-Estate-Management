@@ -87,7 +87,26 @@ namespace RealEstateManagement.Business.Services.Properties
         public async Task<InterestedPropertyDTO> AddInterestAsync(int renterId, int propertyId)
         {
             var existing = await _repository.GetByRenterAndPropertyAsync(renterId, propertyId);
-            if (existing != null) return MapToDTO(existing);
+
+            if (existing != null)
+            {
+                // Nếu status là RenterNotRent (hoặc LandlordRejected, v.v.) thì cho phép renter "hồi sinh" lại quan tâm này
+                if (existing.Status == InterestedStatus.RenterNotRent ||
+                    existing.Status == InterestedStatus.LandlordRejected)
+                {
+                    existing.Status = InterestedStatus.WaitingForRenterReply; // hoặc None, tuỳ bạn
+                    existing.RenterConfirmed = false;
+                    existing.LandlordConfirmed = false;
+                    existing.RenterReplyAt = null;
+                    existing.LandlordReplyAt = null;
+                    existing.InterestedAt = DateTime.UtcNow;
+                    await _repository.UpdateAsync(existing);
+                }
+                // Nếu đang trong trạng thái khác thì có thể trả về luôn
+                return MapToDTO(existing);
+            }
+             
+            // Nếu chưa từng quan tâm thì tạo mới
             var ip = new InterestedProperty
             {
                 RenterId = renterId,
