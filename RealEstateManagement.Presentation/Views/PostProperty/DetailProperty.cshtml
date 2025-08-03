@@ -239,6 +239,7 @@
 </form>
 
 <script>
+     let clickUpdateMap = false;
      let isAuthen = authService.isAuthenticated();
      if(!isAuthen){
          window.location.href = '/Auth/Login';
@@ -513,8 +514,11 @@
              images : []
          };
 
+         if(!clickUpdateMap){
+             updateMap();
+             clickUpdateMap = true;
+         }
 
-         updateMap();
          let order = 0;
          if(!changeFileImage){
              console.log('changeImage');

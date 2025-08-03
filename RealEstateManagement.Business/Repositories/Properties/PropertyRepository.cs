@@ -254,24 +254,6 @@ namespace RealEstateManagement.Business.Repositories.Properties
             var wards = await _context.Wards.ToListAsync();
             var provinces = await _context.Provinces.ToListAsync();
 
-            provinces.Add(new Province
-            {
-                Id = 0,
-                Name = "All"
-            });
-
-            wards.Add(new Ward
-            {
-                Id = 0,
-                Name = "All"
-            });
-
-            streets.Add(new Street
-            {
-                Id = 0,
-                Name = "All"
-            });
-
             provinces = provinces.OrderBy(p => p.Id).ToList();
             wards = wards.OrderBy(p => p.Id).ToList();
             streets = streets.OrderBy(p => p.Id).ToList();

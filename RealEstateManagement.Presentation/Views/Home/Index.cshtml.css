@@ -39,6 +39,7 @@
     min-width: 0; /* Ngăn ảnh làm giãn container */
 }
 
+
 .slider-button {
     position: absolute;
     top: 50%;
@@ -98,32 +99,6 @@
     z-index: 20; /* Tăng z-index để hiển thị trên slider */
     padding: 30px;
 }
-
-.dropdown-menu {
-    position: absolute; /* Thay fixed bằng absolute */
-    top: 100%; /* Hiển thị ngay dưới nút dropdown */
-    left: 0;
-    background: white;
-    border: 2px solid #e1e8ed;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    z-index: 1001;
-    max-height: 300px; /* Giới hạn chiều cao */
-    overflow-y: auto; /* Cho phép cuộn nếu nội dung dài */
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.3s ease;
-    width: 100%; /* Đảm bảo chiều rộng khớp với nút */
-    margin-top: 5px; /* Khoảng cách từ nút */
-}
-
-    .dropdown-menu.active {
-        max-height: 400px;
-        opacity: 1;
-        pointer-events: auto;
-        margin-top: 5px;
-    }
-
 
 
 /* Các phần còn lại giữ nguyên */
