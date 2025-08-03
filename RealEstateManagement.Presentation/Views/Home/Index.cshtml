@@ -2,15 +2,89 @@
     // ViewData["Title"] = "Home Page";
     Layout = "~/Views/Shared/_LayoutV2.cshtml";
 }
+<style>
 
+    input[type="range"]::-webkit-slider-thumb {
+        appearance: none;
+        height: 20px;
+        width: 20px;
+        background-color: #e74c3c;
+        border: 3px solid white;
+        border-radius: 50%;
+        cursor: pointer;
+        pointer-events: all;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    #rangeMinArea, #rangeMaxArea,.rangeCls {
+        padding-bottom:2.5rem !important;
+    }
+
+    .filterProperty input {
+        min-height: auto !important;
+    }
+
+    #rangeTrackArea,.bgRange{
+        background-color: #e74c3c;
+    }
+
+
+    #locationMenu {
+        width: 250px;
+        padding:20px;
+    }
+
+    .location-item {
+        width:100%;
+        padding: 10px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #f1f2f6;
+        transition: background 0.2s ease;
+    }
+
+        .location-item:hover {
+            background: #f8f9fa;
+        }
+
+        .location-item:last-child {
+            border-bottom: none;
+        }
+
+
+    .dropdown-menu {
+        position: absolute; /* Thay fixed bằng absolute */
+        top: 100%; /* Hiển thị ngay dưới nút dropdown */
+        left: 0;
+        background: white;
+        border: 2px solid #e1e8ed;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        z-index: 1001;
+        max-height: 300px; /* Giới hạn chiều cao */
+        overflow-y: auto; /* Cho phép cuộn nếu nội dung dài */
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s ease;
+        width: 100%; /* Đảm bảo chiều rộng khớp với nút */
+        margin-top: 5px; /* Khoảng cách từ nút */
+    }
+
+        .dropdown-menu.active {
+            max-height: 400px;
+            opacity: 1;
+            pointer-events: auto;
+            margin-top: 5px;
+        }
+
+</style>
 <!-- Search Bar chồng lên Slider -->
 <div class="slider">
     <div class="search-container">
         <!-- Tab Navigation -->
         <div class="tab-navigation">
-            <button class="tab-item active" data-tab="buy">Nhà đất bán</button>
-            <button class="tab-item" data-tab="rent">Nhà đất cho thuê</button>
-            <button class="tab-item" data-tab="project">Dự án</button>
+            <button class="tab-item" data-tab="buy" onclick="window.location.href='/?type=room'" id="room" data-type="room">Phòng trọ</button>
+            <button class="tab-item" data-tab="rent" onclick="window.location.href='/?type=house'" id="house" data-type="house">Nhà nguyên căn</button>
+            <button class="tab-item" data-tab="project" onclick="window.location.href='/?type=apartment'" id="apartment" value="apartment">Căn hộ</button>
         </div>
 
         <!-- Search Form -->
@@ -22,16 +96,16 @@
                     <div class="input-group">
                         <div class="custom-dropdown">
                             <button class="dropdown-button" id="locationBtn">
-                                <span>📍 Đắk Lắk</span>
+                                <span id="provinceSelected" data-value="Hanoi" data-id="2">Hanoi</span>
                                 <span class="dropdown-arrow">▼</span>
                             </button>
                             <div class="dropdown-menu" id="locationMenu">
-                                <div class="location-dropdown">
-                                    <div class="location-item" data-value="hcm">Hồ Chí Minh</div>
+                                <div class="location-dropdown" id="locationProvinder">
+@*                                     <div class="location-item" data-value="hcm">Hồ Chí Minh</div>
                                     <div class="location-item" data-value="hanoi">Hà Nội</div>
                                     <div class="location-item" data-value="danang">Đà Nẵng</div>
                                     <div class="location-item" data-value="daklak">Đắk Lắk</div>
-                                    <div class="location-item" data-value="cantho">Cần Thơ</div>
+                                    <div class="location-item" data-value="cantho">Cần Thơ</div> *@
                                 </div>
                             </div>
                         </div>
@@ -39,10 +113,19 @@
 
                     <!-- Main Search Input -->
                     <div class="input-group">
-                        <div class="location-input">
-                            <input type="text" class="main-input"
+                        <div class="location-input" style="position:relative">
+                            <input type="text" class="main-input dropdown2"
                                    placeholder="Nhập tối đa 5 địa điểm, dự án. VD: Quận Hoàn Kiếm, Quận Đống Đa"
                                    id="searchInput">
+                            <div id="dropdown2" style="height:20rem;top:100%" class="dropdown2 absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg hidden">
+                                <div class="p-4 dropdown2">
+                                    <div class="p-4 dropdown2">
+                                        <p class="font-semibold text-sm text-gray-600 mb-2 mt-2 dropdown2">Tất cả địa điểm</p>
+                                        <div id="location-list" style="max-height:14rem;left:0" class="absolute z-10 mt-1 w-full bg-white overflow-y-auto dropdown2">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -51,24 +134,45 @@
                         🔍 Tìm kiếm
                     </button>
                 </div>
-
+                <div>
+                    <div id="location-selected-list" class="flex flex-wrap gap-2">
+                    </div>
+                </div>
                 <!-- Filter Row - 3 dropdowns ngang hàng -->
                 <div class="filter-row">
                     <!-- Property Type -->
                     <div class="input-group">
                         <div class="custom-dropdown">
                             <button class="dropdown-button" id="propertyTypeBtn">
-                                <span>Loại nhà đất</span>
+                                <span>Số lượng phòng</span>
                                 <span class="dropdown-arrow">▼</span>
                             </button>
-                            <div class="dropdown-menu" id="propertyTypeMenu">
+                            <div class="dropdown-menu" id="propertyTypeMenu" style="overflow:hidden">
                                 <div class="dropdown-content">
-                                    <div class="location-dropdown">
-                                        <div class="location-item" data-value="">Tất cả</div>
-                                        <div class="location-item" data-value="apartment">Căn hộ</div>
-                                        <div class="location-item" data-value="house">Nhà riêng</div>
-                                        <div class="location-item" data-value="land">Đất</div>
-                                        <div class="location-item" data-value="room">Phòng trọ</div>
+                                    <div class="flex justify-between items-center mb-2 text-sm">
+                                        <div>
+                                            Từ: <span class="font-semibold text-cyan-700" id="minLabel"></span>
+                                        </div>
+                                        <div>
+                                            Đến: <span class="font-semibold text-cyan-700" id="maxLabel"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <input id="minInput" type="number" class="w-full border rounded px-2 py-1 text-center" value="0" min="0" />
+                                        <span>→</span>
+                                        <input id="maxInput" type="number" class="w-full border rounded px-2 py-1 text-center" value="15" max="15" />
+                                    </div>
+
+                                    <div class="relative h-4">
+                                        <div class="absolute inset-0 bg-gray-200 rounded-full"></div>
+
+                                        <div id="rangeTrack" class="absolute bgRange h-full bg-cyan-600 rounded-full"></div>
+
+                                        <input id="rangeMin" type="range" min="0" max="15" value="0"
+                                               class="absolute rangeCls w-full h-4 appearance-none bg-transparent pointer-events-none thumb-min" />
+                                        <input id="rangeMax" type="range" min="0" max="15" value="15"
+                                               class="absolute rangeCls w-full h-4 appearance-none bg-transparent pointer-events-none thumb-max" />
                                     </div>
                                 </div>
                             </div>
@@ -82,36 +186,32 @@
                                 <span id="priceDisplay">Mức giá</span>
                                 <span class="dropdown-arrow">▼</span>
                             </button>
-                            <div class="dropdown-menu" id="priceMenu">
+                            <div class="dropdown-menu" id="priceMenu" style="overflow:hidden">
                                 <div class="dropdown-content">
-                                    <div class="price-range">
-                                        <div class="price-display">
-                                            <span>Từ: <span id="minPriceDisplay">0 triệu</span></span>
-                                            <span>Đến: <span id="maxPriceDisplay">60 tỷ</span></span>
+                                    <div class="flex justify-between items-center mb-2 text-sm">
+                                        <div>
+                                            Từ: <span class="font-semibold text-cyan-700" id="minLabelPrice"></span>
                                         </div>
+                                        <div>
+                                            Đến: <span class="font-semibold text-cyan-700" id="maxLabelPrice"></span>
+                                        </div>
+                                    </div>
 
-                                        <div class="price-inputs">
-                                            <input type="number" class="price-input" id="minPriceInput"
-                                                   placeholder="0" min="0">
-                                            <span class="price-separator">→</span>
-                                            <input type="number" class="price-input" id="maxPriceInput"
-                                                   placeholder="60000" min="0">
-                                        </div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <input id="minInputPrice" type="number" class="w-full border rounded px-2 py-1 text-center" value="0" min="0" />
+                                        <span>→</span>
+                                        <input id="maxInputPrice" type="number" class="w-full border rounded px-2 py-1 text-center" value="100" max="100" />
+                                    </div>
 
-                                        <div class="range-slider" id="priceSlider">
-                                            <div class="range-track" id="priceTrack"></div>
-                                            <div class="range-thumb" id="minThumb"></div>
-                                            <div class="range-thumb" id="maxThumb"></div>
-                                        </div>
+                                    <div class="relative h-4">
+                                        <div class="absolute inset-0 bg-gray-200 rounded-full"></div>
 
-                                        <div class="quick-options">
-                                            <div class="quick-option" data-range="all">Tất cả mức giá</div>
-                                            <div class="quick-option" data-range="under500">Dưới 500 triệu</div>
-                                            <div class="quick-option" data-range="500-800">500 - 800 triệu</div>
-                                            <div class="quick-option" data-range="800-1000">800 triệu - 1 tỷ</div>
-                                            <div class="quick-option" data-range="1-2">1 - 2 tỷ</div>
-                                            <div class="quick-option" data-range="custom">Đặt lại</div>
-                                        </div>
+                                        <div id="rangeTrackPrice" class="absolute bgRange h-full bg-cyan-600 rounded-full"></div>
+
+                                        <input id="rangeMinPrice" type="range" min="0" max="100" value="0"
+                                               class="absolute rangeCls w-full h-4 appearance-none bg-transparent pointer-events-none thumb-min" />
+                                        <input id="rangeMaxPrice" type="range" min="0" max="100" value="100"
+                                               class="absolute rangeCls w-full h-4 appearance-none bg-transparent pointer-events-none thumb-max" />
                                     </div>
                                 </div>
                             </div>
@@ -127,13 +227,32 @@
                             </button>
                             <div class="dropdown-menu" id="areaMenu">
                                 <div class="dropdown-content">
-                                    <div class="location-dropdown">
-                                        <div class="location-item" data-value="">Chọn diện tích</div>
-                                        <div class="location-item" data-value="under30">Dưới 30 m²</div>
-                                        <div class="location-item" data-value="30-50">30 - 50 m²</div>
-                                        <div class="location-item" data-value="50-80">50 - 80 m²</div>
-                                        <div class="location-item" data-value="80-100">80 - 100 m²</div>
-                                        <div class="location-item" data-value="over100">Trên 100 m²</div>
+                                    <div class="location-dropdown" style="overflow:hidden">
+                                        <div class="flex justify-between items-center mb-2 text-sm">
+                                            <div>
+                                                Từ: <span class="font-semibold text-cyan-700" id="minLabelArea"></span>
+                                            </div>
+                                            <div>
+                                                Đến: <span class="font-semibold text-cyan-700" id="maxLabelArea"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <input id="minInputArea" type="number" class="w-full border rounded px-2 py-1 text-center" value="0" min="0" />
+                                            <span>→</span>
+                                            <input id="maxInputArea" type="number" class="w-full border rounded px-2 py-1 text-center" value="200" max="200" />
+                                        </div>
+
+                                        <div class="relative h-4">
+                                            <div class="absolute inset-0 bg-gray-200 rounded-full"></div>
+
+                                            <div id="rangeTrackArea" class="absolute h-full bg-cyan-600 rounded-full"></div>
+
+                                            <input id="rangeMinArea" type="range" min="0" max="200" value="0"
+                                                   class="absolute w-full h-4 appearance-none bg-transparent pointer-events-none thumb-min" />
+                                            <input id="rangeMaxArea" type="range" min="0" max="200" value="200"
+                                                   class="absolute w-full h-4 appearance-none bg-transparent pointer-events-none thumb-max" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -162,17 +281,23 @@
     let urlBase = "https://localhost:7031";
     let urlParams1 = new URLSearchParams(window.location.search);
     let type1 = urlParams1.get('type');
+    const locationInput = document.getElementById('searchInput');
+    const dropdown2 = document.getElementById('dropdown2');
+    const provinceList = document.getElementById('province-list');
+    const locationList = document.getElementById("location-list");
+    let selectedLocationLists = [];
+    const selectedLocationsEl = document.getElementById("location-selected-list");
     if (type1 == null || type1 == undefined) type1 = "room";
 
     let el = document.getElementById(type1);
     if (el) {
-        el.classList.add("text-orange-500");
-        el.classList.replace("border-gray-200", "border-orange-500");
+        el.classList.add("active");
     }
 
     let listLocationSelected = sessionStorage.getItem('selectedLocationLists');
     let provinceId = sessionStorage.getItem('provinceId');
     let provinceName = sessionStorage.getItem('provinceName');
+    let searchInput = document.getElementById('provinceSelected');
     if (listLocationSelected != null && listLocationSelected != undefined) {
         let html = '';
         listLocationSelected = JSON.parse(listLocationSelected);
@@ -188,15 +313,26 @@
 
     let slideIndex = 0;
     let slides = [];
+    let locations = [];
 
     getAllData();
 
     async function getAllData() {
         try {
-            const [properties, sliders] = await Promise.all([
+            const [properties, sliders,location1s] = await Promise.all([
                 propertyService.getAllproperty(),
-                fetch(`${urlBase}/api/admin/slider`).then(res => res.json())
+                fetch(`${urlBase}/api/admin/slider`).then(res => res.json()),
+                getAllLocation()
             ]);
+            if(location1s){
+                locations = location1s;
+                let html = '';
+                $('#locationProvinder').html('');
+                location1s.forEach(item => {
+                    html += `<div class="location-item location-province" onclick="handleProvince(this)" data-value="${item.name}" data-id="${item.id}">${item.name}</div>`;
+                });
+                $('#locationProvinder').html(html);
+            }
 
             if (sliders && sliders.length > 0) {
                 // Cập nhật slider với dữ liệu từ API slider
@@ -236,7 +372,104 @@
         }
     }
 
-       function updateSlider(sliders) {
+    let listLocationName = [];
+    let listLocationBackup = [];
+    locationInput.addEventListener("input", () => {
+        listLocationBackup = [];
+        renderLocations(searchInput.dataset.id);
+    });
+
+     locationInput.addEventListener("focus", () => {
+         dropdown2.classList.remove("hidden");
+         renderLocations(searchInput.dataset.id);
+     });
+
+     document.addEventListener("click", (e) => {
+         console.log(e);
+        if (!e.target.classList.contains("dropdown2")) {
+            dropdown2.classList.add("hidden");
+        }
+    });
+
+    function renderSelectedLocations() {
+        selectedLocationsEl.innerHTML = "";
+        selectedLocationLists
+        .forEach(loc => {
+        const tag = document.createElement("div");
+        tag.className = "bg-blue-100 text-blue-700 px-3 py-1 dropdown2-item rounded-full text-sm flex items-center gap-2";
+        tag.innerHTML = `<span>${loc.locationName}</span>
+                            <button class="text-blue-600 hover:text-red-500 font-bold">×</button>`;
+        tag.querySelector("button").addEventListener("click", () => {
+            selectedLocationLists = selectedLocationLists.filter(l => l.locationName !== loc.locationName);
+            dropdown2.style.height = 25.3 + 2.1 * selectedLocationLists.length + 'rem';
+            renderSelectedLocations();
+        });
+        selectedLocationsEl.appendChild(tag);
+        });
+    }
+
+    function selectProvinceItem(id) {
+        selectedLocationsEl.innerHTML = "";
+        selectedLocationLists = [];
+        renderSelectedLocations();
+        listLocationBackup = [];
+        dropdown2.style.height = 25.3 + 2.1 * selectedLocationLists.length + 'rem';
+        renderLocations(id);
+    }
+
+
+    function renderLocations(id = -1) {
+        locationList.innerHTML = "";
+        if(listLocationBackup.length == 0){
+            const provinceItem = locations.filter(l => l.id == id)[0];
+            provinceItem.wards.forEach(ward => {
+                    ward.streets.forEach(street => {
+                        if(ward.id != 0 && street.id != 0){
+                            let itemValue = { province:{id: provinceItem.id,
+                                name: provinceItem.name},
+                                ward : {id:ward.id,name: ward.name },
+                                street: {id: street.id,name:street.name },
+                                locationName : `${street.name}, ${ward.name}, ${provinceItem.name}`
+                            };
+                            listLocationBackup.push(itemValue);
+                        }
+                    })
+            })
+        }
+
+        listLocationName = listLocationBackup;
+        listLocationName = listLocationName.filter(p => p.locationName.toLowerCase().includes(locationInput.value.toLowerCase()));
+        listLocationName.forEach(loc => {
+            const li = document.createElement("li");
+            li.className = "cursor-pointer py-1 hover:bg-gray-100 flex items-center gap-1 dropdown2-item";
+            li.innerHTML = `<span class="text-blue-500 ml-4"><i class="fas fa-map-marker-alt text-gray-500 mr-2"></i></span><span>${loc.locationName}</span>`;
+            li.addEventListener("click", () => selectLocation(loc));
+            locationList.appendChild(li);
+        });
+    }
+
+
+    function selectLocation(loc) {
+        let findIndex = selectedLocationLists.findIndex(p => p.province.id == loc.province.id
+            && p.ward.id == loc.ward.id
+            && p.street.id == loc.street.id);
+        if(findIndex != -1){
+            alert('Địa điểm đã được chọn trước đó');
+            return;
+        }
+        if (selectedLocationLists.length >= 5){
+            alert('Đã tối đa 5 địa điểm');
+            return;
+        }
+        selectedLocationLists.push(loc);
+        renderSelectedLocations();
+        locationInput.value = "";
+        renderLocations(searchInput.dataset.id);
+        // locationDropdown.classList.add("hidden");
+    }
+
+
+    function updateSlider(sliders) {
         const sliderContainer = document.getElementById('sliderContainer');
         const sliderDots = document.getElementById('sliderDots');
 
@@ -251,6 +484,16 @@
         showSlides(slideIndex);
     }
 
+    function handleProvince(el){
+        let val = $(el).data('value');
+        let id = $(el).data('id');
+        $('#provinceSelected').attr('data-id', id);
+        $('#provinceSelected').attr('data-value', val);
+        $('#provinceSelected').html(val);
+        listLocationBackup = [];
+        dropdown2.classList.add('hidden');
+        $('#locationBtn').click();
+    }
 
     function showSlides(n) {
         const sliderContainer = document.getElementById('sliderContainer');
@@ -375,7 +618,7 @@
         const menu = document.getElementById(menuId);
 
         button.addEventListener('click', function (e) {
-            console.log('Clicked:', buttonId);
+            //console.log('Clicked:', buttonId);
             e.stopPropagation();
             // Đóng các dropdown khác
             document.querySelectorAll('.dropdown-menu.active').forEach(m => {
@@ -386,6 +629,7 @@
             });
             button.classList.toggle('active');
             menu.classList.toggle('active');
+            dropdown2.classList.add('hidden');
             console.log('Dropdown menu', menuId, 'active:', menu.classList.contains('active'));
         });
 
@@ -491,18 +735,18 @@
     });
 
     // Price input handling
-    document.getElementById('minPriceInput').addEventListener('input', function() {
-        minPrice = parseInt(this.value) || 0;
-        updatePriceDisplay();
-    });
+    // document.getElementById('minPriceInput').addEventListener('input', function() {
+    //     minPrice = parseInt(this.value) || 0;
+    //     updatePriceDisplay();
+    // });
 
-    document.getElementById('maxPriceInput').addEventListener('input', function() {
-        maxPrice = parseInt(this.value) || 60000;
-        updatePriceDisplay();
-    });
+    // document.getElementById('maxPriceInput').addEventListener('input', function() {
+    //     maxPrice = parseInt(this.value) || 60000;
+    //     updatePriceDisplay();
+    // });
 
-    // Initialize
-    updatePriceDisplay();
+    // // Initialize
+    // updatePriceDisplay();
 
     // Search function
     function performSearch() {
@@ -620,6 +864,119 @@
         } catch (error) {
             console.error("Lỗi khi tạo/mở cuộc trò chuyện:", error);
         }
+    }
+
+            setupDoubleRangeSlider({
+            rangeMinId: "rangeMinArea",
+            rangeMaxId: "rangeMaxArea",
+            inputMinId: "minInputArea",
+            inputMaxId: "maxInputArea",
+            labelMinId: "minLabelArea",
+            labelMaxId: "maxLabelArea",
+            trackId: "rangeTrackArea",
+            maxValue: 200,
+            labelInfo: 'm<sup>2</sup>'
+        });
+
+        setupDoubleRangeSlider({
+            rangeMinId: "rangeMinPrice",
+            rangeMaxId: "rangeMaxPrice",
+            inputMinId: "minInputPrice",
+            inputMaxId: "maxInputPrice",
+            labelMinId: "minLabelPrice",
+            labelMaxId: "maxLabelPrice",
+            trackId: "rangeTrackPrice",
+            maxValue: 100,
+            labelInfo: 'triệu'
+        });
+
+
+        setupDoubleRangeSlider({
+            rangeMinId: "rangeMin",
+            rangeMaxId: "rangeMax",
+            inputMinId: "minInput",
+            inputMaxId: "maxInput",
+            labelMinId: "minLabel",
+            labelMaxId: "maxLabel",
+            trackId: "rangeTrack",
+            maxValue: 15
+        });
+
+
+    function setupDoubleRangeSlider({rangeMinId,rangeMaxId,inputMinId,inputMaxId,
+        labelMinId,labelMaxId,trackId,maxValue = 15,labelInfo = ''
+    }) {
+        const rangeMin = document.getElementById(rangeMinId);
+        const rangeMax = document.getElementById(rangeMaxId);
+        const minInput = document.getElementById(inputMinId);
+        const maxInput = document.getElementById(inputMaxId);
+        const minLabel = document.getElementById(labelMinId);
+        const maxLabel = document.getElementById(labelMaxId);
+        const rangeTrack = document.getElementById(trackId);
+
+        function updateRangeUI() {
+            const min = parseInt(rangeMin.value);
+            const max = parseInt(rangeMax.value);
+
+            minInput.value = min;
+            maxInput.value = max;
+
+            minLabel.innerHTML = min + ' ' + labelInfo;
+            maxLabel.innerHTML = max + ' ' + labelInfo;
+
+            const minPercent = (min / maxValue) * 100;
+            const maxPercent = (max / maxValue) * 100;
+            rangeTrack.style.left = minPercent + "%";
+            rangeTrack.style.right = (100 - maxPercent) + "%";
+        }
+
+        rangeMin.addEventListener("input", function () {
+            let minVal = parseInt(rangeMin.value);
+            let maxVal = parseInt(rangeMax.value);
+
+            if (minVal > maxVal) {
+                minVal = maxVal;
+                rangeMin.value = maxVal;
+            }
+            updateRangeUI();
+        });
+
+        rangeMax.addEventListener("input", function () {
+            let minVal = parseInt(rangeMin.value);
+            let maxVal = parseInt(rangeMax.value);
+
+            if (maxVal < minVal) {
+                maxVal = minVal;
+                rangeMax.value = minVal;
+            }
+            updateRangeUI();
+        });
+
+        minInput.addEventListener("input", function () {
+            let minVal = parseInt(minInput.value);
+            let maxVal = parseInt(maxInput.value);
+
+            if (minVal > maxVal) {
+                minVal = maxVal;
+                minInput.value = maxVal;
+            }
+            rangeMin.value = minInput.value;
+            updateRangeUI();
+        });
+
+        maxInput.addEventListener("input", function () {
+            let minVal = parseInt(minInput.value);
+            let maxVal = parseInt(maxInput.value);
+
+            if (maxVal < minVal) {
+                maxVal = minVal;
+                maxInput.value = minVal;
+            }
+            rangeMax.value = maxInput.value;
+            updateRangeUI();
+        });
+
+        updateRangeUI();
     }
 
     function getUserIdFromToken(token) {

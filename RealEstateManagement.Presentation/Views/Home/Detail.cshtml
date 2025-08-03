@@ -1,7 +1,7 @@
 
 ﻿@{
     // ViewData["Title"] = "Home Page";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_LayoutV2.cshtml";
 }
 <style>
     .text-orange-500 {
@@ -33,7 +33,7 @@
     <span class="text-gray-700">Pass phòng cửa sổ lớn 175 Nguyễn Thị Thập</span>
 </nav> *@
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6" style="margin-top:2rem">
 
     <div class="md:col-span-2">
         <div class="grid gap-6">
@@ -213,7 +213,7 @@
         $('#imgPrimaryUrl').prop('src',prop.primaryImageUrl.includes("http") ? prop.primaryImageUrl : urlBase + prop.primaryImageUrl);
         $('.areaId').html(prop.area);
         $('.addressId').html(addressInfo);
-        $('.priceId').html(formatVietnameseNumber(prop.price));
+        $('.priceId').html(formatVietnameseNumber(prop.price) + " đ");
         $('.timeAgoId').html(timeAgo(prop.createdAt));
         $('.descriptionId').html(prop.description);
         $('.wardId').html(prop.ward);

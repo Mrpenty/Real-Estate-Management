@@ -34,6 +34,13 @@
     </script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/RealEstateManagement.Presentation.styles.css" asp-append-version="true" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/authService.js" asp-append-version="true"></script>
+    <script src="~/js/postPropertyService.js"></script>
+    <script src="~/js/helper.js" asp-append-version="true"></script>
+    <script src="~/js/compareProperty.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Styles", required: false)
     <style>
         .gradient-bg {
@@ -102,6 +109,10 @@
                     <a href="#" class="text-gray-700 hover:text-orange-600 font-medium transition-colors duration-200 flex items-center space-x-2">
                         <i class="fas fa-phone text-sm"></i>
                         <span>Liên hệ</span>
+                    </a>
+                    <a onclick="showFilterPopup('compare-popup')" class="text-gray-700 hover:text-orange-600 font-medium transition-colors duration-200 flex items-center space-x-2">
+                        <i class="fas fa-window-restore text-sm"></i>
+                        <span>So sánh</span>
                     </a>
                 </nav>
 
@@ -241,12 +252,29 @@
         </div>
     </footer>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/authService.js"></script>
-    <script src="~/js/postPropertyService.js"></script>
-    <script src="~/js/helper.js" asp-append-version="true"></script>
-    <script src="~/js/compareProperty.js" asp-append-version="true"></script>
+    @* compare-popup *@
+    <div id="compare-popup" class="hidden fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-lg">
+
+            <div class="sticky top-0 bg-white z-10 px-4 pt-4 pb-3 rounded-t-lg shadow-sm border-b mb-2">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-semibold">So sánh</h2>
+                    <button onclick="hideFilterPopup('compare-popup')" class="text-2xl text-gray-500 hover:text-red-500">&times;</button>
+                </div>
+            </div>
+
+            <div class="px-4 overflow-y-auto h-[60vh]">
+                <div id="compare-table-container" class="overflow-x-auto">
+                    <table class="table-auto w-full text-sm text-gray-700 border" id="compare-table">
+                    </table>
+                </div>
+                <p id="compare-warning" class="text-red-500 text-sm mt-2 hidden">
+                    Vui lòng chọn ít nhất 2 và không quá 3 mục để so sánh.
+                </p>
+            </div>
+
+        </div>
+    </div>
 
 
     <script>
@@ -277,6 +305,7 @@
                 if (notificationBell) notificationBell.style.display = 'none'; // Ẩn chuông
             }
         }
+     
 
         // Toggle dropdown
         function toggleDropdown() {
@@ -337,7 +366,7 @@
             event.preventDefault();
             const isAuthenticated = authService.isAuthenticated();
             if (isAuthenticated) {
-                window.location.href = '/PostProperty/CreateProperty';
+                window.location.href = '/PostProperty/ListProperty';
             } else {
                 window.location.href = '/Auth/Login';
             }
@@ -488,6 +517,17 @@
                 dropdown.classList.add('hidden');
             }
         });
+
+        function hideFilterPopup(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function showFilterPopup(id) {
+            document.getElementById(id).classList.remove('hidden');
+            if(id == 'compare-popup'){
+              renderComparePopup();
+            }
+        }
 
         // Update navigation and notification count on load
         document.addEventListener('DOMContentLoaded', () => {
