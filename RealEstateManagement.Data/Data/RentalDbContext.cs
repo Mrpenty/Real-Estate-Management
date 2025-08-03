@@ -1,17 +1,26 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Data.Data;
-using RealEstateManagement.Data.Entity;
-using static ApplicationUserConfiguration;
 using RealEstateManagement.Data.Data.Configurations;
+using RealEstateManagement.Data.Data.Configurations.ReportConfig;
+using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.AddressEnity;
+<<<<<<< HEAD
+using RealEstateManagement.Data.Entity.Messages;
+using RealEstateManagement.Data.Entity.Payment;
+using RealEstateManagement.Data.Entity.PropertyEntity;
+using RealEstateManagement.Data.Entity.ReportEntity;
+using RealEstateManagement.Data.Entity.User;
+using static ApplicationUserConfiguration;
+=======
 using RealEstateManagement.Data.Entity.Notification;
 using RealEstateManagement.Data.Entity.User;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using RealEstateManagement.Data.Entity.Payment;
 using RealEstateManagement.Data.Entity.Messages;
 using RealEstateManagement.Data.Data.Configurations.UserConfig;
+>>>>>>> origin/master
 
 public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
 {
@@ -40,7 +49,7 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
 
     public DbSet<PromotionPackage> promotionPackages { get; set; }
     public DbSet<PropertyPromotion> PropertyPromotions { get; set; }
-
+    public DbSet<Report> Reports { get; set; }
 
     // DbSets for Address and Location
     public DbSet<Address> Addresses { get; set; }
@@ -86,9 +95,13 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
         modelBuilder.ApplyConfiguration(new RentalContractConfiguration());
         modelBuilder.ApplyConfiguration(new PropertyPromotionConfiguration());
         modelBuilder.ApplyConfiguration(new PromotionPackageConfiguration());
+<<<<<<< HEAD
+        modelBuilder.ApplyConfiguration(new ReportConfiguration());
+=======
         modelBuilder.ApplyConfiguration(new InterestedPropertyConfiguration());
 
 
+>>>>>>> origin/master
         MainDataSeed.SeedData(modelBuilder);
     }
 }

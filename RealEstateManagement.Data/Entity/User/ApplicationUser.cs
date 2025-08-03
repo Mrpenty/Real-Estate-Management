@@ -10,6 +10,7 @@ using RealEstateManagement.Data.Entity.Messages;
 using RealEstateManagement.Data.Entity.Notification;
 using RealEstateManagement.Data.Entity.Payment;
 using RealEstateManagement.Data.Entity.PropertyEntity;
+using RealEstateManagement.Data.Entity.ReportEntity;
 using Property = RealEstateManagement.Data.Entity.PropertyEntity.Property;
 
 
@@ -36,6 +37,10 @@ namespace RealEstateManagement.Data.Entity.User
         public ICollection<Conversation> ConversationsAsRenter { get; set; }
         public ICollection<Conversation> ConversationsAsLandlord { get; set; }
         public ICollection<UserFavoriteProperty> FavoriteProperties { get; set; }
+
+        public ICollection<Report> ReportsCreated { get; set; }
+        public ICollection<Report> ReportsResolved { get; set; }
+
         public ICollection<Message> MessagesSent { get; set; }
 
         public Wallet Wallet { get; set; }

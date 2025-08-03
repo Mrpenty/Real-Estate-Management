@@ -1,38 +1,30 @@
-﻿using RealEstateManagement.Business.Services.Auth;
-using RealEstateManagement.Business.Services.Mail;
-using RealEstateManagement.Business.Repositories.Token;
-using RealEstateManagement.Business.Repositories.OwnerRepo;
-using RealEstateManagement.Business.Services.OwnerService;
-using RealEstateManagement.Business.Repositories.Properties;
-using RealEstateManagement.Business.Services.Properties;
-using RealEstateManagement.Business.Repositories.AddressRepo;
-using RealEstateManagement.Business.Repositories.Repository;
-using RealEstateManagement.Business.Services.User;
-using RealEstateManagement.Business.Services.UploadPicService;
-using RealEstateManagement.Business.Repositories.SearchProperties;
-using RealEstateManagement.Business.Services.SearchProperties;
-using RealEstateManagement.Business.Repositories.FavoriteRepository;
-using RealEstateManagement.Business.Services.Favorite;
+﻿using RealEstateManagement.Business.Repositories.AddressRepo;
 using RealEstateManagement.Business.Repositories.Chat.Conversations;
 using RealEstateManagement.Business.Repositories.Chat.Messages;
-using RealEstateManagement.Business.Services.Chat.Messages;
-using RealEstateManagement.Business.Services.Chat.Conversations;
+using RealEstateManagement.Business.Repositories.FavoriteRepository;
+using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Repositories.Package;
+using RealEstateManagement.Business.Repositories.Properties;
+using RealEstateManagement.Business.Repositories.Repository;
+using RealEstateManagement.Business.Repositories.SearchProperties;
+using RealEstateManagement.Business.Repositories.Token;
+using RealEstateManagement.Business.Services;
+using RealEstateManagement.Business.Services.Auth;
+using RealEstateManagement.Business.Services.Chat.Conversations;
+using RealEstateManagement.Business.Services.Chat.Messages;
+using RealEstateManagement.Business.Services.Favorite;
+using RealEstateManagement.Business.Services.Mail;
+using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Business.Services.PromotionPackages;
-
-
+using RealEstateManagement.Business.Services.Properties;
+using RealEstateManagement.Business.Services.SearchProperties;
+using RealEstateManagement.Business.Services.UploadPicService;
+using RealEstateManagement.Business.Services.User;
 using RealEstateManagement.Business.Services.Wallet;
 using RealEstateManagement.Business.Repositories.NewsRepository;
 using RealEstateManagement.Business.Services.NewsService;
-
-using RealEstateManagement.Business.Repositories.NewsRepository;
-using RealEstateManagement.Business.Services.NewsService;
-
 using RealEstateManagement.Business.Repositories.NotificationRepository;
 using RealEstateManagement.Business.Services.NotificationService;
-
-
-
 namespace RealEstateManagement.API.Extensions
 {
     public static class DependencyInjectionExtensions
@@ -63,13 +55,8 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IConversationRepository, ConversationRepository>();
             services.AddScoped<IMessageRepository, MessageRepository>();
 
-
-
             //Notification Repository
             services.AddScoped<INotificationRepository, NotificationRepository>();
-
-          
-
 
             //----Service----\\
 
@@ -109,15 +96,12 @@ namespace RealEstateManagement.API.Extensions
             //Notification Service
             services.AddScoped<INotificationService, NotificationService>();
 
-
-
-
-
-
             //Wallet
             services.AddScoped<WalletService>();
             services.AddScoped<QRCodeService>();
 
+            // logic kiểm tra và cập nhật bài hết hạn
+            services.AddHostedService<ExpirePostBackgroundService>();
             return services;
         }
     }
