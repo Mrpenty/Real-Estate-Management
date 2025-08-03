@@ -25,8 +25,17 @@ namespace RealEstateManagement.Data.Data.Configurations.UserConfig
                    .HasDefaultValueSql("GETDATE()")
                    .IsRequired();
 
+            builder.Property(ip => ip.RenterConfirmed)
+                .HasDefaultValue(false)
+                .IsRequired();
+
+            builder.Property(ip => ip.LandlordConfirmed)
+                .HasDefaultValue(false)
+                .IsRequired();
+
             builder.Property(ip => ip.RenterReplyAt)
                    .IsRequired(false);
+
             builder.Property(ip => ip.LandlordReplyAt)
                    .IsRequired(false);
 

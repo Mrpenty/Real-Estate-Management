@@ -3,6 +3,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using NuGet.Protocol.Core.Types;
 using RealEstateManagement.Business.DTO.Properties;
+using RealEstateManagement.Data.Entity.User;
 using System.Text.Json.Serialization;
 
 namespace RealEstateManagement.API.Extensions
@@ -28,7 +29,9 @@ namespace RealEstateManagement.API.Extensions
             var builder = new ODataConventionModelBuilder();
             builder.EntitySet<HomePropertyDTO>("Properties");
             builder.EntityType<HomePropertyDTO>().HasKey(u => u.Id);
-            
+            builder.EntitySet<InterestedPropertyDTO>("InterestedProperty");
+            builder.EntityType<InterestedPropertyDTO>().HasKey(u => u.Id);
+
             return builder.GetEdmModel();
         }
     }

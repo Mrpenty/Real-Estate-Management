@@ -100,8 +100,14 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<WalletService>();
             services.AddScoped<QRCodeService>();
 
+            //Interested Property
+            services.AddScoped<IInterestedPropertyRepository, InterestedPropertyRepository>();
+            services.AddScoped<IInterestedPropertyService, InterestedPropertyService>();
+
+
             // logic kiểm tra và cập nhật bài hết hạn
             services.AddHostedService<ExpirePostBackgroundService>();
+
             return services;
         }
     }
