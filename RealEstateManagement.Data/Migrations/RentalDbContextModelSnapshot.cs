@@ -917,9 +917,6 @@ namespace RealEstateManagement.Data.Migrations
 
                             CreatedAt = new DateTime(2025, 8, 2, 18, 7, 12, 775, DateTimeKind.Local).AddTicks(8394),
 
-
-                            CreatedAt = new DateTime(2025, 7, 31, 0, 37, 11, 804, DateTimeKind.Local).AddTicks(2128),
-
                             Description = "Premium promotion package for property listings.",
                             DurationInDays = 60,
                             IsActive = true,
