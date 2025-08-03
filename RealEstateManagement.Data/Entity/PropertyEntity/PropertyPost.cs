@@ -25,7 +25,8 @@ namespace RealEstateManagement.Data.Entity.PropertyEntity
             Approved = 2,
             Rejected = 3,
             Rented = 4,
-            Sold = 5
+            Sold = 5,
+            Expired = 6
         }
     }
 }

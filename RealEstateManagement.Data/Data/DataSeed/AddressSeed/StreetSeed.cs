@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Data.Entity.AddressEnity;
 
 namespace RealEstateManagement.Data.Data.DataSeed.AddressSeed

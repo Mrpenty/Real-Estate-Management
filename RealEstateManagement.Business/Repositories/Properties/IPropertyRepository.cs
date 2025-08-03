@@ -2,6 +2,7 @@
 using RealEstateManagement.Business.DTO.Location;
 using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Data.Entity.PropertyEntity;
+using RealEstateManagement.Data.Entity.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,5 +30,8 @@ namespace RealEstateManagement.Business.Repositories.Properties
         Task<List<ProvinceDTO>> GetListLocationAsync();
 
         Task<IEnumerable<Property>> FilterByTypeAsync(string type);
+        //Lấy tất cả property theo landlordId
+        Task<ApplicationUser?> GetUserByIdAsync(int userId);
+        Task<List<Property>> GetPropertiesByLandlordIdAsync(int landlordId);
     }
 }

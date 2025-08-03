@@ -31,6 +31,8 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.Address).ThenInclude(a => a.Province)
                 .Include(p => p.Address).ThenInclude(a => a.Ward)
                 .Include(p => p.Address).ThenInclude(a => a.Street)
+                .Include(p => p.Posts)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
                 .AsNoTracking()
@@ -73,6 +75,8 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.Images)
                 .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
+                .Include(p => p.Posts)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
                 .AsQueryable();
 
@@ -102,6 +106,8 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.Images)
                 .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
+                .Include(p => p.Posts)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
                 .AsQueryable();
 
@@ -139,6 +145,8 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.Images)
                 .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
+                .Include(p => p.Posts)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
                 .AsQueryable();
 
@@ -228,6 +236,8 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities)
                     .ThenInclude(pa => pa.Amenity)
+                .Include(p => p.Posts)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .ToListAsync();
         }
 
@@ -241,6 +251,8 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.Reviews)
                 .Include(p => p.PropertyAmenities)
                     .ThenInclude(pa => pa.Amenity)
+                .Include(p => p.Posts)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .ToListAsync();
         }
 
@@ -303,6 +315,8 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.Images)
                 .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
+                .Include(p => p.Posts)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
                 .AsQueryable();
             if (!string.IsNullOrWhiteSpace(type))
@@ -323,6 +337,35 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Select(x => x.Property)
                 .ToListAsync();
         }
+        // Lấy thông tin người dùng
+        public async Task<ApplicationUser?> GetUserByIdAsync(int userId)
+        {
+            return await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == userId);
+        }
+        // Lấy property theo landlordId
+        public async Task<List<Property>> GetPropertiesByLandlordIdAsync(int landlordId)
+        {
+            return await _context.Properties
+                .Where(p => p.LandlordId == landlordId)
+                .Include(p => p.Images)
+                .Include(p => p.Address).ThenInclude(a => a.Province)
+                .Include(p => p.Address).ThenInclude(a => a.Ward)
+                .Include(p => p.Address).ThenInclude(a => a.Street)
+                .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
+                .Include(p => p.Posts)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
+                .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
+                .OrderByDescending(p => p.PropertyPromotions.Any()
+                    ? p.PropertyPromotions.Max(pp => pp.PromotionPackage.Level)
+                    : 0)
+                .ThenByDescending(p => p.CreatedAt)
+                .ThenByDescending(p => p.ViewsCount)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
 
     }
 }

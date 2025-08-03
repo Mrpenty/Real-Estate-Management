@@ -43,4 +43,9 @@
     <ProjectReference Include="..\RealEstateManagement.Data\RealEstateManagement.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\uploads\cccd-back\" />
+    <Folder Include="wwwroot\uploads\cccd-front\" />
+  </ItemGroup>
+
 </Project>

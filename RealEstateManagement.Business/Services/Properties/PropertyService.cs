@@ -7,6 +7,7 @@ using RealEstateManagement.Business.Repositories.FavoriteRepository;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.AddressEnity;
+using RealEstateManagement.Data.Entity.PropertyEntity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -470,7 +471,6 @@ namespace RealEstateManagement.Business.Services.Properties
                     .FirstOrDefault()
             });
         }
-
         public async Task<IEnumerable<HomePropertyDTO>> GetPropertiesByUserAsync(int? userId)
         {
             var properties = await _repository.GetAllAsync();
@@ -506,6 +506,59 @@ namespace RealEstateManagement.Business.Services.Properties
                                         .Select(pp => pp.PromotionPackage.Name)
                                         .FirstOrDefault()
             });
+        }
+        public async Task<UserProfileWithPropertiesDTO?> GetUserProfileWithPropertiesAsync(int userId, int? currentId = null)
+        {
+            var user = await _repository.GetUserByIdAsync(userId);
+            if (user == null) return null;
+            var properties = await _repository.GetPropertiesByLandlordIdAsync(userId);
+            var favoriteProperties = new List<Property>();
+            if (currentId.HasValue && currentId.Value > 0)
+            {
+                favoriteProperties = (await _repositoryFavorite.AllFavoritePropertyAsync(currentId.Value)).ToList();
+            }
+            var propertyDtos = properties.Select(p => new HomePropertyDTO
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Description = p.Description,
+                Type = p.Type,
+                AddressID = p.AddressId,
+                Area = p.Area,
+                Bedrooms = p.Bedrooms,
+                Price = p.Price,
+                Status = p.Status,
+                Location = p.Address?.Province?.Name + " - " + p.Address?.Ward?.Name + " - " + p.Address?.Street?.Name,
+                DetailedAddress = p.Address?.DetailedAddress ?? "",
+                PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
+                CreatedAt = p.CreatedAt,
+                ViewsCount = p.ViewsCount,
+                LandlordId = p.LandlordId,
+                LandlordName = user.Name,
+                LandlordPhoneNumber = user.PhoneNumber,
+                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                PromotionPackageName = p.PropertyPromotions?
+                    .OrderByDescending(pp => pp.PromotionPackage.Level)
+                    .Select(pp => pp.PromotionPackage.Name)
+                    .FirstOrDefault(),
+                ProvinceId = p.Address?.ProvinceId,
+                Province = p.Address?.Province?.Name,
+                WardId = p.Address?.WardId,
+                Ward = p.Address?.Ward?.Name,
+                StreetId = p.Address?.StreetId,
+                Street = p.Address?.Street?.Name,
+                IsFavorite = favoriteProperties.Any(fav => fav.Id == p.Id)
+            }).ToList();
+
+            return new UserProfileWithPropertiesDTO
+            {
+                UserId = user.Id,
+                Name = user.Name,
+                PhoneNumber = user.PhoneNumber,
+                Email = user.Email,
+                AvatarUrl = user.ProfilePictureUrl,
+                Properties = propertyDtos
+            };
         }
     }
 }

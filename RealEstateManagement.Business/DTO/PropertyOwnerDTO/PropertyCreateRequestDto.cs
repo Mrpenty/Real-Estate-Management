@@ -22,5 +22,6 @@ namespace RealEstateManagement.Business.DTO.PropertyOwnerDTO
         public int WardId { get; set; }
         public int  StreetId { get; set; }
         public string DetailedAddress { get; set; }
+
     }
 }

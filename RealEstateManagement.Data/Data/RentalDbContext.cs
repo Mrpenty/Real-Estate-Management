@@ -1,23 +1,37 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Data.Data;
-using RealEstateManagement.Data.Entity;
-using static ApplicationUserConfiguration;
 using RealEstateManagement.Data.Data.Configurations;
+using RealEstateManagement.Data.Data.Configurations.ReportConfig;
+using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.AddressEnity;
+<<<<<<< HEAD
+using RealEstateManagement.Data.Entity.Messages;
+using RealEstateManagement.Data.Entity.Payment;
+using RealEstateManagement.Data.Entity.PropertyEntity;
+using RealEstateManagement.Data.Entity.ReportEntity;
+using RealEstateManagement.Data.Entity.User;
+using static ApplicationUserConfiguration;
+=======
 using RealEstateManagement.Data.Entity.Notification;
 using RealEstateManagement.Data.Entity.User;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using RealEstateManagement.Data.Entity.Payment;
 using RealEstateManagement.Data.Entity.Messages;
+using RealEstateManagement.Data.Data.Configurations.UserConfig;
+>>>>>>> origin/master
 
 public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
 {
     // DbSets for Identity
     public DbSet<UserPreference> UserPreferences { get; set; }
+    // DbSets for Admin Management
+    public DbSet<News> News { get; set; }
+    public DbSet<NewsImage> NewsImages { get; set; }
 
     // DbSets for Property Management
+    public DbSet<InterestedProperty> InterestedProperties { get; set; }
     public DbSet<Property> Properties { get; set; }
     public DbSet<Amenity> Amenities { get; set; }
     public DbSet<RentalContract> RentalContracts { get; set; }
@@ -34,9 +48,9 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     public DbSet<Review> Reviews { get; set; }
     public DbSet<UserFavoriteProperty> UserFavoriteProperties { get; set; }
 
-    public DbSet <PromotionPackage> promotionPackages { get; set; }
+    public DbSet<PromotionPackage> promotionPackages { get; set; }
     public DbSet<PropertyPromotion> PropertyPromotions { get; set; }
-
+    public DbSet<Report> Reports { get; set; }
 
     // DbSets for Address and Location
     public DbSet<Address> Addresses { get; set; }
@@ -56,7 +70,9 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
+        // Configure News
+        modelBuilder.ApplyConfiguration(new NewsConfiguration());
+        modelBuilder.ApplyConfiguration(new NewsImageConfiguration());
         // Configure Identity
         modelBuilder.ApplyConfiguration(new ApplicationUserConfiguration());
         modelBuilder.ApplyConfiguration(new UserPreferenceConfiguration());
@@ -80,7 +96,13 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
         modelBuilder.ApplyConfiguration(new RentalContractConfiguration());
         modelBuilder.ApplyConfiguration(new PropertyPromotionConfiguration());
         modelBuilder.ApplyConfiguration(new PromotionPackageConfiguration());
+<<<<<<< HEAD
+        modelBuilder.ApplyConfiguration(new ReportConfiguration());
+=======
+        modelBuilder.ApplyConfiguration(new InterestedPropertyConfiguration());
 
+
+>>>>>>> origin/master
         MainDataSeed.SeedData(modelBuilder);
     }
 }

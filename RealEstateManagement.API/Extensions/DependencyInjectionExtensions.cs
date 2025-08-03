@@ -1,33 +1,30 @@
-﻿using RealEstateManagement.Business.Services.Auth;
-using RealEstateManagement.Business.Services.Mail;
-using RealEstateManagement.Business.Repositories.Token;
-using RealEstateManagement.Business.Repositories.OwnerRepo;
-using RealEstateManagement.Business.Services.OwnerService;
-using RealEstateManagement.Business.Repositories.Properties;
-using RealEstateManagement.Business.Services.Properties;
-using RealEstateManagement.Business.Repositories.AddressRepo;
-using RealEstateManagement.Business.Repositories.Repository;
-using RealEstateManagement.Business.Services.User;
-using RealEstateManagement.Business.Services.UploadPicService;
-using RealEstateManagement.Business.Repositories.SearchProperties;
-using RealEstateManagement.Business.Services.SearchProperties;
-using RealEstateManagement.Business.Repositories.FavoriteRepository;
-using RealEstateManagement.Business.Services.Favorite;
+﻿using RealEstateManagement.Business.Repositories.AddressRepo;
 using RealEstateManagement.Business.Repositories.Chat.Conversations;
 using RealEstateManagement.Business.Repositories.Chat.Messages;
-using RealEstateManagement.Business.Services.Chat.Messages;
-using RealEstateManagement.Business.Services.Chat.Conversations;
+using RealEstateManagement.Business.Repositories.FavoriteRepository;
+using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Repositories.Package;
+using RealEstateManagement.Business.Repositories.Properties;
+using RealEstateManagement.Business.Repositories.Repository;
+using RealEstateManagement.Business.Repositories.SearchProperties;
+using RealEstateManagement.Business.Repositories.Token;
+using RealEstateManagement.Business.Services;
+using RealEstateManagement.Business.Services.Auth;
+using RealEstateManagement.Business.Services.Chat.Conversations;
+using RealEstateManagement.Business.Services.Chat.Messages;
+using RealEstateManagement.Business.Services.Favorite;
+using RealEstateManagement.Business.Services.Mail;
+using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Business.Services.PromotionPackages;
-
-using RealEstateManagement.Business.Repositories.TenantInteraction;
-using RealEstateManagement.Business.Services.TenantInteraction;
-
+using RealEstateManagement.Business.Services.Properties;
+using RealEstateManagement.Business.Services.SearchProperties;
+using RealEstateManagement.Business.Services.UploadPicService;
+using RealEstateManagement.Business.Services.User;
 using RealEstateManagement.Business.Services.Wallet;
+using RealEstateManagement.Business.Repositories.NewsRepository;
+using RealEstateManagement.Business.Services.NewsService;
 using RealEstateManagement.Business.Repositories.NotificationRepository;
 using RealEstateManagement.Business.Services.NotificationService;
-using RealEstateManagement.Business.Repositories.Admin;
-using RealEstateManagement.Business.Services.Admin;
 
 
 namespace RealEstateManagement.API.Extensions
@@ -58,13 +55,10 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<ISliderRepository, SliderRepository>();
             //Chat Repository
             services.AddScoped<IConversationRepository, ConversationRepository>();
-            services.AddScoped<IMessageRepository,MessageRepository>();
+            services.AddScoped<IMessageRepository, MessageRepository>();
 
             //Notification Repository
             services.AddScoped<INotificationRepository, NotificationRepository>();
-
-            //Admin Dashboard Repository
-            services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
 
           
 
@@ -94,6 +88,13 @@ namespace RealEstateManagement.API.Extensions
             //Chat Serivce
             services.AddScoped<IConversationService, ConversationService>();
             services.AddScoped<IMessageService, MessageService>();
+            // News
+            services.AddScoped<INewsRepository, NewsRepository>();
+            services.AddScoped<INewsService, NewsService>();
+            services.AddScoped<INewsImageRepository, NewsImageRepository>();
+            services.AddScoped<INewImageService, NewImageService>();
+
+
 
 
             //Notification Service
@@ -117,6 +118,14 @@ namespace RealEstateManagement.API.Extensions
             //Wallet
             services.AddScoped<WalletService>();
             services.AddScoped<QRCodeService>();
+
+            //Interested Property
+            services.AddScoped<IInterestedPropertyRepository, InterestedPropertyRepository>();
+            services.AddScoped<IInterestedPropertyService, InterestedPropertyService>();
+
+
+            // logic kiểm tra và cập nhật bài hết hạn
+            services.AddHostedService<ExpirePostBackgroundService>();
 
             return services;
         }
