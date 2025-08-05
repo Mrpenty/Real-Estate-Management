@@ -1,4 +1,4 @@
-﻿using RealEstateManagement.Data.Entity;
+﻿using RealEstateManagement.Data.Entity.Reviews;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +9,16 @@ namespace RealEstateManagement.Business.Repositories.Reviews
 {
     public interface IReviewRepository
     {
-        Task<bool> HasCompletedContractAsync(int propertyId, int renterId);
-        Task<bool> HasReviewedAsync(int propertyId, int renterId);
-        Task<Review> AddAsync(Review review);
-        Task<List<Review>> GetByPropertyIdAsync(int propertyId);
+        Task<Review> GetReviewByIdAsync(int reviewId);
+        Task<Review> GetReviewByContractAsync(int contractId, int renterId);
+        Task AddReviewAsync(Review review);
+        Task UpdateReviewAsync(Review review);
+        Task<ReviewReply> GetReplyByReviewIdAsync(int reviewId);
+        Task AddReplyAsync(ReviewReply reply);
+        Task UpdateReplyAsync(ReviewReply reply);
+        Task SaveChangesAsync();
+        Task<Review> GetReviewWithReplyAsync(int reviewId);
+        Task<bool> HardDeleteReviewAsync(int reviewId);
+
     }
 }

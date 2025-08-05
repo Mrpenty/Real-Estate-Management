@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace RealEstateManagement.Business.DTO.Review
 {
-    public class SubmitReviewDTO
+    public class AddReviewDTO
     {
+        public int ContractId { get; set; }
         public int PropertyId { get; set; }
-        public int Rating { get; set; }      // 1-5
-        public string Comment { get; set; }
+        public string ReviewText { get; set; }
+        public int Rating { get; set; }
     }
 }

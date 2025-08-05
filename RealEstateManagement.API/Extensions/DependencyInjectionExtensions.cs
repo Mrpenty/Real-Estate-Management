@@ -25,6 +25,8 @@ using RealEstateManagement.Business.Repositories.NewsRepository;
 using RealEstateManagement.Business.Services.NewsService;
 using RealEstateManagement.Business.Repositories.NotificationRepository;
 using RealEstateManagement.Business.Services.NotificationService;
+using RealEstateManagement.Business.Repositories.Reviews;
+using RealEstateManagement.Business.Services.Reviews;
 namespace RealEstateManagement.API.Extensions
 {
     public static class DependencyInjectionExtensions
@@ -107,7 +109,9 @@ namespace RealEstateManagement.API.Extensions
 
             // logic kiểm tra và cập nhật bài hết hạn
             services.AddHostedService<ExpirePostBackgroundService>();
-
+            //Review
+            services.AddScoped<IReviewRepository, ReviewRepository>();
+            services.AddScoped<IReviewService, ReviewService>();
             return services;
         }
     }
