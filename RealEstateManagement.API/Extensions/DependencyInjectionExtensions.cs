@@ -27,6 +27,7 @@ using RealEstateManagement.Business.Repositories.NotificationRepository;
 using RealEstateManagement.Business.Services.NotificationService;
 using RealEstateManagement.Business.Services.Admin;
 using RealEstateManagement.Business.Repositories.Admin;
+using RealEstateManagement.Business.Repositories.AmenityRepo;
 
 
 namespace RealEstateManagement.API.Extensions
@@ -47,6 +48,7 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
             services.AddScoped<IRentalContractRepository, RentalContractRepository>();
             services.AddScoped<IOwnerPropertyRepository, OwnerPropertyRepository>();
+            services.AddScoped<IAmenityRepository, AmenityRepository>();
 
             // Some support Repository
             services.AddScoped<IAddressRepository, AddressRepository>();
