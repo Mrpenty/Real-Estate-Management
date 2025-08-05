@@ -50,5 +50,31 @@ namespace RealEstateManagement.Presentation.Controllers
         {
             return View();
         }
+
+        public IActionResult NewsManagement()
+        {
+            ViewBag.Title = "Quản lý bài báo";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult CreateOrEditNews(int? id)
+        {
+            ViewBag.NewsId = id;
+            return View();
+        }
+
+
+        public IActionResult SliderManagement()
+        {
+            ViewBag.Title = "Quản lý slider";
+            return View();
+        }
+
+        public IActionResult AmenityManagement()
+        {
+            ViewBag.Title = "Quản lý tiện ích";
+            return View();
+        }
     }
 } 

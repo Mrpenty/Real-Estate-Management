@@ -1,0 +1,54 @@
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Thêm/Sửa bài báo";
+}
+<div class="container mx-auto py-8 px-4 max-w-2xl">
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <h1 class="text-2xl font-bold mb-6" id="formTitle">Thêm/Sửa bài báo</h1>
+        <form id="newsForm" autocomplete="off">
+            <input type="hidden" id="newsId" name="id">
+            <div class="mb-4">
+                <label class="block mb-1 font-medium">Tiêu đề <span class="text-red-600">*</span></label>
+                <input type="text" id="title" name="title" class="w-full border border-gray-300 rounded px-3 py-2" required>
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1 font-medium">Tóm tắt</label>
+                <textarea id="summary" name="summary" rows="2" class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1 font-medium">Nội dung <span class="text-red-600">*</span></label>
+                <textarea id="content" name="content" rows="8" class="w-full border border-gray-300 rounded px-3 py-2" required></textarea>
+            </div>
+            <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block mb-1 font-medium">Tác giả</label>
+                    <input type="text" id="authorName" name="authorName" class="w-full border border-gray-300 rounded px-3 py-2">
+                </div>
+                <div>
+                    <label class="block mb-1 font-medium">Nguồn</label>
+                    <input type="text" id="source" name="source" class="w-full border border-gray-300 rounded px-3 py-2">
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1 font-medium">Trạng thái</label>
+                <select id="status" name="status" class="w-full border border-gray-300 rounded px-3 py-2">
+                    <option value="0">Nháp</option>
+                    <option value="1">Đã xuất bản</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block mb-1 font-medium">Ảnh đại diện</label>
+                <input type="file" id="newsImage" accept="image/*" class="block">
+                <div id="imagePreview" class="mt-2"></div>
+            </div>
+            <div class="flex justify-end gap-2">
+                <a href="/Admin/NewsManagement" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Quay lại</a>
+                <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded font-semibold">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/Admin/CreateOrEditNews.js"></script>
+} 
