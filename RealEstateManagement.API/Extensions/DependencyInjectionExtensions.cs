@@ -25,6 +25,8 @@ using RealEstateManagement.Business.Repositories.NewsRepository;
 using RealEstateManagement.Business.Services.NewsService;
 using RealEstateManagement.Business.Repositories.NotificationRepository;
 using RealEstateManagement.Business.Services.NotificationService;
+using RealEstateManagement.Business.Services.Admin;
+using RealEstateManagement.Business.Repositories.Admin;
 
 
 namespace RealEstateManagement.API.Extensions
@@ -38,7 +40,7 @@ namespace RealEstateManagement.API.Extensions
 
             //---Repository--\\
             services.AddScoped<ITokenRepository, TokenRepository>();
-
+            services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
             // Property Repository
             services.AddScoped<IPropertyPostRepository, PropertyPostRepository>();
             services.AddScoped<IPropertyRepository, PropertyRepository>();
@@ -110,8 +112,8 @@ namespace RealEstateManagement.API.Extensions
 
 
             // Tenant Interaction Service
-            services.AddScoped<IInteractionService, InteractionService>();
-            services.AddScoped<IInteractionRepository, InteractionRepository>();
+            //services.AddScoped<IInteractionService, InteractionService>();
+            //services.AddScoped<IInteractionRepository, InteractionRepository>();
 
 
 

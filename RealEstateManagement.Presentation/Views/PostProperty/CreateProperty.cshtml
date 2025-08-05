@@ -313,7 +313,9 @@
          if (createdPropertyId) {
              await uploadImages(createdPropertyId); // Đợi upload xong ảnh
              alert('Tạo bài và upload ảnh thành công!');
-             window.location.href = `/PostProperty/SelectPackage?propertyId=${createdPropertyId}`;
+              //window.location.href = `/PostProperty/SelectPackage?propertyId=${createdPropertyId}`;
+
+             window.location.href = `/PostProperty/CreateContract?propertyPostId=${createdPropertyId}`;
              return;
          }
      };

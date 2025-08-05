@@ -1,4 +1,4 @@
-const ADMIN_API_BASE_URL = "https://localhost:7031";
+const ADMIND_API_BASE_URL = "https://localhost:7031";
 
 const AdminDashboardService = {
     /**
@@ -7,7 +7,7 @@ const AdminDashboardService = {
      */
     async getDashboardStats() {
         try {
-            const response = await fetch(`${ADMIN_API_BASE_URL}/api/Admin/Dashboard/stats`, {
+            const response = await fetch(`${ADMIND_API_BASE_URL}/api/Admin/Dashboard/stats`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -39,7 +39,7 @@ const AdminDashboardService = {
             const start = startDate.toISOString().split('T')[0];
             const end = endDate.toISOString().split('T')[0];
             
-            const response = await fetch(`${ADMIN_API_BASE_URL}/api/Admin/Dashboard/daily-stats?startDate=${start}&endDate=${end}`, {
+            const response = await fetch(`${ADMIND_API_BASE_URL}/api/Admin/Dashboard/daily-stats?startDate=${start}&endDate=${end}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -67,7 +67,7 @@ const AdminDashboardService = {
      */
     async getMonthlyStats(year) {
         try {
-            const response = await fetch(`${ADMIN_API_BASE_URL}/api/Admin/Dashboard/monthly-stats/${year}`, {
+            const response = await fetch(`${ADMIND_API_BASE_URL}/api/Admin/Dashboard/monthly-stats/${year}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -94,7 +94,7 @@ const AdminDashboardService = {
      */
     async getPropertyStats() {
         try {
-            const response = await fetch(`${ADMIN_API_BASE_URL}/api/Admin/Dashboard/property-stats`, {
+            const response = await fetch(`${ADMIND_API_BASE_URL}/api/Admin/Dashboard/property-stats`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -121,7 +121,7 @@ const AdminDashboardService = {
      */
     async getUserStats() {
         try {
-            const response = await fetch(`${ADMIN_API_BASE_URL}/api/Admin/Dashboard/user-stats`, {
+            const response = await fetch(`${ADMIND_API_BASE_URL}/api/Admin/Dashboard/user-stats`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -153,7 +153,7 @@ const AdminDashboardService = {
             const start = startDate.toISOString().split('T')[0];
             const end = endDate.toISOString().split('T')[0];
             
-            const response = await fetch(`${ADMIN_API_BASE_URL}/api/Admin/Dashboard/revenue-stats?startDate=${start}&endDate=${end}`, {
+            const response = await fetch(`${ADMIND_API_BASE_URL}/api/Admin/Dashboard/revenue-stats?startDate=${start}&endDate=${end}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -180,7 +180,7 @@ const AdminDashboardService = {
      */
     async getSystemOverview() {
         try {
-            const response = await fetch(`${ADMIN_API_BASE_URL}/api/Admin/Dashboard/system-overview`, {
+            const response = await fetch(`${ADMIND_API_BASE_URL}/api/Admin/Dashboard/system-overview`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -218,7 +218,7 @@ const AdminDashboardService = {
                 endDate: endDate.toISOString()
             };
 
-            const response = await fetch(`${ADMIN_API_BASE_URL}/api/Admin/Dashboard/download-report`, {
+            const response = await fetch(`${ADMIND_API_BASE_URL}/api/Admin/Dashboard/download-report`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
