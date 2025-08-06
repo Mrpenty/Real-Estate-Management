@@ -16,7 +16,7 @@
             border-color: rgb(249 115 22 / var(--tw-border-opacity, 1));
         }
 </style>
-<h1 class="text-xl font-bold mb-4">Tin đã lưu</h1>
+<h1 class="text-xl font-bold mb-4">Danh sách tin</h1>
 
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -29,6 +29,32 @@
 
     <div>
         <div style="height: max-content;" class="w-full max-w-xs bg-white p-4 rounded-md shadow-sm space-y-4 text-sm">
+            <div class="space-y-4 text-center">
+                <div style="cursor:pointer" onclick="window.location.href='/Home/Landlord/@ViewBag.LandlordId'" class="w-20 h-20 mx-auto rounded-full border bg-gray-100 flex items-center justify-center">
+                    <img class="landlordUrl" style="border-radius:5rem;height:100%;width:100%" />
+                </div>
+
+                <div>
+                    <p style="cursor:pointer" onclick="window.location.href='/Home/Landlord/@ViewBag.LandlordId'" class="font-semibold text-gray-800 contactName"></p>
+                    <p style="display:none" class="text-sm text-gray-500">
+                        <span class="text-green-500">●</span> Đang hoạt động
+                    </p>
+                </div>
+
+                <p style="display:none" class="text-sm text-gray-500">1 tin đăng • Tham gia từ: 19/06/2025</p>
+
+                <div class="space-y-2">
+                    <a href="tel:0369864430" id="contactPhone" class="block w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold">
+                        📞 <span class="contactPhone"></span>
+                    </a>
+                    <a href="#" class="block w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold">
+                        💬 Nhắn Zalo
+                    </a>
+                </div>
+
+            </div>
+        </div>
+        <div style="height: max-content;margin-top:2rem" class="w-full max-w-xs bg-white p-4 rounded-md shadow-sm space-y-4 text-sm">
             <h3 class="font-semibold text-gray-800 mb-2">Tin mới đăng</h3>
             <div class="space-y-4" id="listNew">
             </div>
@@ -38,9 +64,15 @@
 <script src="~/js/propertyService.js"></script>
 <script>
     let urlBase = "https://localhost:7031";
-    getListFavorite();
-    async function getListFavorite(){
-        let listFavoriteItem = await listFavorite();
+    getList();
+    let landlordId = @ViewBag.LandlordId;
+    async function getList(){
+        let prop = await propertyService.getLandlord(@ViewBag.LandlordId);
+        $('.contactPhone').html(prop.phoneNumber);
+        $('.landlordUrl').prop('src',prop.avatarUrl);
+        $('.contactName').html(prop.name);
+        console.log(prop);
+        let listFavoriteItem = prop.properties;
         //console.log(listFavoriteItem);
         let html = '';
         listFavoriteItem.forEach(item => {
@@ -78,11 +110,16 @@
 
                         <div class="text-xs text-gray-400 mt-1">${timeAgo(item.createdAt)}</div>
                     </div>
+                        ${item.isFavorite ? `
+                            <button onclick="removeToFavorite(${item.id})" class="mt-1 text-red-500 hover:text-red-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.13 2.44h1.75C14.09 5.01 15.76 4 17.5 4 20 4 22 6 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                            </svg>` : `
+                           <button id="addFavoriteDetail" onclick="addToFavourite(${item.id});" class="d-none flex items-center space-x-1 hover:text-blue-600">
+                                <span style="font-size:22px">♡</span>
+                            </button>
+                            `}
 
-                        <button onclick="removeToFavorite(${item.id})" class="mt-1 text-red-500 hover:text-red-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.13 2.44h1.75C14.09 5.01 15.76 4 17.5 4 20 4 22 6 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                        </svg>
                     </button>
                 </div>
             `;
