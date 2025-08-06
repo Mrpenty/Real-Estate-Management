@@ -16,10 +16,39 @@
     <script src="~/js/authService.js" asp-append-version="true"></script>
     <script src="~/js/Admin/AdminUserService.js" asp-append-version="true"></script>
     <script src="~/js/Admin/AdminPostService.js" asp-append-version="true"></script>
-
+    <link rel="stylesheet" href="~/css/admin-news-management.css" />
+    <link rel="stylesheet" href="~/css/admin-news-detail.css" />
     <style>
         body { font-family: 'Montserrat', sans-serif; }
         .sidebar-link.active { background: #e0e7ff; color: #1e40af; font-weight: 600; }
+
+        .toolbar {
+            margin-bottom: 10px;
+        }
+
+            .toolbar button, .toolbar input[type="file"], .toolbar select {
+                padding: 8px 12px;
+                margin: 0 5px;
+                cursor: pointer;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                background-color: #f9f9f9;
+            }
+
+                .toolbar button:hover, .toolbar input[type="file"]:hover, .toolbar select:hover {
+                    background-color: #e0e0e0;
+                }
+
+        #content {
+            min-height: 200px;
+            outline: none;
+        }
+
+            #content img {
+                max-width: 100%;
+                height: auto;
+                margin: 5px 0;
+            }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -113,5 +142,6 @@
                 }
             }
     </script>
+    
 </body>
 </html> 

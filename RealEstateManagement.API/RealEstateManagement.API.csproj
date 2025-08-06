@@ -19,7 +19,6 @@
 	  <PackageReference Include="Google.Apis.Core" Version="1.69.0" />
 	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.1" />
 	  <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.1" />
-	  <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="9.0.6" />
 	  <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.0.1" />
 	  <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.0.1" />
 	  <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />

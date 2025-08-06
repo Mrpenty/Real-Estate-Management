@@ -1,0 +1,128 @@
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Chi tiết bài báo";
+}
+
+
+
+<div class="container mx-auto py-8 px-4 max-w-4xl" data-news-id="@ViewBag.NewsId">
+    <!-- Loading State -->
+    <div id="loadingState" class="text-center py-12">
+        <div class="loading-spinner mx-auto mb-4"></div>
+        <p class="text-gray-600">Đang tải bài báo...</p>
+    </div>
+    
+    <!-- Error State -->
+    <div id="errorState" class="text-center py-12" style="display: none;">
+        <div class="text-red-500 text-6xl mb-4">⚠️</div>
+        <h2 class="text-xl font-semibold text-gray-800 mb-2">Không thể tải bài báo</h2>
+        <p class="text-gray-600 mb-6" id="errorMessage">Đã xảy ra lỗi khi tải dữ liệu.</p>
+        <a href="/Admin/NewsManagement" class="action-button btn-edit">
+            <i class="fas fa-arrow-left"></i>
+            Quay lại danh sách
+        </a>
+    </div>
+    
+    <!-- News Content -->
+    <div id="newsContent" style="display: none;">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
+                <div class="flex-1">
+                    <h1 id="newsTitle" class="text-3xl font-bold text-gray-900 mb-3"></h1>
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                        <span id="newsStatus"></span>
+                        <span id="newsDate"></span>
+                        <span id="newsAuthor"></span>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-2">
+                    <a id="editButton" href="#" class="action-button btn-edit">
+                        <i class="fas fa-edit"></i>
+                        Chỉnh sửa
+                    </a>
+                    <button id="publishButton" class="action-button btn-publish" style="display: none;" onclick="publishNews()">
+                        <i class="fas fa-upload"></i>
+                        Xuất bản
+                    </button>
+                    <button id="deleteButton" class="action-button btn-delete" onclick="deleteNews()">
+                        <i class="fas fa-trash"></i>
+                        Xóa
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Summary -->
+            <div id="newsSummary" class="bg-gray-50 rounded-lg p-4 border-l-4 border-blue-500"></div>
+        </div>
+        
+        <!-- Images Gallery -->
+        <div id="imagesSection" class="bg-white rounded-lg shadow-lg p-6 mb-6" style="display: none;">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-images mr-2"></i>
+                Ảnh bài viết
+            </h3>
+            <div id="imageGallery" class="image-gallery"></div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-file-alt mr-2"></i>
+                Nội dung bài viết
+            </h3>
+            <div id="newsContentBody" class="news-content"></div>
+        </div>
+        
+        <!-- Meta Information -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-info-circle mr-2"></i>
+                Thông tin bài viết
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <span class="font-medium text-gray-700">ID:</span>
+                    <span id="newsId" class="text-gray-600"></span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Slug:</span>
+                    <span id="newsSlug" class="text-gray-600"></span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Ngày tạo:</span>
+                    <span id="newsCreatedAt" class="text-gray-600"></span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Cập nhật lần cuối:</span>
+                    <span id="newsUpdatedAt" class="text-gray-600"></span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Ngày xuất bản:</span>
+                    <span id="newsPublishedAt" class="text-gray-600"></span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Nguồn:</span>
+                    <span id="newsSource" class="text-gray-600"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Back Button -->
+        <div class="text-center mt-8">
+            <a href="/Admin/NewsManagement" class="action-button btn-edit">
+                <i class="fas fa-arrow-left"></i>
+                Quay lại danh sách bài báo
+            </a>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/Admin/NewsDetail.js"></script>
+} 

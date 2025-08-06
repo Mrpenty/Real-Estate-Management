@@ -18,7 +18,7 @@ namespace RealEstateManagement.Data.Entity
         [MaxLength(255)]
         public string? Slug { get; set; } // Tạo từ Title, dùng trong URL
 
-        [Required]
+       
         public string Content { get; set; }
 
         [MaxLength(500)]

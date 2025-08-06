@@ -162,254 +162,298 @@
 </div>
 
 @section Scripts {
-<script>
-const PACKAGE_API_BASE_URL = 'https://localhost:7031/api/PromotionPackage';
-let packages = [];
-let currentDeleteId = null;
+    <script>
+        const PACKAGE_API_BASE_URL = 'https://localhost:7031/api/PromotionPackage';
+        let packages = [];
+        let currentDeleteId = null;
 
-const PackageService = {
-    async getAll() {
-        const res = await fetch(`${PACKAGE_API_BASE_URL}/GetAllPackage`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        if (!res.ok) throw new Error('Không thể lấy danh sách gói khuyến mãi');
-        return await res.json();
-    },
+        const PackageService = {
+            async getAll() {
+                const res = await fetch(`${PACKAGE_API_BASE_URL}/GetAllPackage`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('Không thể lấy danh sách gói khuyến mãi');
+                return await res.json();
+            },
 
-    async getById(id) {
-        const res = await fetch(`${PACKAGE_API_BASE_URL}/GetPackageById/${id}`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        if (!res.ok) throw new Error('Không thể lấy thông tin gói khuyến mãi');
-        return await res.json();
-    },
+            async getById(id) {
+                const res = await fetch(`${PACKAGE_API_BASE_URL}/GetPackageById/${id}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('Không thể lấy thông tin gói khuyến mãi');
+                return await res.json();
+            },
 
-    async create(packageData) {
-        const res = await fetch(`${PACKAGE_API_BASE_URL}/CreatePackage`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(packageData)
-        });
-        if (!res.ok) throw new Error('Không thể tạo gói khuyến mãi');
-        return await res.json();
-    },
+            async create(packageData) {
+                const res = await fetch(`${PACKAGE_API_BASE_URL}/CreatePackage`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(packageData)
+                });
+                if (!res.ok) throw new Error('Không thể tạo gói khuyến mãi');
+                return await res.json();
+            },
 
-    async update(id, packageData) {
-        const res = await fetch(`${PACKAGE_API_BASE_URL}/UpdatePackage/${id}`, {
-            method: 'PUT',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(packageData)
-        });
-        if (!res.ok) throw new Error('Không thể cập nhật gói khuyến mãi');
-        return await res.json();
-    },
+            async update(id, packageData) {
+                const res = await fetch(`${PACKAGE_API_BASE_URL}/UpdatePackage/${id}`, {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(packageData)
+                });
+                if (!res.ok) throw new Error('Không thể cập nhật gói khuyến mãi');
+                return await res.json();
+            },
 
-    async delete(id) {
-        const res = await fetch(`${PACKAGE_API_BASE_URL}/DeletePackage/${id}`, {
-            method: 'DELETE',
-            credentials: 'include'
-        });
-        if (!res.ok) throw new Error('Không thể xóa gói khuyến mãi');
-        return true;
-    }
-};
+            async delete(id) {
+                const res = await fetch(`${PACKAGE_API_BASE_URL}/DeletePackage/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('Không thể xóa gói khuyến mãi');
+                return true;
+            }
+        };
 
-async function loadPackages() {
-    try {
-        showLoading(true);
-        packages = await PackageService.getAll();
-        renderLevelOptions(packages);
-        renderPackages(packages);
-    } catch (err) {
-        showError(err.message);
-    } finally {
-        showLoading(false);
-    }
-}
-
-function renderLevelOptions(packages) {
-    const levelSet = new Set();
-    packages.forEach(pkg => levelSet.add(pkg.level));
-    const levelFilter = document.getElementById('levelFilter');
-    levelFilter.innerHTML = '<option value="">Tất cả</option>';
-    Array.from(levelSet).sort((a, b) => a - b).forEach(level => {
-        levelFilter.innerHTML += `<option value="${level}">Cấp ${level}</option>`;
-    });
-}
-
-function renderPackages(packagesToRender) {
-    const tbody = document.getElementById('packageTableBody');
-    
-    if (packagesToRender.length === 0) {
-        showNoData();
-        return;
-    }
-
-    tbody.innerHTML = packagesToRender.map(pkg => `
-        <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pkg.id}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${pkg.name}</td>
-            <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate" title="${pkg.description}">${pkg.description}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pkg.price.toLocaleString('vi-VN')}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pkg.durationInDays}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pkg.level}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    pkg.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }">
-                    ${pkg.isActive ? 'Đang hoạt động' : 'Không hoạt động'}
-                </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${new Date(pkg.createdAt).toLocaleDateString('vi-VN')}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-                <button onclick="editPackage(${pkg.id})" class="text-blue-600 hover:text-blue-900 mr-3">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button onclick="deletePackage(${pkg.id})" class="text-red-600 hover:text-red-900">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-function applyFilters() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const statusFilter = document.getElementById('statusFilter').value;
-    const levelFilter = document.getElementById('levelFilter').value;
-
-    let filteredPackages = packages.filter(pkg => {
-        const matchesSearch = pkg.name.toLowerCase().includes(searchTerm) || 
-                             pkg.description.toLowerCase().includes(searchTerm);
-        const matchesStatus = statusFilter === '' || pkg.isActive.toString() === statusFilter;
-        const matchesLevel = levelFilter === '' || pkg.level.toString() === levelFilter;
-
-        return matchesSearch && matchesStatus && matchesLevel;
-    });
-
-    renderPackages(filteredPackages);
-}
-
-function openCreateModal() {
-    document.getElementById('modalTitle').textContent = 'Thêm gói khuyến mãi';
-    document.getElementById('packageForm').reset();
-    document.getElementById('packageId').value = '';
-    document.getElementById('packageModal').classList.remove('hidden');
-}
-
-function editPackage(id) {
-    PackageService.getById(id).then(pkg => {
-        document.getElementById('modalTitle').textContent = 'Chỉnh sửa gói khuyến mãi';
-        document.getElementById('packageId').value = pkg.id;
-        document.getElementById('packageName').value = pkg.name;
-        document.getElementById('packageDescription').value = pkg.description;
-        document.getElementById('packagePrice').value = pkg.price;
-        document.getElementById('packageDuration').value = pkg.durationInDays;
-        document.getElementById('packageLevel').value = pkg.level;
-        document.getElementById('packageIsActive').checked = pkg.isActive;
-        document.getElementById('packageModal').classList.remove('hidden');
-    }).catch(err => {
-        showError(err.message);
-    });
-}
-
-function closeModal() {
-    document.getElementById('packageModal').classList.add('hidden');
-}
-
-function deletePackage(id) {
-    currentDeleteId = id;
-    document.getElementById('deleteModal').classList.remove('hidden');
-}
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.add('hidden');
-    currentDeleteId = null;
-}
-
-async function confirmDelete() {
-    if (!currentDeleteId) return;
-
-    try {
-        await PackageService.delete(currentDeleteId);
-        showSuccess('Xóa gói khuyến mãi thành công!');
-        closeDeleteModal();
-        loadPackages();
-    } catch (err) {
-        showError(err.message);
-    }
-}
-
-document.getElementById('packageForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const packageData = {
-        name: document.getElementById('packageName').value,
-        description: document.getElementById('packageDescription').value,
-        price: parseFloat(document.getElementById('packagePrice').value),
-        durationInDays: parseInt(document.getElementById('packageDuration').value),
-        level: parseInt(document.getElementById('packageLevel').value),
-        isActive: document.getElementById('packageIsActive').checked
-    };
-
-    const packageId = document.getElementById('packageId').value;
-
-    try {
-        if (packageId) {
-            await PackageService.update(packageId, packageData);
-            showSuccess('Cập nhật gói khuyến mãi thành công!');
-        } else {
-            await PackageService.create(packageData);
-            showSuccess('Tạo gói khuyến mãi thành công!');
+        async function loadPackages() {
+            try {
+                showLoading(true);
+                packages = await PackageService.getAll();
+                renderLevelOptions(packages);
+                renderPackages(packages);
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: err.message,
+                    confirmButtonText: 'Đóng'
+                });
+            } finally {
+                showLoading(false);
+            }
         }
-        closeModal();
+
+        function renderLevelOptions(packages) {
+            const levelSet = new Set();
+            packages.forEach(pkg => levelSet.add(pkg.level));
+            const levelFilter = document.getElementById('levelFilter');
+            levelFilter.innerHTML = '<option value="">Tất cả</option>';
+            Array.from(levelSet).sort((a, b) => a - b).forEach(level => {
+                levelFilter.innerHTML += `<option value="${level}">Cấp ${level}</option>`;
+            });
+        }
+
+        function renderPackages(packagesToRender) {
+            const tbody = document.getElementById('packageTableBody');
+
+            if (packagesToRender.length === 0) {
+                showNoData();
+                return;
+            }
+
+            tbody.innerHTML = packagesToRender.map(pkg => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pkg.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${pkg.name}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate" title="${pkg.description}">${pkg.description}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pkg.price.toLocaleString('vi-VN')}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pkg.durationInDays}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pkg.level}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            pkg.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }">
+                            ${pkg.isActive ? 'Đang hoạt động' : 'Không hoạt động'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${new Date(pkg.createdAt).toLocaleDateString('vi-VN')}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                        <button onclick="editPackage(${pkg.id})" class="text-blue-600 hover:text-blue-900 mr-3">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deletePackage(${pkg.id})" class="text-red-600 hover:text-red-900">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const levelFilter = document.getElementById('levelFilter').value;
+
+            let filteredPackages = packages.filter(pkg => {
+                const matchesSearch = pkg.name.toLowerCase().includes(searchTerm) ||
+                                     pkg.description.toLowerCase().includes(searchTerm);
+                const matchesStatus = statusFilter === '' || pkg.isActive.toString() === statusFilter;
+                const matchesLevel = levelFilter === '' || pkg.level.toString() === levelFilter;
+
+                return matchesSearch && matchesStatus && matchesLevel;
+            });
+
+            renderPackages(filteredPackages);
+        }
+
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = 'Thêm gói khuyến mãi';
+            document.getElementById('packageForm').reset();
+            document.getElementById('packageId').value = '';
+            document.getElementById('packageModal').classList.remove('hidden');
+        }
+
+        function editPackage(id) {
+            PackageService.getById(id).then(pkg => {
+                document.getElementById('modalTitle').textContent = 'Chỉnh sửa gói khuyến mãi';
+                document.getElementById('packageId').value = pkg.id;
+                document.getElementById('packageName').value = pkg.name;
+                document.getElementById('packageDescription').value = pkg.description;
+                document.getElementById('packagePrice').value = pkg.price;
+                document.getElementById('packageDuration').value = pkg.durationInDays;
+                document.getElementById('packageLevel').value = pkg.level;
+                document.getElementById('packageIsActive').checked = pkg.isActive;
+                document.getElementById('packageModal').classList.remove('hidden');
+            }).catch(err => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: err.message,
+                    confirmButtonText: 'Đóng'
+                });
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('packageModal').classList.add('hidden');
+        }
+
+        function deletePackage(id) {
+            currentDeleteId = id;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            currentDeleteId = null;
+        }
+
+        async function confirmDelete() {
+            if (!currentDeleteId) return;
+
+            try {
+                await PackageService.delete(currentDeleteId);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: 'Xóa gói khuyến mãi thành công!',
+                    confirmButtonText: 'Đóng'
+                });
+                closeDeleteModal();
+                loadPackages();
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: err.message,
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        }
+
+        document.getElementById('packageForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const packageData = {
+                name: document.getElementById('packageName').value,
+                description: document.getElementById('packageDescription').value,
+                price: parseFloat(document.getElementById('packagePrice').value),
+                durationInDays: parseInt(document.getElementById('packageDuration').value),
+                level: parseInt(document.getElementById('packageLevel').value),
+                isActive: document.getElementById('packageIsActive').checked
+            };
+
+            const packageId = document.getElementById('packageId').value;
+
+            try {
+                if (packageId) {
+                    await PackageService.update(packageId, packageData);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công',
+                        text: 'Cập nhật gói khuyến mãi thành công!',
+                        confirmButtonText: 'Đóng'
+                    });
+                } else {
+                    await PackageService.create(packageData);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công',
+                        text: 'Tạo gói khuyến mãi thành công!',
+                        confirmButtonText: 'Đóng'
+                    });
+                }
+                closeModal();
+                loadPackages();
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: err.message,
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        });
+
+        function showLoading(show) {
+            document.getElementById('loading').classList.toggle('hidden', !show);
+            document.getElementById('noData').classList.add('hidden');
+        }
+
+        function showNoData() {
+            document.getElementById('packageTableBody').innerHTML = '';
+            document.getElementById('noData').classList.remove('hidden');
+        }
+
+        function showSuccess(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công',
+                text: message,
+                confirmButtonText: 'Đóng'
+            });
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: message,
+                confirmButtonText: 'Đóng'
+            });
+        }
+
+        // Load packages when page loads
         loadPackages();
-    } catch (err) {
-        showError(err.message);
-    }
-});
 
-function showLoading(show) {
-    document.getElementById('loading').classList.toggle('hidden', !show);
-    document.getElementById('noData').classList.add('hidden');
+        // Add event listeners for real-time search
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('levelFilter').addEventListener('change', applyFilters);
+
+        document.getElementById('packageDescription').addEventListener('input', function() {
+            const chars = this.value.length;
+            document.getElementById('descriptionWordCount').textContent = chars;
+            if (chars > 250) {
+                this.value = this.value.slice(0, 250);
+                document.getElementById('descriptionWordCount').textContent = 250;
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 }
-
-function showNoData() {
-    document.getElementById('packageTableBody').innerHTML = '';
-    document.getElementById('noData').classList.remove('hidden');
-}
-
-function showSuccess(message) {
-    // You can implement a toast notification here
-    alert(message);
-}
-
-function showError(message) {
-    // You can implement a toast notification here
-    alert('Lỗi: ' + message);
-}
-
-// Load packages when page loads
-loadPackages();
-
-// Add event listeners for real-time search
-document.getElementById('searchInput').addEventListener('input', applyFilters);
-document.getElementById('statusFilter').addEventListener('change', applyFilters);
-document.getElementById('levelFilter').addEventListener('change', applyFilters);
-
-document.getElementById('packageDescription').addEventListener('input', function() {
-    const chars = this.value.length;
-    document.getElementById('descriptionWordCount').textContent = chars;
-    if (chars > 250) {
-        this.value = this.value.slice(0, 250);
-        document.getElementById('descriptionWordCount').textContent = 250;
-    }
-});
-</script>
-} 

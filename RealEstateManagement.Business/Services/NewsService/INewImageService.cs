@@ -13,7 +13,7 @@ namespace RealEstateManagement.Business.Services.NewsService
     public interface INewImageService
     {
         Task<NewsImage> AddImageAsync(int newId, NewImageCreateDto dto);
-
         Task<NewsImage> UpdateImageAsync(NewsImage updatedImage);
+        Task<IEnumerable<NewsImageDto>> GetImagesByNewsIdAsync(int newId);
     }
 }

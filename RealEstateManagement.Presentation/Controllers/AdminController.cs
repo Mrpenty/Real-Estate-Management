@@ -58,6 +58,14 @@ namespace RealEstateManagement.Presentation.Controllers
         }
 
         [HttpGet]
+        public IActionResult NewsDetail(int id)
+        {
+            ViewBag.Title = "Chi tiết bài báo";
+            ViewBag.NewsId = id;
+            return View();
+        }
+
+        [HttpGet]
         public IActionResult CreateOrEditNews(int? id)
         {
             ViewBag.NewsId = id;

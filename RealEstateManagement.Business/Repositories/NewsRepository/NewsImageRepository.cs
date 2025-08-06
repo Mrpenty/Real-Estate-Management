@@ -90,13 +90,13 @@ namespace RealEstateManagement.Business.Repositories.NewsRepository
                 throw;
             }
         }
-        //public async Task<List<NewsImage>> GetImagesByNewsIdAsync(int newsId)
-        //{
-        //    return await _context.NewsImages
-        //        .Where(x => x.NewsId == newsId)
-        //        .OrderBy(x => x.Order)
-        //        .ToListAsync();
-        //}
+        public async Task<List<NewsImage>> GetImagesByNewsIdAsync(int newsId)
+        {
+            return await _context.NewsImages
+                .Where(x => x.NewsId == newsId)
+                .OrderBy(x => x.Order)
+                .ToListAsync();
+        }
         public async Task<bool> HasAnyImageAsync(int newsId)
         {
             return await _context.NewsImages.AnyAsync(x => x.Id == newsId);
