@@ -67,6 +67,7 @@ namespace RealEstateManagement.Business.Services.Properties
                         LandlordName = p.Landlord?.Name,
                         LandlordPhoneNumber = p.Landlord?.PhoneNumber,
                         LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
+                        PropertyPostId = p.Posts.FirstOrDefault(post => post.Status == PropertyPost.PropertyPostStatus.Approved)?.Id ?? 0,
                         Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
                         PromotionPackageName = p.PropertyPromotions?
                                                 .OrderByDescending(pp => pp.PromotionPackage.Level)

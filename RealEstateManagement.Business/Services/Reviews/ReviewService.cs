@@ -13,16 +13,23 @@ namespace RealEstateManagement.Business.Services.Reviews
         private readonly IReviewRepository _repo;
         public ReviewService(IReviewRepository repo) => _repo = repo;
 
-        public async Task<(bool, string)> AddReviewAsync(int contractId, int propertyId, int renterId, string reviewText, int rating)
+        public async Task<(bool, string)> AddReviewAsync(int propertyPostId, int renterId, string reviewText, int rating)
         {
-            var existed = await _repo.GetReviewByContractAsync(contractId, renterId);
+            // 1. Lấy hợp đồng đã hoàn thành của renter với propertyPost này
+            var contract = await _repo.GetCompletedContractAsync(propertyPostId, renterId);
+            if (contract == null)
+                return (false, "Bạn không đủ điều kiện review: hợp đồng chưa hoàn thành!");
+
+            // 2. Đã review hợp đồng này chưa?
+            var existed = await _repo.GetReviewByContractAsync(contract.Id, renterId);
             if (existed != null)
                 return (false, "Bạn đã đánh giá hợp đồng này rồi.");
 
+            // 3. Tạo review
             var review = new Review
             {
-                PropertyId = propertyId,
-                ContractId = contractId,
+                PropertyId = contract.PropertyPost.PropertyId, // Lấy chuẩn qua propertyPost
+                ContractId = contract.Id,
                 RenterId = renterId,
                 ReviewText = reviewText,
                 Rating = rating,
@@ -90,6 +97,7 @@ namespace RealEstateManagement.Business.Services.Reviews
             await _repo.SaveChangesAsync();
             return (true, "Cập nhật trả lời thành công");
         }
+
         public async Task<bool> DeleteReviewWhenReportResolvedAsync(int reviewId)
         {
             return await _repo.HardDeleteReviewAsync(reviewId);

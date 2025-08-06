@@ -8,7 +8,7 @@ namespace RealEstateManagement.Business.Services.Reviews
 {
     public interface IReviewService
     {
-        Task<(bool IsSuccess, string Message)> AddReviewAsync(int contractId, int propertyId, int renterId, string reviewText, int rating);
+        Task<(bool IsSuccess, string Message)> AddReviewAsync(int propertyPostId, int renterId, string reviewText, int rating);
         Task<(bool IsSuccess, string Message)> EditReviewAsync(int reviewId, int renterId, string newText);
         Task<(bool IsSuccess, string Message)> AddReplyAsync(int reviewId, int landlordId, string replyContent);
         Task<(bool IsSuccess, string Message)> EditReplyAsync(int replyId, int landlordId, string newContent);

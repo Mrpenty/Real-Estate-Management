@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.Reviews;
 using System;
 using System.Collections.Generic;
@@ -66,6 +67,27 @@ namespace RealEstateManagement.Business.Repositories.Reviews
 
             await _context.SaveChangesAsync();
             return true;
+        }
+        public async Task<RentalContract> GetContractByRenterAndPostAsync(int renterId, int propertyPostId)
+        {
+            return await _context.RentalContracts
+                .FirstOrDefaultAsync(c => c.RenterId == renterId && c.PropertyPostId == propertyPostId);
+        }
+        public async Task<RentalContract> GetCompletedContractAsync(int propertyPostId, int renterId)
+        {
+            // Lấy tất cả contract thỏa mãn điều kiện trong DB
+            var contracts = await _context.RentalContracts
+                .Include(c => c.PropertyPost)
+                .Where(c => c.PropertyPostId == propertyPostId
+                        && c.RenterId == renterId
+                        && c.Status == RentalContract.ContractStatus.Confirmed
+                        && c.StartDate.HasValue)
+                .ToListAsync();
+
+            // Lọc ở ngoài C#
+            return contracts.FirstOrDefault(c =>
+                c.StartDate.Value.AddMonths(c.ContractDurationMonths) <= DateTime.Now
+            );
         }
     }
 }

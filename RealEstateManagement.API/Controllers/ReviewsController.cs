@@ -20,9 +20,9 @@ namespace RealEstateManagement.API.Controllers
         [Authorize] // Chỉ cho user đăng nhập
         public async Task<IActionResult> AddReview([FromBody] AddReviewDTO dto)
         {
-            // Lấy renterId từ JWT hoặc claim nếu cần
             var renterId = int.Parse(User.FindFirst("id").Value);
-            var (ok, msg) = await _reviewService.AddReviewAsync(dto.ContractId, dto.PropertyId, renterId, dto.ReviewText, dto.Rating);
+            // Không cần truyền ContractId, PropertyId từ client
+            var (ok, msg) = await _reviewService.AddReviewAsync(dto.PropertyPostId, renterId, dto.ReviewText, dto.Rating);
             if (!ok) return BadRequest(msg);
             return Ok(msg);
         }

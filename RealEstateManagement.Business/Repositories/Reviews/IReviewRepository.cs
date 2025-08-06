@@ -1,4 +1,5 @@
-﻿using RealEstateManagement.Data.Entity.Reviews;
+﻿using RealEstateManagement.Data.Entity;
+using RealEstateManagement.Data.Entity.Reviews;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace RealEstateManagement.Business.Repositories.Reviews
         Task SaveChangesAsync();
         Task<Review> GetReviewWithReplyAsync(int reviewId);
         Task<bool> HardDeleteReviewAsync(int reviewId);
-
+        Task<RentalContract> GetContractByRenterAndPostAsync(int renterId, int propertyPostId);
+        Task<RentalContract> GetCompletedContractAsync(int propertyPostId, int renterId);
     }
 }
