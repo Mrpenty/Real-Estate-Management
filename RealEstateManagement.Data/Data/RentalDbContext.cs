@@ -20,6 +20,8 @@ using RealEstateManagement.Data.Entity.PropertyEntity;
 using RealEstateManagement.Data.Entity.Payment;
 using RealEstateManagement.Data.Entity.Messages;
 using RealEstateManagement.Data.Data.Configurations.UserConfig;
+using RealEstateManagement.Data.Entity.Reviews;
+using RealEstateManagement.Data.Data.Configurations.ReviewConfig;
 
 
 public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
@@ -46,6 +48,8 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     public DbSet<Conversation> Conversation { get; set; }
     public DbSet<Message> Message { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<ReviewReply> ReviewReplies { get; set; }
+
     public DbSet<UserFavoriteProperty> UserFavoriteProperties { get; set; }
 
     public DbSet<PromotionPackage> promotionPackages { get; set; }
@@ -101,6 +105,7 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
 
         modelBuilder.ApplyConfiguration(new InterestedPropertyConfiguration());
 
+        modelBuilder.ApplyConfiguration(new ReviewReplyConfiguration());
 
 
         MainDataSeed.SeedData(modelBuilder);

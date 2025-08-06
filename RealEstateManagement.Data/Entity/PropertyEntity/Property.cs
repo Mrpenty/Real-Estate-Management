@@ -3,6 +3,7 @@ using System.Net;
 using RealEstateManagement.Data.Entity.User;
 using RealEstateManagement.Data.Entity.Messages;
 using RealEstateManagement.Data.Entity.AddressEnity;
+using RealEstateManagement.Data.Entity.Reviews;
 
 
 namespace RealEstateManagement.Data.Entity.PropertyEntity

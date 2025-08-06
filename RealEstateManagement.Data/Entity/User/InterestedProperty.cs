@@ -9,6 +9,7 @@ namespace RealEstateManagement.Data.Entity.User
 {
     public class InterestedProperty
     {
+        //Xác nhận xem property post đã thuê hay chưa 
         public int Id { get; set; }
         public int PropertyId { get; set; }
         public int RenterId { get; set; }

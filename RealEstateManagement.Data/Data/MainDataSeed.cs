@@ -5,6 +5,7 @@ using RealEstateManagement.Data.Data.DataSeed.AddressSeed;
 using RealEstateManagement.Data.Data.DataSeed.NewsSeed;
 using RealEstateManagement.Data.Data.DataSeed.PaymentSeed;
 using RealEstateManagement.Data.Data.DataSeed.PropertySeed;
+using RealEstateManagement.Data.Data.DataSeed.ReviewsSeed;
 using RealEstateManagement.Data.Data.DataSeed.User;
 
 
@@ -30,7 +31,6 @@ namespace RealEstateManagement.Data.Data
             //Payment and transaction seeding
             WalletSeed.SeedWallets(modelBuilder);
             WalletTransactionSeed.SeedWalletTransactions(modelBuilder);
-            ReviewSeed.SeedReviews(modelBuilder);
             PackageSeed.SeedPackage(modelBuilder);
             PropertyPromotionSeed.SeedPromotionProperty(modelBuilder);
             RentalContractSeed.SeedRentalContracts(modelBuilder);
@@ -48,6 +48,11 @@ namespace RealEstateManagement.Data.Data
 
             //Interested Property
             InterestedPropertySeed.SeedInterestedProperties(modelBuilder);
+
+            //Reviews
+            ReviewSeed.SeedReviews(modelBuilder);
+            ReviewReplySeed.SeedReviewReplies(modelBuilder);
+
 
         }
     }
