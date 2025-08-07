@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using RealEstateManagement.Business.DTO.SliderDTO;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 using System;
+using System.Threading.Tasks;
 
-[Route("api/admin/slider")]
+[Route("api/[controller]")]
 [ApiController]
 public class SliderController : ControllerBase
 {
@@ -14,7 +15,7 @@ public class SliderController : ControllerBase
     {
         _sliderService = sliderService;
     }
-
+    [EnableQuery]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {

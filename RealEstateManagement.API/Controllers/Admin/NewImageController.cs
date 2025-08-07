@@ -26,6 +26,22 @@ namespace RealEstateManagement.API.Controllers.Admin
             _logger = logger;
         }
 
+        // Lấy danh sách ảnh của một bài tin tức
+        [HttpGet]
+        public async Task<IActionResult> GetImagesByNewsId(int newId)
+        {
+            try
+            {
+                var images = await _imageService.GetImagesByNewsIdAsync(newId);
+                return Ok(images);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting images for new {newId}", newId);
+                return StatusCode(500, "An error occurred while getting images");
+            }
+        }
+
         //Bước 2 của quá trình tạo bài đăng: Upload ảnh và đổi status từ Draft thành Pending
         [HttpPost("upload")]
         public async Task<IActionResult> UploadImageFile(int newId, IFormFile file)
@@ -39,7 +55,7 @@ namespace RealEstateManagement.API.Controllers.Admin
                     return BadRequest("No file uploaded");
                 }
 
-                var uploadResult = await _uploadPicService.UploadImageAsync(file, "new-images", $"property_{newId}");
+                var uploadResult = await _uploadPicService.UploadImageAsync(file, "new-images", $"new_{newId}");
 
                 if (!uploadResult.Succeeded)
                 {

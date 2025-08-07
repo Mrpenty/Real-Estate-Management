@@ -23,6 +23,6 @@ const AdminUserService = {
         if (!res.ok) throw new Error('Không thể lấy danh sách user');
         return await res.json();
     },
-    // Có thể bổ sung các hàm duyệt, ban, đổi role, ... sau
+
 };
 window.AdminUserService = AdminUserService; 

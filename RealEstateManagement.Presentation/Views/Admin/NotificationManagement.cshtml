@@ -2,25 +2,45 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
+
+
 <div class="container mx-auto py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Quản lý thông báo hệ thống</h1>
-        <button onclick="openCreateModal()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 flex items-center">
-            <i class="fas fa-plus mr-2"></i>Tạo thông báo mới
-        </button>
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Quản lý thông báo hệ thống</h1>
+        <p>Gửi thông báo đến người dùng và quản lý tin nhắn hệ thống</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="totalNotifications">0</div>
+            <div class="stat-label">Tổng thông báo</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="infoNotifications">0</div>
+            <div class="stat-label">Thông tin</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="warningNotifications">0</div>
+            <div class="stat-label">Cảnh báo</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="alertNotifications">0</div>
+            <div class="stat-label">Báo động</div>
+        </div>
     </div>
 
     <!-- Search and Filter -->
-    <div class="bg-white p-4 rounded-lg shadow mb-6">
+    <div class="search-container">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
-                <input type="text" id="searchInput" placeholder="Tìm theo tiêu đề..." 
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="form-label">Tìm kiếm</label>
+                <input type="text" id="searchInput" placeholder="Tìm theo tiêu đề..." class="form-input" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Loại thông báo</label>
-                <select id="typeFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="form-label">Loại thông báo</label>
+                <select id="typeFilter" class="form-input">
                     <option value="">Tất cả</option>
                     <option value="info">Thông tin</option>
                     <option value="warning">Cảnh báo</option>
@@ -28,8 +48,8 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Đối tượng</label>
-                <select id="audienceFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="form-label">Đối tượng</label>
+                <select id="audienceFilter" class="form-input">
                     <option value="">Tất cả</option>
                     <option value="all">Tất cả người dùng</option>
                     <option value="renters">Chỉ người thuê</option>
@@ -38,532 +58,557 @@
                 </select>
             </div>
             <div class="flex items-end">
-                <button onclick="applyFilters()" class="w-full bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
-                    <i class="fas fa-search mr-2"></i>Lọc
+                <button onclick="applyFilters()" class="btn btn-primary w-full">
+                    <i class="fas fa-search"></i>
+                    Lọc
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- Action Bar -->
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-4">
+            <button onclick="openCreateModal()" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Tạo thông báo mới
+            </button>
+            <button onclick="refreshNotifications()" class="btn btn-secondary">
+                <i class="fas fa-refresh"></i>
+                Làm mới
+            </button>
+        </div>
+        <div class="text-sm text-gray-600">
+            Hiển thị <span id="displayCount">0</span> thông báo
+        </div>
+    </div>
+
     <!-- Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="table-container">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class="table-header">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiêu đề</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nội dung</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Đối tượng</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Người nhận</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày tạo</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+                        <th>ID</th>
+                        <th>Tiêu đề</th>
+                        <th>Nội dung</th>
+                        <th>Loại</th>
+                        <th>Đối tượng</th>
+                        <th>Người nhận</th>
+                        <th>Ngày tạo</th>
+                        <th class="text-center">Hành động</th>
                     </tr>
                 </thead>
                 <tbody id="notificationTableBody" class="bg-white divide-y divide-gray-200">
-                    <!-- Data will be loaded here -->
+                    <!-- Loading State -->
+                    <tr>
+                        <td colspan="8" class="text-center py-8">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-2 text-gray-600">Đang tải dữ liệu...</p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
     <!-- Pagination -->
-    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-        <div class="flex-1 flex justify-between sm:hidden">
-            <button onclick="previousPage()" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                Trước
-            </button>
-            <button onclick="nextPage()" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                Sau
-            </button>
-        </div>
-        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm text-gray-700">
-                    Hiển thị <span id="startIndex">1</span> đến <span id="endIndex">10</span> của <span id="totalItems">0</span> kết quả
-                </p>
+    <div class="pagination-container" id="paginationBar" style="display: none;">
+        <div class="flex justify-between items-center">
+            <div class="pagination-info">
+                Hiển thị <span id="startIndex">1</span> - <span id="endIndex">10</span> trong tổng số <span id="totalItems">0</span> thông báo
             </div>
-            <div>
-                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                    <button onclick="previousPage()" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <div id="pageNumbers" class="flex">
-                        <!-- Page numbers will be generated here -->
-                    </div>
-                    <button onclick="nextPage()" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </nav>
+            <div class="pagination-buttons" id="paginationButtons">
+                <!-- Pagination buttons will be rendered here -->
             </div>
         </div>
-    </div>
-
-    <!-- Loading -->
-    <div id="loading" class="text-center py-8">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p class="mt-2 text-gray-600">Đang tải...</p>
-    </div>
-
-    <!-- No data message -->
-    <div id="noData" class="text-center py-8 hidden">
-        <i class="fas fa-bell-slash text-4xl text-gray-400 mb-4"></i>
-        <p class="text-gray-600">Không có thông báo nào</p>
     </div>
 </div>
 
 <!-- Create/Edit Modal -->
-<div id="notificationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border-t-8 border-blue-400 w-96 shadow-lg rounded-2xl bg-white">
-        <div class="mt-3">
-            <h3 id="modalTitle" class="text-2xl font-bold text-blue-600 mb-6 flex items-center">
-                <i class="fas fa-bell mr-2"></i>Tạo thông báo mới
+<div id="notificationModal" class="modal-overlay hidden">
+    <div class="modal-content max-w-2xl">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <i class="fas fa-bell"></i>
+                <span id="modalTitle">Tạo thông báo mới</span>
             </h3>
-            <form id="notificationForm" class="space-y-5">
-                <input type="hidden" id="notificationId">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tiêu đề *</label>
-                        <input type="text" id="notificationTitle" required maxlength="200"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50" />
-                        <div class="text-xs text-gray-500 mt-1 text-right">
-                            <span id="titleCharCount">0</span>/200 ký tự
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nội dung *</label>
-                        <textarea id="notificationContent" required maxlength="1000" rows="4"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50"></textarea>
-                        <div class="text-xs text-gray-500 mt-1 text-right">
-                            <span id="contentCharCount">0</span>/1000 ký tự
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Loại *</label>
-                            <select id="notificationType" required
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50">
-                                <option value="info">Thông tin</option>
-                                <option value="warning">Cảnh báo</option>
-                                <option value="alert">Báo động</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Đối tượng *</label>
-                            <select id="notificationAudience" required
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50">
-                                <option value="all">Tất cả người dùng</option>
-                                <option value="renters">Chỉ người thuê</option>
-                                <option value="landlords">Chỉ chủ nhà</option>
-                                <option value="specific">Người dùng cụ thể</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div id="specificUsersGroup" class="hidden">
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">ID người dùng (phân cách bằng dấu phẩy)</label>
-                        <input type="text" id="specificUserIds" placeholder="1,2,3,4"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50" />
-                        <div class="text-xs text-gray-500 mt-1">Nhập ID người dùng phân cách bằng dấu phẩy</div>
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="notificationForm" class="space-y-6">
+                <input type="hidden" id="notificationId" />
+                
+                <div class="form-group">
+                    <label class="form-label">Tiêu đề *</label>
+                    <input type="text" id="notificationTitle" required maxlength="200" class="form-input" />
+                    <div class="text-xs text-gray-500 mt-1 text-right">
+                        <span id="titleCharCount">0</span>/200 ký tự
                     </div>
                 </div>
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" onclick="closeModal()"
-                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold">
-                        Hủy
-                    </button>
-                    <button type="submit"
-                            class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold shadow">
-                        <i class="fas fa-save mr-1"></i>Lưu
-                    </button>
+                
+                <div class="form-group">
+                    <label class="form-label">Nội dung *</label>
+                    <textarea id="notificationContent" required maxlength="1000" rows="4" class="form-input form-textarea"></textarea>
+                    <div class="text-xs text-gray-500 mt-1 text-right">
+                        <span id="contentCharCount">0</span>/1000 ký tự
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">Loại *</label>
+                        <select id="notificationType" required class="form-input">
+                            <option value="info">Thông tin</option>
+                            <option value="warning">Cảnh báo</option>
+                            <option value="alert">Báo động</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Đối tượng *</label>
+                        <select id="notificationAudience" required class="form-input">
+                            <option value="all">Tất cả người dùng</option>
+                            <option value="renters">Chỉ người thuê</option>
+                            <option value="landlords">Chỉ chủ nhà</option>
+                            <option value="specific">Người dùng cụ thể</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="specificUsersGroup" class="form-group hidden">
+                    <label class="form-label">ID người dùng (phân cách bằng dấu phẩy)</label>
+                    <input type="text" id="specificUserIds" placeholder="1,2,3,4" class="form-input" />
+                    <div class="text-xs text-gray-500 mt-1">Nhập ID người dùng phân cách bằng dấu phẩy</div>
                 </div>
             </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closeModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                Hủy
+            </button>
+            <button type="submit" form="notificationForm" class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                Lưu
+            </button>
         </div>
     </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3 text-center">
+<div id="deleteModal" class="modal-overlay hidden">
+    <div class="modal-content max-w-md">
+        <div class="modal-body text-center">
             <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
             <h3 class="text-lg font-medium text-gray-900 mb-2">Xác nhận xóa</h3>
             <p class="text-gray-600 mb-6">Bạn có chắc chắn muốn xóa thông báo này?</p>
-            <div class="flex justify-center space-x-3">
-                <button onclick="closeDeleteModal()" 
-                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
-                    Hủy
-                </button>
-                <button onclick="confirmDelete()" 
-                        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-                    Xóa
-                </button>
-            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeDeleteModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                Hủy
+            </button>
+            <button onclick="confirmDelete()" class="btn btn-danger">
+                <i class="fas fa-trash"></i>
+                Xóa
+            </button>
         </div>
     </div>
 </div>
 
 @section Scripts {
-<script>
-const NOTIFICATION_API_BASE_URL = 'https://localhost:7031/api/Notification';
-let notifications = [];
-let currentDeleteId = null;
-let currentPage = 1;
-let pageSize = 10;
-let filteredNotifications = [];
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const NOTIFICATION_API_BASE_URL = 'https://localhost:7031/api/Notification';
+        let notifications = [];
+        let currentDeleteId = null;
+        let currentPage = 1;
+        let pageSize = 10;
+        let filteredNotifications = [];
 
-const NotificationService = {
-    async getAll() {
-        const res = await fetch(`${NOTIFICATION_API_BASE_URL}/all`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        if (!res.ok) throw new Error('Không thể lấy danh sách thông báo');
-        return await res.json();
-    },
+        const NotificationService = {
+            async getAll() {
+                const res = await fetch(`${NOTIFICATION_API_BASE_URL}/all`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('Không thể lấy danh sách thông báo');
+                return await res.json();
+            },
 
-    async getById(id) {
-        const res = await fetch(`${NOTIFICATION_API_BASE_URL}/${id}`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        if (!res.ok) throw new Error('Không thể lấy thông tin thông báo');
-        return await res.json();
-    },
+            async getById(id) {
+                const res = await fetch(`${NOTIFICATION_API_BASE_URL}/${id}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('Không thể lấy thông tin thông báo');
+                return await res.json();
+            },
 
-    async create(notificationData) {
-        const res = await fetch(`${NOTIFICATION_API_BASE_URL}/create`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(notificationData)
-        });
-        if (!res.ok) throw new Error('Không thể tạo thông báo');
-        return await res.json();
-    },
+            async create(notificationData) {
+                const res = await fetch(`${NOTIFICATION_API_BASE_URL}/create`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(notificationData)
+                });
+                if (!res.ok) throw new Error('Không thể tạo thông báo');
+                return await res.json();
+            },
 
-    async update(notificationData) {
-        const res = await fetch(`${NOTIFICATION_API_BASE_URL}/update`, {
-            method: 'PUT',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(notificationData)
-        });
-        if (!res.ok) throw new Error('Không thể cập nhật thông báo');
-        return await res.json();
-    },
+            async update(notificationData) {
+                const res = await fetch(`${NOTIFICATION_API_BASE_URL}/update`, {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(notificationData)
+                });
+                if (!res.ok) throw new Error('Không thể cập nhật thông báo');
+                return await res.json();
+            },
 
-    async delete(id) {
-        const res = await fetch(`${NOTIFICATION_API_BASE_URL}/delete/${id}`, {
-            method: 'DELETE',
-            credentials: 'include'
-        });
-        if (!res.ok) throw new Error('Không thể xóa thông báo');
-        return true;
-    }
-};
-
-async function loadNotifications() {
-    try {
-        showLoading(true);
-        const response = await NotificationService.getAll();
-        if (response.success) {
-            notifications = response.data;
-            filteredNotifications = [...notifications];
-            renderNotifications();
-        } else {
-            throw new Error(response.message || 'Không thể tải thông báo');
-        }
-    } catch (err) {
-        showError(err.message);
-    } finally {
-        showLoading(false);
-    }
-}
-
-function renderNotifications() {
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const pageNotifications = filteredNotifications.slice(startIndex, endIndex);
-    
-    const tbody = document.getElementById('notificationTableBody');
-    
-    if (filteredNotifications.length === 0) {
-        showNoData();
-        return;
-    }
-
-    tbody.innerHTML = pageNotifications.map(notification => `
-        <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${notification.id}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${notification.title}</td>
-            <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate" title="${notification.content}">${notification.content}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getTypeBadgeClass(notification.type)}">
-                    ${getTypeDisplayName(notification.type)}
-                </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                    ${getAudienceDisplayName(notification.audience)}
-                </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${notification.recipientCount}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${new Date(notification.createdAt).toLocaleDateString('vi-VN')}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-                <button onclick="editNotification(${notification.id})" class="text-blue-600 hover:text-blue-900 mr-3">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button onclick="deleteNotification(${notification.id})" class="text-red-600 hover:text-red-900">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
-    
-    updatePagination();
-}
-
-function getTypeBadgeClass(type) {
-    switch(type) {
-        case 'info': return 'bg-blue-100 text-blue-800';
-        case 'warning': return 'bg-yellow-100 text-yellow-800';
-        case 'alert': return 'bg-red-100 text-red-800';
-        default: return 'bg-gray-100 text-gray-800';
-    }
-}
-
-function getTypeDisplayName(type) {
-    switch(type) {
-        case 'info': return 'Thông tin';
-        case 'warning': return 'Cảnh báo';
-        case 'alert': return 'Báo động';
-        default: return type;
-    }
-}
-
-function getAudienceDisplayName(audience) {
-    switch(audience) {
-        case 'all': return 'Tất cả';
-        case 'renters': return 'Người thuê';
-        case 'landlords': return 'Chủ nhà';
-        case 'specific': return 'Cụ thể';
-        default: return audience;
-    }
-}
-
-function updatePagination() {
-    const totalPages = Math.ceil(filteredNotifications.length / pageSize);
-    const startIndex = (currentPage - 1) * pageSize + 1;
-    const endIndex = Math.min(currentPage * pageSize, filteredNotifications.length);
-    
-    document.getElementById('startIndex').textContent = startIndex;
-    document.getElementById('endIndex').textContent = endIndex;
-    document.getElementById('totalItems').textContent = filteredNotifications.length;
-    
-    const pageNumbers = document.getElementById('pageNumbers');
-    pageNumbers.innerHTML = '';
-    
-    for (let i = 1; i <= totalPages; i++) {
-        const button = document.createElement('button');
-        button.className = `relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-            i === currentPage 
-                ? 'z-10 bg-blue-50 border-blue-500 text-blue-600' 
-                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-        }`;
-        button.textContent = i;
-        button.onclick = () => goToPage(i);
-        pageNumbers.appendChild(button);
-    }
-}
-
-function goToPage(page) {
-    currentPage = page;
-    renderNotifications();
-}
-
-function previousPage() {
-    if (currentPage > 1) {
-        currentPage--;
-        renderNotifications();
-    }
-}
-
-function nextPage() {
-    const totalPages = Math.ceil(filteredNotifications.length / pageSize);
-    if (currentPage < totalPages) {
-        currentPage++;
-        renderNotifications();
-    }
-}
-
-function applyFilters() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const typeFilter = document.getElementById('typeFilter').value;
-    const audienceFilter = document.getElementById('audienceFilter').value;
-
-    filteredNotifications = notifications.filter(notification => {
-        const matchesSearch = notification.title.toLowerCase().includes(searchTerm) || 
-                             notification.content.toLowerCase().includes(searchTerm);
-        const matchesType = typeFilter === '' || notification.type === typeFilter;
-        const matchesAudience = audienceFilter === '' || notification.audience === audienceFilter;
-
-        return matchesSearch && matchesType && matchesAudience;
-    });
-
-    currentPage = 1;
-    renderNotifications();
-}
-
-function openCreateModal() {
-    document.getElementById('modalTitle').textContent = 'Tạo thông báo mới';
-    document.getElementById('notificationForm').reset();
-    document.getElementById('notificationId').value = '';
-    document.getElementById('specificUsersGroup').classList.add('hidden');
-    document.getElementById('notificationModal').classList.remove('hidden');
-}
-
-function editNotification(id) {
-    NotificationService.getById(id).then(response => {
-        if (response.success) {
-            const notification = response.data;
-            document.getElementById('modalTitle').textContent = 'Chỉnh sửa thông báo';
-            document.getElementById('notificationId').value = notification.id;
-            document.getElementById('notificationTitle').value = notification.title;
-            document.getElementById('notificationContent').value = notification.content;
-            document.getElementById('notificationType').value = notification.type;
-            document.getElementById('notificationAudience').value = notification.audience;
-            
-            if (notification.audience === 'specific') {
-                document.getElementById('specificUsersGroup').classList.remove('hidden');
-            } else {
-                document.getElementById('specificUsersGroup').classList.add('hidden');
+            async delete(id) {
+                const res = await fetch(`${NOTIFICATION_API_BASE_URL}/delete/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('Không thể xóa thông báo');
+                return true;
             }
+        };
+
+        async function loadNotifications() {
+            try {
+                showLoading(true);
+                const response = await NotificationService.getAll();
+                if (response.success) {
+                    notifications = response.data;
+                    filteredNotifications = [...notifications];
+                    updateStats(notifications);
+                    renderNotifications();
+                } else {
+                    throw new Error(response.message || 'Không thể tải thông báo');
+                }
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function updateStats(notifications) {
+            const total = notifications.length;
+            const info = notifications.filter(n => n.type === 'info').length;
+            const warning = notifications.filter(n => n.type === 'warning').length;
+            const alert = notifications.filter(n => n.type === 'alert').length;
             
+            document.getElementById('totalNotifications').textContent = total;
+            document.getElementById('infoNotifications').textContent = info;
+            document.getElementById('warningNotifications').textContent = warning;
+            document.getElementById('alertNotifications').textContent = alert;
+            document.getElementById('displayCount').textContent = filteredNotifications.length;
+        }
+
+        function renderNotifications() {
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            const pageNotifications = filteredNotifications.slice(startIndex, endIndex);
+
+            const tbody = document.getElementById('notificationTableBody');
+
+            if (filteredNotifications.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-8">
+                            <div class="empty-state">
+                                <i class="fas fa-bell-slash"></i>
+                                <p>Không có thông báo nào</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = pageNotifications.map(notification => `
+                <tr class="table-row">
+                    <td class="font-medium">${notification.id}</td>
+                    <td class="font-medium">${notification.title}</td>
+                    <td class="max-w-xs truncate" title="${notification.content}">${notification.content}</td>
+                    <td>
+                        <span class="badge ${getTypeBadgeClass(notification.type)}">
+                            ${getTypeDisplayName(notification.type)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge badge-info">
+                            ${getAudienceDisplayName(notification.audience)}
+                        </span>
+                    </td>
+                    <td>${notification.recipientCount || 0}</td>
+                    <td>${new Date(notification.createdAt).toLocaleDateString('vi-VN')}</td>
+                    <td class="text-center">
+                        <button onclick="editNotification(${notification.id})" class="btn btn-secondary btn-sm mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteNotification(${notification.id})" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            updatePagination();
+        }
+
+        function getTypeBadgeClass(type) {
+            switch(type) {
+                case 'info': return 'badge-info';
+                case 'warning': return 'badge-warning';
+                case 'alert': return 'badge-danger';
+                default: return 'badge-gray';
+            }
+        }
+
+        function getTypeDisplayName(type) {
+            switch(type) {
+                case 'info': return 'Thông tin';
+                case 'warning': return 'Cảnh báo';
+                case 'alert': return 'Báo động';
+                default: return type;
+            }
+        }
+
+        function getAudienceDisplayName(audience) {
+            switch(audience) {
+                case 'all': return 'Tất cả';
+                case 'renters': return 'Người thuê';
+                case 'landlords': return 'Chủ nhà';
+                case 'specific': return 'Cụ thể';
+                default: return audience;
+            }
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredNotifications.length / pageSize);
+            const startIndex = (currentPage - 1) * pageSize + 1;
+            const endIndex = Math.min(currentPage * pageSize, filteredNotifications.length);
+
+            document.getElementById('startIndex').textContent = startIndex;
+            document.getElementById('endIndex').textContent = endIndex;
+            document.getElementById('totalItems').textContent = filteredNotifications.length;
+
+            const pageNumbers = document.getElementById('paginationButtons');
+            pageNumbers.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.className = `btn ${i === currentPage ? 'btn-primary' : 'btn-secondary'} btn-sm`;
+                button.textContent = i;
+                button.onclick = () => goToPage(i);
+                pageNumbers.appendChild(button);
+            }
+
+            if (totalPages > 0) {
+                document.getElementById('paginationBar').style.display = 'block';
+            }
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderNotifications();
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const typeFilter = document.getElementById('typeFilter').value;
+            const audienceFilter = document.getElementById('audienceFilter').value;
+
+            filteredNotifications = notifications.filter(notification => {
+                const matchesSearch = notification.title.toLowerCase().includes(searchTerm) ||
+                                     notification.content.toLowerCase().includes(searchTerm);
+                const matchesType = typeFilter === '' || notification.type === typeFilter;
+                const matchesAudience = audienceFilter === '' || notification.audience === audienceFilter;
+
+                return matchesSearch && matchesType && matchesAudience;
+            });
+
+            currentPage = 1;
+            updateStats(filteredNotifications);
+            renderNotifications();
+        }
+
+        function refreshNotifications() {
+            loadNotifications();
+        }
+
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = 'Tạo thông báo mới';
+            document.getElementById('notificationForm').reset();
+            document.getElementById('notificationId').value = '';
+            document.getElementById('specificUsersGroup').classList.add('hidden');
             document.getElementById('notificationModal').classList.remove('hidden');
-        } else {
-            throw new Error(response.message);
         }
-    }).catch(err => {
-        showError(err.message);
-    });
-}
 
-function closeModal() {
-    document.getElementById('notificationModal').classList.add('hidden');
-}
+        function editNotification(id) {
+            NotificationService.getById(id).then(response => {
+                if (response.success) {
+                    const notification = response.data;
+                    document.getElementById('modalTitle').textContent = 'Chỉnh sửa thông báo';
+                    document.getElementById('notificationId').value = notification.id;
+                    document.getElementById('notificationTitle').value = notification.title;
+                    document.getElementById('notificationContent').value = notification.content;
+                    document.getElementById('notificationType').value = notification.type;
+                    document.getElementById('notificationAudience').value = notification.audience;
 
-function deleteNotification(id) {
-    currentDeleteId = id;
-    document.getElementById('deleteModal').classList.remove('hidden');
-}
+                    if (notification.audience === 'specific') {
+                        document.getElementById('specificUsersGroup').classList.remove('hidden');
+                        document.getElementById('specificUserIds').value = notification.specificUserIds ? notification.specificUserIds.join(',') : '';
+                    } else {
+                        document.getElementById('specificUsersGroup').classList.add('hidden');
+                    }
 
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.add('hidden');
-    currentDeleteId = null;
-}
-
-async function confirmDelete() {
-    if (!currentDeleteId) return;
-
-    try {
-        await NotificationService.delete(currentDeleteId);
-        showSuccess('Xóa thông báo thành công!');
-        closeDeleteModal();
-        loadNotifications();
-    } catch (err) {
-        showError(err.message);
-    }
-}
-
-document.getElementById('notificationForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const notificationData = {
-        title: document.getElementById('notificationTitle').value,
-        content: document.getElementById('notificationContent').value,
-        type: document.getElementById('notificationType').value,
-        audience: document.getElementById('notificationAudience').value,
-        specificUserIds: document.getElementById('notificationAudience').value === 'specific' ? 
-            document.getElementById('specificUserIds').value.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id)) : null
-    };
-
-    const notificationId = document.getElementById('notificationId').value;
-
-    try {
-        if (notificationId) {
-            notificationData.id = parseInt(notificationId);
-            await NotificationService.update(notificationData);
-            showSuccess('Cập nhật thông báo thành công!');
-        } else {
-            await NotificationService.create(notificationData);
-            showSuccess('Tạo thông báo thành công!');
+                    document.getElementById('notificationModal').classList.remove('hidden');
+                } else {
+                    throw new Error(response.message);
+                }
+            }).catch(err => {
+                showError(err.message);
+            });
         }
-        closeModal();
+
+        function closeModal() {
+            document.getElementById('notificationModal').classList.add('hidden');
+        }
+
+        function deleteNotification(id) {
+            currentDeleteId = id;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            currentDeleteId = null;
+        }
+
+        async function confirmDelete() {
+            if (!currentDeleteId) return;
+
+            try {
+                await NotificationService.delete(currentDeleteId);
+                showSuccess('Xóa thông báo thành công!');
+                closeDeleteModal();
+                loadNotifications();
+            } catch (err) {
+                showError(err.message);
+            }
+        }
+
+        function showLoading(show) {
+            const tbody = document.getElementById('notificationTableBody');
+            if (show) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-8">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-2 text-gray-600">Đang tải dữ liệu...</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function hideLoading() {
+            // Loading is handled by renderNotifications
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: message,
+                confirmButtonText: 'Đóng'
+            });
+        }
+
+        function showSuccess(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công',
+                text: message,
+                confirmButtonText: 'Đóng'
+            });
+        }
+
+        // Event Listeners
+        document.getElementById('notificationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const notificationData = {
+                title: document.getElementById('notificationTitle').value,
+                content: document.getElementById('notificationContent').value,
+                type: document.getElementById('notificationType').value,
+                audience: document.getElementById('notificationAudience').value,
+                specificUserIds: document.getElementById('notificationAudience').value === 'specific' ?
+                    document.getElementById('specificUserIds').value.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id)) : null
+            };
+
+            const notificationId = document.getElementById('notificationId').value;
+
+            try {
+                if (notificationId) {
+                    notificationData.id = parseInt(notificationId);
+                    await NotificationService.update(notificationData);
+                    showSuccess('Cập nhật thông báo thành công!');
+                } else {
+                    await NotificationService.create(notificationData);
+                    showSuccess('Tạo thông báo thành công!');
+                }
+                closeModal();
+                loadNotifications();
+            } catch (err) {
+                showError(err.message);
+            }
+        });
+
+        // Event listeners for audience change
+        document.getElementById('notificationAudience').addEventListener('change', function() {
+            const specificGroup = document.getElementById('specificUsersGroup');
+            if (this.value === 'specific') {
+                specificGroup.classList.remove('hidden');
+            } else {
+                specificGroup.classList.add('hidden');
+            }
+        });
+
+        // Character count for title
+        document.getElementById('notificationTitle').addEventListener('input', function() {
+            const chars = this.value.length;
+            document.getElementById('titleCharCount').textContent = chars;
+            if (chars > 200) {
+                this.value = this.value.slice(0, 200);
+                document.getElementById('titleCharCount').textContent = 200;
+            }
+        });
+
+        // Character count for content
+        document.getElementById('notificationContent').addEventListener('input', function() {
+            const chars = this.value.length;
+            document.getElementById('contentCharCount').textContent = chars;
+            if (chars > 1000) {
+                this.value = this.value.slice(0, 1000);
+                document.getElementById('contentCharCount').textContent = 1000;
+            }
+        });
+
+        // Add event listeners for real-time search
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('typeFilter').addEventListener('change', applyFilters);
+        document.getElementById('audienceFilter').addEventListener('change', applyFilters);
+
+        // Load notifications when page loads
         loadNotifications();
-    } catch (err) {
-        showError(err.message);
-    }
-});
-
-// Event listeners for audience change
-document.getElementById('notificationAudience').addEventListener('change', function() {
-    const specificGroup = document.getElementById('specificUsersGroup');
-    if (this.value === 'specific') {
-        specificGroup.classList.remove('hidden');
-    } else {
-        specificGroup.classList.add('hidden');
-    }
-});
-
-// Character count for title
-document.getElementById('notificationTitle').addEventListener('input', function() {
-    const chars = this.value.length;
-    document.getElementById('titleCharCount').textContent = chars;
-    if (chars > 200) {
-        this.value = this.value.slice(0, 200);
-        document.getElementById('titleCharCount').textContent = 200;
-    }
-});
-
-// Character count for content
-document.getElementById('notificationContent').addEventListener('input', function() {
-    const chars = this.value.length;
-    document.getElementById('contentCharCount').textContent = chars;
-    if (chars > 1000) {
-        this.value = this.value.slice(0, 1000);
-        document.getElementById('contentCharCount').textContent = 1000;
-    }
-});
-
-function showLoading(show) {
-    document.getElementById('loading').classList.toggle('hidden', !show);
-    document.getElementById('noData').classList.add('hidden');
+    </script>
 }
-
-function showNoData() {
-    document.getElementById('notificationTableBody').innerHTML = '';
-    document.getElementById('noData').classList.remove('hidden');
-}
-
-function showSuccess(message) {
-    // You can implement a toast notification here
-    alert(message);
-}
-
-function showError(message) {
-    // You can implement a toast notification here
-    alert('Lỗi: ' + message);
-}
-
-// Load notifications when page loads
-loadNotifications();
-
-// Add event listeners for real-time search
-document.getElementById('searchInput').addEventListener('input', applyFilters);
-document.getElementById('typeFilter').addEventListener('change', applyFilters);
-document.getElementById('audienceFilter').addEventListener('change', applyFilters);
-</script>
-} 

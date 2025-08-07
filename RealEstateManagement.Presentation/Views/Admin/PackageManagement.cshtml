@@ -2,414 +2,497 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
+
+
 <div class="container mx-auto py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Quản lý gói khuyến mãi</h1>
-        <button onclick="openCreateModal()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 flex items-center">
-            <i class="fas fa-plus mr-2"></i>Thêm gói mới
-        </button>
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Quản lý gói khuyến mãi</h1>
+        <p>Tạo và quản lý các gói khuyến mãi cho người dùng</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="totalPackages">0</div>
+            <div class="stat-label">Tổng gói</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="activePackages">0</div>
+            <div class="stat-label">Đang hoạt động</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="totalRevenue">0</div>
+            <div class="stat-label">Tổng doanh thu (VNĐ)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="avgPrice">0</div>
+            <div class="stat-label">Giá trung bình (VNĐ)</div>
+        </div>
     </div>
 
     <!-- Search and Filter -->
-    <div class="bg-white p-4 rounded-lg shadow mb-6">
+    <div class="search-container">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
-                <input type="text" id="searchInput" placeholder="Tìm theo tên..." 
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="form-label">Tìm kiếm</label>
+                <input type="text" id="searchInput" placeholder="Tìm theo tên..." class="form-input" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                <select id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="form-label">Trạng thái</label>
+                <select id="statusFilter" class="form-input">
                     <option value="">Tất cả</option>
                     <option value="true">Đang hoạt động</option>
                     <option value="false">Không hoạt động</option>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Cấp độ</label>
-                <select id="levelFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="form-label">Cấp độ</label>
+                <select id="levelFilter" class="form-input">
                     <option value="">Tất cả</option>
                     <!-- Option động sẽ được render bằng JS -->
                 </select>
             </div>
             <div class="flex items-end">
-                <button onclick="applyFilters()" class="w-full bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
-                    <i class="fas fa-search mr-2"></i>Lọc
+                <button onclick="applyFilters()" class="btn btn-primary w-full">
+                    <i class="fas fa-search"></i>
+                    Lọc
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- Action Bar -->
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-4">
+            <button onclick="openCreateModal()" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Thêm gói mới
+            </button>
+            <button onclick="refreshPackages()" class="btn btn-secondary">
+                <i class="fas fa-refresh"></i>
+                Làm mới
+            </button>
+        </div>
+        <div class="text-sm text-gray-600">
+            Hiển thị <span id="displayCount">0</span> gói
+        </div>
+    </div>
+
     <!-- Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="table-container">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class="table-header">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên gói</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mô tả</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá (VNĐ)</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian (ngày)</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cấp độ</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày tạo</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+                        <th>ID</th>
+                        <th>Tên gói</th>
+                        <th>Mô tả</th>
+                        <th>Giá (VNĐ)</th>
+                        <th>Thời gian (ngày)</th>
+                        <th>Cấp độ</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th class="text-center">Hành động</th>
                     </tr>
                 </thead>
                 <tbody id="packageTableBody" class="bg-white divide-y divide-gray-200">
-                    <!-- Data will be loaded here -->
+                    <!-- Loading State -->
+                    <tr>
+                        <td colspan="9" class="text-center py-8">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-2 text-gray-600">Đang tải dữ liệu...</p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
-
-    <!-- Loading -->
-    <div id="loading" class="text-center py-8">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p class="mt-2 text-gray-600">Đang tải...</p>
-    </div>
-
-    <!-- No data message -->
-    <div id="noData" class="text-center py-8 hidden">
-        <i class="fas fa-box-open text-4xl text-gray-400 mb-4"></i>
-        <p class="text-gray-600">Không có gói khuyến mãi nào</p>
-    </div>
 </div>
 
 <!-- Create/Edit Modal -->
-<div id="packageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border-t-8 border-orange-400 w-96 shadow-lg rounded-2xl bg-white">
-        <div class="mt-3">
-            <h3 id="modalTitle" class="text-2xl font-bold text-orange-600 mb-6 flex items-center">
-                <i class="fas fa-gift mr-2"></i>Chỉnh sửa gói khuyến mãi
+<div id="packageModal" class="modal-overlay hidden">
+    <div class="modal-content max-w-2xl">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <i class="fas fa-gift"></i>
+                <span id="modalTitle">Thêm gói khuyến mãi</span>
             </h3>
-            <form id="packageForm" class="space-y-5">
-                <input type="hidden" id="packageId">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tên gói *</label>
-                        <input type="text" id="packageName" required maxlength="100"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50" />
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="packageForm" class="space-y-6">
+                <input type="hidden" id="packageId" />
+                
+                <div class="form-group">
+                    <label class="form-label">Tên gói *</label>
+                    <input type="text" id="packageName" required maxlength="100" class="form-input" />
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Mô tả *</label>
+                    <textarea id="packageDescription" required maxlength="500" rows="3" class="form-input form-textarea"></textarea>
+                    <div class="text-xs text-gray-500 mt-1 text-right">
+                        <span id="descriptionCharCount">0</span>/500 ký tự
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Mô tả *</label>
-                        <textarea id="packageDescription" required maxlength="500" rows="3"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50"></textarea>
-                        <div class="text-xs text-gray-500 mt-1 text-right">
-                            <span id="descriptionWordCount">0</span>/250 ký tự
-                        </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">Giá (VNĐ) *</label>
+                        <input type="number" id="packagePrice" required min="0" step="1000" class="form-input" />
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Giá (VNĐ) </label>
-                            <input type="number" id="packagePrice" required min="0" step="1000"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Số ngày hiệu lực</label>
-                            <input type="number" id="packageDuration" required min="1" max="365"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50" />
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label">Số ngày hiệu lực *</label>
+                        <input type="number" id="packageDuration" required min="1" max="365" class="form-input" />
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Cấp độ *</label>
-                            <input type="number" id="packageLevel" required min="1" max="10"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50" />
-                        </div>
-                        <div class="flex items-center h-full">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">Cấp độ *</label>
+                        <input type="number" id="packageLevel" required min="1" max="10" class="form-input" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Trạng thái</label>
+                        <div class="flex items-center mt-2">
                             <input type="checkbox" id="packageIsActive" class="rounded border-gray-300 text-orange-500 focus:ring-orange-400" />
                             <span class="ml-2 text-sm text-gray-700">Đang hoạt động</span>
                         </div>
                     </div>
                 </div>
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" onclick="closeModal()"
-                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold">
-                        Hủy
-                    </button>
-                    <button type="submit"
-                            class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold shadow">
-                        <i class="fas fa-save mr-1"></i>Lưu
-                    </button>
-                </div>
             </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closeModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                Hủy
+            </button>
+            <button type="submit" form="packageForm" class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                Lưu
+            </button>
         </div>
     </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3 text-center">
+<div id="deleteModal" class="modal-overlay hidden">
+    <div class="modal-content max-w-md">
+        <div class="modal-body text-center">
             <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
             <h3 class="text-lg font-medium text-gray-900 mb-2">Xác nhận xóa</h3>
             <p class="text-gray-600 mb-6">Bạn có chắc chắn muốn xóa gói khuyến mãi này?</p>
-            <div class="flex justify-center space-x-3">
-                <button onclick="closeDeleteModal()" 
-                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
-                    Hủy
-                </button>
-                <button onclick="confirmDelete()" 
-                        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-                    Xóa
-                </button>
-            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeDeleteModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                Hủy
+            </button>
+            <button onclick="confirmDelete()" class="btn btn-danger">
+                <i class="fas fa-trash"></i>
+                Xóa
+            </button>
         </div>
     </div>
 </div>
 
 @section Scripts {
-<script>
-const PACKAGE_API_BASE_URL = 'https://localhost:7031/api/PromotionPackage';
-let packages = [];
-let currentDeleteId = null;
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const PACKAGE_API_BASE_URL = 'https://localhost:7031/api/PromotionPackage';
+        let packages = [];
+        let currentDeleteId = null;
+        let filteredPackages = [];
 
-const PackageService = {
-    async getAll() {
-        const res = await fetch(`${PACKAGE_API_BASE_URL}/GetAllPackage`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        if (!res.ok) throw new Error('Không thể lấy danh sách gói khuyến mãi');
-        return await res.json();
-    },
+        const PackageService = {
+            async getAll() {
+                const res = await fetch(`${PACKAGE_API_BASE_URL}/GetAllPackage`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('Không thể lấy danh sách gói khuyến mãi');
+                return await res.json();
+            },
 
-    async getById(id) {
-        const res = await fetch(`${PACKAGE_API_BASE_URL}/GetPackageById/${id}`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        if (!res.ok) throw new Error('Không thể lấy thông tin gói khuyến mãi');
-        return await res.json();
-    },
+            async getById(id) {
+                const res = await fetch(`${PACKAGE_API_BASE_URL}/GetPackageById/${id}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('Không thể lấy thông tin gói khuyến mãi');
+                return await res.json();
+            },
 
-    async create(packageData) {
-        const res = await fetch(`${PACKAGE_API_BASE_URL}/CreatePackage`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(packageData)
-        });
-        if (!res.ok) throw new Error('Không thể tạo gói khuyến mãi');
-        return await res.json();
-    },
+            async create(packageData) {
+                const res = await fetch(`${PACKAGE_API_BASE_URL}/CreatePackage`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(packageData)
+                });
+                if (!res.ok) throw new Error('Không thể tạo gói khuyến mãi');
+                return await res.json();
+            },
 
-    async update(id, packageData) {
-        const res = await fetch(`${PACKAGE_API_BASE_URL}/UpdatePackage/${id}`, {
-            method: 'PUT',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(packageData)
-        });
-        if (!res.ok) throw new Error('Không thể cập nhật gói khuyến mãi');
-        return await res.json();
-    },
+            async update(id, packageData) {
+                const res = await fetch(`${PACKAGE_API_BASE_URL}/UpdatePackage/${id}`, {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(packageData)
+                });
+                if (!res.ok) throw new Error('Không thể cập nhật gói khuyến mãi');
+                return await res.json();
+            },
 
-    async delete(id) {
-        const res = await fetch(`${PACKAGE_API_BASE_URL}/DeletePackage/${id}`, {
-            method: 'DELETE',
-            credentials: 'include'
-        });
-        if (!res.ok) throw new Error('Không thể xóa gói khuyến mãi');
-        return true;
-    }
-};
+            async delete(id) {
+                const res = await fetch(`${PACKAGE_API_BASE_URL}/DeletePackage/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('Không thể xóa gói khuyến mãi');
+                return true;
+            }
+        };
 
-async function loadPackages() {
-    try {
-        showLoading(true);
-        packages = await PackageService.getAll();
-        renderLevelOptions(packages);
-        renderPackages(packages);
-    } catch (err) {
-        showError(err.message);
-    } finally {
-        showLoading(false);
-    }
-}
-
-function renderLevelOptions(packages) {
-    const levelSet = new Set();
-    packages.forEach(pkg => levelSet.add(pkg.level));
-    const levelFilter = document.getElementById('levelFilter');
-    levelFilter.innerHTML = '<option value="">Tất cả</option>';
-    Array.from(levelSet).sort((a, b) => a - b).forEach(level => {
-        levelFilter.innerHTML += `<option value="${level}">Cấp ${level}</option>`;
-    });
-}
-
-function renderPackages(packagesToRender) {
-    const tbody = document.getElementById('packageTableBody');
-    
-    if (packagesToRender.length === 0) {
-        showNoData();
-        return;
-    }
-
-    tbody.innerHTML = packagesToRender.map(pkg => `
-        <tr class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pkg.id}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${pkg.name}</td>
-            <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate" title="${pkg.description}">${pkg.description}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pkg.price.toLocaleString('vi-VN')}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pkg.durationInDays}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${pkg.level}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    pkg.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }">
-                    ${pkg.isActive ? 'Đang hoạt động' : 'Không hoạt động'}
-                </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                ${new Date(pkg.createdAt).toLocaleDateString('vi-VN')}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-                <button onclick="editPackage(${pkg.id})" class="text-blue-600 hover:text-blue-900 mr-3">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button onclick="deletePackage(${pkg.id})" class="text-red-600 hover:text-red-900">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-function applyFilters() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const statusFilter = document.getElementById('statusFilter').value;
-    const levelFilter = document.getElementById('levelFilter').value;
-
-    let filteredPackages = packages.filter(pkg => {
-        const matchesSearch = pkg.name.toLowerCase().includes(searchTerm) || 
-                             pkg.description.toLowerCase().includes(searchTerm);
-        const matchesStatus = statusFilter === '' || pkg.isActive.toString() === statusFilter;
-        const matchesLevel = levelFilter === '' || pkg.level.toString() === levelFilter;
-
-        return matchesSearch && matchesStatus && matchesLevel;
-    });
-
-    renderPackages(filteredPackages);
-}
-
-function openCreateModal() {
-    document.getElementById('modalTitle').textContent = 'Thêm gói khuyến mãi';
-    document.getElementById('packageForm').reset();
-    document.getElementById('packageId').value = '';
-    document.getElementById('packageModal').classList.remove('hidden');
-}
-
-function editPackage(id) {
-    PackageService.getById(id).then(pkg => {
-        document.getElementById('modalTitle').textContent = 'Chỉnh sửa gói khuyến mãi';
-        document.getElementById('packageId').value = pkg.id;
-        document.getElementById('packageName').value = pkg.name;
-        document.getElementById('packageDescription').value = pkg.description;
-        document.getElementById('packagePrice').value = pkg.price;
-        document.getElementById('packageDuration').value = pkg.durationInDays;
-        document.getElementById('packageLevel').value = pkg.level;
-        document.getElementById('packageIsActive').checked = pkg.isActive;
-        document.getElementById('packageModal').classList.remove('hidden');
-    }).catch(err => {
-        showError(err.message);
-    });
-}
-
-function closeModal() {
-    document.getElementById('packageModal').classList.add('hidden');
-}
-
-function deletePackage(id) {
-    currentDeleteId = id;
-    document.getElementById('deleteModal').classList.remove('hidden');
-}
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.add('hidden');
-    currentDeleteId = null;
-}
-
-async function confirmDelete() {
-    if (!currentDeleteId) return;
-
-    try {
-        await PackageService.delete(currentDeleteId);
-        showSuccess('Xóa gói khuyến mãi thành công!');
-        closeDeleteModal();
-        loadPackages();
-    } catch (err) {
-        showError(err.message);
-    }
-}
-
-document.getElementById('packageForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const packageData = {
-        name: document.getElementById('packageName').value,
-        description: document.getElementById('packageDescription').value,
-        price: parseFloat(document.getElementById('packagePrice').value),
-        durationInDays: parseInt(document.getElementById('packageDuration').value),
-        level: parseInt(document.getElementById('packageLevel').value),
-        isActive: document.getElementById('packageIsActive').checked
-    };
-
-    const packageId = document.getElementById('packageId').value;
-
-    try {
-        if (packageId) {
-            await PackageService.update(packageId, packageData);
-            showSuccess('Cập nhật gói khuyến mãi thành công!');
-        } else {
-            await PackageService.create(packageData);
-            showSuccess('Tạo gói khuyến mãi thành công!');
+        async function loadPackages() {
+            try {
+                showLoading(true);
+                packages = await PackageService.getAll();
+                filteredPackages = [...packages];
+                renderLevelOptions(packages);
+                updateStats(packages);
+                renderPackages(packages);
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                hideLoading();
+            }
         }
-        closeModal();
+
+        function updateStats(packages) {
+            const total = packages.length;
+            const active = packages.filter(p => p.isActive).length;
+            const totalRevenue = packages.reduce((sum, p) => sum + p.price, 0);
+            const avgPrice = total > 0 ? Math.round(totalRevenue / total) : 0;
+            
+            document.getElementById('totalPackages').textContent = total;
+            document.getElementById('activePackages').textContent = active;
+            document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString('vi-VN');
+            document.getElementById('avgPrice').textContent = avgPrice.toLocaleString('vi-VN');
+            document.getElementById('displayCount').textContent = filteredPackages.length;
+        }
+
+        function renderLevelOptions(packages) {
+            const levelSet = new Set();
+            packages.forEach(pkg => levelSet.add(pkg.level));
+            const levelFilter = document.getElementById('levelFilter');
+            levelFilter.innerHTML = '<option value="">Tất cả</option>';
+            Array.from(levelSet).sort((a, b) => a - b).forEach(level => {
+                levelFilter.innerHTML += `<option value="${level}">Cấp ${level}</option>`;
+            });
+        }
+
+        function renderPackages(packagesToRender) {
+            const tbody = document.getElementById('packageTableBody');
+
+            if (packagesToRender.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-8">
+                            <div class="empty-state">
+                                <i class="fas fa-box-open"></i>
+                                <p>Không có gói khuyến mãi nào</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = packagesToRender.map(pkg => `
+                <tr class="table-row">
+                    <td class="font-medium">${pkg.id}</td>
+                    <td class="font-medium">${pkg.name}</td>
+                    <td class="max-w-xs truncate" title="${pkg.description}">${pkg.description}</td>
+                    <td>${pkg.price.toLocaleString('vi-VN')}</td>
+                    <td>${pkg.durationInDays}</td>
+                    <td>${pkg.level}</td>
+                    <td>
+                        <span class="badge ${pkg.isActive ? 'badge-success' : 'badge-danger'}">
+                            ${pkg.isActive ? 'Đang hoạt động' : 'Không hoạt động'}
+                        </span>
+                    </td>
+                    <td>${new Date(pkg.createdAt).toLocaleDateString('vi-VN')}</td>
+                    <td class="text-center">
+                        <button onclick="editPackage(${pkg.id})" class="btn btn-secondary btn-sm mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deletePackage(${pkg.id})" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const levelFilter = document.getElementById('levelFilter').value;
+
+            filteredPackages = packages.filter(pkg => {
+                const matchesSearch = pkg.name.toLowerCase().includes(searchTerm) ||
+                                     pkg.description.toLowerCase().includes(searchTerm);
+                const matchesStatus = statusFilter === '' || pkg.isActive.toString() === statusFilter;
+                const matchesLevel = levelFilter === '' || pkg.level.toString() === levelFilter;
+
+                return matchesSearch && matchesStatus && matchesLevel;
+            });
+
+            updateStats(filteredPackages);
+            renderPackages(filteredPackages);
+        }
+
+        function refreshPackages() {
+            loadPackages();
+        }
+
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = 'Thêm gói khuyến mãi';
+            document.getElementById('packageForm').reset();
+            document.getElementById('packageId').value = '';
+            document.getElementById('packageModal').classList.remove('hidden');
+        }
+
+        function editPackage(id) {
+            PackageService.getById(id).then(pkg => {
+                document.getElementById('modalTitle').textContent = 'Chỉnh sửa gói khuyến mãi';
+                document.getElementById('packageId').value = pkg.id;
+                document.getElementById('packageName').value = pkg.name;
+                document.getElementById('packageDescription').value = pkg.description;
+                document.getElementById('packagePrice').value = pkg.price;
+                document.getElementById('packageDuration').value = pkg.durationInDays;
+                document.getElementById('packageLevel').value = pkg.level;
+                document.getElementById('packageIsActive').checked = pkg.isActive;
+                document.getElementById('packageModal').classList.remove('hidden');
+            }).catch(err => {
+                showError(err.message);
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('packageModal').classList.add('hidden');
+        }
+
+        function deletePackage(id) {
+            currentDeleteId = id;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            currentDeleteId = null;
+        }
+
+        async function confirmDelete() {
+            if (!currentDeleteId) return;
+
+            try {
+                await PackageService.delete(currentDeleteId);
+                showSuccess('Xóa gói khuyến mãi thành công!');
+                closeDeleteModal();
+                loadPackages();
+            } catch (err) {
+                showError(err.message);
+            }
+        }
+
+        function showLoading(show) {
+            const tbody = document.getElementById('packageTableBody');
+            if (show) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-8">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-2 text-gray-600">Đang tải dữ liệu...</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function hideLoading() {
+            // Loading is handled by renderPackages
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: message,
+                confirmButtonText: 'Đóng'
+            });
+        }
+
+        function showSuccess(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công',
+                text: message,
+                confirmButtonText: 'Đóng'
+            });
+        }
+
+        // Event Listeners
+        document.getElementById('packageForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const packageData = {
+                name: document.getElementById('packageName').value,
+                description: document.getElementById('packageDescription').value,
+                price: parseFloat(document.getElementById('packagePrice').value),
+                durationInDays: parseInt(document.getElementById('packageDuration').value),
+                level: parseInt(document.getElementById('packageLevel').value),
+                isActive: document.getElementById('packageIsActive').checked
+            };
+
+            const packageId = document.getElementById('packageId').value;
+
+            try {
+                if (packageId) {
+                    await PackageService.update(packageId, packageData);
+                    showSuccess('Cập nhật gói khuyến mãi thành công!');
+                } else {
+                    await PackageService.create(packageData);
+                    showSuccess('Tạo gói khuyến mãi thành công!');
+                }
+                closeModal();
+                loadPackages();
+            } catch (err) {
+                showError(err.message);
+            }
+        });
+
+        // Character count for description
+        document.getElementById('packageDescription').addEventListener('input', function() {
+            const chars = this.value.length;
+            document.getElementById('descriptionCharCount').textContent = chars;
+            if (chars > 500) {
+                this.value = this.value.slice(0, 500);
+                document.getElementById('descriptionCharCount').textContent = 500;
+            }
+        });
+
+        // Add event listeners for real-time search
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('levelFilter').addEventListener('change', applyFilters);
+
+        // Load packages when page loads
         loadPackages();
-    } catch (err) {
-        showError(err.message);
-    }
-});
-
-function showLoading(show) {
-    document.getElementById('loading').classList.toggle('hidden', !show);
-    document.getElementById('noData').classList.add('hidden');
+    </script>
 }
-
-function showNoData() {
-    document.getElementById('packageTableBody').innerHTML = '';
-    document.getElementById('noData').classList.remove('hidden');
-}
-
-function showSuccess(message) {
-    // You can implement a toast notification here
-    alert(message);
-}
-
-function showError(message) {
-    // You can implement a toast notification here
-    alert('Lỗi: ' + message);
-}
-
-// Load packages when page loads
-loadPackages();
-
-// Add event listeners for real-time search
-document.getElementById('searchInput').addEventListener('input', applyFilters);
-document.getElementById('statusFilter').addEventListener('change', applyFilters);
-document.getElementById('levelFilter').addEventListener('change', applyFilters);
-
-document.getElementById('packageDescription').addEventListener('input', function() {
-    const chars = this.value.length;
-    document.getElementById('descriptionWordCount').textContent = chars;
-    if (chars > 250) {
-        this.value = this.value.slice(0, 250);
-        document.getElementById('descriptionWordCount').textContent = 250;
-    }
-});
-</script>
-} 

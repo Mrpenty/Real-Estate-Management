@@ -53,6 +53,9 @@ namespace RealEstateManagement.Data.Entity.User
         public string? CitizenIdFrontImageUrl { get; set; }
         public string? CitizenIdBackImageUrl { get; set; }
         public string? VerificationRejectReason { get; set; }
+        
+        // Trạng thái xác thực cho renter: "none", "pending", "approved", "rejected"
+        public string VerificationStatus { get; set; } = "none";
 
         public ICollection<ApplicationUserNotification> Notifications { get; set; }
     }

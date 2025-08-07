@@ -90,5 +90,28 @@ namespace RealEstateManagement.Business.Services.NewsService
         {
             return await _imageRepo.UpdateImageAsync(updatedImage);
         }
+
+        public async Task<IEnumerable<NewsImageDto>> GetImagesByNewsIdAsync(int newId)
+        {
+            try
+            {
+                _logger.LogInformation("Getting images for new {newId}", newId);
+                
+                var images = await _imageRepo.GetImagesByNewsIdAsync(newId);
+                
+                return images.Select(img => new NewsImageDto
+                {
+                    Id = img.Id,
+                    ImageUrl = img.ImageUrl,
+                    IsPrimary = img.IsPrimary,
+                    Order = img.Order
+                }).OrderBy(img => img.Order);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetImagesByNewsIdAsync for new {newId}", newId);
+                throw;
+            }
+        }
     }
 }

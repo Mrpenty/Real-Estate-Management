@@ -27,6 +27,9 @@ using RealEstateManagement.Business.Repositories.NotificationRepository;
 using RealEstateManagement.Business.Services.NotificationService;
 using RealEstateManagement.Business.Repositories.Reviews;
 using RealEstateManagement.Business.Services.Reviews;
+using RealEstateManagement.Business.Services.Admin;
+using RealEstateManagement.Business.Repositories.Admin;
+using RealEstateManagement.Business.Repositories.AmenityRepo;
 namespace RealEstateManagement.API.Extensions
 {
     public static class DependencyInjectionExtensions
@@ -38,13 +41,14 @@ namespace RealEstateManagement.API.Extensions
 
             //---Repository--\\
             services.AddScoped<ITokenRepository, TokenRepository>();
-
+            services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
             // Property Repository
             services.AddScoped<IPropertyPostRepository, PropertyPostRepository>();
             services.AddScoped<IPropertyRepository, PropertyRepository>();
             services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
             services.AddScoped<IRentalContractRepository, RentalContractRepository>();
             services.AddScoped<IOwnerPropertyRepository, OwnerPropertyRepository>();
+            services.AddScoped<IAmenityRepository, AmenityRepository>();
 
             // Some support Repository
             services.AddScoped<IAddressRepository, AddressRepository>();
@@ -59,6 +63,8 @@ namespace RealEstateManagement.API.Extensions
 
             //Notification Repository
             services.AddScoped<INotificationRepository, NotificationRepository>();
+
+          
 
             //----Service----\\
 
@@ -97,6 +103,21 @@ namespace RealEstateManagement.API.Extensions
 
             //Notification Service
             services.AddScoped<INotificationService, NotificationService>();
+
+            //Admin Dashboard Service
+            services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+
+
+
+
+
+
+
+            // Tenant Interaction Service
+            //services.AddScoped<IInteractionService, InteractionService>();
+            //services.AddScoped<IInteractionRepository, InteractionRepository>();
+
+
 
             //Wallet
             services.AddScoped<WalletService>();

@@ -68,7 +68,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
             if (!Enum.IsDefined(typeof(RentalContract.PaymentCycleType), dto.PaymentCycle))
                 throw new ArgumentException("Kiểu thanh toán không hợp lệ (phải là Monthly, Quarterly hoặc Yearly).");
 
-            var propertyPost = await _propertyPostRepo.GetByPropertyIdAndOwnerIdAsync(propertyPostId, ownerId);
+            var propertyPost = await _propertyPostRepo.GetPropertyPostByIdAsync(propertyPostId, ownerId);
             if (propertyPost == null)
                 throw new ArgumentException("Không tìm thấy bài đăng bất động sản hợp lệ cho chủ nhà này.");
 

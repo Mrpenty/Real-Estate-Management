@@ -13,6 +13,6 @@ namespace RealEstateManagement.Business.Repositories.NewsRepository
         Task<NewsImage> UpdateImageAsync(NewsImage updatedImage);
         Task<bool> NewsExistsAsync(int newsId);
         Task<bool> HasAnyImageAsync(int newsId);
-        //Task<List<NewsImage>> GetImagesByNewsIdAsync(int newsId);
+        Task<List<NewsImage>> GetImagesByNewsIdAsync(int newsId);
     }
 }

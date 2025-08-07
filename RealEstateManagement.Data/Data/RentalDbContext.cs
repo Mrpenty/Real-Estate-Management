@@ -6,23 +6,16 @@ using RealEstateManagement.Data.Data.Configurations;
 using RealEstateManagement.Data.Data.Configurations.ReportConfig;
 using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.AddressEnity;
-
 using RealEstateManagement.Data.Entity.Messages;
 using RealEstateManagement.Data.Entity.Payment;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using RealEstateManagement.Data.Entity.ReportEntity;
 using RealEstateManagement.Data.Entity.User;
 using static ApplicationUserConfiguration;
-
 using RealEstateManagement.Data.Entity.Notification;
-using RealEstateManagement.Data.Entity.User;
-using RealEstateManagement.Data.Entity.PropertyEntity;
-using RealEstateManagement.Data.Entity.Payment;
-using RealEstateManagement.Data.Entity.Messages;
 using RealEstateManagement.Data.Data.Configurations.UserConfig;
 using RealEstateManagement.Data.Entity.Reviews;
 using RealEstateManagement.Data.Data.Configurations.ReviewConfig;
-
 
 public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
 {
@@ -100,14 +93,9 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
         modelBuilder.ApplyConfiguration(new RentalContractConfiguration());
         modelBuilder.ApplyConfiguration(new PropertyPromotionConfiguration());
         modelBuilder.ApplyConfiguration(new PromotionPackageConfiguration());
-
         modelBuilder.ApplyConfiguration(new ReportConfiguration());
-
         modelBuilder.ApplyConfiguration(new InterestedPropertyConfiguration());
-
         modelBuilder.ApplyConfiguration(new ReviewReplyConfiguration());
-
-
         MainDataSeed.SeedData(modelBuilder);
     }
 }

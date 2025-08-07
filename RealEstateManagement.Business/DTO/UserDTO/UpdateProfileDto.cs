@@ -28,5 +28,6 @@ namespace RealEstateManagement.Business.DTO.UserDTO
         public DateTime? CitizenIdIssuedDate { get; set; }
         public DateTime? CitizenIdExpiryDate { get; set; }
         public string? VerificationRejectReason { get; set; }
+        public string? VerificationStatus { get; set; }
     }
 }

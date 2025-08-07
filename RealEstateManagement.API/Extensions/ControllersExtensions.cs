@@ -3,6 +3,8 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using NuGet.Protocol.Core.Types;
 using RealEstateManagement.Business.DTO.Properties;
+using RealEstateManagement.Business.DTO.SliderDTO;
+using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.User;
 using System.Text.Json.Serialization;
 
@@ -21,7 +23,7 @@ namespace RealEstateManagement.API.Extensions
                        .Expand()
                        .Count()
                        .SetMaxTop(100)
-                       .AddRouteComponents("api/Property", GetEdmModel()));
+                       .AddRouteComponents("api", GetEdmModel()));
             return services;
         }
         private static IEdmModel GetEdmModel()
@@ -31,6 +33,10 @@ namespace RealEstateManagement.API.Extensions
             builder.EntityType<HomePropertyDTO>().HasKey(u => u.Id);
             builder.EntitySet<InterestedPropertyDTO>("InterestedProperty");
             builder.EntityType<InterestedPropertyDTO>().HasKey(u => u.Id);
+
+            // Thêm Slider DTO vào OData
+            builder.EntitySet<SliderResponseDto>("Sliders");
+            builder.EntityType<SliderResponseDto>().HasKey(s => s.Id);
 
             return builder.GetEdmModel();
         }

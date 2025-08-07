@@ -41,5 +41,48 @@ namespace RealEstateManagement.Presentation.Controllers
             ViewBag.Title = "Quản lý thông báo";
             return View();
         }
+
+        /// <summary>
+        /// Admin Dashboard - Thống kê tổng quan
+        /// </summary>
+        [HttpGet]
+        public IActionResult Dashboard()
+        {
+            return View();
+        }
+
+        public IActionResult NewsManagement()
+        {
+            ViewBag.Title = "Quản lý bài báo";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult NewsDetail(int id)
+        {
+            ViewBag.Title = "Chi tiết bài báo";
+            ViewBag.NewsId = id;
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult CreateOrEditNews(int? id)
+        {
+            ViewBag.NewsId = id;
+            return View();
+        }
+
+
+        public IActionResult SliderManagement()
+        {
+            ViewBag.Title = "Quản lý slider";
+            return View();
+        }
+
+        public IActionResult AmenityManagement()
+        {
+            ViewBag.Title = "Quản lý tiện ích";
+            return View();
+        }
     }
 } 
