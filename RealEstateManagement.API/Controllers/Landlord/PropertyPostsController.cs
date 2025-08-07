@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
+using RealEstateManagement.Business.Services;
 using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using System.Security.Claims;
@@ -16,15 +17,17 @@ namespace RealEstateManagement.API.Controllers.Landlord
         private readonly IPropertyPostService _propertyPostService;
         private readonly ILogger<PropertyPostsController> _logger;
         private readonly RentalDbContext _context;
+        private readonly OpenAIService _openAIService;
 
-        public PropertyPostsController(IPropertyPostService propertyPostService, ILogger<PropertyPostsController> logger)
+        public PropertyPostsController(IPropertyPostService propertyPostService, ILogger<PropertyPostsController> logger, OpenAIService openAIService)
         {
             _propertyPostService = propertyPostService;
             _logger = logger;
+            _openAIService = openAIService;
         }
 
         //Landlord tạo 1 bài đăng mới với status Draft
-        [HttpPost]
+        [HttpPost("Create")]
         public async Task<IActionResult> CreatePropertyPost([FromBody] PropertyCreateRequestDto dto)
         {
             try
@@ -75,5 +78,18 @@ namespace RealEstateManagement.API.Controllers.Landlord
             return NoContent();
         }
 
+        [HttpPost("suggest-description")]
+        public async Task<IActionResult> SuggestDescription([FromBody] RealEstateDescriptionRequest dto)
+        {
+            try
+            {
+                var result = await _openAIService.AskGPTAsync(dto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

@@ -92,7 +92,7 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<INewsImageRepository, NewsImageRepository>();
             services.AddScoped<INewImageService, NewImageService>();
 
-
+            services.AddScoped<OpenAIService>();
 
 
             //Notification Service
