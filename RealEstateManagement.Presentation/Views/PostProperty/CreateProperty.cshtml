@@ -123,6 +123,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L18.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM10.5 7.5L12 12m-2.25-4.5L12 12m0 0 4.5 4.5M12 12l-1.5 4.5M12 12l3.75-3.75M12 12l-3.75 3.75M13.5 12h-3" />
                     </svg>
+
                 </button>
                 <textarea required id="description" name="description" rows="10" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
             </div>
@@ -319,9 +320,7 @@
          if (createdPropertyId) {
              await uploadImages(createdPropertyId); // Đợi upload xong ảnh
              alert('Tạo bài và upload ảnh thành công!');
-              //window.location.href = `/PostProperty/SelectPackage?propertyId=${createdPropertyId}`;
-
-             window.location.href = `/PostProperty/CreateContract?propertyPostId=${createdPropertyId}`;
+             window.location.href = `/PostProperty/SelectPackage?propertyId=${createdPropertyId}`;
              return;
          }
      };
@@ -633,7 +632,6 @@
              console.log(error);
          }
      });
-
 
      // Thêm hàm để lấy dữ liệu từ form và gọi API AI Suggestion
     document.getElementById('ai-suggest-button').addEventListener('click', async function() {

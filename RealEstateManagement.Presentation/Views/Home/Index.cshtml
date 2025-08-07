@@ -321,7 +321,7 @@
         try {
             const [properties, sliders,location1s] = await Promise.all([
                 propertyService.getAllproperty(),
-                fetch(`${urlBase}/api/admin/slider`).then(res => res.json()),
+                fetch(`${urlBase}/api/slider`).then(res => res.json()),
                 getAllLocation()
             ]);
             if(location1s){

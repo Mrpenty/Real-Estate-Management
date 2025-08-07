@@ -108,11 +108,6 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 
 
-
-
-
-
-
             // Tenant Interaction Service
             //services.AddScoped<IInteractionService, InteractionService>();
             //services.AddScoped<IInteractionRepository, InteractionRepository>();
