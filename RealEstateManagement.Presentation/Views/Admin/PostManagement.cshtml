@@ -1,20 +1,46 @@
 @{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
+
+
+
 <div class="container mx-auto py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Quản lý bài đăng</h1>
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Quản lý bài đăng</h1>
+        <p>Quản lý và duyệt các bài đăng bất động sản từ người dùng</p>
     </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="totalPosts">0</div>
+            <div class="stat-label">Tổng bài đăng</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="pendingPosts">0</div>
+            <div class="stat-label">Chờ duyệt</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="approvedPosts">0</div>
+            <div class="stat-label">Đã duyệt</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="rejectedPosts">0</div>
+            <div class="stat-label">Đã từ chối</div>
+        </div>
+    </div>
+
     <!-- Search and Filter -->
-    <div class="bg-white p-4 rounded-lg shadow mb-6">
+    <div class="search-container">
         <form id="postFilterForm" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
-                <input id="searchInput" type="text" placeholder="Tìm theo tiêu đề hoặc chủ nhà..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <label class="form-label">Tìm kiếm</label>
+                <input id="searchInput" type="text" placeholder="Tìm theo tiêu đề hoặc chủ nhà..." class="form-input" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                <select id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="form-label">Trạng thái</label>
+                <select id="statusFilter" class="form-input">
                     <option value="">Tất cả</option>
                     <option value="0">Bản nháp</option>
                     <option value="1">Chờ duyệt</option>
@@ -25,81 +51,161 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label>
-                <input id="fromDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <label class="form-label">Từ ngày</label>
+                <input id="fromDate" type="date" class="form-input" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Đến ngày</label>
-                <input id="toDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <label class="form-label">Đến ngày</label>
+                <input id="toDate" type="date" class="form-input" />
             </div>
             <div class="flex gap-2">
-                <button type="button" onclick="applyFilters()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center justify-center">
-                    <i class="fas fa-search mr-2"></i>Lọc
+                <button type="button" onclick="applyFilters()" class="btn btn-primary flex-1">
+                    <i class="fas fa-search"></i>
+                    Lọc
                 </button>
-                <button type="button" onclick="resetFilters()" class="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 flex items-center justify-center">
-                    <i class="fas fa-undo mr-2"></i>Đặt lại
+                <button type="button" onclick="resetFilters()" class="btn btn-secondary flex-1">
+                    <i class="fas fa-undo"></i>
+                    Đặt lại
                 </button>
             </div>
         </form>
     </div>
+
+    <!-- Action Bar -->
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-4">
+            <button onclick="refreshPosts()" class="btn btn-secondary">
+                <i class="fas fa-refresh"></i>
+                Làm mới
+            </button>
+            <button onclick="exportPosts()" class="btn btn-success">
+                <i class="fas fa-download"></i>
+                Xuất Excel
+            </button>
+        </div>
+        <div class="text-sm text-gray-600">
+            Hiển thị <span id="displayCount">0</span> bài đăng
+        </div>
+    </div>
+
     <!-- Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="table-container">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200" id="postTable">
-                <thead class="bg-gray-50">
+                <thead class="table-header">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiêu đề</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Chủ nhà</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày tạo</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+                        <th>ID</th>
+                        <th>Tiêu đề</th>
+                        <th>Chủ nhà</th>
+                        <th>Giá</th>
+                        <th>Ngày tạo</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center">Hành động</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Render bằng JS -->
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <!-- Loading State -->
+                    <tr>
+                        <td colspan="7" class="text-center py-8">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-2 text-gray-600">Đang tải dữ liệu...</p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
     <!-- Pagination -->
-    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4">
-        <div class="flex-1 flex justify-between sm:hidden">
-            <button onclick="previousPage()" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                Trước
-            </button>
-            <button onclick="nextPage()" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                Sau
-            </button>
-        </div>
-        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm text-gray-700">
-                    Hiển thị <span id="startIndex">1</span> đến <span id="endIndex">10</span> của <span id="totalItems">0</span> kết quả
-                </p>
+    <div class="pagination-container" id="paginationBar" style="display: none;">
+        <div class="flex justify-between items-center">
+            <div class="pagination-info">
+                Hiển thị <span id="startIndex">1</span> - <span id="endIndex">10</span> trong tổng số <span id="totalItems">0</span> bài đăng
             </div>
-            <div>
-                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                    <button onclick="previousPage()" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <div id="pageNumbers" class="flex">
-                        <!-- Page numbers will be generated here -->
-                    </div>
-                    <button onclick="nextPage()" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </nav>
+            <div class="pagination-buttons" id="paginationButtons">
+                <!-- Pagination buttons will be rendered here -->
             </div>
         </div>
     </div>
 </div>
 
+<!-- Post Detail Modal -->
+<div id="postDetailModal" class="modal-overlay hidden">
+    <div class="modal-content max-w-4xl">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <i class="fas fa-home"></i>
+                <span id="modalPostTitle">Chi tiết bài đăng</span>
+            </h3>
+            <button onclick="closePostDetailModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="postDetailContent">
+                <!-- Post detail content will be rendered here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Update Modal -->
+<div id="statusUpdateModal" class="modal-overlay hidden">
+    <div class="modal-content max-w-md">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <i class="fas fa-edit"></i>
+                Cập nhật trạng thái
+            </h3>
+            <button onclick="closeStatusModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="statusUpdateForm" class="space-y-4">
+                <input type="hidden" id="currentPostId" />
+                
+                <div class="form-group">
+                    <label class="form-label">Trạng thái mới</label>
+                    <select id="newStatus" class="form-input" required>
+                        <option value="0">Bản nháp</option>
+                        <option value="1">Chờ duyệt</option>
+                        <option value="2">Đã duyệt</option>
+                        <option value="3">Đã từ chối</option>
+                        <option value="4">Đã cho thuê</option>
+                        <option value="5">Đã bán</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="rejectReasonGroup" style="display: none;">
+                    <label class="form-label">Lý do từ chối</label>
+                    <textarea id="rejectReason" class="form-input form-textarea" 
+                              placeholder="Nhập lý do từ chối..." maxlength="500"></textarea>
+                    <div class="text-xs text-gray-500 mt-1 text-right">
+                        <span id="reasonCharCount">0</span>/500 ký tự
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeStatusModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                Hủy
+            </button>
+            <button onclick="updatePostStatus()" class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                Cập nhật
+            </button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let currentPage = 1, totalPages = 1, allPosts = [];
         let currentSearch = '', currentStatus = '', currentFromDate = '', currentToDate = '';
+        let currentPostDetail = null;
 
         const AdminPostService = window.AdminPostService || {
             async getPosts(status = '', page = 1, pageSize = 10) {
@@ -128,14 +234,24 @@
                 });
                 if (!res.ok) throw new Error('Không thể cập nhật trạng thái bài đăng');
                 return await res.json();
+            },
+            async deletePost(id) {
+                const res = await fetch(`${ADMIN_POST_API_BASE_URL}/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('Không thể xóa bài đăng');
+                return true;
             }
         };
 
         async function loadPosts(page = 1, status = '', search = '', fromDate = '', toDate = '') {
             try {
-                const data = await AdminPostService.getPosts(status, page, 10); // Phân trang backend
-                allPosts = data.posts;
+                showLoading(true);
+                const data = await AdminPostService.getPosts(status, page, 10);
+                allPosts = data.posts || [];
                 let filtered = [...allPosts];
+                
                 // Lọc thêm theo search và ngày nếu có
                 if (search) {
                     const s = search.toLowerCase();
@@ -152,13 +268,31 @@
                     const to = new Date(toDate);
                     filtered = filtered.filter(post => post.createdAt && new Date(post.createdAt) <= to);
                 }
+                
                 totalPages = data.totalPages || Math.ceil((data.total || filtered.length) / 10);
                 currentPage = data.page || page;
+                
+                updateStats(allPosts);
                 renderPostTable(filtered);
                 updatePagination(currentPage, totalPages);
             } catch (err) {
-                document.querySelector('#postTable tbody').innerHTML = `<tr><td colspan='6' class='text-center text-red-500'>${err.message}</td></tr>`;
+                showError(err.message);
+            } finally {
+                hideLoading();
             }
+        }
+
+        function updateStats(posts) {
+            const total = posts.length;
+            const pending = posts.filter(p => p.status === 1 || p.status === 'pending').length;
+            const approved = posts.filter(p => p.status === 2 || p.status === 'approved').length;
+            const rejected = posts.filter(p => p.status === 3 || p.status === 'rejected').length;
+            
+            document.getElementById('totalPosts').textContent = total;
+            document.getElementById('pendingPosts').textContent = pending;
+            document.getElementById('approvedPosts').textContent = approved;
+            document.getElementById('rejectedPosts').textContent = rejected;
+            document.getElementById('displayCount').textContent = allPosts.length;
         }
 
         function applyFilters() {
@@ -181,8 +315,16 @@
             loadPosts(1);
         }
 
+        function refreshPosts() {
+            loadPosts(currentPage, currentStatus, currentSearch, currentFromDate, currentToDate);
+        }
+
+        function exportPosts() {
+            showSuccess('Tính năng xuất Excel sẽ được triển khai trong phiên bản tiếp theo!');
+        }
+
         function getStatusBadge(status, statusDisplay) {
-            let color = 'bg-gray-200 text-gray-700';
+            let color = 'badge-gray';
             let display = statusDisplay || status;
             const statusMap = {
                 0: 'Bản nháp',
@@ -199,35 +341,58 @@
                 'sold': 'Đã bán'
             };
             if (statusMap[status] !== undefined) display = statusMap[status];
-            if (status === 'pending' || status === 1) color = 'bg-yellow-100 text-yellow-800';
-            else if (status === 'approved' || status === 2) color = 'bg-green-100 text-green-800';
-            else if (status === 'rejected' || status === 3) color = 'bg-red-100 text-red-800';
-            else if (status === 'rented' || status === 4) color = 'bg-blue-100 text-blue-800';
-            else if (status === 'sold' || status === 5) color = 'bg-gray-300 text-gray-800';
-            else if (status === 'draft' || status === 0) color = 'bg-gray-100 text-gray-700';
-            return `<span class="px-3 py-1 rounded-full text-xs font-semibold ${color}">${display}</span>`;
+            
+            if (status === 'pending' || status === 1) color = 'badge-warning';
+            else if (status === 'approved' || status === 2) color = 'badge-success';
+            else if (status === 'rejected' || status === 3) color = 'badge-danger';
+            else if (status === 'rented' || status === 4) color = 'badge-info';
+            else if (status === 'sold' || status === 5) color = 'badge-gray';
+            else if (status === 'draft' || status === 0) color = 'badge-gray';
+            
+            return `<span class="badge ${color}">${display}</span>`;
         }
 
         function renderPostTable(posts) {
             const tbody = document.querySelector('#postTable tbody');
             if (!posts || posts.length === 0) {
-                tbody.innerHTML = `<tr><td colspan='6' class='text-center'>Không có dữ liệu</td></tr>`;
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-8">
+                            <div class="empty-state">
+                                <i class="fas fa-home"></i>
+                                <p>Không có bài đăng nào</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
                 return;
             }
+            
             tbody.innerHTML = posts.map(post => `
-                <tr class="hover:bg-blue-50 transition">
-                    <td class="px-6 py-4 font-medium text-gray-700">${post.id}</td>
-                    <td class="px-6 py-4">
-                        <a href="/Admin/PostDetail/${post.id}" class="text-blue-700 hover:underline font-semibold">
-                            ${post.title || (post.property && post.property.title) || ''}
-                        </a>
+                <tr class="table-row">
+                    <td class="font-medium">${post.id}</td>
+                    <td>
+                        <div class="font-medium text-gray-900">${post.title || (post.property && post.property.title) || ''}</div>
+                        <div class="text-sm text-gray-500">${post.property && post.property.address ? post.property.address : ''}</div>
                     </td>
-                    <td class="px-6 py-4 text-gray-800">${post.name || (post.landlord && (post.landlord.fullName || post.landlord.name)) || post.landlordId || ''}</td>
-                    <td class="px-6 py-4 text-gray-600">${post.createdAt ? new Date(post.createdAt).toLocaleDateString('vi-VN') : ''}</td>
-                    <td class="px-6 py-4 text-center">${getStatusBadge(post.status, post.statusDisplay)}</td>
-                    <td class="px-6 py-4 text-center">
-                        <a href="/Admin/PostDetail/${post.id}" class="text-blue-600 hover:text-blue-900 mr-2"><i class="fas fa-eye"></i></a>
-                        <button onclick="deletePost(${post.id})" class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                    <td>${post.name || (post.landlord && (post.landlord.fullName || post.landlord.name)) || post.landlordId || ''}</td>
+                    <td>
+                        <span class="font-medium text-green-600">
+                            ${post.price ? post.price.toLocaleString('vi-VN') + ' VNĐ' : 'N/A'}
+                        </span>
+                    </td>
+                    <td>${post.createdAt ? new Date(post.createdAt).toLocaleDateString('vi-VN') : ''}</td>
+                    <td class="text-center">${getStatusBadge(post.status, post.statusDisplay)}</td>
+                    <td class="text-center">
+                        <button onclick="showPostDetail(${post.id})" class="btn btn-secondary btn-sm mr-2" title="Xem chi tiết">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="showStatusUpdateModal(${post.id})" class="btn btn-primary btn-sm mr-2" title="Cập nhật trạng thái">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deletePost(${post.id})" class="btn btn-danger btn-sm" title="Xóa">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </td>
                 </tr>
             `).join('');
@@ -240,57 +405,202 @@
             document.getElementById('endIndex').textContent = endIndex;
             document.getElementById('totalItems').textContent = allPosts.length;
 
-            const pageNumbers = document.getElementById('pageNumbers');
+            const pageNumbers = document.getElementById('paginationButtons');
             pageNumbers.innerHTML = '';
 
             for (let i = 1; i <= totalPages; i++) {
                 const button = document.createElement('button');
-                button.className = `relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                    i === page
-                        ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                }`;
+                button.className = `btn ${i === page ? 'btn-primary' : 'btn-secondary'} btn-sm`;
                 button.textContent = i;
                 button.onclick = () => loadPosts(i, currentStatus, currentSearch, currentFromDate, currentToDate);
                 pageNumbers.appendChild(button);
             }
-        }
 
-        function previousPage() {
-            if (currentPage > 1) {
-                loadPosts(currentPage - 1, currentStatus, currentSearch, currentFromDate, currentToDate);
+            if (totalPages > 0) {
+                document.getElementById('paginationBar').style.display = 'block';
             }
         }
 
-        function nextPage() {
-            if (currentPage < totalPages) {
-                loadPosts(currentPage + 1, currentStatus, currentSearch, currentFromDate, currentToDate);
+        async function showPostDetail(id) {
+            try {
+                const post = await AdminPostService.getPostDetail(id);
+                currentPostDetail = post;
+                
+                document.getElementById('modalPostTitle').textContent = post.title || 'Chi tiết bài đăng';
+                document.getElementById('postDetailContent').innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div class="form-group">
+                                <label class="form-label">Tiêu đề</label>
+                                <div class="form-input bg-gray-50">${post.title || 'N/A'}</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Chủ nhà</label>
+                                <div class="form-input bg-gray-50">${post.name || (post.landlord && (post.landlord.fullName || post.landlord.name)) || 'N/A'}</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Giá</label>
+                                <div class="form-input bg-gray-50">${post.price ? post.price.toLocaleString('vi-VN') + ' VNĐ' : 'N/A'}</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Trạng thái</label>
+                                <div>${getStatusBadge(post.status, post.statusDisplay)}</div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="form-group">
+                                <label class="form-label">Địa chỉ</label>
+                                <div class="form-input bg-gray-50">${post.property && post.property.address ? post.property.address : 'N/A'}</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Ngày tạo</label>
+                                <div class="form-input bg-gray-50">${post.createdAt ? new Date(post.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Mô tả</label>
+                                <div class="form-input bg-gray-50 form-textarea">${post.description || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${post.rejectReason ? `
+                        <div class="mt-6">
+                            <label class="form-label">Lý do từ chối</label>
+                            <div class="form-input bg-red-50 text-red-700">${post.rejectReason}</div>
+                        </div>
+                    ` : ''}
+                `;
+                
+                document.getElementById('postDetailModal').classList.remove('hidden');
+            } catch (err) {
+                showError(err.message);
             }
         }
 
-        // Chức năng xóa (giả lập, cần triển khai thực tế)
-        function deletePost(id) {
-            Swal.fire({
+        function closePostDetailModal() {
+            document.getElementById('postDetailModal').classList.add('hidden');
+        }
+
+        function showStatusUpdateModal(postId) {
+            const post = allPosts.find(p => p.id === postId);
+            if (!post) {
+                showError('Không tìm thấy bài đăng');
+                return;
+            }
+            
+            document.getElementById('currentPostId').value = postId;
+            document.getElementById('newStatus').value = post.status;
+            document.getElementById('rejectReason').value = post.rejectReason || '';
+            
+            // Show/hide reject reason field based on status
+            const rejectGroup = document.getElementById('rejectReasonGroup');
+            const statusSelect = document.getElementById('newStatus');
+            
+            statusSelect.addEventListener('change', function() {
+                if (this.value === '3') {
+                    rejectGroup.style.display = 'block';
+                } else {
+                    rejectGroup.style.display = 'none';
+                }
+            });
+            
+            // Character count for reject reason
+            const rejectReason = document.getElementById('rejectReason');
+            const reasonCharCount = document.getElementById('reasonCharCount');
+            rejectReason.addEventListener('input', function() {
+                reasonCharCount.textContent = this.value.length;
+            });
+            
+            document.getElementById('statusUpdateModal').classList.remove('hidden');
+        }
+
+        function closeStatusModal() {
+            document.getElementById('statusUpdateModal').classList.add('hidden');
+        }
+
+        async function updatePostStatus() {
+            const postId = document.getElementById('currentPostId').value;
+            const newStatus = document.getElementById('newStatus').value;
+            const rejectReason = document.getElementById('rejectReason').value;
+            
+            try {
+                await AdminPostService.updatePostStatus(postId, newStatus, newStatus === '3' ? rejectReason : null);
+                showSuccess('Cập nhật trạng thái thành công!');
+                closeStatusModal();
+                loadPosts(currentPage, currentStatus, currentSearch, currentFromDate, currentToDate);
+            } catch (err) {
+                showError(err.message);
+            }
+        }
+
+        async function deletePost(id) {
+            const result = await Swal.fire({
                 title: 'Xác nhận xóa',
                 text: 'Bạn có chắc chắn muốn xóa bài đăng này?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Xóa',
+                confirmButtonText: 'Có, xóa!',
                 cancelButtonText: 'Hủy'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Gọi API xóa (cần triển khai)
-                    console.log(`Deleting post with ID: ${id}`);
-                    loadPosts(currentPage, currentStatus, currentSearch, currentFromDate, currentToDate); // Tải lại để cập nhật
-                    Swal.fire('Đã xóa!', 'Bài đăng đã được xóa.', 'success');
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    await AdminPostService.deletePost(id);
+                    showSuccess('Xóa bài đăng thành công!');
+                    loadPosts(currentPage, currentStatus, currentSearch, currentFromDate, currentToDate);
+                } catch (err) {
+                    showError(err.message);
                 }
+            }
+        }
+
+        function showLoading(show) {
+            const tbody = document.querySelector('#postTable tbody');
+            if (show) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-8">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-2 text-gray-600">Đang tải dữ liệu...</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function hideLoading() {
+            // Loading is handled by renderPostTable
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: message,
+                confirmButtonText: 'Đóng'
             });
         }
 
-        // Khởi tạo
-        loadPosts(1);
+        function showSuccess(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công',
+                text: message,
+                confirmButtonText: 'Đóng'
+            });
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPosts(1);
+
+            // Add event listeners for real-time search
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
+            document.getElementById('statusFilter').addEventListener('change', applyFilters);
+            document.getElementById('fromDate').addEventListener('change', applyFilters);
+            document.getElementById('toDate').addEventListener('change', applyFilters);
+        });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 }

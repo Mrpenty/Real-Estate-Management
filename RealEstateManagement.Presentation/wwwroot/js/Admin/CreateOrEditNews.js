@@ -74,8 +74,8 @@ function getFullImageUrl(imageUrl) {
     // Nếu đã là URL đầy đủ thì return luôn
     if (imageUrl.startsWith('http')) {
         return imageUrl;
-    }
-    
+}
+
     // Nếu là relative path thì thêm base URL của API
     const API_BASE = "https://localhost:7031";
     return API_BASE + imageUrl;
@@ -158,7 +158,7 @@ function saveSelection() {
     const selection = window.getSelection();
     if (selection.rangeCount > 0) {
         savedRange = selection.getRangeAt(0).cloneRange();
-    }
+}
 }
 
 // Khôi phục vị trí con trỏ
@@ -305,7 +305,7 @@ form.onsubmit = async function (e) {
     // Nếu chưa có id, tạo bài báo trước
     if (!id) {
         const dto = { title, summary, content, authorName, source, status: 0 };
-        try {
+    try {
             const res = await fetch(API_New_BASE_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

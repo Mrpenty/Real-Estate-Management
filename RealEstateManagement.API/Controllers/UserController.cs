@@ -66,11 +66,20 @@ namespace RealEstateManagement.API.Controllers
                     return Unauthorized("Invalid user token");
                 }
 
+                var user = await _userManager.FindByIdAsync(userId.ToString());
+                if (user == null)
+                {
+                    return NotFound("User not found");
+                }
+
                 var result = await _profileService.UpdateProfileAsync(userId, model);
 
                 if (result.Succeeded)
                 {
-                    return Ok(new { message = "Profile updated successfully" });
+                    return Ok(new { 
+                        message = "Cập nhật thông tin thành công!",
+                        role = user.Role
+                    });
                 }
 
                 return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
@@ -79,6 +88,35 @@ namespace RealEstateManagement.API.Controllers
             {
                 _logger.LogError(ex, "Error occurred while updating profile");
                 return StatusCode(500, "An error occurred while updating the profile");
+            }
+        }
+
+        [HttpPost("request-verification")]
+        public async Task<IActionResult> RequestVerification()
+        {
+            try
+            {
+                var userId = GetUserIdFromToken();
+                if (userId == 0)
+                {
+                    return Unauthorized("Invalid user token");
+                }
+
+                var result = await _profileService.RequestVerificationAsync(userId);
+
+                if (result.Succeeded)
+                {
+                    return Ok(new { 
+                        message = "Yêu cầu duyệt đã được gửi thành công! Hồ sơ của bạn đã được gửi để xác thực." 
+                    });
+                }
+
+                return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while requesting verification");
+                return StatusCode(500, "An error occurred while requesting verification");
             }
         }
 
@@ -155,6 +193,7 @@ namespace RealEstateManagement.API.Controllers
             if (dto.CitizenIdIssuedDate.HasValue) user.CitizenIdIssuedDate = dto.CitizenIdIssuedDate;
             if (dto.CitizenIdExpiryDate.HasValue) user.CitizenIdExpiryDate = dto.CitizenIdExpiryDate;
             if (!string.IsNullOrEmpty(dto.VerificationRejectReason)) user.VerificationRejectReason = dto.VerificationRejectReason;
+            if (!string.IsNullOrEmpty(dto.VerificationStatus)) user.VerificationStatus = dto.VerificationStatus;
 
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
@@ -195,7 +234,8 @@ namespace RealEstateManagement.API.Controllers
                     u.Email,
                     u.Role,
                     u.IsActive,
-                    u.CreatedAt
+                    u.CreatedAt,
+                    u.VerificationStatus
                 })
                 .ToList();
 

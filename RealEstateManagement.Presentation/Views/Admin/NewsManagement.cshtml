@@ -1,100 +1,126 @@
 @{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    ViewData["Title"] = "Quản lý bài báo";
 }
 
 
 
-<div class="container mx-auto py-8 px-4">
+<div class="container mx-auto py-8">
     <!-- Page Header -->
     <div class="page-header">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
-            <div class="mb-4 md:mb-0">
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Quản lý bài báo</h1>
-                <p class="text-gray-600">Quản lý và theo dõi tất cả bài báo trong hệ thống</p>
-            </div>
-            <a href="/Admin/CreateOrEditNews" class="add-news-btn">
-                <i class="fas fa-plus"></i>
-                Tạo bài báo mới
-            </a>
+        <h1>Quản lý tin tức</h1>
+        <p>Tạo và quản lý các bài viết tin tức cho website</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="totalNews">0</div>
+            <div class="stat-label">Tổng tin tức</div>
         </div>
-        
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div id="totalNews" class="stat-number">-</div>
-                <div class="stat-label">Tổng bài báo</div>
+        <div class="stat-card">
+            <div class="stat-number" id="publishedNews">0</div>
+            <div class="stat-label">Đã xuất bản</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="draftNews">0</div>
+            <div class="stat-label">Bản nháp</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="totalImages">0</div>
+            <div class="stat-label">Tổng hình ảnh</div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="search-container">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="form-label">Tìm kiếm</label>
+                <input type="text" id="searchInput" placeholder="Tìm theo tiêu đề, tác giả..." class="form-input" />
             </div>
-            <div class="stat-card">
-                <div id="publishedNews" class="stat-number">-</div>
-                <div class="stat-label">Đã xuất bản</div>
+            <div>
+                <label class="form-label">Trạng thái</label>
+                <select id="statusFilter" class="form-input">
+                    <option value="">Tất cả</option>
+                    <option value="published">Đã xuất bản</option>
+                    <option value="draft">Bản nháp</option>
+                </select>
             </div>
-            <div class="stat-card">
-                <div id="draftNews" class="stat-number">-</div>
-                <div class="stat-label">Bản nháp</div>
+            <div>
+                <label class="form-label">Sắp xếp</label>
+                <select id="sortFilter" class="form-input">
+                    <option value="newest">Mới nhất</option>
+                    <option value="oldest">Cũ nhất</option>
+                    <option value="title">Theo tiêu đề</option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button onclick="applyFilters()" class="btn btn-primary w-full">
+                    <i class="fas fa-search"></i>
+                    Lọc
+                </button>
             </div>
         </div>
     </div>
-    
-    <!-- Search -->
-    <div class="search-container">
-        <h3 class="text-lg font-semibold mb-4">
-            <i class="fas fa-search mr-2"></i>
-            Tìm kiếm bài báo
-        </h3>
-        <div class="flex flex-col md:flex-row gap-4">
-            <input 
-                id="searchTitle" 
-                type="text" 
-                class="search-input flex-1" 
-                placeholder="Nhập tiêu đề bài báo cần tìm..."
-                autocomplete="off"
-            >
-            <button id="btnSearch" class="search-button">
-                <i class="fas fa-search"></i>
-                Tìm kiếm
+
+    <!-- Action Bar -->
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-4">
+            <a href="/Admin/CreateOrEditNews" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Tạo tin tức mới
+            </a>
+            <button onclick="refreshNews()" class="btn btn-secondary">
+                <i class="fas fa-refresh"></i>
+                Làm mới
             </button>
         </div>
+        <div class="text-sm text-gray-600">
+            Hiển thị <span id="displayCount">0</span> tin tức
+        </div>
     </div>
-    
+
     <!-- Table -->
     <div class="table-container">
         <div class="overflow-x-auto">
-            <table class="min-w-full">
+            <table class="min-w-full divide-y divide-gray-200">
                 <thead class="table-header">
                     <tr>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">ID</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Tiêu đề</th>
-                        <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700">Trạng thái</th>
-                        <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700">Ngày tạo</th>
-                        <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700">Tác giả</th>
-                        <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700">Thao tác</th>
+                        <th>ID</th>
+                        <th>Tiêu đề</th>
+                        <th>Tóm tắt</th>
+                        <th>Tác giả</th>
+                        <th>Trạng thái</th>
+                        <th>Hình ảnh</th>
+                        <th>Ngày tạo</th>
+                        <th class="text-center">Hành động</th>
                     </tr>
                 </thead>
-                <tbody id="newsTableBody">
-                    <tr class="loading-state">
-                        <td colspan="6" class="text-center py-12">
-                            <div class="loading-spinner mx-auto"></div>
-                            <p>Đang tải dữ liệu...</p>
+                <tbody id="newsTableBody" class="bg-white divide-y divide-gray-200">
+                    <!-- Loading State -->
+                    <tr>
+                        <td colspan="8" class="text-center py-8">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-2 text-gray-600">Đang tải dữ liệu...</p>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        
-        <!-- Pagination -->
-        <div id="paginationContainer" class="pagination-container" style="display: none;">
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" id="paginationBar" style="display: none;">
+        <div class="flex justify-between items-center">
             <div class="pagination-info">
-                Hiển thị <span id="showingFrom">1</span> - <span id="showingTo">10</span> trong tổng số <span id="totalItems">0</span> bài báo
+                Hiển thị <span id="startIndex">1</span> - <span id="endIndex">10</span> trong tổng số <span id="totalItems">0</span> tin tức
             </div>
-            <div id="paginationButtons" class="pagination-buttons">
+            <div class="pagination-buttons" id="paginationButtons">
                 <!-- Pagination buttons will be rendered here -->
             </div>
         </div>
     </div>
 </div>
-
-
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -1,342 +1,640 @@
 @{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
+
+
+
 <div class="container mx-auto py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Quản lý người dùng</h1>
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Quản lý người dùng</h1>
+        <p>Quản lý tài khoản người dùng, phân quyền và xác thực</p>
     </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="totalUsers">0</div>
+            <div class="stat-label">Tổng người dùng</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="activeUsers">0</div>
+            <div class="stat-label">Người dùng hoạt động</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="pendingVerifications">0</div>
+            <div class="stat-label">Chờ xác thực</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="landlords">0</div>
+            <div class="stat-label">Chủ nhà</div>
+        </div>
+    </div>
+
     <!-- Search and Filter -->
-    <div class="bg-white p-4 rounded-lg shadow mb-6">
+    <div class="search-container">
         <form id="userFilterForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
-                <input type="text" name="search" id="searchInput" placeholder="Tìm tên hoặc SĐT..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <label class="form-label">Tìm kiếm</label>
+                <input type="text" name="search" id="searchInput" placeholder="Tìm tên hoặc SĐT..." class="form-input" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Vai trò</label>
-                <select name="role" id="roleSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="form-label">Vai trò</label>
+                <select name="role" id="roleSelect" class="form-input">
                     <option value="">Tất cả vai trò</option>
                     <option value="renter">Renter</option>
                     <option value="landlord">Landlord</option>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                <select name="isActive" id="activeSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label class="form-label">Trạng thái</label>
+                <select name="isActive" id="activeSelect" class="form-input">
                     <option value="">Tất cả</option>
                     <option value="true">Active</option>
                     <option value="false">Inactive</option>
                 </select>
             </div>
             <div>
-                <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center justify-center">
-                    <i class="fas fa-search mr-2"></i>Tìm kiếm
+                <button type="submit" class="btn btn-primary w-full">
+                    <i class="fas fa-search"></i>
+                    Tìm kiếm
                 </button>
             </div>
         </form>
     </div>
+
     <!-- Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="table-container">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class="table-header">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SĐT</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày tạo</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+                        <th>ID</th>
+                        <th>Tên</th>
+                        <th>SĐT</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Trạng thái</th>
+                        <th>Xác thực</th>
+                        <th>Ngày tạo</th>
+                        <th class="text-center">Hành động</th>
                     </tr>
                 </thead>
                 <tbody id="userTableBody" class="bg-white divide-y divide-gray-200">
-                    <!-- Render bằng JS -->
+                    <!-- Loading State -->
+                    <tr>
+                        <td colspan="9" class="text-center py-8">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-2 text-gray-600">Đang tải dữ liệu...</p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
-    <div class="flex justify-between items-center mt-4" id="paginationBar">
-        <!-- Render bằng JS -->
+
+    <!-- Pagination -->
+    <div class="pagination-container" id="paginationBar" style="display: none;">
+        <div class="flex justify-between items-center">
+            <div class="pagination-info">
+                Hiển thị <span id="startIndex">1</span> - <span id="endIndex">10</span> trong tổng số <span id="totalItems">0</span> người dùng
+            </div>
+            <div class="pagination-buttons" id="paginationButtons">
+                <!-- Pagination buttons will be rendered here -->
+            </div>
+        </div>
     </div>
 </div>
-<!-- Modal chi tiết user -->
-<div id="userDetailModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg relative">
-    <button onclick="closeUserDetailModal()" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-xl">&times;</button>
-    <div id="userDetailContent">
-      <!-- Nội dung chi tiết user sẽ render ở đây -->
+
+<!-- User Detail Modal -->
+<div id="userDetailModal" class="modal-overlay hidden">
+    <div class="modal-content max-w-4xl">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <i class="fas fa-user"></i>
+                <span id="modalUserName">Chi tiết người dùng</span>
+            </h3>
+            <button onclick="closeUserDetailModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="userDetailContent">
+                <!-- User detail content will be rendered here -->
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+
 @section Scripts {
-<script>
-    let currentPage = 1;
-    let totalPages = 1;
-    let lastFilter = {};
-    let currentUserDetail = null;
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        let lastFilter = {};
+        let currentUserDetail = null;
+        let users = [];
 
-    async function loadUsers(page = 1) {
-        const search = document.getElementById('searchInput').value;
-        const role = document.getElementById('roleSelect').value;
-        const isActive = document.getElementById('activeSelect').value;
-        const params = {
-            search,
-            role,
-            isActive: isActive === '' ? undefined : isActive,
-            page,
-            pageSize: 10
-        };
-        lastFilter = params;
-        try {
-            const data = await AdminUserService.getUsers(params);
-            renderUserTable(data.users);
-            renderPagination(data.page, data.totalPages);
-            currentPage = data.page;
-            totalPages = data.totalPages;
-        } catch (err) {
-            document.getElementById('userTableBody').innerHTML = `<tr><td colspan='8' class='text-center text-red-500'>${err.message}</td></tr>`;
-            document.getElementById('paginationBar').innerHTML = '';
-        }
-    }
-
-    function renderUserTable(users) {
-        const tbody = document.getElementById('userTableBody');
-        if (!users || users.length === 0) {
-            tbody.innerHTML = `<tr><td colspan='8' class='text-center'>Không có dữ liệu</td></tr>`;
-            return;
-        }
-        tbody.innerHTML = users.map(user => `
-            <tr class="border-b hover:bg-gray-50">
-                <td class="px-6 py-4">${user.id}</td>
-                <td class="px-6 py-4">
-                    <a href="#" class="text-blue-600 hover:underline" onclick="showUserDetail(${user.id});return false;">
-                        ${user.name || ''}
-                    </a>
-                </td>
-                <td class="px-6 py-4">${user.phoneNumber || ''}</td>
-                <td class="px-6 py-4">${user.email || ''}</td>
-                <td class="px-6 py-4">${user.role || ''}</td>
-                <td class="px-6 py-4">
-                    <span class="inline-block px-2 py-1 rounded-full text-xs font-semibold ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                        ${user.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                </td>
-                <td class="px-6 py-4">${user.createdAt ? new Date(user.createdAt).toLocaleDateString('vi-VN') : ''}</td>
-                <td class="px-6 py-4 text-center">
-                    <button onclick="showUserDetail(${user.id});return false;" class="text-blue-600 hover:text-blue-900 mr-2"><i class="fas fa-edit"></i></button>
-                    <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    function renderPagination(page, totalPages) {
-        let html = `<div>Trang ${page} / ${totalPages}</div><div class='space-x-1'>`;
-        if (page > 1) {
-            html += `<button onclick='loadUsers(${page-1})' class='px-3 py-1 border rounded'>&laquo; Trước</button>`;
-        }
-        for (let i = 1; i <= totalPages; i++) {
-            if (i === page) {
-                html += `<span class='px-3 py-1 border rounded bg-blue-600 text-white'>${i}</span>`;
-            } else {
-                html += `<button onclick='loadUsers(${i})' class='px-3 py-1 border rounded'>${i}</button>`;
+        async function loadUsers(page = 1) {
+            try {
+                showLoading(true);
+                const search = document.getElementById('searchInput').value;
+                const role = document.getElementById('roleSelect').value;
+                const isActive = document.getElementById('activeSelect').value;
+                const params = {
+                    search,
+                    role,
+                    isActive: isActive === '' ? undefined : isActive,
+                    page,
+                    pageSize: 10
+                };
+                lastFilter = params;
+                
+                const data = await AdminUserService.getUsers(params);
+                users = data.users;
+                
+                renderUserTable(users);
+                renderPagination(data.page, data.totalPages, data.totalUsers);
+                updateStats(data.users);
+                
+                currentPage = data.page;
+                totalPages = data.totalPages;
+                
+                showPagination();
+            } catch (err) {
+                showError('Không thể tải danh sách người dùng: ' + err.message);
+            } finally {
+                hideLoading();
             }
         }
-        if (page < totalPages) {
-            html += `<button onclick='loadUsers(${page+1})' class='px-3 py-1 border rounded'>Sau &raquo;</button>`;
+
+        function renderUserTable(users) {
+            const tbody = document.getElementById('userTableBody');
+            if (!users || users.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-8">
+                            <div class="empty-state">
+                                <i class="fas fa-users"></i>
+                                <p>Không có người dùng nào</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = users.map(user => `
+                <tr class="table-row">
+                    <td class="font-medium">${user.id}</td>
+                    <td>
+                        <a href="#" class="text-blue-600 hover:text-blue-800 font-medium" onclick="showUserDetail(${user.id});return false;">
+                            ${user.name || 'N/A'}
+                        </a>
+                    </td>
+                    <td>${user.phoneNumber || 'N/A'}</td>
+                    <td>${user.email || 'N/A'}</td>
+                    <td>
+                        <span class="badge ${user.role === 'landlord' ? 'badge-success' : 'badge-info'}">
+                            ${user.role || 'N/A'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${user.isActive ? 'badge-success' : 'badge-danger'}">
+                            ${user.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td>
+                        ${getVerificationStatusBadge(user.verificationStatus, user.role)}
+                    </td>
+                    <td>${user.createdAt ? new Date(user.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</td>
+                    <td class="text-center">
+                        <button onclick="showUserDetail(${user.id});return false;" class="btn btn-secondary btn-sm mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteUser(${user.id})" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
         }
-        html += `</div>`;
-        document.getElementById('paginationBar').innerHTML = html;
-    }
 
-    document.getElementById('userFilterForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        loadUsers(1);
-    });
+        function getVerificationStatusBadge(status, role) {
+            if (role !== 'renter') {
+                return '<span class="text-gray-400 text-xs">-</span>';
+            }
+            
+            switch (status) {
+                case 'pending':
+                    return '<span class="badge badge-warning">Chờ duyệt</span>';
+                case 'approved':
+                    return '<span class="badge badge-success">Đã duyệt</span>';
+                case 'rejected':
+                    return '<span class="badge badge-danger">Từ chối</span>';
+                default:
+                    return '<span class="badge badge-gray">Chưa yêu cầu</span>';
+            }
+        }
 
-    // Modal chi tiết user
-    async function showUserDetail(userId) {
-        try {
-            const res = await fetch(`${ADMIN_API_BASE_URL}/api/User/${userId}`, {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' },
-                credentials: 'include'
+        function renderPagination(page, totalPages, totalUsers) {
+            const startIndex = (page - 1) * 10 + 1;
+            const endIndex = Math.min(page * 10, totalUsers);
+            
+            document.getElementById('startIndex').textContent = startIndex;
+            document.getElementById('endIndex').textContent = endIndex;
+            document.getElementById('totalItems').textContent = totalUsers;
+            
+            const buttonsContainer = document.getElementById('paginationButtons');
+            buttonsContainer.innerHTML = '';
+            
+            // Previous button
+            if (page > 1) {
+                buttonsContainer.innerHTML += `
+                    <button onclick="goToPage(${page - 1})" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                `;
+            }
+            
+            // Page numbers
+            const startPage = Math.max(1, page - 2);
+            const endPage = Math.min(totalPages, page + 2);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                buttonsContainer.innerHTML += `
+                    <button onclick="goToPage(${i})" class="btn ${i === page ? 'btn-primary' : 'btn-secondary'} btn-sm">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            // Next button
+            if (page < totalPages) {
+                buttonsContainer.innerHTML += `
+                    <button onclick="goToPage(${page + 1})" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                `;
+            }
+        }
+
+        function goToPage(page) {
+            loadUsers(page);
+        }
+
+        function updateStats(users) {
+            const totalUsers = users.length;
+            const activeUsers = users.filter(u => u.isActive).length;
+            const pendingVerifications = users.filter(u => u.role === 'renter' && u.verificationStatus === 'pending').length;
+            const landlords = users.filter(u => u.role === 'landlord').length;
+            
+            document.getElementById('totalUsers').textContent = totalUsers;
+            document.getElementById('activeUsers').textContent = activeUsers;
+            document.getElementById('pendingVerifications').textContent = pendingVerifications;
+            document.getElementById('landlords').textContent = landlords;
+        }
+
+        function showLoading(show) {
+            const tbody = document.getElementById('userTableBody');
+            if (show) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-8">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-2 text-gray-600">Đang tải dữ liệu...</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function hideLoading() {
+            // Loading is handled by renderUserTable
+        }
+
+        function showPagination() {
+            document.getElementById('paginationBar').style.display = 'block';
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: message,
+                confirmButtonText: 'Đóng'
             });
-            if (!res.ok) throw new Error('Không thể lấy thông tin chi tiết user');
-            const user = await res.json();
-            currentUserDetail = user; // Lưu lại user detail
-            const modalBox = document.getElementById('userDetailModal').querySelector('.bg-white');
-            modalBox.classList.add('overflow-y-auto', 'max-h-[90vh]');
-            modalBox.classList.remove('overflow-x-auto');
-            modalBox.style.overflowX = 'hidden';
-            // Tăng chiều ngang modal
-            modalBox.classList.add('max-w-5xl');
-            modalBox.style.minWidth = '800px';
-            modalBox.style.maxWidth = '1100px';
-            document.getElementById('userDetailContent').innerHTML = `
-                <div class="p-8 min-w-[800px] max-w-[1100px]">
-                    <h2 class="text-2xl font-bold mb-4 text-center">${user.name}</h2>
-                    <div class="flex flex-row justify-between mb-4 gap-8">
-                        <div class="flex-1 grid grid-cols-1 gap-2 text-base">
-                            <div><span class="font-semibold">Email:</span> ${user.email} ${user.emailConfirmed ? '<span class="inline-block bg-green-100 text-green-800 text-xs font-medium ml-2 px-2.5 py-0.5 rounded-full">Đã xác thực</span>' : '<span class="inline-block bg-red-100 text-red-800 text-xs font-medium ml-2 px-2.5 py-0.5 rounded-full">Chưa xác thực</span>'}</div>
-                            <div><span class="font-semibold">SĐT:</span> ${user.phoneNumber} ${user.phoneNumberConfirmed ? '<span class="inline-block bg-green-100 text-green-800 text-xs font-medium ml-2 px-2.5 py-0.5 rounded-full">Đã xác thực</span>' : '<span class="inline-block bg-red-100 text-red-800 text-xs font-medium ml-2 px-2.5 py-0.5 rounded-full">Chưa xác thực</span>'}</div>
-                            <div><span class="font-semibold">Role:</span> <span id='roleValue'>${user.role}</span></div>
-                            <div><span class="font-semibold">Trạng thái:</span> <span id='activeValue'>${user.isActive ? '<span class=\'bg-green-100 text-green-700 px-2 py-1 rounded text-xs\'>Active</span>' : '<span class=\'bg-red-100 text-red-700 px-2 py-1 rounded text-xs\'>Inactive</span>'}</span></div>
-                            <div><span class="font-semibold">Ngày tạo:</span> ${user.createdAt ? new Date(user.createdAt).toLocaleDateString('vi-VN') : ''}</div>
-                        </div>
-                        <div class="flex-1 flex flex-col items-end justify-start text-base">
-                            <div class="mb-2"><span class="font-semibold">Số CCCD:</span> ${user.citizenIdNumber || '<span class=\'text-gray-400\'>Chưa cập nhật</span>'}</div>
-                            <div class="mb-2"><span class="font-semibold">Ngày cấp:</span> ${user.citizenIdIssuedDate ? new Date(user.citizenIdIssuedDate).toLocaleDateString('vi-VN') : '<span class=\'text-gray-400\'>Chưa cập nhật</span>'}</div>
-                            <div class="mb-2"><span class="font-semibold">Ngày hết hạn:</span> ${user.citizenIdExpiryDate ? new Date(user.citizenIdExpiryDate).toLocaleDateString('vi-VN') : '<span class=\'text-gray-400\'>Chưa cập nhật</span>'}</div>
-                        </div>
-                    </div>
-                    <div class="mt-6 mb-2 font-semibold text-lg text-center">Ảnh căn cước công dân</div>
-                    <div class="flex flex-row justify-center gap-10 mb-6 items-center">
-                        <div class="flex flex-col items-center w-1/2">
-                            <div class="font-medium mb-2 text-center">Mặt trước</div>
-                            <div class="bg-white border border-gray-300 rounded-lg shadow p-2 flex items-center justify-center min-h-[220px] min-w-[260px]">
-                                <img src="${user.citizenIdFrontImageUrl ? ADMIN_API_BASE_URL + user.citizenIdFrontImageUrl : '/image/no-image.png'}" class="max-h-56 max-w-full object-contain rounded" alt="CCCD mặt trước" />
-                            </div>
-                        </div>
-                        <div class="flex flex-col items-center w-1/2">
-                            <div class="font-medium mb-2 text-center">Mặt sau</div>
-                            <div class="bg-white border border-gray-300 rounded-lg shadow p-2 flex items-center justify-center min-h-[220px] min-w-[260px]">
-                                <img src="${user.citizenIdBackImageUrl ? ADMIN_API_BASE_URL + user.citizenIdBackImageUrl : '/image/no-image.png'}" class="max-h-56 max-w-full object-contain rounded" alt="CCCD mặt sau" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-2">
-                        <span class="font-semibold">Lý do từ chối:</span>
-                        <textarea id='rejectReasonInput' class='border rounded px-2 py-1 w-full mt-1 resize-none' maxlength='400' rows='3' placeholder='Nhập lý do từ chối (tối đa 400 ký tự)'>${user.verificationRejectReason || ''}</textarea>
-                        <div class='text-right text-xs text-gray-500 mt-1'><span id='rejectReasonCount'>0</span>/400 ký tự</div>
-                    </div>
-                    <div class='mt-6 flex gap-2 justify-end'>
-                        <button id="toggleRoleBtn" onclick="toggleRole(${user.id}, '${user.role}')" class="${user.role === 'landlord' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'} text-white px-4 py-2 rounded font-semibold">${user.role === 'landlord' ? 'Hủy (Renter)' : 'Duyệt (Landlord)'}</button>
-                        <button onclick="banUser(${user.id}, ${user.isActive ? false : true})" class="${user.isActive ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white px-4 py-2 rounded font-semibold">${user.isActive ? 'Ban' : 'Unban'}</button>
-                        <button onclick="saveRejectReason(${user.id})" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded font-semibold">Lưu lý do từ chối</button>
-                    </div>
-                </div>
-            `;
-            document.getElementById('userDetailModal').classList.remove('hidden');
-            // Đếm ký tự lý do từ chối
-            const rejectReasonInput = document.getElementById('rejectReasonInput');
-            const rejectReasonCount = document.getElementById('rejectReasonCount');
-            if (rejectReasonInput && rejectReasonCount) {
-                rejectReasonCount.textContent = rejectReasonInput.value.length;
-                rejectReasonInput.addEventListener('input', function() {
-                    rejectReasonCount.textContent = rejectReasonInput.value.length;
-                });
-            }
-        } catch (err) {
-            alert(err.message);
         }
-    }
-    function closeUserDetailModal() {
-        document.getElementById('userDetailModal').classList.add('hidden');
-    }
 
-    // Hàm gửi cập nhật (dùng chung cho các thao tác)
-    async function updateUserDetail(changes) {
-        if (!currentUserDetail) {
-            alert('Không tìm thấy thông tin user');
-            return;
+        function showSuccess(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: message,
+                confirmButtonText: 'Đóng'
+            });
         }
-        // Tạo payload đầy đủ
-        const payload = {
-            name: currentUserDetail.name,
-            email: currentUserDetail.email,
-            phoneNumber: currentUserDetail.phoneNumber,
-            profilePictureUrl: currentUserDetail.profilePictureUrl,
-            isVerified: currentUserDetail.isVerified,
-            isActive: currentUserDetail.isActive,
-            role: currentUserDetail.role,
-            citizenIdNumber: currentUserDetail.citizenIdNumber,
-            citizenIdFrontImageUrl: currentUserDetail.citizenIdFrontImageUrl,
-            citizenIdBackImageUrl: currentUserDetail.citizenIdBackImageUrl,
-            citizenIdIssuedDate: currentUserDetail.citizenIdIssuedDate,
-            citizenIdExpiryDate: currentUserDetail.citizenIdExpiryDate,
-            verificationRejectReason: currentUserDetail.verificationRejectReason,
-            ...changes // ghi đè các trường cần thay đổi
-        };
-        const res = await fetch(`${ADMIN_API_BASE_URL}/api/User/admin-update/${currentUserDetail.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload)
+
+        // Event Listeners
+        document.getElementById('userFilterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            loadUsers(1);
         });
-        return res;
-    }
 
-    // Call API duyệt user (chuyển role thành landlord)
-    async function approveUser(userId) {
-        if (!confirm('Chuyển role user này thành Landlord?')) return;
-        try {
-            const res = await updateUserDetail({ role: 'landlord' });
-            if (!res.ok) throw new Error('Không thể duyệt user');
-            alert('Đã duyệt thành Landlord!');
-            closeUserDetailModal();
-            loadUsers(currentPage);
-        } catch (err) {
-            alert(err.message);
-        }
-    }
-    // Call API ban/unban user
-    async function banUser(userId, isActive) {
-        if (!confirm(isActive ? 'Mở khóa user này?' : 'Ban user này?')) return;
-        try {
-            const res = await updateUserDetail({ isActive: isActive });
-            if (!res.ok) throw new Error('Không thể cập nhật trạng thái user');
-            alert(isActive ? 'Đã mở khóa user!' : 'Đã ban user!');
-            closeUserDetailModal();
-            loadUsers(currentPage);
-        } catch (err) {
-            alert(err.message);
-        }
-    }
-    // Call API lưu lý do từ chối
-    async function saveRejectReason(userId) {
-        const reason = document.getElementById('rejectReasonInput').value;
-        try {
-            const res = await updateUserDetail({ verificationRejectReason: reason });
-            if (!res.ok) throw new Error('Không thể lưu lý do từ chối');
-            alert('Đã lưu lý do từ chối!');
-            closeUserDetailModal();
-            loadUsers(currentPage);
-        } catch (err) {
-            alert(err.message);
-        }
-    }
-
-    // Thêm hàm toggleRole
-    async function toggleRole(userId, currentRole) {
-        if (currentRole === 'landlord') {
-            if (!confirm('Bạn có chắc muốn chuyển user này về Renter?')) return;
+        // User Detail Modal
+        async function showUserDetail(userId) {
             try {
-                const res = await updateUserDetail({ role: 'renter' });
-                if (!res.ok) throw new Error('Không thể chuyển về Renter');
-                alert('Đã chuyển về Renter!');
-                closeUserDetailModal();
-                loadUsers(currentPage);
+                const res = await fetch(`${ADMIN_API_BASE_URL}/api/User/${userId}`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('Không thể lấy thông tin chi tiết user');
+                const user = await res.json();
+                currentUserDetail = user;
+                
+                document.getElementById('modalUserName').textContent = user.name;
+                document.getElementById('userDetailContent').innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <div class="flex items-center gap-2">
+                                    <span class="form-input bg-gray-50">${user.email}</span>
+                                    ${user.emailConfirmed ? '<span class="badge badge-success">Đã xác thực</span>' : '<span class="badge badge-warning">Chưa xác thực</span>'}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Số điện thoại</label>
+                                <div class="flex items-center gap-2">
+                                    <span class="form-input bg-gray-50">${user.phoneNumber || 'N/A'}</span>
+                                    ${user.phoneNumberConfirmed ? '<span class="badge badge-success">Đã xác thực</span>' : '<span class="badge badge-warning">Chưa xác thực</span>'}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Vai trò</label>
+                                <span class="badge ${user.role === 'landlord' ? 'badge-success' : 'badge-info'}">${user.role}</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Trạng thái</label>
+                                <span class="badge ${user.isActive ? 'badge-success' : 'badge-danger'}">${user.isActive ? 'Active' : 'Inactive'}</span>
+                            </div>
+                            ${user.role === 'renter' ? `
+                                <div class="form-group">
+                                    <label class="form-label">Trạng thái xác thực</label>
+                                    ${getVerificationStatusBadge(user.verificationStatus, user.role)}
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="space-y-4">
+                            <div class="form-group">
+                                <label class="form-label">Số CCCD</label>
+                                <span class="form-input bg-gray-50">${user.citizenIdNumber || 'Chưa cập nhật'}</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Ngày cấp CCCD</label>
+                                <span class="form-input bg-gray-50">${user.citizenIdIssuedDate ? new Date(user.citizenIdIssuedDate).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Ngày hết hạn CCCD</label>
+                                <span class="form-input bg-gray-50">${user.citizenIdExpiryDate ? new Date(user.citizenIdExpiryDate).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Ngày tạo</label>
+                                <span class="form-input bg-gray-50">${user.createdAt ? new Date(user.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h4 class="font-semibold text-lg mb-4">Ảnh căn cước công dân</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="form-label">Mặt trước</label>
+                                <div class="border rounded-lg p-4 bg-gray-50">
+                                    <img src="${user.citizenIdFrontImageUrl ? ADMIN_API_BASE_URL + user.citizenIdFrontImageUrl : '/image/no-image.png'}" 
+                                         class="max-h-48 mx-auto object-contain" alt="CCCD mặt trước" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label">Mặt sau</label>
+                                <div class="border rounded-lg p-4 bg-gray-50">
+                                    <img src="${user.citizenIdBackImageUrl ? ADMIN_API_BASE_URL + user.citizenIdBackImageUrl : '/image/no-image.png'}" 
+                                         class="max-h-48 mx-auto object-contain" alt="CCCD mặt sau" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <label class="form-label">Lý do từ chối</label>
+                        <textarea id="rejectReasonInput" class="form-input form-textarea" 
+                                  placeholder="Nhập lý do từ chối (tối đa 400 ký tự)" maxlength="400">${user.verificationRejectReason || ''}</textarea>
+                        <div class="text-right text-xs text-gray-500 mt-1">
+                            <span id="rejectReasonCount">0</span>/400 ký tự
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button onclick="closeUserDetailModal()" class="btn btn-secondary">
+                            <i class="fas fa-times"></i>
+                            Đóng
+                        </button>
+                        <button onclick="toggleRole(${user.id}, '${user.role}')" class="btn ${user.role === 'landlord' ? 'btn-warning' : 'btn-success'}">
+                            <i class="fas fa-exchange-alt"></i>
+                            ${user.role === 'landlord' ? 'Chuyển về Renter' : 'Duyệt thành Landlord'}
+                        </button>
+                        <button onclick="banUser(${user.id}, ${user.isActive ? false : true})" class="btn ${user.isActive ? 'btn-danger' : 'btn-success'}">
+                            <i class="fas ${user.isActive ? 'fa-ban' : 'fa-unlock'}"></i>
+                            ${user.isActive ? 'Ban' : 'Unban'}
+                        </button>
+                        <button onclick="rejectUser(${user.id})" class="btn btn-danger">
+                            <i class="fas fa-times-circle"></i>
+                            Từ chối
+                        </button>
+                    </div>
+                `;
+                
+                // Character count for rejection reason
+                const rejectReasonInput = document.getElementById('rejectReasonInput');
+                const rejectReasonCount = document.getElementById('rejectReasonCount');
+                if (rejectReasonInput && rejectReasonCount) {
+                    rejectReasonCount.textContent = rejectReasonInput.value.length;
+                    rejectReasonInput.addEventListener('input', function() {
+                        rejectReasonCount.textContent = rejectReasonInput.value.length;
+                    });
+                }
+                
+                document.getElementById('userDetailModal').classList.remove('hidden');
             } catch (err) {
-                alert(err.message);
-            }
-        } else {
-            if (!confirm('Chuyển role user này thành Landlord?')) return;
-            try {
-                const res = await updateUserDetail({ role: 'landlord' });
-                if (!res.ok) throw new Error('Không thể duyệt user');
-                alert('Đã duyệt thành Landlord!');
-                closeUserDetailModal();
-                loadUsers(currentPage);
-            } catch (err) {
-                alert(err.message);
+                showError(err.message);
             }
         }
-    }
 
-    // Load lần đầu
-    loadUsers(1);
-</script>
+        function closeUserDetailModal() {
+            document.getElementById('userDetailModal').classList.add('hidden');
+        }
+
+        // User Management Functions
+        async function updateUserDetail(changes) {
+            if (!currentUserDetail) {
+                showError('Không tìm thấy thông tin user');
+                return;
+            }
+            
+            const payload = {
+                name: currentUserDetail.name,
+                email: currentUserDetail.email,
+                phoneNumber: currentUserDetail.phoneNumber,
+                profilePictureUrl: currentUserDetail.profilePictureUrl,
+                isVerified: currentUserDetail.isVerified,
+                isActive: currentUserDetail.isActive,
+                role: currentUserDetail.role,
+                citizenIdNumber: currentUserDetail.citizenIdNumber,
+                citizenIdFrontImageUrl: currentUserDetail.citizenIdFrontImageUrl,
+                citizenIdBackImageUrl: currentUserDetail.citizenIdBackImageUrl,
+                citizenIdIssuedDate: currentUserDetail.citizenIdIssuedDate,
+                citizenIdExpiryDate: currentUserDetail.citizenIdExpiryDate,
+                verificationRejectReason: currentUserDetail.verificationRejectReason,
+                verificationStatus: currentUserDetail.verificationStatus,
+                ...changes
+            };
+            
+            const res = await fetch(`${ADMIN_API_BASE_URL}/api/User/admin-update/${currentUserDetail.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+            return res;
+        }
+
+        async function toggleRole(userId, currentRole) {
+            const action = currentRole === 'landlord' ? 'chuyển về Renter' : 'duyệt thành Landlord';
+            const result = await Swal.fire({
+                title: 'Xác nhận thay đổi vai trò',
+                text: `Bạn có chắc muốn ${action}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Có, thay đổi!',
+                cancelButtonText: 'Hủy'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const newRole = currentRole === 'landlord' ? 'renter' : 'landlord';
+                    const newStatus = currentRole === 'landlord' ? 'none' : 'approved';
+                    
+                    const res = await updateUserDetail({ 
+                        role: newRole, 
+                        verificationStatus: newStatus 
+                    });
+                    
+                    if (!res.ok) throw new Error('Không thể thay đổi vai trò user');
+                    
+                    showSuccess(`Đã ${action} thành công!`);
+                    closeUserDetailModal();
+                    loadUsers(currentPage);
+                } catch (err) {
+                    showError(err.message);
+                }
+            }
+        }
+
+        async function banUser(userId, isActive) {
+            const action = isActive ? 'mở khóa' : 'ban';
+            const result = await Swal.fire({
+                title: 'Xác nhận',
+                text: `${isActive ? 'Mở khóa' : 'Ban'} user này?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: `Có, ${action}!`,
+                cancelButtonText: 'Hủy'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const res = await updateUserDetail({ isActive: isActive });
+                    if (!res.ok) throw new Error('Không thể cập nhật trạng thái user');
+                    
+                    showSuccess(`Đã ${action} user thành công!`);
+                    closeUserDetailModal();
+                    loadUsers(currentPage);
+                } catch (err) {
+                    showError(err.message);
+                }
+            }
+        }
+
+        async function rejectUser(userId) {
+            const reason = document.getElementById('rejectReasonInput').value;
+            if (!reason.trim()) {
+                showError('Vui lòng nhập lý do từ chối');
+                return;
+            }
+            
+            const result = await Swal.fire({
+                title: 'Xác nhận từ chối',
+                text: 'Từ chối yêu cầu xác thực của user này?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Có, từ chối!',
+                cancelButtonText: 'Hủy'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const res = await updateUserDetail({ 
+                        verificationStatus: 'rejected',
+                        verificationRejectReason: reason 
+                    });
+                    if (!res.ok) throw new Error('Không thể từ chối user');
+                    
+                    showSuccess('Đã từ chối yêu cầu xác thực thành công!');
+                    closeUserDetailModal();
+                    loadUsers(currentPage);
+                } catch (err) {
+                    showError(err.message);
+                }
+            }
+        }
+
+        async function deleteUser(userId) {
+            const result = await Swal.fire({
+                title: 'Xác nhận xóa',
+                text: 'Bạn có chắc chắn muốn xóa user này?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Có, xóa!',
+                cancelButtonText: 'Hủy'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch(`${ADMIN_API_BASE_URL}/api/User/delete/${userId}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    
+                    if (!res.ok) throw new Error('Không thể xóa user');
+                    
+                    showSuccess('Đã xóa user thành công!');
+                    loadUsers(currentPage);
+                } catch (err) {
+                    showError(err.message);
+                }
+            }
+        }
+
+        // Load initial data
+        loadUsers(1);
+    </script>
 } 

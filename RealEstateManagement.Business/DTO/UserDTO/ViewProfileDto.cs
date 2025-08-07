@@ -21,5 +21,6 @@
         public DateTime? CitizenIdExpiryDate { get; set; }
 
         public string? VerificationRejectReason { get; set; }
+        public string VerificationStatus { get; set; } = "none";
     }
 }

@@ -52,6 +52,7 @@ namespace RealEstateManagement.Business.Services.User
                 CitizenIdNumber = user.CitizenIdNumber,
                 CitizenIdIssuedDate = user.CitizenIdIssuedDate,
                 CitizenIdExpiryDate = user.CitizenIdExpiryDate,
+                VerificationStatus = user.VerificationStatus
             };
 
             return profile;
@@ -117,6 +118,43 @@ namespace RealEstateManagement.Business.Services.User
             {
                 user.PhoneNumberConfirmed = false;
             }
+
+            return await _userManager.UpdateAsync(user);
+        }
+
+        public async Task<IdentityResult> RequestVerificationAsync(int userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            if (user.Role != "renter")
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "Chỉ người dùng renter mới có thể yêu cầu duyệt" });
+            }
+
+            // Kiểm tra xem có đủ thông tin không
+            var hasAllRequiredFields = !string.IsNullOrEmpty(user.CitizenIdNumber) &&
+                                     user.CitizenIdIssuedDate.HasValue &&
+                                     user.CitizenIdExpiryDate.HasValue &&
+                                     !string.IsNullOrEmpty(user.CitizenIdFrontImageUrl) &&
+                                     !string.IsNullOrEmpty(user.CitizenIdBackImageUrl);
+
+            if (!hasAllRequiredFields)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "Vui lòng điền đầy đủ thông tin CCCD trước khi yêu cầu duyệt" });
+            }
+
+            // Chỉ cho phép yêu cầu duyệt nếu trạng thái là none hoặc rejected
+            if (user.VerificationStatus != "none" && user.VerificationStatus != "rejected")
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "Không thể yêu cầu duyệt với trạng thái hiện tại" });
+            }
+
+            user.VerificationStatus = "pending";
+            user.VerificationRejectReason = null; // Xóa lý do từ chối cũ
 
             return await _userManager.UpdateAsync(user);
         }
