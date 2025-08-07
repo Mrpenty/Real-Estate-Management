@@ -186,6 +186,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 IsFavorite = isFavorite == null ? false : true,
                 PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
                 ImageUrls = p.Images?.Select(c => c.Url).ToList(),
+                LandlordId = p.LandlordId,
                 LandlordName = p.Landlord?.Name,
                 LandlordPhoneNumber = p.Landlord?.PhoneNumber,
                 LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,

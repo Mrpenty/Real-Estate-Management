@@ -516,6 +516,7 @@
     }
 
     function createPropertyCard(item) {
+        console.log(item);
         return `
             <div id="card-property-${item.id}" class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300" data-id="${item.id}">
                 <!-- Image and Buttons -->
@@ -576,7 +577,7 @@
                 <!-- Footer -->
                 <div class="flex items-center justify-between px-4 py-3 bg-gray-50">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
+                        <div style="cursor:pointer" onclick="window.location.href='/Home/Landlord/${item.landlordId}'" class="w-10 h-10 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
                             <img
                                 onerror="handleImageError(this)"
                                 src="${item.landlordProfilePictureUrl?.includes('http') ? item.landlordProfilePictureUrl : urlBase + item.landlordProfilePictureUrl}"
@@ -585,7 +586,7 @@
                             >
                         </div>
                         <div class="text-sm text-gray-700">
-                            ${item.landlordName} <span class="text-gray-400 text-xs">(${timeAgo(item.createdAt)})</span>
+                            <span style="cursor:pointer" onclick="window.location.href='/Home/Landlord/${item.landlordId}'">${item.landlordName}</span> <span class="text-gray-400 text-xs">(${timeAgo(item.createdAt)})</span>
                         </div>
                     </div>
                     <div class="flex flex-col gap-2 items-end">

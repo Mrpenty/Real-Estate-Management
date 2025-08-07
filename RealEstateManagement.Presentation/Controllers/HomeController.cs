@@ -22,6 +22,18 @@ namespace RealEstateManagement.Presentation.Controllers
             return View();
         }
 
+        public IActionResult NewDetail(int id)
+        {
+            ViewBag.Id = id;
+            return View();
+        }
+
+        public IActionResult Landlord(int id)
+        {
+            ViewBag.LandlordId = id;
+            return View();
+        }
+
         public IActionResult Detail(int id)
         {
             ViewBag.Id = id;
