@@ -1,0 +1,552 @@
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+
+<div class="container mx-auto py-8">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Quản lý Tiện ích</h1>
+        <p>Quản lý các tiện ích và dịch vụ cho bất động sản</p>
+    </div>
+
+    
+
+    <!-- Search and Filter -->
+    <div class="search-container">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="form-label">Tìm kiếm</label>
+                <input type="text" id="searchInput" placeholder="Tìm theo tên..." class="form-input" />
+            </div>
+            
+            
+            <div class="flex items-end">
+                <button onclick="applyFilters()" class="btn btn-primary w-full">
+                    <i class="fas fa-search"></i>
+                    Lọc
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-4">
+            <button onclick="openCreateModal()" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Thêm tiện ích mới
+            </button>
+           
+           
+        </div>
+        <div class="text-sm text-gray-600">
+            Hiển thị <span id="displayCount">0</span> tiện ích
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200" id="amenityTable">
+                <thead class="table-header">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên tiện ích</th>
+                        <th>Mô tả</th>
+                        <th>Số lượng sử dụng</th>
+                        <th>Ngày tạo</th>
+                        <th class="text-center">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <!-- Loading State -->
+                    <tr>
+                        <td colspan="6" class="text-center py-8">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-2 text-gray-600">Đang tải dữ liệu...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" id="paginationBar" style="display: none;">
+        <div class="flex justify-between items-center">
+            <div class="pagination-info">
+                Hiển thị <span id="startIndex">1</span> - <span id="endIndex">10</span> trong tổng số <span id="totalItems">0</span> tiện ích
+            </div>
+            <div class="pagination-buttons" id="paginationButtons">
+                <!-- Pagination buttons will be rendered here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div id="amenityModal" class="modal-overlay hidden">
+    <div class="modal-content max-w-2xl">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <i class="fas fa-concierge-bell"></i>
+                <span id="modalTitle">Thêm tiện ích mới</span>
+            </h3>
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="amenityForm" class="space-y-6">
+                <input type="hidden" id="amenityId" />
+                
+                <div class="form-group">
+                    <label class="form-label">Tên tiện ích *</label>
+                    <input type="text" id="amenityName" required maxlength="100" class="form-input" />
+                    <div class="text-xs text-gray-500 mt-1 text-right">
+                        <span id="nameCharCount">0</span>/100 ký tự
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Mô tả</label>
+                    <textarea id="amenityDescription" maxlength="500" rows="4" class="form-input form-textarea" 
+                              placeholder="Mô tả chi tiết về tiện ích này..."></textarea>
+                    <div class="text-xs text-gray-500 mt-1 text-right">
+                        <span id="descriptionCharCount">0</span>/500 ký tự
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Loại tiện ích</label>
+                    <select id="amenityType" class="form-input">
+                        <option value="basic">Cơ bản</option>
+                        <option value="luxury">Cao cấp</option>
+                        <option value="security">An ninh</option>
+                        <option value="recreation">Giải trí</option>
+                        <option value="transportation">Giao thông</option>
+                        <option value="other">Khác</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Trạng thái</label>
+                    <div class="flex items-center mt-2">
+                        <input type="checkbox" id="amenityIsActive" class="rounded border-gray-300 text-blue-500 focus:ring-blue-400" checked />
+                        <span class="ml-2 text-sm text-gray-700">Đang hoạt động</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closeModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                Hủy
+            </button>
+            <button type="submit" form="amenityForm" class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                Lưu
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal-overlay hidden">
+    <div class="modal-content max-w-md">
+        <div class="modal-body text-center">
+            <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Xác nhận xóa</h3>
+            <p class="text-gray-600 mb-6">Bạn có chắc chắn muốn xóa tiện ích này?</p>
+            <p class="text-sm text-red-600">Hành động này không thể hoàn tác!</p>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeDeleteModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                Hủy
+            </button>
+            <button onclick="confirmDelete()" class="btn btn-danger">
+                <i class="fas fa-trash"></i>
+                Xóa
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const AMENITY_API_BASE_URL = 'https://localhost:7031/api/Amenity';
+        let amenities = [];
+        let currentDeleteId = null;
+        let currentPage = 1;
+        let pageSize = 10;
+        let filteredAmenities = [];
+
+        const AmenityService = {
+            async getAll() {
+                const res = await fetch(`${AMENITY_API_BASE_URL}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('Không thể lấy danh sách tiện ích');
+                const data = await res.json();
+                return data.data || [];
+            },
+
+            async getPaged(page = 1, pageSize = 10) {
+                const res = await fetch(`${AMENITY_API_BASE_URL}/paged?page=${page}&pageSize=${pageSize}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('Không thể lấy danh sách tiện ích');
+                const data = await res.json();
+                return data.data || { items: [], totalCount: 0 };
+            },
+
+            async create(amenityData) {
+                const res = await fetch(`${AMENITY_API_BASE_URL}`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(amenityData)
+                });
+                if (!res.ok) throw new Error('Không thể tạo tiện ích');
+                return await res.json();
+            },
+
+            async update(id, amenityData) {
+                const res = await fetch(`${AMENITY_API_BASE_URL}/${id}`, {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(amenityData)
+                });
+                if (!res.ok) throw new Error('Không thể cập nhật tiện ích');
+                return await res.json();
+            },
+
+            async delete(id) {
+                const res = await fetch(`${AMENITY_API_BASE_URL}/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error('Không thể xóa tiện ích');
+                return true;
+            }
+        };
+
+        async function loadAmenities() {
+            try {
+                showLoading(true);
+                const response = await AmenityService.getPaged(currentPage, pageSize);
+                amenities = response.items || [];
+                filteredAmenities = [...amenities];
+                updateStats(amenities);
+                renderAmenityTable();
+                updatePagination(currentPage, Math.ceil((response.totalCount || 0) / pageSize));
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function updateStats(amenities) {
+            const total = amenities.length;
+            const active = amenities.filter(a => a.isActive !== false).length;
+            const popular = amenities.filter(a => a.usageCount > 10).length;
+            const recent = amenities.filter(a => {
+                const created = new Date(a.createdAt || new Date());
+                const now = new Date();
+                const diffDays = (now - created) / (1000 * 60 * 60 * 24);
+                return diffDays <= 30;
+            }).length;
+            
+            document.getElementById('totalAmenities').textContent = total;
+            document.getElementById('activeAmenities').textContent = active;
+            document.getElementById('popularAmenities').textContent = popular;
+            document.getElementById('recentAdded').textContent = recent;
+            document.getElementById('displayCount').textContent = filteredAmenities.length;
+        }
+
+        function renderAmenityTable() {
+            const tbody = document.querySelector('#amenityTable tbody');
+
+            if (filteredAmenities.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-8">
+                            <div class="empty-state">
+                                <i class="fas fa-concierge-bell"></i>
+                                <p>Không có tiện ích nào</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filteredAmenities.map(amenity => `
+                <tr class="table-row">
+                    <td class="font-medium">${amenity.id}</td>
+                    <td>
+                        <div class="font-medium text-gray-900">${amenity.name}</div>
+                        <div class="text-sm text-gray-500">${getAmenityTypeDisplay(amenity.type)}</div>
+                    </td>
+                    <td class="max-w-xs truncate" title="${amenity.description || 'Không có mô tả'}">
+                        ${amenity.description || 'Không có mô tả'}
+                    </td>
+                    <td>
+                        <span class="badge badge-info">${amenity.usageCount || 0} lần</span>
+                    </td>
+                    <td>${formatDate(amenity.createdAt)}</td>
+                    <td class="text-center">
+                        <button onclick="editAmenity(${amenity.id})" class="btn btn-primary btn-sm mr-2" title="Chỉnh sửa">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteAmenity(${amenity.id})" class="btn btn-danger btn-sm" title="Xóa">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getAmenityTypeDisplay(type) {
+            const typeMap = {
+                'basic': 'Cơ bản',
+                'luxury': 'Cao cấp',
+                'security': 'An ninh',
+                'recreation': 'Giải trí',
+                'transportation': 'Giao thông',
+                'other': 'Khác'
+            };
+            return typeMap[type] || 'Không xác định';
+        }
+
+        function updatePagination(page, totalPages) {
+            const startIndex = (page - 1) * pageSize + 1;
+            const endIndex = Math.min(page * pageSize, filteredAmenities.length);
+
+            document.getElementById('startIndex').textContent = startIndex;
+            document.getElementById('endIndex').textContent = endIndex;
+            document.getElementById('totalItems').textContent = filteredAmenities.length;
+
+            const buttonsContainer = document.getElementById('paginationButtons');
+            buttonsContainer.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.className = `btn ${i === page ? 'btn-primary' : 'btn-secondary'} btn-sm`;
+                button.textContent = i;
+                button.onclick = () => goToPage(i);
+                buttonsContainer.appendChild(button);
+            }
+
+            if (totalPages > 0) {
+                document.getElementById('paginationBar').style.display = 'block';
+            }
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            loadAmenities();
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const sortFilter = document.getElementById('sortFilter').value;
+            const pageSizeFilter = document.getElementById('pageSizeFilter').value;
+
+            filteredAmenities = amenities.filter(amenity => {
+                return amenity.name.toLowerCase().includes(searchTerm) ||
+                       (amenity.description && amenity.description.toLowerCase().includes(searchTerm));
+            });
+
+            // Sort
+            switch (sortFilter) {
+                case 'name':
+                    filteredAmenities.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'newest':
+                    filteredAmenities.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    break;
+                case 'oldest':
+                    filteredAmenities.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    break;
+                case 'popular':
+                    filteredAmenities.sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0));
+                    break;
+            }
+
+            pageSize = parseInt(pageSizeFilter);
+            currentPage = 1;
+            updateStats(filteredAmenities);
+            renderAmenityTable();
+        }
+
+        function refreshAmenities() {
+            loadAmenities();
+        }
+
+      
+
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = 'Thêm tiện ích mới';
+            document.getElementById('amenityForm').reset();
+            document.getElementById('amenityId').value = '';
+            document.getElementById('amenityIsActive').checked = true;
+            document.getElementById('amenityModal').classList.remove('hidden');
+        }
+
+        function editAmenity(id) {
+            const amenity = amenities.find(a => a.id === id);
+            if (!amenity) {
+                showError('Không tìm thấy tiện ích');
+                return;
+            }
+
+            document.getElementById('modalTitle').textContent = 'Chỉnh sửa tiện ích';
+            document.getElementById('amenityId').value = amenity.id;
+            document.getElementById('amenityName').value = amenity.name;
+            document.getElementById('amenityDescription').value = amenity.description || '';
+            document.getElementById('amenityType').value = amenity.type || 'basic';
+            document.getElementById('amenityIsActive').checked = amenity.isActive !== false;
+            
+            // Update character counts
+            document.getElementById('nameCharCount').textContent = amenity.name.length;
+            document.getElementById('descriptionCharCount').textContent = (amenity.description || '').length;
+            
+            document.getElementById('amenityModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('amenityModal').classList.add('hidden');
+        }
+
+        function deleteAmenity(id) {
+            currentDeleteId = id;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            currentDeleteId = null;
+        }
+
+        async function confirmDelete() {
+            if (!currentDeleteId) return;
+
+            try {
+                await AmenityService.delete(currentDeleteId);
+                showSuccess('Xóa tiện ích thành công!');
+                closeDeleteModal();
+                loadAmenities();
+            } catch (err) {
+                showError(err.message);
+            }
+        }
+
+        function showLoading(show) {
+            const tbody = document.querySelector('#amenityTable tbody');
+            if (show) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-8">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-2 text-gray-600">Đang tải dữ liệu...</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function hideLoading() {
+            // Loading is handled by renderAmenityTable
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: message,
+                confirmButtonText: 'Đóng'
+            });
+        }
+
+        function showSuccess(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công',
+                text: message,
+                confirmButtonText: 'Đóng'
+            });
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        // Event Listeners
+        document.getElementById('amenityForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const amenityData = {
+                name: document.getElementById('amenityName').value,
+                description: document.getElementById('amenityDescription').value,
+                type: document.getElementById('amenityType').value,
+                isActive: document.getElementById('amenityIsActive').checked
+            };
+
+            const amenityId = document.getElementById('amenityId').value;
+
+            try {
+                if (amenityId) {
+                    amenityData.id = parseInt(amenityId);
+                    await AmenityService.update(amenityId, amenityData);
+                    showSuccess('Cập nhật tiện ích thành công!');
+                } else {
+                    await AmenityService.create(amenityData);
+                    showSuccess('Tạo tiện ích thành công!');
+                }
+                closeModal();
+                loadAmenities();
+            } catch (err) {
+                showError(err.message);
+            }
+        });
+
+        // Character count for name
+        document.getElementById('amenityName').addEventListener('input', function() {
+            const chars = this.value.length;
+            document.getElementById('nameCharCount').textContent = chars;
+            if (chars > 100) {
+                this.value = this.value.slice(0, 100);
+                document.getElementById('nameCharCount').textContent = 100;
+            }
+        });
+
+        // Character count for description
+        document.getElementById('amenityDescription').addEventListener('input', function() {
+            const chars = this.value.length;
+            document.getElementById('descriptionCharCount').textContent = chars;
+            if (chars > 500) {
+                this.value = this.value.slice(0, 500);
+                document.getElementById('descriptionCharCount').textContent = 500;
+            }
+        });
+
+        // Add event listeners for real-time search
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('sortFilter').addEventListener('change', applyFilters);
+        document.getElementById('pageSizeFilter').addEventListener('change', applyFilters);
+
+        // Load amenities when page loads
+        loadAmenities();
+    </script>
+} 

@@ -78,10 +78,7 @@
                 <i class="fas fa-refresh"></i>
                 Làm mới
             </button>
-            <button onclick="exportPosts()" class="btn btn-success">
-                <i class="fas fa-download"></i>
-                Xuất Excel
-            </button>
+            
         </div>
         <div class="text-sm text-gray-600">
             Hiển thị <span id="displayCount">0</span> bài đăng
@@ -319,9 +316,7 @@
             loadPosts(currentPage, currentStatus, currentSearch, currentFromDate, currentToDate);
         }
 
-        function exportPosts() {
-            showSuccess('Tính năng xuất Excel sẽ được triển khai trong phiên bản tiếp theo!');
-        }
+       
 
         function getStatusBadge(status, statusDisplay) {
             let color = 'badge-gray';
