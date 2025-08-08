@@ -45,6 +45,7 @@
   <ItemGroup>
     <Folder Include="wwwroot\uploads\cccd-back\" />
     <Folder Include="wwwroot\uploads\cccd-front\" />
+    <Folder Include="wwwroot\uploads\property-images\" />
   </ItemGroup>
 
 </Project>
