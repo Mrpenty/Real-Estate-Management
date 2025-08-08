@@ -7,15 +7,33 @@
 
 <div class="container mx-auto py-8">
     <div class="max-w-4xl mx-auto">
-        <h1 class="text-2xl font-bold mb-4">Bước 2: Thông tin hợp đồng thuê</h1>
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p class="text-blue-800 text-sm">
-                <strong>Lưu ý:</strong> Sau khi tạo hợp đồng, bài đăng sẽ chuyển từ trạng thái Draft sang Pending để chờ phê duyệt.
-            </p>
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-4 text-gray-800">Bước 2: Thông tin hợp đồng thuê</h1>
+            <p class="text-gray-600 text-lg">Hoàn tất thông tin hợp đồng để bài đăng được phê duyệt</p>
+        </div>
+        
+        <div class="bg-orange-50 border border-orange-200 rounded-xl p-6 mb-8">
+            <div class="flex items-start gap-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-info-circle text-orange-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-orange-800 mb-2">Lưu ý quan trọng</h3>
+                    <p class="text-orange-700 text-sm leading-relaxed">
+                        Sau khi tạo hợp đồng, bài đăng sẽ chuyển từ trạng thái <strong>Draft</strong> sang <strong>Pending</strong> để chờ phê duyệt từ admin. 
+                        Bạn có thể theo dõi trạng thái bài đăng trong mục "Danh sách tin đăng".
+                    </p>
+                </div>
+            </div>
         </div>
         
         <form id="create-contract-form" class="form-section">
-            <input type="hidden" id="propertyPostId" value="@ViewBag.PropertyPostId">
+            <input type="hidden" id="propertyPostId" name="propertyPostId" value="@ViewBag.PropertyPostId">
+            <script>
+                // Debug: Check if PropertyPostId is set correctly
+                console.log('ViewBag.PropertyPostId:', '@ViewBag.PropertyPostId');
+                console.log('Hidden input value:', document.getElementById('propertyPostId').value);
+            </script>
             
             <div class="space-y-6">
                 <!-- Financial Information -->
@@ -88,34 +106,42 @@
             </div>
 
             <!-- Contract Summary -->
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-6">
-                <h3 class="font-semibold text-gray-800 mb-3">Tóm tắt hợp đồng:</h3>
-                <div class="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <span class="font-medium">Ngày kết thúc dự kiến:</span>
-                        <span id="endDateDisplay" class="ml-2 text-blue-600">-</span>
+            <div class="contract-summary">
+                <h3><i class="fas fa-file-contract mr-2"></i>Tóm tắt hợp đồng</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="summary-label">Ngày kết thúc dự kiến:</span>
+                        <span id="endDateDisplay" class="summary-value">-</span>
                     </div>
-                    <div>
-                        <span class="font-medium">Tổng số tiền thuê:</span>
-                        <span id="totalRentDisplay" class="ml-2 text-green-600">-</span>
+                    <div class="summary-item">
+                        <span class="summary-label">Tổng số tiền thuê:</span>
+                        <span id="totalRentDisplay" class="summary-value">-</span>
                     </div>
                 </div>
             </div>
 
-            <div class="text-right mt-8">
-                <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg transition">
-                    Tạo hợp đồng và hoàn tất
+            <div class="text-center mt-8">
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-check mr-2"></i>Tạo hợp đồng và hoàn tất
                 </button>
             </div>
         </form>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 // Check authentication
 let isAuthen = authService.isAuthenticated();
 if(!isAuthen){
-    window.location.href = '/Auth/Login';
+    Swal.fire({
+        icon: 'warning',
+        title: 'Cần đăng nhập',
+        text: 'Vui lòng đăng nhập để tiếp tục',
+        confirmButtonColor: '#ff6b35'
+    }).then(() => {
+        window.location.href = '/Auth/Login';
+    });
 }
 
 // Set default start date to today
@@ -158,18 +184,41 @@ document.getElementById('create-contract-form').addEventListener('submit', async
     const API_BASE_URL = 'https://localhost:7031/api';
     const token = localStorage.getItem('authToken');
     
+    // Debug: Log all form data
+    console.log('Form data:', {
+        propertyPostId: document.getElementById('propertyPostId').value,
+        depositAmount: formData.get('depositAmount'),
+        monthlyRent: formData.get('monthlyRent'),
+        contractDurationMonths: formData.get('contractDurationMonths'),
+        startDate: formData.get('startDate'),
+        paymentMethod: formData.get('paymentMethod'),
+        contactInfo: formData.get('contactInfo')
+    });
+    
     // Validate required fields
-    const requiredFields = ['depositAmount', 'monthlyRent', 'contractDurationMonths', 'startDate', 'paymentMethod', 'contactInfo'];
+    const requiredFields = [
+        { name: 'depositAmount', label: 'Tiền cọc' },
+        { name: 'monthlyRent', label: 'Số tiền trả mỗi tháng' },
+        { name: 'contractDurationMonths', label: 'Thời hạn hợp đồng' },
+        { name: 'startDate', label: 'Ngày bắt đầu' },
+        { name: 'paymentMethod', label: 'Phương thức thanh toán' },
+        { name: 'contactInfo', label: 'Thông tin liên hệ' }
+    ];
+    
     for (const field of requiredFields) {
-        const value = formData.get(field);
+        const value = formData.get(field.name);
         if (!value || value.toString().trim() === '') {
-            alert(`Vui lòng điền đầy đủ thông tin: ${field}`);
+            Swal.fire({
+                icon: 'warning',
+                title: 'Thông tin chưa đầy đủ',
+                text: `Vui lòng điền đầy đủ: ${field.label}`,
+                confirmButtonColor: '#ff6b35'
+            });
             return;
         }
     }
     
     // Get current user ID from token or session
-    const token = localStorage.getItem('authToken');
     let ownerId = 1; // Default to 1 if not available
     
     // Try to get user info from token
@@ -196,11 +245,29 @@ document.getElementById('create-contract-form').addEventListener('submit', async
     try {
         // Show loading state
         const submitBtn = document.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Đang tạo hợp đồng...';
+        submitBtn.classList.add('loading');
         submitBtn.disabled = true;
+        
+        // Show loading with SweetAlert
+        Swal.fire({
+            title: 'Đang tạo hợp đồng...',
+            text: 'Vui lòng chờ trong giây lát',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
 
-        const response = await fetch(`${API_BASE_URL}/owner/rental-contracts/${ownerId}/${formData.get('propertyPostId')}`, {
+        // Get propertyPostId from hidden input
+        const propertyPostId = document.getElementById('propertyPostId').value;
+        console.log('PropertyPostId:', propertyPostId);
+        
+        if (!propertyPostId) {
+            alert('Không tìm thấy ID bài đăng. Vui lòng thử lại.');
+            return;
+        }
+        
+        const response = await fetch(`${API_BASE_URL}/owner/rental-contracts/${ownerId}/${propertyPostId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -214,21 +281,35 @@ document.getElementById('create-contract-form').addEventListener('submit', async
             throw new Error(errorText || 'Failed to create contract');
         }
 
-        alert('Contract created successfully for the post');
-        // Redirect to package selection after successful contract creation
-        window.location.href = `/PostProperty/SelectPackage?propertyId=${formData.get('propertyPostId')}`;
+        // Close loading and show success
+        Swal.close();
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Thành công!',
+            text: 'Hợp đồng đã được tạo thành công. Bạn sẽ được chuyển đến trang chọn gói quảng cáo.',
+            confirmButtonColor: '#ff6b35'
+        }).then(() => {
+            // Redirect to package selection after successful contract creation
+            window.location.href = `/PostProperty/SelectPackage?propertyId=${propertyPostId}`;
+        });
     } catch (err) {
         console.error(err);
-        alert(`Đã có lỗi xảy ra: ${err.message}`);
+        Swal.close();
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi!',
+            text: `Đã có lỗi xảy ra: ${err.message}`,
+            confirmButtonColor: '#ff6b35'
+        });
     } finally {
         // Restore button state
         const submitBtn = document.querySelector('button[type="submit"]');
-        submitBtn.textContent = 'Tạo hợp đồng và hoàn tất';
+        submitBtn.classList.remove('loading');
         submitBtn.disabled = false;
     }
 });
 </script>
 
-@section Scripts {
-    <script src="~/js/authService.js"></script>
-} 
+ 

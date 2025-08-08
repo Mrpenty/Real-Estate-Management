@@ -21,14 +21,51 @@ window.addEventListener('DOMContentLoaded', async () => {
             const res = await fetch(`${API_New_BASE_URL}/${id}`);
             if (!res.ok) throw new Error('Không tìm thấy bài báo');
             const news = await res.json();
+            // Set các field với validation
             document.getElementById('newsId').value = news.id;
-            document.getElementById('title').value = news.title;
+            document.getElementById('title').value = news.title || '';
             document.getElementById('summary').value = news.summary || '';
-            // Load nội dung và chèn ảnh từ imageUrl
-            contentEditor.innerHTML = await loadContentWithImages(news.id, news.content);
             document.getElementById('authorName').value = news.authorName || '';
             document.getElementById('source').value = news.source || '';
-            document.getElementById('status').value = news.status;
+            
+            // Load nội dung và chèn ảnh từ imageUrl
+            contentEditor.innerHTML = await loadContentWithImages(news.id, news.content);
+            
+            // Set status với kiểm tra giá trị
+            const statusSelect = document.getElementById('status');
+            console.log('Status từ API:', news.status, typeof news.status);
+            
+            // Đảm bảo status là số và có giá trị hợp lệ
+            let statusValue = '0'; // Default là Nháp
+            if (news.status !== null && news.status !== undefined) {
+                const status = parseInt(news.status);
+                if (!isNaN(status) && (status === 0 || status === 1)) {
+                    statusValue = status.toString();
+                }
+            }
+            
+            statusSelect.value = statusValue;
+            console.log('Status đã set:', statusSelect.value);
+            
+            // Trigger change event để đảm bảo UI cập nhật
+            statusSelect.dispatchEvent(new Event('change'));
+            
+            // Đảm bảo select được hiển thị đúng
+            setTimeout(() => {
+                console.log('Status sau khi set:', statusSelect.value, statusSelect.selectedIndex);
+                console.log('Options:', Array.from(statusSelect.options).map(opt => opt.value));
+            }, 100);
+            
+            // Log để debug
+            console.log('Dữ liệu đã load:', {
+                id: news.id,
+                title: news.title,
+                summary: news.summary,
+                authorName: news.authorName,
+                source: news.source,
+                status: statusValue,
+                content: news.content ? 'Có nội dung' : 'Không có nội dung'
+            });
             
             // Hiển thị ảnh primary nếu có
             const primaryImage = news.images && news.images.find(img => img.isPrimary);
@@ -47,6 +84,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 primaryImagePreview.style.display = 'block';
             }
         } catch (err) {
+            console.error('Lỗi khi load dữ liệu:', err);
             Swal.fire('Lỗi', err.message, 'error');
         }
     } else {
@@ -322,6 +360,16 @@ async function insertImageAtCursor() {
             contentEditor.appendChild(img);
         }
 
+        // Lưu ảnh cũ trước khi thêm ảnh mới
+        const oldImages = new Set(currentImagesInContent);
+        
+        // Thêm ảnh cũ vào danh sách để xóa
+        oldImages.forEach(img => {
+            if (img !== getFullImageUrl(imageUrl)) {
+                oldImagesToDelete.add(img);
+            }
+        });
+        
         // Thêm ảnh mới vào danh sách theo dõi
         currentImagesInContent.add(getFullImageUrl(imageUrl));
 
@@ -331,6 +379,14 @@ async function insertImageAtCursor() {
         // Focus lại vào editor để user có thể tiếp tục viết
         contentEditor.focus();
         
+        // Kiểm tra và xóa ảnh cũ sau khi chèn ảnh mới
+        setTimeout(() => {
+            checkForDeletedImages();
+            // Xóa ảnh cũ nếu có
+            deleteOldImages();
+        }, 100);
+        
+        // Thông báo thành công
         Swal.fire({
             icon: 'success',
             title: 'Thành công',
@@ -338,6 +394,10 @@ async function insertImageAtCursor() {
             timer: 1500,
             showConfirmButton: false
         });
+        
+        // Log để debug
+        console.log('Đã chèn ảnh mới:', imageUrl);
+        console.log('Danh sách ảnh hiện tại:', Array.from(currentImagesInContent));
     } catch (err) {
         Swal.fire('Lỗi', 'Upload ảnh thất bại: ' + err.message, 'error');
     }
@@ -373,8 +433,38 @@ contentEditor.addEventListener('cut', function() {
     setTimeout(checkForDeletedImages, 50);
 });
 
+// Sử dụng MutationObserver để theo dõi thay đổi DOM
+const observer = new MutationObserver(function(mutations) {
+    let hasImageChanges = false;
+    
+    mutations.forEach(function(mutation) {
+        // Kiểm tra nếu có ảnh bị xóa
+        if (mutation.type === 'childList') {
+            mutation.removedNodes.forEach(function(node) {
+                if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'IMG') {
+                    console.log('Phát hiện ảnh bị xóa qua MutationObserver:', node.src);
+                    hasImageChanges = true;
+                }
+            });
+        }
+    });
+    
+    if (hasImageChanges) {
+        setTimeout(checkForDeletedImages, 50);
+    }
+});
+
+// Bắt đầu theo dõi
+observer.observe(contentEditor, {
+    childList: true,
+    subtree: true
+});
+
 // Biến lưu trữ danh sách ảnh hiện tại trong content
 let currentImagesInContent = new Set();
+
+// Biến lưu trữ ảnh cũ để xóa khi thay đổi
+let oldImagesToDelete = new Set();
 
 // Hàm kiểm tra ảnh bị xóa
 function checkForDeletedImages() {
@@ -394,8 +484,13 @@ function checkForDeletedImages() {
         }
     });
     
+    console.log('Ảnh hiện tại trong editor:', Array.from(currentImageUrls));
+    console.log('Ảnh đã lưu trước đó:', Array.from(currentImagesInContent));
+    
     // Tìm ảnh đã bị xóa
     const deletedImages = Array.from(currentImagesInContent).filter(url => !currentImageUrls.has(url));
+    
+    console.log('Ảnh bị xóa:', deletedImages);
     
     // Xóa ảnh khỏi database nếu có
     deletedImages.forEach(imageUrl => {
@@ -413,42 +508,77 @@ async function deleteImageFromDatabase(imageUrl) {
     if (!newsId) return;
     
     try {
+        console.log('Bắt đầu xóa ảnh:', imageUrl);
+        
         // Lấy danh sách ảnh để tìm imageId
         const res = await fetch(`${API_IMAGES_BASE_URL}?newId=${newsId}`);
-        if (!res.ok) return;
+        if (!res.ok) {
+            console.log('Không thể lấy danh sách ảnh');
+            return;
+        }
         
         const images = await res.json();
+        console.log('Danh sách ảnh từ server:', images);
+        
         // Tìm ảnh bằng cách so sánh URL (cả relative và full URL)
         const image = images.find(img => {
             const fullUrl = getFullImageUrl(img.imageUrl);
-            return fullUrl === imageUrl || img.imageUrl === imageUrl;
+            const matches = fullUrl === imageUrl || img.imageUrl === imageUrl;
+            console.log(`So sánh: ${fullUrl} vs ${imageUrl} = ${matches}`);
+            return matches;
         });
         
         if (image && !image.isPrimary) {
+            console.log('Tìm thấy ảnh để xóa:', image);
+            
             // Xóa ảnh khỏi database
-            const deleteRes = await fetch(`${API_IMAGES_BASE_URL}/${newsId}/${image.id}`, {
+            const deleteRes = await fetch(`${API_IMAGES_BASE_URL}/${image.id}?newId=${newsId}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
             
             if (deleteRes.ok) {
-                console.log(`Đã xóa ảnh: ${imageUrl}`);
+                console.log(`Đã xóa ảnh khỏi database: ${imageUrl}`);
+                
                 // Xóa file vật lý nếu có thể
                 try {
-                    await fetch(`${API_IMAGES_BASE_URL}/delete-file`, {
+                    const fileDeleteRes = await fetch(`${API_IMAGES_BASE_URL}/delete-file`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ imageUrl: image.imageUrl }),
                         credentials: 'include'
                     });
+                    
+                    if (fileDeleteRes.ok) {
+                        console.log(`Đã xóa file vật lý: ${image.imageUrl}`);
+                    } else {
+                        console.log('Không thể xóa file vật lý');
+                    }
                 } catch (fileErr) {
-                    console.log('Không thể xóa file vật lý:', fileErr);
+                    console.log('Lỗi khi xóa file vật lý:', fileErr);
                 }
+            } else {
+                console.log('Không thể xóa ảnh khỏi database');
             }
+        } else {
+            console.log('Không tìm thấy ảnh hoặc ảnh là primary:', image);
         }
     } catch (err) {
         console.error('Lỗi khi xóa ảnh:', err);
     }
+}
+
+// Hàm xóa ảnh cũ khi user thay đổi
+async function deleteOldImages() {
+    if (oldImagesToDelete.size === 0) return;
+    
+    console.log('Bắt đầu xóa ảnh cũ:', Array.from(oldImagesToDelete));
+    
+    for (const imageUrl of oldImagesToDelete) {
+        await deleteImageFromDatabase(imageUrl);
+    }
+    
+    oldImagesToDelete.clear();
 }
 
 // Chức năng định dạng văn bản

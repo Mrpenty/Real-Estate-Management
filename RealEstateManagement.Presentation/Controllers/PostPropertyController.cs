@@ -127,6 +127,11 @@ namespace RealEstateManagement.Presentation.Controllers
         [HttpGet]
         public IActionResult CreateContract(int propertyPostId)
         {
+            if (propertyPostId <= 0)
+            {
+                return BadRequest("Invalid propertyPostId");
+            }
+            
             ViewBag.PropertyPostId = propertyPostId;
             return View();
         }
