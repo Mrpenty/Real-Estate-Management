@@ -98,29 +98,29 @@ namespace RealEstateManagement.Business.Services.Properties
 
             properties = properties.Where(c => c.Type == type);
 
-            //properties = properties.Where(p => p.Price >= minPrice * 1000000 && p.Price <= maxPrice * 1000000);
+            properties = properties.Where(p => p.Price >= minPrice * 1000000 && p.Price <= maxPrice * 1000000);
 
-            //properties = properties.Where(p => p.Area >= minArea && p.Area <= maxArea);
+            properties = properties.Where(p => p.Area >= minArea && p.Area <= maxArea);
 
-            //properties = properties.Where(p => p.Bedrooms >= minRoom && p.Bedrooms <= maxRoom);
+            properties = properties.Where(p => p.Bedrooms >= minRoom && p.Bedrooms <= maxRoom);
 
-            //if(!string.IsNullOrEmpty(provinces))
-            //{
-            //    var Provinces = provinces.Split(',').Select(c => int.Parse(c)).ToList();
-            //    properties = properties.Where(p => Provinces.Contains(p.Address.Province.Id));
-            //}
+            if (!string.IsNullOrEmpty(provinces))
+            {
+                var Provinces = provinces.Split(',').Select(c => int.Parse(c)).ToList();
+                properties = properties.Where(p => Provinces.Contains(p.Address.Province.Id));
+            }
 
-            //if(!string.IsNullOrEmpty(wards))
-            //{
-            //    var Wards = wards.Split(',').Select(c => int.Parse(c)).ToList();
-            //    properties = properties.Where(p => Wards.Contains(p.Address.Ward.Id));
-            //}
+            if (!string.IsNullOrEmpty(wards))
+            {
+                var Wards = wards.Split(',').Select(c => int.Parse(c)).ToList();
+                properties = properties.Where(p => Wards.Contains(p.Address.Ward.Id));
+            }
 
-            //if(!string.IsNullOrEmpty(streets))
-            //{
-            //    var Streets = streets.Split(',').Select(c => int.Parse(c)).ToList();
-            //    properties = properties.Where(p => Streets.Contains(p.Address.Street.Id));
-            //}
+            if (!string.IsNullOrEmpty(streets))
+            {
+                var Streets = streets.Split(',').Select(c => int.Parse(c)).ToList();
+                properties = properties.Where(p => Streets.Contains(p.Address.Street.Id));
+            }
 
 
             foreach (var p in properties)

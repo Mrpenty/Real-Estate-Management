@@ -64,8 +64,8 @@ namespace RealEstateManagement.API.Controllers
                 var result = await _propertyService.GetPaginatedPropertiesAsync(page, pageSize, 
                     userId, type,provinces,wards,streets,minPrice,maxPrice,minArea,maxArea,minRoom,maxRoom);
 
-                if (result == null || !result.Data.Any())
-                    return NotFound("Không tìm thấy bất động sản nào");
+                //if (result == null || !result.Data.Any())
+                //    return NotFound("Không tìm thấy bất động sản nào");
 
                 return Ok(result);
             }

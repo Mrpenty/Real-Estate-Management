@@ -12,7 +12,7 @@ const propertyService = {
             let provinces = [];
             let wards = [];
             let streets = [];
-            if (listLocationSelected != null && listLocationSelected != undefined) {
+            if (listLocationSelected != null && listLocationSelected != undefined && listLocationSelected != '') {
                 listLocationSelected = JSON.parse(listLocationSelected);
                 if (listLocationSelected.length != 0) {
                     listLocationSelected.forEach(item => {
@@ -24,6 +24,7 @@ const propertyService = {
                     provinces.push(Number(provinceId));
                 }
             }
+            else if (provinceId) provinces.push(Number(provinceId));
 
             const token = localStorage.getItem('authToken');
             let userId = 0;
@@ -38,11 +39,12 @@ const propertyService = {
             } else {
                 body = {};
             }
-            body['provinces'] = provinces;
-            body['wards'] = wards;
-            body['streets'] = streets;
-            body['type'] = type;
-            body['userId'] = userId;
+            //console.log(body);
+            //body['provinces'] = provinces;
+            //body['wards'] = wards;
+            //body['streets'] = streets;
+            //body['type'] = type;
+            //body['userId'] = userId;
 
             // Gửi bộ lọc qua query string cho endpoint paginated
             const queryParams = new URLSearchParams({

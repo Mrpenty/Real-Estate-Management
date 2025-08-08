@@ -96,7 +96,7 @@
                     <div class="input-group">
                         <div class="custom-dropdown">
                             <button class="dropdown-button" id="locationBtn">
-                                <span id="provinceSelected" data-value="Hanoi" data-id="2">Hanoi</span>
+                                <span id="provinceSelected" data-value="Ho Chi Minh City" data-id="1">Ho Chi Minh City</span>
                                 <span class="dropdown-arrow">▼</span>
                             </button>
                             <div class="dropdown-menu" id="locationMenu">
@@ -240,7 +240,7 @@
                                         <div class="flex items-center gap-2 mb-2">
                                             <input id="minInputArea" type="number" class="w-full border rounded px-2 py-1 text-center" value="0" min="0" />
                                             <span>→</span>
-                                            <input id="maxInputArea" type="number" class="w-full border rounded px-2 py-1 text-center" value="200" max="200" />
+                                            <input id="maxInputArea" type="number" class="w-full border rounded px-2 py-1 text-center" value="100" max="100" />
                                         </div>
 
                                         <div class="relative h-4">
@@ -301,17 +301,16 @@
     let provinceId = sessionStorage.getItem('provinceId');
     let provinceName = sessionStorage.getItem('provinceName');
     let searchInput = document.getElementById('provinceSelected');
-    if (listLocationSelected != null && listLocationSelected != undefined) {
+    if (listLocationSelected != null && listLocationSelected != undefined && listLocationSelected != '') {
         let html = '';
         listLocationSelected = JSON.parse(listLocationSelected);
+        selectedLocationLists = listLocationSelected;
         if (listLocationSelected.length != 0) {
             listLocationSelected.forEach(item => {
-                html += `<button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">${item.locationName}</button>`;
+                html += `<button class="bg-blue-100 text-blue-700 px-3 py-1 dropdown2-item rounded-full text-sm flex items-center gap-2"><span>${item.locationName}</span><button class="text-blue-600 hover:text-red-500 font-bold">×</button></button>`;
             });
-        } else if (provinceId != 0 && provinceId != -1) {
-            html += `<button class="bg-blue-100 text-blue-700 px-3 py-1 rounded">${provinceName}</button>`;
-        }
-        $('#locationSelected').html(html);
+        } 
+        $('#location-selected-list').html(html);
     }
 
     let slideIndex = 0;
@@ -383,6 +382,16 @@
                     </div>`
             });
             $('#listNew').html(htmlNew);
+            let provinceId = sessionStorage.getItem('provinceId');
+            if(provinceId){
+                let provinceName = sessionStorage.getItem('provinceName');
+                $('#provinceSelected').attr('data-id', provinceId);
+                $('#provinceSelected').attr('data-value', provinceName);
+                $('#provinceSelected').text(provinceName);
+            }
+
+
+
         } catch (error) {
             console.error('Lỗi khi lấy dữ liệu:', error);
             document.getElementById('featuredProperties').innerHTML = '<p>Lỗi khi tải dữ liệu.</p>';
@@ -404,7 +413,6 @@
      });
 
      document.addEventListener("click", (e) => {
-         console.log(e);
         if (!e.target.classList.contains("dropdown2")) {
             dropdown2.classList.add("hidden");
         }
@@ -650,7 +658,7 @@
             button.classList.toggle('active');
             menu.classList.toggle('active');
             dropdown2.classList.add('hidden');
-            console.log('Dropdown menu', menuId, 'active:', menu.classList.contains('active'));
+            //console.log('Dropdown menu', menuId, 'active:', menu.classList.contains('active'));
         });
 
         menu.addEventListener('click', function (e) {
@@ -771,26 +779,29 @@
     // Search function
     function performSearch() {
         //const location = document.querySelector('#locationBtn span:first-child').textContent.replace('📍 ', '');
-        const searchText = document.getElementById('searchInput').value;
-        const propertyType = document.querySelector('#propertyTypeBtn span:first-child').textContent;
-        const minPriceValue = minPrice;
-        const maxPriceValue = maxPrice;
-        const area = document.querySelector('#areaBtn span:first-child').textContent;
-        const tab = document.querySelector('.tab-item.active').dataset.tab;
+        //const searchText = document.getElementById('searchInput').value;
+        //const propertyType = document.querySelector('#propertyTypeBtn span:first-child').textContent;
+        //const minPriceValue = minPrice;
+        //const maxPriceValue = maxPrice;
+        //const area = document.querySelector('#areaBtn span:first-child').textContent;
+        //const tab = document.querySelector('.tab-item.active').dataset.tab;
 
         const provinceSelected = document.getElementById('provinceSelected').dataset.id;
-        console.log(selectedLocationLists);
-        console.log(provinceSelected);
         const filterData = {
-            location,
-            searchText,
-            propertyType,
-            minPrice: minPriceValue,
-            maxPrice: maxPriceValue,
-            area,
-            type: tab === 'rent' ? 'room' : (tab === 'buy' ? 'apartment' : 'project') // Map tab to type
+            //location: selectedLocationLists.length == 0 ? provinceSelected : selectedLocationLists,
+            //searchText,
+            //propertyType,
+            minRoom: $('#minInput').val(),
+            maxRoom: $('#maxInput').val(),
+            minPrice: $('#minInputPrice').val(),
+            maxPrice: $('#maxInputPrice').val(),
+            minArea: $('#minInputArea').val(),
+            maxArea: $('#maxInputArea').val(),
+            //type: tab === 'rent' ? 'room' : (tab === 'buy' ? 'apartment' : 'project') // Map tab to type
         };
-
+        sessionStorage.setItem('selectedLocationLists',JSON.stringify(selectedLocationLists));
+        sessionStorage.setItem('provinceId',provinceSelected);
+        sessionStorage.setItem('provinceName',$('#provinceSelected').data('value'));
         sessionStorage.setItem('filterData', JSON.stringify(filterData));
         window.location.reload();
     }
@@ -889,7 +900,25 @@
         }
     }
 
-            setupDoubleRangeSlider({
+    let defaultMin = 0;
+    let defaultMax = 200;
+    let defaultMinPrice = 0;
+    let defaultMaxPrice = 100;
+    let defaultMinRoom = 0;
+    let defaultMaxRoom = 15;
+    let body = sessionStorage.getItem('filterData');
+    if (body != null && body != undefined && body != '') {
+        body = JSON.parse(body);
+        defaultMin = body.minArea;
+        defaultMax = body.maxArea;
+        defaultMinRoom = body.minRoom;
+        defaultMaxRoom = body.maxRoom;
+        defaultMinPrice = body.minPrice;
+        defaultMaxPrice = body.maxPrice;
+    } else {
+    }
+
+        setupDoubleRangeSlider({
             rangeMinId: "rangeMinArea",
             rangeMaxId: "rangeMaxArea",
             inputMinId: "minInputArea",
@@ -898,7 +927,9 @@
             labelMaxId: "maxLabelArea",
             trackId: "rangeTrackArea",
             maxValue: 200,
-            labelInfo: 'm<sup>2</sup>'
+            labelInfo: 'm<sup>2</sup>',
+            defaultMin: defaultMin,
+            defaultMax: defaultMax
         });
 
         setupDoubleRangeSlider({
@@ -910,7 +941,9 @@
             labelMaxId: "maxLabelPrice",
             trackId: "rangeTrackPrice",
             maxValue: 100,
-            labelInfo: 'triệu'
+            labelInfo: 'triệu',
+            defaultMin: defaultMinPrice,
+            defaultMax: defaultMaxPrice
         });
 
 
@@ -922,12 +955,14 @@
             labelMinId: "minLabel",
             labelMaxId: "maxLabel",
             trackId: "rangeTrack",
-            maxValue: 15
+            maxValue: 15,
+            defaultMin: defaultMinRoom,
+            defaultMax: defaultMaxRoom
         });
 
 
     function setupDoubleRangeSlider({rangeMinId,rangeMaxId,inputMinId,inputMaxId,
-        labelMinId,labelMaxId,trackId,maxValue = 15,labelInfo = ''
+        labelMinId,labelMaxId,trackId,maxValue = 15,labelInfo = '',defaultMin = 0,defaultMax = maxValue
     }) {
         const rangeMin = document.getElementById(rangeMinId);
         const rangeMax = document.getElementById(rangeMaxId);
@@ -936,6 +971,11 @@
         const minLabel = document.getElementById(labelMinId);
         const maxLabel = document.getElementById(labelMaxId);
         const rangeTrack = document.getElementById(trackId);
+
+        rangeMin.value = defaultMin;
+        rangeMax.value = defaultMax;
+        minInput.value = defaultMin;
+        maxInput.value = defaultMax;
 
         function updateRangeUI() {
             const min = parseInt(rangeMin.value);
