@@ -9,6 +9,7 @@ namespace RealEstateManagement.API.Controllers.Wallet
 {
     [Authorize(Roles = "Renter,Landlord,Admin")]
     [ApiController]
+    [Route("api/[controller]")]
     public class WalletController : ControllerBase
     {
         private readonly WalletService _walletService;
@@ -33,9 +34,17 @@ namespace RealEstateManagement.API.Controllers.Wallet
         [HttpGet("balance")]
         public async Task<IActionResult> GetBalance()
         {
-            var userId = GetCurrentUserId(); // tự viết extension lấy ID từ token
+            try
+            {
+                var userId = GetCurrentUserId(); // tự viết extension lấy ID từ token
             var balance = await _walletService.GetBalanceAsync(userId);
-            return Ok(balance);
+            return Ok(new { balance = balance });
+            }
+            catch (Exception ex)
+            {
+                // Trả về lỗi JSON chuẩn để frontend dễ xử lý
+                return StatusCode(500, new { message = "Đã xảy ra lỗi nội bộ khi lấy số dư ví.", detailedError = ex.Message, code = "INTERNAL_SERVER_ERROR" });
+            }
         }
 
         [HttpGet("transaction-history")]
