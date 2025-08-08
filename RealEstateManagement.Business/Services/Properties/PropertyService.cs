@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Twilio.Rest.Api.V2010.Account;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace RealEstateManagement.Business.Services.Properties
 {
@@ -84,12 +85,43 @@ namespace RealEstateManagement.Business.Services.Properties
 
         }
 
-        public async Task<PaginatedResponseDTO<HomePropertyDTO>> GetPaginatedPropertiesAsync(int page = 1, int pageSize = 10, int? userId = 0)
+        public async Task<PaginatedResponseDTO<HomePropertyDTO>> GetPaginatedPropertiesAsync(int page = 1, int pageSize = 10, 
+                int? userId = 0, string type = "room", string provinces = "", string wards = "", string streets = "",
+                int minPrice = 0, int maxPrice = 100,
+                int minArea = 0, int maxArea = 100, int minRoom = 0, int maxRoom = 15)
         {
             var properties = await _repository.GetAllAsync();
             var favoriteUsers = await _context.UserFavoriteProperties.Where(c => c.UserId == userId).ToListAsync();
 
             var result = new List<HomePropertyDTO>();
+            //properties = properties.ToList();
+
+            properties = properties.Where(c => c.Type == type);
+
+            //properties = properties.Where(p => p.Price >= minPrice * 1000000 && p.Price <= maxPrice * 1000000);
+
+            //properties = properties.Where(p => p.Area >= minArea && p.Area <= maxArea);
+
+            //properties = properties.Where(p => p.Bedrooms >= minRoom && p.Bedrooms <= maxRoom);
+
+            //if(!string.IsNullOrEmpty(provinces))
+            //{
+            //    var Provinces = provinces.Split(',').Select(c => int.Parse(c)).ToList();
+            //    properties = properties.Where(p => Provinces.Contains(p.Address.Province.Id));
+            //}
+
+            //if(!string.IsNullOrEmpty(wards))
+            //{
+            //    var Wards = wards.Split(',').Select(c => int.Parse(c)).ToList();
+            //    properties = properties.Where(p => Wards.Contains(p.Address.Ward.Id));
+            //}
+
+            //if(!string.IsNullOrEmpty(streets))
+            //{
+            //    var Streets = streets.Split(',').Select(c => int.Parse(c)).ToList();
+            //    properties = properties.Where(p => Streets.Contains(p.Address.Street.Id));
+            //}
+
 
             foreach (var p in properties)
             {

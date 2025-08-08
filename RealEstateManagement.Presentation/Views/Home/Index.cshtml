@@ -276,6 +276,9 @@
 <h2 class="text-lg font-semibold mb-2">Bất động sản dành cho bạn</h2>
 <div id="recommendedProperties" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
+<!-- Danh sách Tin mới đăng -->
+<h2 style="margin-top:2rem" class="text-lg font-semibold mb-2">Tin mới đăng</h2>
+<div id="listNew" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 <script src="~/js/propertyService.js" asp-append-version="true"></script>
 <script>
     let urlBase = "https://localhost:7031";
@@ -365,6 +368,21 @@
                 document.getElementById('featuredProperties').innerHTML = '<p>Không có bất động sản nổi bật.</p>';
                 document.getElementById('recommendedProperties').innerHTML = '<p>Không có bất động sản dành cho bạn.</p>';
             }
+
+            listNewPost = await propertyService.getNewPost();
+            let htmlNew = '';
+            listNewPost.forEach(item => {
+                htmlNew += `<div style="cursor:pointer" onclick="window.location.href='/Home/NewDetail/${item.id}'" class="p-3 flex gap-2 items-start bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300">
+                        <img src="${urlBase + item.images[0].imageUrl}" onerror="handleImageError(this)" alt="tin" class="w-14 h-14 rounded object-cover" />
+                        <div>
+                            <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
+                                ${item.title}
+                            </div>
+                            <div class="text-xs text-gray-500">${timeAgo(item.publishedAt)}</div>
+                        </div>
+                    </div>`
+            });
+            $('#listNew').html(htmlNew);
         } catch (error) {
             console.error('Lỗi khi lấy dữ liệu:', error);
             document.getElementById('featuredProperties').innerHTML = '<p>Lỗi khi tải dữ liệu.</p>';
@@ -517,7 +535,7 @@
     }
 
     function createPropertyCard(item) {
-        console.log(item);
+        //console.log(item);
         return `
             <div id="card-property-${item.id}" class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300" data-id="${item.id}">
                 <!-- Image and Buttons -->
@@ -590,13 +608,13 @@
                             <span style="cursor:pointer" onclick="window.location.href='/Home/Landlord/${item.landlordId}'">${item.landlordName}</span> <span class="text-gray-400 text-xs">(${timeAgo(item.createdAt)})</span>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-2 items-end">
+                    <div style="display:none" class=" flex flex-col gap-2 items-end">
                         <a href="tel:${item.landlordPhoneNumber}" class="text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-1 rounded text-sm font-medium transition-colors duration-200">
                             ${item.landlordPhoneNumber}
                         </a>
                         <button
                             onclick="startChatWithLandlord(parseInt('${item.landlordId}'))"
-                            class="bg-orange-500 text-white px-3 py-1 rounded text-sm font-medium hover:bg-orange-600 transition-colors duration-200"
+                            class=" bg-orange-500 text-white px-3 py-1 rounded text-sm font-medium hover:bg-orange-600 transition-colors duration-200"
                         >
                             💬 Nhắn tin
                         </button>
@@ -752,7 +770,7 @@
 
     // Search function
     function performSearch() {
-        const location = document.querySelector('#locationBtn span:first-child').textContent.replace('📍 ', '');
+        //const location = document.querySelector('#locationBtn span:first-child').textContent.replace('📍 ', '');
         const searchText = document.getElementById('searchInput').value;
         const propertyType = document.querySelector('#propertyTypeBtn span:first-child').textContent;
         const minPriceValue = minPrice;
@@ -760,6 +778,9 @@
         const area = document.querySelector('#areaBtn span:first-child').textContent;
         const tab = document.querySelector('.tab-item.active').dataset.tab;
 
+        const provinceSelected = document.getElementById('provinceSelected').dataset.id;
+        console.log(selectedLocationLists);
+        console.log(provinceSelected);
         const filterData = {
             location,
             searchText,

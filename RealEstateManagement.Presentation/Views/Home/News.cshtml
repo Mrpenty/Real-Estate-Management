@@ -1,0 +1,92 @@
+﻿@{
+    // ViewData["Title"] = "Home Page";
+    Layout = "~/Views/Shared/_LayoutV2.cshtml";
+}
+<style>
+    .text-orange-500 {
+        color: rgb(249 115 22 / var(--tw-text-opacity, 1)) !important;
+    }
+
+    a {
+        color: black !important;
+    }
+
+        a:hover {
+            color: rgb(249 115 22 / var(--tw-text-opacity, 1)) !important;
+            border-color: rgb(249 115 22 / var(--tw-border-opacity, 1));
+        }
+</style>
+<h1 class="text-xl font-bold mb-4">Tin nổi bật</h1>
+
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <div class="md:col-span-2">
+        <div id="listNewId" class="grid gap-6">
+
+        </div>
+    </div>
+
+    <div>
+        <div style="height: max-content;" class="w-full max-w-xs bg-white p-4 rounded-md shadow-sm space-y-4 text-sm">
+            <h3 class="font-semibold text-gray-800 mb-2">Tin mới đăng</h3>
+            <div class="space-y-4" id="listNew">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/propertyService.js"></script>
+<script>
+    let urlBase = "https://localhost:7031";
+    getList();
+
+    async function getList(){
+
+        listNewPost = await propertyService.getNewPost();
+        console.log(listNewPost);
+        let htmlNew = '';
+        listNewPost.forEach(item => {
+            htmlNew += `<div style="cursor:pointer" onclick="window.location.href='/Home/NewDetail/${item.id}'" class="flex gap-2 items-start">
+                    <img src="${urlBase + item.images[0].imageUrl}" onerror="handleImageError(this)" alt="tin" class="w-14 h-14 rounded object-cover" />
+                    <div>
+                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
+                            ${item.title}
+                        </div>
+                        <div class="text-xs text-gray-500">${timeAgo(item.publishedAt)}</div>
+                    </div>
+                </div>`
+        });
+        $('#listNew').html(htmlNew);
+
+
+        let html = '';
+        listNewPost.forEach(item => {
+            html += `
+                   <div class="bg-white rounded-md shadow-sm border border-gray-200 flex p-4 gap-4 items-start">
+
+                    <div class="relative w-40 h-28 flex-shrink-0">
+                            <img onerror="handleImageError(this)" src="${urlBase + item.images[0].imageUrl}" alt="new" class="w-full h-full object-cover rounded-lg">
+
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg">
+                        </div>
+
+                    </div>
+
+                    <div class="flex-1">
+                        <h2  onclick="window.location.href='/Home/NewDetail/${item.id}'" style="cursor:pointer" class="text-blue-800 font-semibold text-base leading-tight">
+                            ${item.title}
+                        </h2>
+
+                        <p class="text-sm text-gray-700 mt-1 line-clamp-2">
+                               ${item.summary}
+                        </p>
+
+                        <div class="text-xs text-gray-400 mt-1">${timeAgo(item.publishedAt)}</div>
+                    </div>
+                </div>
+            `;
+        });
+        $('#listNewId').html(html);
+    }
+</script>

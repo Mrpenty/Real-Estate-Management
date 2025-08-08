@@ -34,6 +34,10 @@ namespace RealEstateManagement.Presentation.Controllers
             return View();
         }
 
+        public IActionResult News()
+        {
+            return View();
+        }
         public IActionResult Detail(int id)
         {
             ViewBag.Id = id;
