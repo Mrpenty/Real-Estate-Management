@@ -195,7 +195,7 @@
         try {
             const [properties, sliders] = await Promise.all([
                 propertyService.getAllproperty(),
-                fetch(`${urlBase}/api/admin/slider`).then(res => res.json())
+                fetch(`${urlBase}/api/Slider`).then(res => res.json())
             ]);
 
             if (sliders && sliders.length > 0) {

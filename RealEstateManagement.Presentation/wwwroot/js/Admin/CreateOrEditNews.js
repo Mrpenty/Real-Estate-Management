@@ -34,7 +34,17 @@ window.addEventListener('DOMContentLoaded', async () => {
             const primaryImage = news.images && news.images.find(img => img.isPrimary);
             if (primaryImage) {
                 const fullImageUrl = getFullImageUrl(primaryImage.imageUrl);
-                showPrimaryImagePreview(fullImageUrl);
+                const container = document.getElementById('primaryImageContainer');
+                container.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <img src="${fullImageUrl}" alt="Ảnh đại diện" class="max-w-xs rounded" />
+                        <div class="text-sm text-gray-600">
+                            <p><strong>Ảnh hiện tại:</strong> ${primaryImage.imageUrl.split('/').pop()}</p>
+                            <p class="text-orange-600 font-semibold">🌟 Ảnh đại diện hiện tại</p>
+                        </div>
+                    </div>
+                `;
+                primaryImagePreview.style.display = 'block';
             }
         } catch (err) {
             Swal.fire('Lỗi', err.message, 'error');
@@ -52,15 +62,41 @@ async function loadContentWithImages(newId, content) {
         if (!res.ok) throw new Error('Không tải được danh sách ảnh');
         const images = await res.json();
         let htmlContent = content;
+        
+        // Khởi tạo danh sách ảnh hiện tại
+        currentImagesInContent.clear();
+        
         images.forEach(image => {
             if (!image.isPrimary) { // Chỉ chèn ảnh không phải primary vào content
                 const fullImageUrl = getFullImageUrl(image.imageUrl);
-                htmlContent = htmlContent.replace(`[image:${image.id}]`, `<img src="${fullImageUrl}" style="max-width: 100%; height: auto;" />`);
+                const imgTag = `<img src="${fullImageUrl}" style="max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" data-image-url="${image.imageUrl}" />`;
+                htmlContent = htmlContent.replace(`[image:${image.id}]`, imgTag);
+                currentImagesInContent.add(fullImageUrl);
             }
         });
         
         // Fix tất cả ảnh trong content
-        return fixImagesInContent(htmlContent);
+        const fixedContent = fixImagesInContent(htmlContent);
+        
+        // Cập nhật danh sách ảnh hiện tại sau khi fix
+        setTimeout(() => {
+            const images = contentEditor.querySelectorAll('img');
+            currentImagesInContent.clear();
+            images.forEach(img => {
+                const src = img.getAttribute('src');
+                const dataUrl = img.getAttribute('data-image-url');
+                
+                if (src && (src.includes('/uploads/') || src.startsWith('http'))) {
+                    currentImagesInContent.add(src);
+                }
+                if (dataUrl && dataUrl.includes('/uploads/')) {
+                    currentImagesInContent.add(dataUrl);
+                }
+            });
+            console.log('Danh sách ảnh hiện tại:', Array.from(currentImagesInContent));
+        }, 100);
+        
+        return fixedContent;
     } catch (err) {
         console.error('Lỗi tải ảnh:', err);
         return fixImagesInContent(content);
@@ -106,17 +142,42 @@ function fixImagesInContent(content) {
 function previewPrimaryImage() {
     const file = imageInput.files[0];
     if (!file) return;
+
+    // Kiểm tra kích thước file (tối đa 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        Swal.fire('Lỗi', 'Kích thước file quá lớn. Tối đa 5MB.', 'error');
+        imageInput.value = '';
+        return;
+    }
+
+    // Kiểm tra định dạng file
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+        Swal.fire('Lỗi', 'Chỉ chấp nhận file ảnh (JPG, PNG, GIF).', 'error');
+        imageInput.value = '';
+        return;
+    }
     
     const reader = new FileReader();
     reader.onload = function (e) {
-        showPrimaryImagePreview(e.target.result);
+        showPrimaryImagePreview(e.target.result, file);
     };
     reader.readAsDataURL(file);
 }
 
-function showPrimaryImagePreview(imageSrc) {
+function showPrimaryImagePreview(imageSrc, file) {
     const container = document.getElementById('primaryImageContainer');
-    container.innerHTML = `<img src="${imageSrc}" alt="Ảnh đại diện" />`;
+    container.innerHTML = `
+        <div class="flex items-center gap-4">
+            <img src="${imageSrc}" alt="Ảnh đại diện" class="max-w-xs rounded" />
+            <div class="text-sm text-gray-600">
+                <p><strong>Tên file:</strong> ${file.name}</p>
+                <p><strong>Kích thước:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                <p><strong>Định dạng:</strong> ${file.type}</p>
+                <p class="text-orange-600 font-semibold">🌟 Ảnh này sẽ được đánh dấu làm ảnh chính</p>
+            </div>
+        </div>
+    `;
     primaryImagePreview.style.display = 'block';
 }
 
@@ -131,6 +192,19 @@ function previewContentImage() {
     const file = fileInput.files[0];
     if (!file) return;
 
+    // Kiểm tra kích thước file (tối đa 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        Swal.fire('Lỗi', 'Kích thước file quá lớn. Tối đa 5MB.', 'error');
+        return;
+    }
+
+    // Kiểm tra định dạng file
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+        Swal.fire('Lỗi', 'Chỉ chấp nhận file ảnh (JPG, PNG, GIF).', 'error');
+        return;
+    }
+
     // Lưu file được chọn
     selectedContentFile = file;
     
@@ -141,7 +215,16 @@ function previewContentImage() {
     const reader = new FileReader();
     reader.onload = function (e) {
         const container = document.getElementById('contentImageContainer');
-        container.innerHTML = `<img src="${e.target.result}" alt="Preview ảnh content" />`;
+        container.innerHTML = `
+            <div class="flex items-center gap-4">
+                <img src="${e.target.result}" alt="Preview ảnh content" class="max-w-xs rounded" />
+                <div class="text-sm text-gray-600">
+                    <p><strong>Tên file:</strong> ${file.name}</p>
+                    <p><strong>Kích thước:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p><strong>Định dạng:</strong> ${file.type}</p>
+                </div>
+            </div>
+        `;
         contentImagePreview.classList.add('show');
     };
     reader.readAsDataURL(file);
@@ -218,10 +301,14 @@ async function insertImageAtCursor() {
         restoreSelection();
         
         const img = document.createElement('img');
-        img.src = imageUrl;
+        // Sử dụng URL đầy đủ để đảm bảo ảnh hiển thị
+        img.src = getFullImageUrl(imageUrl);
         img.style.maxWidth = '100%';
         img.style.height = 'auto';
         img.style.margin = '10px 0';
+        img.style.borderRadius = '4px';
+        img.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+        img.setAttribute('data-image-url', imageUrl); // Lưu URL gốc để theo dõi
 
         const selection = window.getSelection();
         if (selection.rangeCount > 0) {
@@ -235,8 +322,14 @@ async function insertImageAtCursor() {
             contentEditor.appendChild(img);
         }
 
+        // Thêm ảnh mới vào danh sách theo dõi
+        currentImagesInContent.add(getFullImageUrl(imageUrl));
+
         // Ẩn preview và reset
         cancelContentImagePreview();
+        
+        // Focus lại vào editor để user có thể tiếp tục viết
+        contentEditor.focus();
         
         Swal.fire({
             icon: 'success',
@@ -253,6 +346,110 @@ async function insertImageAtCursor() {
 // Lưu vị trí con trỏ khi click vào editor
 contentEditor.addEventListener('mouseup', saveSelection);
 contentEditor.addEventListener('keyup', saveSelection);
+
+// Theo dõi khi user xóa ảnh trong content editor
+contentEditor.addEventListener('input', function() {
+    // Kiểm tra xem có ảnh nào bị xóa không
+    setTimeout(checkForDeletedImages, 50);
+});
+
+// Theo dõi khi user paste hoặc delete
+contentEditor.addEventListener('paste', function() {
+    setTimeout(checkForDeletedImages, 100);
+});
+
+contentEditor.addEventListener('keydown', function(e) {
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+        setTimeout(checkForDeletedImages, 50);
+    }
+    // Theo dõi khi user undo/redo
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'y')) {
+        setTimeout(checkForDeletedImages, 100);
+    }
+});
+
+// Theo dõi khi user cut
+contentEditor.addEventListener('cut', function() {
+    setTimeout(checkForDeletedImages, 50);
+});
+
+// Biến lưu trữ danh sách ảnh hiện tại trong content
+let currentImagesInContent = new Set();
+
+// Hàm kiểm tra ảnh bị xóa
+function checkForDeletedImages() {
+    const images = contentEditor.querySelectorAll('img');
+    const currentImageUrls = new Set();
+    
+    images.forEach(img => {
+        const src = img.getAttribute('src');
+        const dataUrl = img.getAttribute('data-image-url');
+        
+        // Sử dụng cả src và data-image-url để theo dõi
+        if (src && (src.includes('/uploads/') || src.startsWith('http'))) {
+            currentImageUrls.add(src);
+        }
+        if (dataUrl && dataUrl.includes('/uploads/')) {
+            currentImageUrls.add(dataUrl);
+        }
+    });
+    
+    // Tìm ảnh đã bị xóa
+    const deletedImages = Array.from(currentImagesInContent).filter(url => !currentImageUrls.has(url));
+    
+    // Xóa ảnh khỏi database nếu có
+    deletedImages.forEach(imageUrl => {
+        console.log('Phát hiện ảnh bị xóa:', imageUrl);
+        deleteImageFromDatabase(imageUrl);
+    });
+    
+    // Cập nhật danh sách ảnh hiện tại
+    currentImagesInContent = currentImageUrls;
+}
+
+// Hàm xóa ảnh khỏi database
+async function deleteImageFromDatabase(imageUrl) {
+    const newsId = getNewsId();
+    if (!newsId) return;
+    
+    try {
+        // Lấy danh sách ảnh để tìm imageId
+        const res = await fetch(`${API_IMAGES_BASE_URL}?newId=${newsId}`);
+        if (!res.ok) return;
+        
+        const images = await res.json();
+        // Tìm ảnh bằng cách so sánh URL (cả relative và full URL)
+        const image = images.find(img => {
+            const fullUrl = getFullImageUrl(img.imageUrl);
+            return fullUrl === imageUrl || img.imageUrl === imageUrl;
+        });
+        
+        if (image && !image.isPrimary) {
+            // Xóa ảnh khỏi database
+            const deleteRes = await fetch(`${API_IMAGES_BASE_URL}/${newsId}/${image.id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            
+            if (deleteRes.ok) {
+                console.log(`Đã xóa ảnh: ${imageUrl}`);
+                // Xóa file vật lý nếu có thể
+                try {
+                    await fetch(`${API_IMAGES_BASE_URL}/delete-file`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ imageUrl: image.imageUrl }),
+                        credentials: 'include'
+                    });
+                } catch (fileErr) {
+                    console.log('Không thể xóa file vật lý:', fileErr);
+                }
+            }
+        }
+    } catch (err) {
+        console.error('Lỗi khi xóa ảnh:', err);
+    }
+}
 
 // Chức năng định dạng văn bản
 function formatText(command) {

@@ -113,5 +113,23 @@ namespace RealEstateManagement.Business.Services.NewsService
                 throw;
             }
         }
+
+        public async Task<bool> DeleteImageAsync(int newId, int imageId)
+        {
+            try
+            {
+                _logger.LogInformation("Deleting image {imageId} for new {newId}", imageId, newId);
+                
+                var result = await _imageRepo.DeleteImageAsync(newId, imageId);
+                
+                _logger.LogInformation("Image {imageId} deleted successfully for new {newId}", imageId, newId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteImageAsync for new {newId}, image {imageId}", newId, imageId);
+                throw;
+            }
+        }
     }
 }

@@ -37,14 +37,10 @@ async function loadNewsList() {
     try {
         showLoading(true);
         const response = await NewsService.getAll();
-        if (response.success) {
-            newsList = response.data;
-            filteredNews = [...newsList];
-            updateStats(newsList);
-            renderNewsTable();
-        } else {
-            throw new Error(response.message || 'Không thể tải tin tức');
-        }
+        newsList = response || [];
+        filteredNews = [...newsList];
+        updateStats(newsList);
+        renderNewsTable();
     } catch (err) {
         showError(err.message);
     } finally {
@@ -61,7 +57,7 @@ function updateStats(news) {
     document.getElementById('totalNews').textContent = total;
     document.getElementById('publishedNews').textContent = published;
     document.getElementById('draftNews').textContent = draft;
-    document.getElementById('totalImages').textContent = totalImages;
+    //document.getElementById('totalImages').textContent = totalImages;
     document.getElementById('displayCount').textContent = filteredNews.length;
 }
 
@@ -96,22 +92,17 @@ function renderNewsTable() {
             <td class="max-w-xs truncate" title="${news.summary || 'Không có tóm tắt'}">
                 ${news.summary || 'Không có tóm tắt'}
             </td>
-            <td>${news.author || 'N/A'}</td>
+            <td>${news.authorName || 'N/A'}</td>
             <td>
                 <span class="badge ${news.isPublished ? 'badge-success' : 'badge-warning'}">
                     ${news.isPublished ? 'Đã xuất bản' : 'Bản nháp'}
                 </span>
             </td>
-            <td>
-                <span class="badge badge-info">${news.imageCount || 0} ảnh</span>
-            </td>
+            
             <td>${formatDate(news.createdAt)}</td>
             <td class="text-center">
                 <a href="/Admin/NewsDetail/${news.id}" class="btn btn-secondary btn-sm mr-2" title="Xem chi tiết">
-                    <i class="fas fa-eye"></i>
-                </a>
-                <a href="/Admin/CreateOrEditNews/${news.id}" class="btn btn-primary btn-sm mr-2" title="Chỉnh sửa">
-                    <i class="fas fa-edit"></i>
+                    <i class="fas fa-book"></i>
                 </a>
                 <button onclick="publishNews(${news.id})" class="btn btn-success btn-sm mr-2" title="${news.isPublished ? 'Hủy xuất bản' : 'Xuất bản'}" ${news.isPublished ? 'disabled' : ''}>
                     <i class="fas ${news.isPublished ? 'fa-eye-slash' : 'fa-eye'}"></i>
