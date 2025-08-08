@@ -21,7 +21,6 @@
             <div class="stat-number" id="activeSliders">0</div>
             <div class="stat-label">Đang hoạt động</div>
         </div>
-       
     </div>
 
     <!-- Search and Filter -->
@@ -258,14 +257,14 @@
         function updateStats(sliders) {
             const total = sliders.length;
             const active = sliders.filter(s => s.isActive !== false).length;
-            const totalImages = sliders.length;
-            const totalSize = sliders.reduce((sum, s) => sum + (s.fileSize || 0), 0);
             
-            document.getElementById('totalSliders').textContent = total;
-            document.getElementById('activeSliders').textContent = active;
-            document.getElementById('totalImages').textContent = totalImages;
-            document.getElementById('totalSize').textContent = (totalSize / 1024 / 1024).toFixed(2) + ' MB';
-            document.getElementById('displayCount').textContent = filteredSliders.length;
+            const totalSlidersEl = document.getElementById('totalSliders');
+            const activeSlidersEl = document.getElementById('activeSliders');
+            const displayCountEl = document.getElementById('displayCount');
+            
+            if (totalSlidersEl) totalSlidersEl.textContent = total;
+            if (activeSlidersEl) activeSlidersEl.textContent = active;
+            if (displayCountEl) displayCountEl.textContent = filteredSliders.length;
         }
 
         function renderSliders() {
@@ -328,23 +327,30 @@
             const startIndex = (currentPage - 1) * pageSize + 1;
             const endIndex = Math.min(currentPage * pageSize, filteredSliders.length);
 
-            document.getElementById('startIndex').textContent = startIndex;
-            document.getElementById('endIndex').textContent = endIndex;
-            document.getElementById('totalItems').textContent = filteredSliders.length;
-
+            const startIndexEl = document.getElementById('startIndex');
+            const endIndexEl = document.getElementById('endIndex');
+            const totalItemsEl = document.getElementById('totalItems');
             const buttonsContainer = document.getElementById('paginationButtons');
-            buttonsContainer.innerHTML = '';
+            const paginationBar = document.getElementById('paginationBar');
 
-            for (let i = 1; i <= totalPages; i++) {
-                const button = document.createElement('button');
-                button.className = `btn ${i === currentPage ? 'btn-primary' : 'btn-secondary'} btn-sm`;
-                button.textContent = i;
-                button.onclick = () => goToPage(i);
-                buttonsContainer.appendChild(button);
+            if (startIndexEl) startIndexEl.textContent = startIndex;
+            if (endIndexEl) endIndexEl.textContent = endIndex;
+            if (totalItemsEl) totalItemsEl.textContent = filteredSliders.length;
+
+            if (buttonsContainer) {
+                buttonsContainer.innerHTML = '';
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const button = document.createElement('button');
+                    button.className = `btn ${i === currentPage ? 'btn-primary' : 'btn-secondary'} btn-sm`;
+                    button.textContent = i;
+                    button.onclick = () => goToPage(i);
+                    buttonsContainer.appendChild(button);
+                }
             }
 
-            if (totalPages > 0) {
-                document.getElementById('paginationBar').style.display = 'block';
+            if (paginationBar && totalPages > 0) {
+                paginationBar.style.display = 'block';
             }
         }
 
@@ -356,7 +362,6 @@
         function applyFilters() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const statusFilter = document.getElementById('statusFilter').value;
-            const sortFilter = document.getElementById('sortFilter').value;
 
             filteredSliders = sliders.filter(slider => {
                 const matchesSearch = slider.title.toLowerCase().includes(searchTerm) ||
@@ -367,19 +372,6 @@
 
                 return matchesSearch && matchesStatus;
             });
-
-            // Sort
-            switch (sortFilter) {
-                case 'newest':
-                    filteredSliders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    break;
-                case 'oldest':
-                    filteredSliders.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-                    break;
-                case 'title':
-                    filteredSliders.sort((a, b) => a.title.localeCompare(b.title));
-                    break;
-            }
 
             currentPage = 1;
             updateStats(filteredSliders);
@@ -572,8 +564,6 @@
 
         // Add event listeners for real-time search
         document.getElementById('searchInput').addEventListener('input', applyFilters);
-        document.getElementById('statusFilter').addEventListener('change', applyFilters);
-        document.getElementById('sortFilter').addEventListener('change', applyFilters);
 
         // Load sliders when page loads
         loadSliders();

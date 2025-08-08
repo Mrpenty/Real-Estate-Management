@@ -378,6 +378,8 @@
     border: 1px solid var(--gray-300);
     border-radius: 0.5rem;
     font-size: 0.875rem;
+    color:#2563eb;
+    background-color: white;
     transition: all 0.2s ease;
 }
 
@@ -386,6 +388,21 @@
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
+
+    .form-input::placeholder {
+        color: #2563eb;
+        opacity: 1;
+    }
+
+    .form-input::-webkit-input-placeholder {
+        color: #2563eb;
+        opacity: 1;
+    }
+
+    .form-input::-moz-placeholder {
+        color: #2563eb;
+        opacity: 1;
+    }
 
 .form-textarea {
     resize: vertical;

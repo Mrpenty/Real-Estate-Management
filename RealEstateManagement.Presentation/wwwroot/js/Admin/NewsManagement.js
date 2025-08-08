@@ -6,7 +6,7 @@ let filteredNews = [];
 
 const NewsService = {
     async getAll() {
-        const res = await fetch(`${NEWS_API_BASE_URL}/GetAllNews`, {
+        const res = await fetch(`${NEWS_API_BASE_URL}/All-News`, {
             method: 'GET',
             credentials: 'include'
         });
@@ -15,7 +15,7 @@ const NewsService = {
     },
 
     async delete(id) {
-        const res = await fetch(`${NEWS_API_BASE_URL}/DeleteNews/${id}`, {
+        const res = await fetch(`${NEWS_API_BASE_URL}/${id}`, {
             method: 'DELETE',
             credentials: 'include'
         });
@@ -24,7 +24,7 @@ const NewsService = {
     },
 
     async publish(id) {
-        const res = await fetch(`${NEWS_API_BASE_URL}/PublishNews/${id}`, {
+        const res = await fetch(`${NEWS_API_BASE_URL}/${id}/publish`, {
             method: 'PUT',
             credentials: 'include'
         });

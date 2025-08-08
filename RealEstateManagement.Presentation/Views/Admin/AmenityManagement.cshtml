@@ -11,8 +11,6 @@
         <p>Quản lý các tiện ích và dịch vụ cho bất động sản</p>
     </div>
 
-    
-
     <!-- Search and Filter -->
     <div class="search-container">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -22,12 +20,12 @@
             </div>
             
             
-            <div class="flex items-end">
+            @* <div class="flex items-end">
                 <button onclick="applyFilters()" class="btn btn-primary w-full">
                     <i class="fas fa-search"></i>
                     Lọc
                 </button>
-            </div>
+            </div> *@
         </div>
     </div>
 
@@ -55,7 +53,6 @@
                         <th>ID</th>
                         <th>Tên tiện ích</th>
                         <th>Mô tả</th>
-                        <th>Số lượng sử dụng</th>
                         <th>Ngày tạo</th>
                         <th class="text-center">Hành động</th>
                     </tr>
@@ -119,17 +116,7 @@
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label class="form-label">Loại tiện ích</label>
-                    <select id="amenityType" class="form-input">
-                        <option value="basic">Cơ bản</option>
-                        <option value="luxury">Cao cấp</option>
-                        <option value="security">An ninh</option>
-                        <option value="recreation">Giải trí</option>
-                        <option value="transportation">Giao thông</option>
-                        <option value="other">Khác</option>
-                    </select>
-                </div>
+                
                 
                 <div class="form-group">
                     <label class="form-label">Trạng thái</label>
@@ -255,21 +242,8 @@
         }
 
         function updateStats(amenities) {
-            const total = amenities.length;
-            const active = amenities.filter(a => a.isActive !== false).length;
-            const popular = amenities.filter(a => a.usageCount > 10).length;
-            const recent = amenities.filter(a => {
-                const created = new Date(a.createdAt || new Date());
-                const now = new Date();
-                const diffDays = (now - created) / (1000 * 60 * 60 * 24);
-                return diffDays <= 30;
-            }).length;
-            
-            document.getElementById('totalAmenities').textContent = total;
-            document.getElementById('activeAmenities').textContent = active;
-            document.getElementById('popularAmenities').textContent = popular;
-            document.getElementById('recentAdded').textContent = recent;
-            document.getElementById('displayCount').textContent = filteredAmenities.length;
+            const displayCountEl = document.getElementById('displayCount');
+            if (displayCountEl) displayCountEl.textContent = filteredAmenities.length;
         }
 
         function renderAmenityTable() {
@@ -294,14 +268,11 @@
                     <td class="font-medium">${amenity.id}</td>
                     <td>
                         <div class="font-medium text-gray-900">${amenity.name}</div>
-                        <div class="text-sm text-gray-500">${getAmenityTypeDisplay(amenity.type)}</div>
                     </td>
                     <td class="max-w-xs truncate" title="${amenity.description || 'Không có mô tả'}">
                         ${amenity.description || 'Không có mô tả'}
                     </td>
-                    <td>
-                        <span class="badge badge-info">${amenity.usageCount || 0} lần</span>
-                    </td>
+                    
                     <td>${formatDate(amenity.createdAt)}</td>
                     <td class="text-center">
                         <button onclick="editAmenity(${amenity.id})" class="btn btn-primary btn-sm mr-2" title="Chỉnh sửa">
@@ -315,39 +286,36 @@
             `).join('');
         }
 
-        function getAmenityTypeDisplay(type) {
-            const typeMap = {
-                'basic': 'Cơ bản',
-                'luxury': 'Cao cấp',
-                'security': 'An ninh',
-                'recreation': 'Giải trí',
-                'transportation': 'Giao thông',
-                'other': 'Khác'
-            };
-            return typeMap[type] || 'Không xác định';
-        }
+       
 
         function updatePagination(page, totalPages) {
             const startIndex = (page - 1) * pageSize + 1;
             const endIndex = Math.min(page * pageSize, filteredAmenities.length);
 
-            document.getElementById('startIndex').textContent = startIndex;
-            document.getElementById('endIndex').textContent = endIndex;
-            document.getElementById('totalItems').textContent = filteredAmenities.length;
-
+            const startIndexEl = document.getElementById('startIndex');
+            const endIndexEl = document.getElementById('endIndex');
+            const totalItemsEl = document.getElementById('totalItems');
             const buttonsContainer = document.getElementById('paginationButtons');
-            buttonsContainer.innerHTML = '';
+            const paginationBar = document.getElementById('paginationBar');
 
-            for (let i = 1; i <= totalPages; i++) {
-                const button = document.createElement('button');
-                button.className = `btn ${i === page ? 'btn-primary' : 'btn-secondary'} btn-sm`;
-                button.textContent = i;
-                button.onclick = () => goToPage(i);
-                buttonsContainer.appendChild(button);
+            if (startIndexEl) startIndexEl.textContent = startIndex;
+            if (endIndexEl) endIndexEl.textContent = endIndex;
+            if (totalItemsEl) totalItemsEl.textContent = filteredAmenities.length;
+
+            if (buttonsContainer) {
+                buttonsContainer.innerHTML = '';
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const button = document.createElement('button');
+                    button.className = `btn ${i === page ? 'btn-primary' : 'btn-secondary'} btn-sm`;
+                    button.textContent = i;
+                    button.onclick = () => goToPage(i);
+                    buttonsContainer.appendChild(button);
+                }
             }
 
-            if (totalPages > 0) {
-                document.getElementById('paginationBar').style.display = 'block';
+            if (paginationBar && totalPages > 0) {
+                paginationBar.style.display = 'block';
             }
         }
 
@@ -356,33 +324,15 @@
             loadAmenities();
         }
 
-        function applyFilters() {
+                function applyFilters() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const sortFilter = document.getElementById('sortFilter').value;
-            const pageSizeFilter = document.getElementById('pageSizeFilter').value;
 
             filteredAmenities = amenities.filter(amenity => {
                 return amenity.name.toLowerCase().includes(searchTerm) ||
                        (amenity.description && amenity.description.toLowerCase().includes(searchTerm));
             });
 
-            // Sort
-            switch (sortFilter) {
-                case 'name':
-                    filteredAmenities.sort((a, b) => a.name.localeCompare(b.name));
-                    break;
-                case 'newest':
-                    filteredAmenities.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    break;
-                case 'oldest':
-                    filteredAmenities.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-                    break;
-                case 'popular':
-                    filteredAmenities.sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0));
-                    break;
-            }
 
-            pageSize = parseInt(pageSizeFilter);
             currentPage = 1;
             updateStats(filteredAmenities);
             renderAmenityTable();
@@ -413,7 +363,6 @@
             document.getElementById('amenityId').value = amenity.id;
             document.getElementById('amenityName').value = amenity.name;
             document.getElementById('amenityDescription').value = amenity.description || '';
-            document.getElementById('amenityType').value = amenity.type || 'basic';
             document.getElementById('amenityIsActive').checked = amenity.isActive !== false;
             
             // Update character counts
@@ -499,7 +448,6 @@
             const amenityData = {
                 name: document.getElementById('amenityName').value,
                 description: document.getElementById('amenityDescription').value,
-                type: document.getElementById('amenityType').value,
                 isActive: document.getElementById('amenityIsActive').checked
             };
 
@@ -543,8 +491,7 @@
 
         // Add event listeners for real-time search
         document.getElementById('searchInput').addEventListener('input', applyFilters);
-        document.getElementById('sortFilter').addEventListener('change', applyFilters);
-        document.getElementById('pageSizeFilter').addEventListener('change', applyFilters);
+      //  document.getElementById('pageSizeFilter').addEventListener('change', applyFilters);
 
         // Load amenities when page loads
         loadAmenities();
