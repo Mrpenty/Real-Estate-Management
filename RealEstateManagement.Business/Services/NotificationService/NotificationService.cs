@@ -159,6 +159,13 @@ namespace RealEstateManagement.Business.Services.NotificationService
             return true;
         }
 
+        public async Task<bool> SendNotificationToAdminsAsync(CreateNotificationDTO createDto)
+        {
+            createDto.Audience = "admin";
+            await CreateNotificationAsync(createDto);
+            return true;
+        }
+
         private async Task CreateUserNotificationsForAudience(Notification notification, CreateNotificationDTO createDto)
         {
             var users = createDto.Audience.ToLower() switch
@@ -166,6 +173,7 @@ namespace RealEstateManagement.Business.Services.NotificationService
                 "all" => await _notificationRepository.GetUsersByAudienceAsync("all"),
                 "renters" => await _notificationRepository.GetUsersByAudienceAsync("renters"),
                 "landlords" => await _notificationRepository.GetUsersByAudienceAsync("landlords"),
+                "admin" => await _notificationRepository.GetUsersByAudienceAsync("admin"),
                 "specific" => await _notificationRepository.GetUsersByIdsAsync(createDto.SpecificUserIds ?? new List<int>()),
                 _ => new List<ApplicationUser>()
             };

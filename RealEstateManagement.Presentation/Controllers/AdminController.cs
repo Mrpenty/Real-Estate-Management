@@ -84,5 +84,11 @@ namespace RealEstateManagement.Presentation.Controllers
             ViewBag.Title = "Quản lý tiện ích";
             return View();
         }
+
+        public IActionResult ReportManagement()
+        {
+            ViewBag.Title = "Quản lý báo cáo";
+            return View();
+        }
     }
 } 

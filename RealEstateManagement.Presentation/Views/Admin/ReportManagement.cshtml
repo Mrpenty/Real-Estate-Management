@@ -1,0 +1,657 @@
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Quản lý báo cáo";
+}
+
+<div class="container mx-auto px-4 py-8">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Quản lý báo cáo</h1>
+        <p>Xem và xử lý các báo cáo từ người dùng</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="totalReports">0</div>
+            <div class="stat-label">Tổng báo cáo</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="pendingReports">0</div>
+            <div class="stat-label">Chờ xử lý</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="resolvedReports">0</div>
+            <div class="stat-label">Đã xử lý</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="rejectedReports">0</div>
+            <div class="stat-label">Đã từ chối</div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Container -->
+    <div class="search-container">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="form-group">
+                <label class="form-label">Loại báo cáo</label>
+                <select id="targetTypeFilter" class="form-input">
+                    <option value="">Tất cả</option>
+                    <option value="User">Người dùng</option>
+                    <option value="PropertyPost">Bài đăng</option>
+                    <option value="Review">Đánh giá</option>
+                    <option value="ReviewReply">Phản hồi đánh giá</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Trạng thái</label>
+                <select id="statusFilter" class="form-input">
+                    <option value="">Tất cả</option>
+                    <option value="Pending">Chờ xử lý</option>
+                    <option value="Resolved">Đã xử lý</option>
+                    <option value="Rejected">Từ chối</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Từ khóa</label>
+                <input type="text" id="keywordFilter" placeholder="Tìm kiếm..." class="form-input">
+            </div>
+            <div class="form-group flex items-end">
+                <button onclick="applyFilters()" class="btn btn-primary w-full">
+                    <i class="fas fa-search"></i>
+                    Lọc
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Table -->
+    <div class="table-container">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="table-header">
+                    <tr>
+                        <th>ID</th>
+                        <th>Loại</th>
+                        <th>Lý do</th>
+                        <th>Người báo cáo</th>
+                        <th>Ngày báo cáo</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="reportsTableBody">
+                    <!-- Reports will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="paginationContainer" class="pagination-container">
+        <div class="flex justify-between items-center">
+            <div class="pagination-info">
+                Hiển thị <span id="startIndex">1</span> - <span id="endIndex">10</span> của <span id="totalItems">0</span> báo cáo
+            </div>
+            <div class="pagination-buttons" id="paginationButtons">
+                <!-- Pagination buttons will be generated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Detail Modal -->
+<div id="reportDetailModal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <i class="fas fa-flag"></i>
+                Chi tiết báo cáo
+            </h3>
+            <button onclick="closeReportDetailModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div id="reportDetailContent">
+                <!-- Report details will be loaded here -->
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button onclick="closeReportDetailModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                Đóng
+            </button>
+            <button id="resolveReportBtn" onclick="resolveReport()" class="btn btn-success hidden">
+                <i class="fas fa-check"></i>
+                Xử lý
+            </button>
+            <button id="rejectReportBtn" onclick="rejectReport()" class="btn btn-danger hidden">
+                <i class="fas fa-ban"></i>
+                Từ chối
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Resolve Report Modal -->
+<div id="resolveModal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <i class="fas fa-check-circle"></i>
+                Xử lý báo cáo
+            </h3>
+            <button onclick="closeResolveModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <form id="resolveForm">
+                <div class="form-group">
+                    <label class="form-label">Ghi chú xử lý</label>
+                    <textarea id="adminNote" rows="4" class="form-input form-textarea" placeholder="Nhập ghi chú xử lý..."></textarea>
+                </div>
+            </form>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" onclick="closeResolveModal()" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                Hủy
+            </button>
+            <button type="submit" form="resolveForm" class="btn btn-success">
+                <i class="fas fa-check"></i>
+                Xác nhận xử lý
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="~/js/Admin/ReportManagement.js"></script>
+<script>
+let currentReportId = null;
+let currentPage = 1;
+let pageSize = 10;
+let totalReports = 0;
+let totalPages = 0;
+
+const API_Report_BASE_URL = 'https://localhost:7031';
+
+// Load reports on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadReports();
+});
+
+async function loadReports() {
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: 'Vui lòng đăng nhập',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        const targetType = document.getElementById('targetTypeFilter').value;
+        const status = document.getElementById('statusFilter').value;
+        const keyword = document.getElementById('keywordFilter').value;
+
+        let url = `${API_Report_BASE_URL}/api/Report/admin/all?page=${currentPage}&pageSize=${pageSize}`;
+        
+        if (targetType) url += `&targetType=${targetType}`;
+        if (status) url += `&status=${status}`;
+        if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
+
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Không thể tải danh sách báo cáo');
+        }
+
+        const data = await response.json();
+        
+        // Assuming the API returns { reports: [...], total: number, totalPages: number }
+        const reports = Array.isArray(data) ? data : data.reports || [];
+        totalReports = data.total || reports.length;
+        totalPages = data.totalPages || Math.ceil(totalReports / pageSize);
+
+        displayReports(reports);
+        updateStats();
+        updatePagination();
+
+    } catch (error) {
+        console.error('Error loading reports:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi!',
+            text: error.message,
+            confirmButtonText: 'OK'
+        });
+    }
+}
+
+function displayReports(reports) {
+    const tbody = document.getElementById('reportsTableBody');
+    tbody.innerHTML = '';
+
+    if (reports.length === 0) {
+        tbody.innerHTML = `
+            <tr class="table-row">
+                <td colspan="7" class="text-center text-gray-500 py-8">
+                    <div class="empty-state">
+                        <i class="fas fa-flag"></i>
+                        <p>Không có báo cáo nào</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    reports.forEach(report => {
+        const row = document.createElement('tr');
+        row.className = 'table-row';
+        
+        const statusBadge = getStatusBadge(report.status);
+        const targetTypeLabel = getTargetTypeLabel(report.targetType);
+        
+        row.innerHTML = `
+            <td class="font-medium text-gray-900">
+                #${report.id}
+            </td>
+            <td>
+                <span class="badge badge-info">${targetTypeLabel}</span>
+            </td>
+            <td>
+                <div class="max-w-xs truncate" title="${report.reason}">
+                    ${report.reason}
+                </div>
+            </td>
+            <td>
+                ${report.reportedBy ? report.reportedBy.name : 'N/A'}
+            </td>
+            <td>
+                ${formatDate(report.reportedAt)}
+            </td>
+            <td>
+                ${statusBadge}
+            </td>
+            <td>
+                <div class="flex gap-2">
+                    <button onclick="viewReportDetail(${report.id})" class="btn btn-primary btn-sm">
+                        <i class="fas fa-eye"></i>
+                        Chi tiết
+                    </button>
+                    ${report.status === 'Pending' ? `
+                        <button onclick="showResolveModal(${report.id})" class="btn btn-success btn-sm">
+                            <i class="fas fa-check"></i>
+                            Xử lý
+                        </button>
+                    ` : ''}
+                </div>
+            </td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+function getStatusBadge(status) {
+    switch (status) {
+        case 'Pending':
+            return '<span class="badge badge-warning">Chờ xử lý</span>';
+        case 'Resolved':
+            return '<span class="badge badge-success">Đã xử lý</span>';
+        case 'Rejected':
+            return '<span class="badge badge-danger">Từ chối</span>';
+        default:
+            return '<span class="badge badge-gray">Không xác định</span>';
+    }
+}
+
+function getTargetTypeLabel(targetType) {
+    switch (targetType) {
+        case 'User':
+            return 'Người dùng';
+        case 'PropertyPost':
+            return 'Bài đăng';
+        case 'Review':
+            return 'Đánh giá';
+        case 'ReviewReply':
+            return 'Phản hồi đánh giá';
+        default:
+            return targetType;
+    }
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function updateStats() {
+    document.getElementById('totalReports').textContent = totalReports;
+    
+    // Count reports by status
+    const pendingCount = document.querySelectorAll('.badge-warning').length;
+    const resolvedCount = document.querySelectorAll('.badge-success').length;
+    const rejectedCount = document.querySelectorAll('.badge-danger').length;
+    
+    document.getElementById('pendingReports').textContent = pendingCount;
+    document.getElementById('resolvedReports').textContent = resolvedCount;
+    document.getElementById('rejectedReports').textContent = rejectedCount;
+}
+
+function updatePagination() {
+    const startIndex = (currentPage - 1) * pageSize + 1;
+    const endIndex = Math.min(currentPage * pageSize, totalReports);
+    
+    document.getElementById('startIndex').textContent = startIndex;
+    document.getElementById('endIndex').textContent = endIndex;
+    document.getElementById('totalItems').textContent = totalReports;
+    
+    const buttonsContainer = document.getElementById('paginationButtons');
+    
+    if (totalPages <= 1) {
+        buttonsContainer.innerHTML = '';
+        return;
+    }
+
+    let html = '';
+    
+    // Previous button
+    if (currentPage > 1) {
+        html += `<button onclick="goToPage(${currentPage - 1})" class="btn btn-secondary btn-sm">
+            <i class="fas fa-chevron-left"></i>
+            Trước
+        </button>`;
+    }
+    
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === currentPage) {
+            html += `<button class="btn btn-primary btn-sm">${i}</button>`;
+        } else {
+            html += `<button onclick="goToPage(${i})" class="btn btn-secondary btn-sm">${i}</button>`;
+        }
+    }
+    
+    // Next button
+    if (currentPage < totalPages) {
+        html += `<button onclick="goToPage(${currentPage + 1})" class="btn btn-secondary btn-sm">
+            Sau
+            <i class="fas fa-chevron-right"></i>
+        </button>`;
+    }
+    
+    buttonsContainer.innerHTML = html;
+}
+
+function goToPage(page) {
+    currentPage = page;
+    loadReports();
+}
+
+function applyFilters() {
+    currentPage = 1;
+    loadReports();
+}
+
+async function viewReportDetail(reportId) {
+    try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${API_Report_BASE_URL}/api/Report/${reportId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Không thể tải chi tiết báo cáo');
+        }
+
+        const report = await response.json();
+        displayReportDetail(report);
+        
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi!',
+            text: error.message,
+            confirmButtonText: 'OK'
+        });
+    }
+}
+
+function displayReportDetail(report) {
+    const content = document.getElementById('reportDetailContent');
+    const resolveBtn = document.getElementById('resolveReportBtn');
+    const rejectBtn = document.getElementById('rejectReportBtn');
+    
+    currentReportId = report.id;
+    
+    content.innerHTML = `
+        <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">ID Báo cáo</label>
+                    <p class="text-sm text-gray-900">#${report.id}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Loại báo cáo</label>
+                    <p class="text-sm text-gray-900">${getTargetTypeLabel(report.targetType)}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">ID Đối tượng</label>
+                    <p class="text-sm text-gray-900">${report.targetId}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Trạng thái</label>
+                    <p class="text-sm text-gray-900">${getStatusBadge(report.status)}</p>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Lý do báo cáo</label>
+                <p class="text-sm text-gray-900">${report.reason}</p>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Mô tả chi tiết</label>
+                <p class="text-sm text-gray-900">${report.description || 'Không có mô tả'}</p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Người báo cáo</label>
+                    <p class="text-sm text-gray-900">${report.reportedBy ? report.reportedBy.name : 'N/A'}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Ngày báo cáo</label>
+                    <p class="text-sm text-gray-900">${formatDate(report.reportedAt)}</p>
+                </div>
+            </div>
+            
+            ${report.resolvedBy ? `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Người xử lý</label>
+                        <p class="text-sm text-gray-900">${report.resolvedBy.name}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Ngày xử lý</label>
+                        <p class="text-sm text-gray-900">${formatDate(report.resolvedAt)}</p>
+                    </div>
+                </div>
+            ` : ''}
+            
+            ${report.adminNote ? `
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Ghi chú xử lý</label>
+                    <p class="text-sm text-gray-900">${report.adminNote}</p>
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    // Show/hide action buttons based on status
+    if (report.status === 'Pending') {
+        resolveBtn.classList.remove('hidden');
+        rejectBtn.classList.remove('hidden');
+    } else {
+        resolveBtn.classList.add('hidden');
+        rejectBtn.classList.add('hidden');
+    }
+    
+    document.getElementById('reportDetailModal').classList.remove('hidden');
+}
+
+function closeReportDetailModal() {
+    document.getElementById('reportDetailModal').classList.add('hidden');
+    currentReportId = null;
+}
+
+function showResolveModal(reportId) {
+    currentReportId = reportId;
+    document.getElementById('resolveModal').classList.remove('hidden');
+}
+
+function closeResolveModal() {
+    document.getElementById('resolveModal').classList.add('hidden');
+    document.getElementById('resolveForm').reset();
+    currentReportId = null;
+}
+
+async function resolveReport() {
+    if (!currentReportId) return;
+    
+    const adminNote = document.getElementById('adminNote').value.trim();
+    
+    if (!adminNote) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi!',
+            text: 'Vui lòng nhập ghi chú xử lý',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${API_Report_BASE_URL}/api/Report/${currentReportId}/resolve`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                adminNote: adminNote
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Không thể xử lý báo cáo');
+        }
+
+                    const result = await response.json();
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: result.message || 'Đã xử lý báo cáo thành công',
+                confirmButtonText: 'OK'
+            });
+
+        closeResolveModal();
+        closeReportDetailModal();
+        loadReports();
+
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi!',
+            text: error.message,
+            confirmButtonText: 'OK'
+        });
+    }
+}
+
+async function rejectReport() {
+    if (!currentReportId) return;
+    
+    const result = await Swal.fire({
+        title: 'Xác nhận từ chối',
+        text: 'Bạn có chắc chắn muốn từ chối báo cáo này?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Từ chối',
+        cancelButtonText: 'Hủy'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await fetch(`${API_Report_BASE_URL}/api/Report/${currentReportId}/reject`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Không thể từ chối báo cáo');
+            }
+
+            const result = await response.json();
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: result.message || 'Đã từ chối báo cáo',
+                confirmButtonText: 'OK'
+            });
+
+            closeReportDetailModal();
+            loadReports();
+
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: error.message,
+                confirmButtonText: 'OK'
+            });
+        }
+    }
+}
+
+// Handle resolve form submission
+document.getElementById('resolveForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    resolveReport();
+});
+</script>
+} 

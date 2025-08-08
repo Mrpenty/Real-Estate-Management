@@ -48,10 +48,8 @@ const authService = {
     },
     async login(phone, password) {
         try {
-            console.log('Login attempt with phone:', phone);
 
             const apiPhone = this.formatPhoneForAPI(phone);
-            console.log('Formatted phone for API:', apiPhone);
 
             const response = await fetch(`${API_BASE_URL}/login`, {
                 method: 'POST',
@@ -65,16 +63,13 @@ const authService = {
                 })
             });
 
-            console.log('Login response status:', response.status);
             const data = await response.json();
-            console.log('Login response data:', data);
 
             if (!response.ok) {
                 throw new Error(data.message || data.errorMessage || 'Login failed');
             }
 
             if (data.token) {
-                console.log('[login] Token received from API:', data.token);
                 this.setAuthToken(data.token);
                 this.updateNavigation();
             } else {
@@ -89,10 +84,8 @@ const authService = {
 
     async register(registerData) {
         try {
-            console.log('Register attempt with data:', registerData);
 
             const apiPhone = this.formatPhoneForAPI(registerData.phoneNumber);
-            console.log('Formatted phone for API:', apiPhone);
 
             const response = await fetch(`${API_BASE_URL}/register`, {
                 method: 'POST',
@@ -109,7 +102,6 @@ const authService = {
             });
 
             const data = await response.json();
-            console.log('Register response:', data);
 
             if (!response.ok) {
                 throw new Error(data.message || data.errorMessage || 'Registration failed');
@@ -200,11 +192,10 @@ const authService = {
     isAuthenticated() {
         const token = localStorage.getItem('authToken');
         const expiry = localStorage.getItem('authTokenExpiry');
-        console.log('Checking authentication, token exists:', !!token);
+        //console.log('Checking authentication, token exists:', !!token);
 
         if (!token || !expiry) return false;
         if (Date.now() > parseInt(expiry)) {
-            console.log('Token expired by local expiry, logging out');
             this.logout();
             return false;
         }
@@ -212,8 +203,8 @@ const authService = {
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             const isExpired = payload.exp * 1000 < Date.now();
-            console.log('Token payload:', payload);
-            console.log('Token expired (JWT exp):', isExpired);
+            //console.log('Token payload:', payload);
+            //console.log('Token expired (JWT exp):', isExpired);
 
             if (isExpired) {
                 console.log('Token is expired by JWT, logging out');

@@ -19,5 +19,6 @@ namespace RealEstateManagement.Business.Services.NotificationService
         Task<bool> SendNotificationToRentersAsync(CreateNotificationDTO createDto);
         Task<bool> SendNotificationToLandlordsAsync(CreateNotificationDTO createDto);
         Task<bool> SendNotificationToSpecificUsersAsync(CreateNotificationDTO createDto);
+        Task<bool> SendNotificationToAdminsAsync(CreateNotificationDTO createDto);
     }
 } 
