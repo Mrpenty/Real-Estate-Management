@@ -64,7 +64,7 @@ namespace RealEstateManagement.Business.Services.Wallet
             _context.WalletTransactions.Add(transaction);
             await _context.SaveChangesAsync();
 
-            return result.ToString();
+            return result.checkoutUrl;
         }
 
         public async Task<bool> CheckAndUpdateDepositStatusAsync(long orderCode)

@@ -229,6 +229,7 @@
 </form>
 
 <script>
+     let clickUpdateMap = false;
      let isAuthen = authService.isAuthenticated();
      if(!isAuthen){
          window.location.href = '/Auth/Login';
@@ -390,13 +391,142 @@
              return;
          }
          const data = await res.json();
-         alert("Lưu thành công");
-         window.location.href = '/PostProperty/ListProperty';
-         // updatePropertyId = data.id; // Sử dụng propertyId từ response
-         // if(updatePropertyId){
-         //     uploadImages(updatePropertyId)
-         // }
+         //alert("Lưu thành công");
+         //window.location.href = '/PostProperty/ListProperty';
+         updatePropertyId = data.id; // Sử dụng propertyId từ response
+         if(updatePropertyId){
+             //await uploadImages(updatePropertyId);
+             window.location.href = `/PostProperty/DetailRenterProperty?propertyId=${updatePropertyId}`;
+             return;
+         }
      };
+
+    let propertyImageCreateDto = [];
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function startAutoContinueDraft() {
+        while (true) {
+            await continueDraft();
+            await delay(3000);
+        }
+    }
+    startAutoContinueDraft();
+
+    async function continueDraft(){
+         const formData = new FormData(propertyForm);
+         //console.log(Object.fromEntries(formData.entries()));
+         // Build object đúng chuẩn DTO backend
+         const amenityIds = Array.from(document.querySelectorAll('input[name="AmenityIds"]:checked')).map(cb => parseInt(cb.value));
+         const provinceId = parseInt(formData.get('province-select'));
+         const wardId = parseInt(formData.get('WardId'));
+         const streetId = parseInt(formData.get('StreetId'));
+         const detailedAddress = formData.get('AddressInfo') || '';
+         const propertyData = {
+             postId: @ViewBag.Id,
+             title: formData.get('title'),
+             description: formData.get('description'),
+             type: formData.get('type'),
+             area: parseFloat(formData.get('area')),
+             bedrooms: parseInt(formData.get('bedrooms')),
+             price: parseFloat(formData.get('price')),
+             location: '',
+             provinceId: provinceId,
+             wardId: wardId,
+             streetId: streetId,
+             detailedAddress: detailedAddress,
+             amenityIds: amenityIds,
+             images : []
+         };
+
+         if(!clickUpdateMap){
+             updateMap();
+             clickUpdateMap = true;
+         }
+
+         let order = 0;
+         if(!changeFileImage){
+             console.log('changeImage');
+             propertyImageCreateDto = [];
+             const elements = $('.img-div').toArray();
+             for (let index = 0; index < elements.length; index++) {
+                    const element = elements[index];
+                    let dataId = element.dataset.id;
+                    let hasPrimaryActive = element.classList.contains('primary-active') ||
+                                           element.querySelector('.primary-active') !== null;
+                     let imageUrl = element.querySelector('img').src.replaceAll(baseUrl, "");
+                     if(dataId == 0){
+                         const file = imageFiles[index];
+                         // Upload file lên server trước
+                         const formData = new FormData();
+                         formData.append('file', file);
+
+                         const uploadResponse = await fetch(`https://localhost:7031/api/properties/${@ViewBag.Id}/images/upload`, {
+                             method: 'POST',
+                             headers: {
+                                 ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+                             },
+                             body: formData
+                         });
+
+                         if (!uploadResponse.ok) {
+                             const error = await uploadResponse.text();
+                             alert(`Upload ảnh thất bại: ${error}`);
+                             return;
+                         }
+
+                         const uploadResult = await uploadResponse.json();
+                         //console.log(uploadResult);
+                         imageUrl = uploadResult.imageUrl;
+                     }
+
+
+                     var item = {
+                        id: dataId,
+                        propertyId: @ViewBag.Id,
+                        url: imageUrl,
+                        isPrimary : false,
+                        order : 0
+                    };
+                    if (hasPrimaryActive) {
+                        item['isPrimary'] = true;
+                        item['order'] = 0;
+                    } else {
+                        ++order;
+                        item['order'] = order;
+                    }
+                    propertyImageCreateDto.push(item);
+                    
+             }
+             propertyData['images'] = propertyImageCreateDto;
+             changeFileImage = true;
+         }   
+         propertyData['location'] = await fetchLocationAndSetPropertyData();
+         try{
+             const res = await fetch(`https://localhost:7031/api/PropertyPosts/${@ViewBag.Id}/continue`, {
+                 method: 'PUT',
+                 headers: {
+                     'Content-Type': 'application/json',
+                     ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+                 },
+                 credentials: 'include',
+                 body: JSON.stringify(propertyData)
+             });
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.log('Lỗi từ server');
+                return;
+            }
+            console.log("change draft");
+            itemPropertyBody = await propertyService.getProperty(@ViewBag.Id);
+            renderImage(itemPropertyBody);
+
+         }catch (err){
+             console.log("No Change");
+         }
+    }
 
     async function fetchLocationAndSetPropertyData() {
        const location = `${addressInfo.val()} ${streetSelect.find("option:selected").text()} ${wardSelect.find("option:selected").text()} ${provinceSelect.find("option:selected").text()}`;
@@ -542,7 +672,7 @@
 
 
      //font-bold text-blue-800
-     document.getElementById('CreatePostId').classList.add('font-bold', 'text-blue-800');
+     //document.getElementById('CreatePostId').classList.add('font-bold', 'text-blue-800');
 
      let isScrollingByClick = false;
 

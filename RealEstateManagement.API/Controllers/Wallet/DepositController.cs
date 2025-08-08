@@ -52,6 +52,26 @@ namespace RealEstateManagement.API.Controllers.Wallet
             }
         }
 
+        [HttpGet("Success")] // action method lắng nghe "Success" => /api/Deposit/Success
+        public async Task<IActionResult> PaymentSuccess(
+        [FromQuery] long orderCode,
+        [FromQuery] string code,
+        [FromQuery] string desc)
+        {
+            // ... logic xử lý và redirect đến frontend ...
+            return Redirect($"https://localhost:7160/Deposit/Success?orderCode={orderCode}&status={code}&desc={desc}");
+        }
+
+        [HttpGet("Cancel")] // tương tự cho /api/Deposit/Cancel
+        public IActionResult PaymentCancel(
+            [FromQuery] long orderCode,
+            [FromQuery] string code,
+            [FromQuery] string desc)
+        {
+            // ... logic xử lý và redirect đến frontend ...
+            return Redirect("https://localhost:7160/Deposit/Cancel?orderCode=" + orderCode + "&message=" + desc);
+        }
+
         //[HttpPost("payos_webhook")]
         //public async Task<IActionResult> PayOSWebhook([FromBody] WebhookType body)
         //{

@@ -20,7 +20,58 @@ namespace RealEstateManagement.API.Controllers
             _context = context;
             _httpContextAccessor = httpContextAccessor;
         }
+        //[HttpPost("review/{userReporterId}")]
+        //public async Task<IActionResult> ReportReview([FromBody] ReportCreateDto dto, int userReporterId)
+        //{
+        //    var existing = await _context.Reports.FirstOrDefaultAsync(r =>
+        //        r.TargetId == dto.TargetId &&
+        //        r.TargetType == "Review" &&
+        //        r.ReportedByUserId == userReporterId);
 
+        //    if (existing != null)
+        //        return BadRequest("Bạn đã report review này rồi.");
+
+        //    var report = new Report
+        //    {
+        //        TargetId = dto.TargetId,
+        //        TargetType = "Review",
+        //        ReportedByUserId = userReporterId,
+        //        ReportedAt = DateTime.UtcNow,
+        //        Reason = dto.Reason,
+        //        Description = dto.Description,
+        //        Status = "Pending"
+        //    };
+
+        //    _context.Reports.Add(report);
+        //    await _context.SaveChangesAsync();
+        //    return Ok("Đã gửi report review.");
+        //}
+        //[HttpPost("review-reply/{userReporterId}")]
+        //public async Task<IActionResult> ReportReviewReply([FromBody] ReportCreateDto dto, int userReporterId)
+        //{
+        //    var existing = await _context.Reports.FirstOrDefaultAsync(r =>
+        //        r.TargetId == dto.TargetId &&
+        //        r.TargetType == "ReviewReply" &&
+        //        r.ReportedByUserId == userReporterId);
+
+        //    if (existing != null)
+        //        return BadRequest("Bạn đã report phản hồi này rồi.");
+
+        //    var report = new Report
+        //    {
+        //        TargetId = dto.TargetId,
+        //        TargetType = "ReviewReply",
+        //        ReportedByUserId = userReporterId,
+        //        ReportedAt = DateTime.UtcNow,
+        //        Reason = dto.Reason,
+        //        Description = dto.Description,
+        //        Status = "Pending"
+        //    };
+
+        //    _context.Reports.Add(report);
+        //    await _context.SaveChangesAsync();
+        //    return Ok("Đã gửi report phản hồi review.");
+        //}
         [HttpPost("post/{userRepoertId}")]
         public async Task<IActionResult> ReportPost([FromBody] ReportCreateDto dto, int userRepoertId)
         {

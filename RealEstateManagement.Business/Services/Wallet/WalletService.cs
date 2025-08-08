@@ -66,5 +66,44 @@ namespace RealEstateManagement.Business.Services.Wallet
             }
             return list;
         }
+
+        public async Task<bool> DeductBalanceAsync(int userId, decimal amount, string description)
+        {
+            if (amount <= 0)
+            {
+                throw new ArgumentException("Số tiền trừ phải lớn hơn 0.", nameof(amount));
+            }
+
+            var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == userId);
+
+            if (wallet == null)
+            {
+                throw new Exception($"Wallet not found for UserId={userId}. Cannot deduct balance.");
+            }
+
+            if (wallet.Balance < amount)
+            {
+                return false; // Số dư không đủ
+            }
+
+            wallet.Balance -= amount; // Trừ tiền
+
+            // Ghi lại lịch sử giao dịch
+            var transaction = new WalletTransaction
+            {
+                WalletId = wallet.Id,
+                Amount = -amount, // Lưu số âm để thể hiện là khoản chi
+                CreatedAt = DateTime.UtcNow,
+                Description = description,
+                Status = "Success",
+                Type = "Deduct"
+            };
+
+            _context.WalletTransactions.Add(transaction);
+
+            await _context.SaveChangesAsync(); // Lưu thay đổi vào DB
+
+            return true; // Trừ tiền thành công
+        }
     }
 }

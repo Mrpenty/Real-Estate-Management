@@ -1,0 +1,222 @@
+﻿@{
+    ViewData["Title"] = "Nạp tiền vào ví";
+    Layout = "~/Views/Shared/_LayoutV2.cshtml";
+}
+
+<div class="container mx-auto px-6 py-8">
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8">
+        <h2 class="text-3xl font-bold text-center text-orange-600 mb-8">Nạp tiền vào ví</h2>
+
+        <div class="mb-6">
+            <label for="amount" class="block text-gray-700 text-sm font-bold mb-2">Số tiền muốn nạp (VNĐ):</label>
+            <input type="number" id="amount" name="amount" min="10000" step="1000" placeholder="VD: 50000"
+                   class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                   required>
+            <p class="text-sm text-gray-500 mt-2">Số tiền tối thiểu là 10.000 VNĐ</p>
+        </div>
+
+        <button id="createPaymentBtn"
+                class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-xl focus:outline-none focus:shadow-outline transition-colors duration-200 flex items-center justify-center space-x-2">
+            <i class="fas fa-qrcode"></i>
+            <span>Tạo mã QR / Link thanh toán</span>
+        </button>
+
+        <div id="payment-qr-section" class="mt-8 text-center hidden">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Quét mã QR để thanh toán</h3>
+            <div id="qrCodeContainer" class="flex justify-center mb-4">
+            </div>
+            <a id="paymentLink" href="#" target="_blank"
+               class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 mb-4">
+                Hoặc click để mở liên kết thanh toán
+            </a>
+            <p class="text-sm text-gray-600">
+                Sau khi thanh toán, bấm nút dưới đây để kiểm tra trạng thái.
+            </p>
+            <button id="checkStatusBtn"
+                    class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl focus:outline-none focus:shadow-outline transition-colors duration-200 flex items-center justify-center space-x-2">
+                <i class="fas fa-check-circle"></i>
+                <span>Kiểm tra trạng thái thanh toán</span>
+            </button>
+            <p id="paymentStatusMessage" class="mt-4 text-center font-medium"></p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/qrious@4.0.2/dist/qrious.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const createPaymentBtn = document.getElementById('createPaymentBtn');
+            const checkStatusBtn = document.getElementById('checkStatusBtn');
+            const amountInput = document.getElementById('amount');
+            const paymentQrSection = document.getElementById('payment-qr-section');
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+            const paymentLink = document.getElementById('paymentLink');
+            const paymentStatusMessage = document.getElementById('paymentStatusMessage');
+
+            let currentOrderCode = null; // Biến để lưu trữ orderCode
+
+            createPaymentBtn.addEventListener('click', async () => {
+                const amount = parseFloat(amountInput.value);
+
+                if (isNaN(amount) || amount < 10000) {
+                    showErrorMessage('Vui lòng nhập số tiền hợp lệ (tối thiểu 10.000 VNĐ).');
+                    return;
+                }
+
+                if (!authService.isAuthenticated()) {
+                    showErrorMessage('Bạn cần đăng nhập để nạp tiền.');
+                    window.location.href = '/Auth/Login'; // Redirect nếu chưa đăng nhập
+                    return;
+                }
+
+                try {
+                    const user = authService.getCurrentUser();
+                    const userId = user.id; // Lấy userId từ thông tin người dùng đã đăng nhập
+
+                    // Lấy token từ localStorage
+                    const token = localStorage.getItem('authToken');
+                    if (!token) {
+                        showErrorMessage('Không tìm thấy token xác thực. Vui lòng đăng nhập lại.');
+                        window.location.href = '/Auth/Login';
+                        return;
+                    }
+
+                    showLoadingMessage('Đang tạo liên kết thanh toán...');
+                    const response = await fetch(`https://localhost:7031/api/Deposit/deposit?userId=${userId}&amount=${amount}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}` // Gửi token trong header
+                        }
+                    });
+
+                    hideLoadingMessage(); // Ẩn loading message
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Lỗi khi tạo liên kết thanh toán.');
+                    }
+
+                    const data = await response.json();
+                    const paymentUrl = data.url; // URL chứa thông tin thanh toán từ PayOS
+
+                    // Parse URL để lấy orderCode (nếu PayOS trả về cả orderCode trong URL)
+                    // Hoặc bạn có thể yêu cầu backend trả về orderCode riêng biệt
+                    const urlParams = new URLSearchParams(new URL(paymentUrl).search);
+                    currentOrderCode = urlParams.get('orderCode'); // Kiểm tra cách PayOS trả về orderCode
+                    if (!currentOrderCode) {
+                        // Nếu orderCode không có trong URL, bạn cần backend trả về nó trực tiếp
+                        // Ví dụ: return Ok(new { url, orderCode });
+                        // Hiện tại, tôi giả định nó có trong URL hoặc bạn sẽ sửa backend
+                        console.warn("Could not find orderCode in the payment URL. Status check might not work correctly.");
+                    }
+
+                    // Hiển thị mã QR
+                    qrCodeContainer.innerHTML = ''; // Xóa mã QR cũ
+                    const qr = new QRious({
+                        element: document.createElement('canvas'),
+                        value: paymentUrl,
+                        size: 200
+                    });
+                    qrCodeContainer.appendChild(qr.element);
+
+                    // Cập nhật link thanh toán
+                    paymentLink.href = paymentUrl;
+
+                    paymentQrSection.classList.remove('hidden'); // Hiển thị phần QR
+                    paymentStatusMessage.textContent = ''; // Xóa trạng thái cũ
+                    showSuccessMessage('Đã tạo liên kết thanh toán thành công!');
+
+                } catch (error) {
+                    console.error('Error creating payment:', error);
+                    showErrorMessage(`Lỗi: ${error.message}`);
+                }
+            });
+
+            checkStatusBtn.addEventListener('click', async () => {
+                if (!currentOrderCode) {
+                    showErrorMessage('Chưa có giao dịch nào được tạo để kiểm tra.');
+                    return;
+                }
+
+                try {
+                    showLoadingMessage('Đang kiểm tra trạng thái thanh toán...');
+                    const token = localStorage.getItem('authToken');
+                    const response = await fetch(`https://localhost:7031/api/Deposit/check-payment-status?orderCode=${currentOrderCode}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    hideLoadingMessage();
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Lỗi khi kiểm tra trạng thái thanh toán.');
+                    }
+
+                    const data = await response.json();
+                    if (data.success) {
+                        paymentStatusMessage.className = 'mt-4 text-center font-bold text-green-600';
+                        paymentStatusMessage.textContent = 'Thanh toán đã được xác nhận và ví của bạn đã được cập nhật!';
+                        currentOrderCode = null; // Reset orderCode sau khi thành công
+                        qrCodeContainer.innerHTML = ''; // Xóa QR code
+                        paymentLink.href = '#'; // Reset link
+                        paymentQrSection.classList.add('hidden'); // Ẩn phần QR
+                        updateWalletBalance(); // Cập nhật lại số dư ví trên header
+                    } else {
+                        paymentStatusMessage.className = 'mt-4 text-center font-medium text-blue-600';
+                        paymentStatusMessage.textContent = 'Giao dịch chưa hoàn tất hoặc đang chờ xử lý. Vui lòng thử lại sau.';
+                    }
+                } catch (error) {
+                    console.error('Error checking payment status:', error);
+                    paymentStatusMessage.className = 'mt-4 text-center font-medium text-red-600';
+                    paymentStatusMessage.textContent = `Lỗi: ${error.message}`;
+                }
+            });
+
+            // Hàm hiển thị thông báo lỗi
+            function showErrorMessage(message) {
+                let msgDiv = document.createElement('div');
+                msgDiv.innerText = message;
+                msgDiv.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded shadow-lg z-50';
+                document.body.appendChild(msgDiv);
+                setTimeout(() => {
+                    msgDiv.remove();
+                }, 3000); // Ẩn sau 3 giây
+            }
+
+            // Hàm hiển thị thông báo thành công (bạn đã có, nhưng tôi thêm lại cho đầy đủ context)
+            function showSuccessMessage(message) {
+                let msgDiv = document.createElement('div');
+                msgDiv.innerText = message;
+                msgDiv.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg z-50';
+                document.body.appendChild(msgDiv);
+                setTimeout(() => {
+                    msgDiv.remove();
+                }, 1500);
+            }
+
+            // Thêm hàm showLoadingMessage và hideLoadingMessage
+            let loadingMessageDiv = null;
+            function showLoadingMessage(message) {
+                if (!loadingMessageDiv) {
+                    loadingMessageDiv = document.createElement('div');
+                    loadingMessageDiv.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-gray-700 text-white px-6 py-3 rounded shadow-lg z-50 flex items-center space-x-2';
+                    loadingMessageDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>' + message + '</span>';
+                    document.body.appendChild(loadingMessageDiv);
+                } else {
+                    loadingMessageDiv.querySelector('span').textContent = message;
+                    loadingMessageDiv.classList.remove('hidden');
+                }
+            }
+
+            function hideLoadingMessage() {
+                if (loadingMessageDiv) {
+                    loadingMessageDiv.classList.add('hidden');
+                }
+            }
+        });
+    </script>
+}

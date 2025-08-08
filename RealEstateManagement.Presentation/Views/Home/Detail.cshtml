@@ -1,7 +1,7 @@
 
 ﻿@{
     // ViewData["Title"] = "Home Page";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_LayoutV2.cshtml";
 }
 <style>
     .text-orange-500 {
@@ -33,7 +33,7 @@
     <span class="text-gray-700">Pass phòng cửa sổ lớn 175 Nguyễn Thị Thập</span>
 </nav> *@
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6" style="margin-top:2rem">
 
     <div class="md:col-span-2">
         <div class="grid gap-6">
@@ -92,12 +92,12 @@
                 </div>
                 <h2 class="text-lg font-semibold text-gray-700 mb-2 mt-3">Thông tin liên hệ</h2>
                 <div class="flex items-start space-x-4">
-                    <div class="w-14 h-14 bg-gray-200 rounded-full flex-shrink-0">
+                    <div style="cursor:pointer" onclick="openLandlord()" class="w-14 h-14 bg-gray-200 rounded-full flex-shrink-0">
                          <img class="landlordUrl" style="border-radius:5rem;height:100%;width:100%"/>
                     </div>
                     <div class="flex-1">
                         <div class="flex items-center space-x-2">
-                            <p class="font-semibold text-gray-800 contactName"></p>
+                            <p style="cursor:pointer" onclick="openLandlord()" class="font-semibold text-gray-800 contactName"></p>
                             <span style="display:none" class="text-green-600 text-xs font-medium">● Đang hoạt động</span>
                         </div>
                         <p style="display:none" class="text-sm text-gray-500">1 tin đăng • Tham gia từ: 19/06/2025</p>
@@ -117,12 +117,12 @@
     <div>
         <div style="height: max-content;" class="w-full max-w-xs bg-white p-4 rounded-md shadow-sm space-y-4 text-sm">
             <div class="space-y-4 text-center">
-                <div class="w-20 h-20 mx-auto rounded-full border bg-gray-100 flex items-center justify-center">
+                <div style="cursor:pointer" onclick="openLandlord()" class="w-20 h-20 mx-auto rounded-full border bg-gray-100 flex items-center justify-center">
                     <img class="landlordUrl" style="border-radius:5rem;height:100%;width:100%"/>
                 </div>
 
                 <div>
-                    <p class="font-semibold text-gray-800 contactName"></p>
+                    <p style="cursor:pointer" onclick="openLandlord()" class="font-semibold text-gray-800 contactName"></p>
                     <p style="display:none" class="text-sm text-gray-500">
                         <span class="text-green-500">●</span> Đang hoạt động
                     </p>
@@ -157,41 +157,7 @@
         </div>
         <div style="height: max-content;" class="w-full mt-4 max-w-xs bg-white p-4 rounded-md shadow-sm space-y-4 text-sm">
             <h3 class="font-semibold text-gray-800 mb-2">Tin mới đăng</h3>
-            <div class="space-y-4">
-
-                <div class="flex gap-2 items-start">
-                    <img src="https://pt123.cdn.static123.com/images/thumbs/450x300/fit/2025/06/13/z6700095844028-186681c11699e9a986e980c6cfa79e61_1749801645.jpg" alt="tin" class="w-20 h-14 rounded object-cover" />
-                    <div>
-                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
-                            Cho thuê phòng trọ có gác, giá rẻ gần ĐH Công Thương...
-                        </div>
-                        <div class="text-green-600 font-semibold text-sm">2.8 triệu/tháng</div>
-                        <div class="text-xs text-gray-500">27 giây trước</div>
-                    </div>
-                </div>
-
-                <div class="flex gap-2 items-start">
-                    <img src="https://pt123.cdn.static123.com/images/thumbs/450x300/fit/2025/06/13/z6700095844028-186681c11699e9a986e980c6cfa79e61_1749801645.jpg" alt="tin" class="w-20 h-14 rounded object-cover" />
-                    <div>
-                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
-                            CHO THUÊ NHÀ NGUYÊN CĂN TRẦN QUỐC TOẢN Gần nhà sách...
-                        </div>
-                        <div class="text-green-600 font-semibold text-sm">13 triệu/tháng</div>
-                        <div class="text-xs text-gray-500">5 phút trước</div>
-                    </div>
-                </div>
-
-                <div class="flex gap-2 items-start">
-                    <img src="https://pt123.cdn.static123.com/images/thumbs/450x300/fit/2025/06/13/z6700095844028-186681c11699e9a986e980c6cfa79e61_1749801645.jpg" alt="tin" class="w-20 h-14 rounded object-cover" />
-                    <div>
-                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
-                            Cho Thuê Phòng Có Gác, Nhà Mới Thang Máy, Thoáng Mát
-                        </div>
-                        <div class="text-green-600 font-semibold text-sm">5.5 triệu/tháng</div>
-                        <div class="text-xs text-gray-500">15 phút trước</div>
-                    </div>
-                </div>
-
+            <div class="space-y-4" id="listNew">
             </div>
         </div>
     </div>
@@ -203,9 +169,17 @@
     //document.getElementById('listPostId').classList.add("text-orange-500");
     //document.getElementById('listPostId').classList.replace("border-gray-200", "border-orange-500");
     let id = @ViewBag.Id;
+    let landlordId = 0;
     getProperty();
+
+    function openLandlord(){
+        window.location.href= `/Home/Landlord/${landlordId}`;
+    }
+
     async function getProperty(){
         let prop = await propertyService.getProperty(id);
+        //console.log(prop);
+        landlordId = prop.landlordId;
         let addressInfo = prop.detailedAddress + ", " + prop.street + ", " + prop.ward + ", " + prop.province;
         $('.titleId').html(prop.title);
         
@@ -213,7 +187,7 @@
         $('#imgPrimaryUrl').prop('src',prop.primaryImageUrl.includes("http") ? prop.primaryImageUrl : urlBase + prop.primaryImageUrl);
         $('.areaId').html(prop.area);
         $('.addressId').html(addressInfo);
-        $('.priceId').html(formatVietnameseNumber(prop.price));
+        $('.priceId').html(formatVietnameseNumber(prop.price) + " đ");
         $('.timeAgoId').html(timeAgo(prop.createdAt));
         $('.descriptionId').html(prop.description);
         $('.wardId').html(prop.ward);
@@ -252,7 +226,22 @@
             $('#mapFrame').attr('src', `https://www.google.com/maps?q=${encodedLocation}&output=embed`);
         }
 
-        console.log(prop);
+        //console.log(prop);
+        listNewPost = await propertyService.getNewPost();
+        //console.log(listNewPost);
+        let htmlNew = '';
+        listNewPost.forEach(item => {
+            htmlNew += `<div style="cursor:pointer" onclick="window.location.href='/Home/NewDetail/${item.id}'" class="flex gap-2 items-start">
+                    <img src="${urlBase + item.images[0].imageUrl}" onerror="handleImageError(this)" alt="tin" class="w-14 h-14 rounded object-cover" />
+                    <div>
+                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
+                            ${item.title}
+                        </div>
+                        <div class="text-xs text-gray-500">${timeAgo(item.publishedAt)}</div>
+                    </div>
+                </div>`
+        });
+        $('#listNew').html(htmlNew);
     }
 
     function selectImg(el1){

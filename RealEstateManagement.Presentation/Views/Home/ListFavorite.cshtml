@@ -1,6 +1,6 @@
 ﻿@{
     // ViewData["Title"] = "Home Page";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_LayoutV2.cshtml";
 }
 <style>
     .text-orange-500 {
@@ -30,46 +30,14 @@
     <div>
         <div style="height: max-content;" class="w-full max-w-xs bg-white p-4 rounded-md shadow-sm space-y-4 text-sm">
             <h3 class="font-semibold text-gray-800 mb-2">Tin mới đăng</h3>
-            <div class="space-y-4">
-
-                <div class="flex gap-2 items-start">
-                    <img src="https://pt123.cdn.static123.com/images/thumbs/450x300/fit/2025/06/13/z6700095844028-186681c11699e9a986e980c6cfa79e61_1749801645.jpg" alt="tin" class="w-20 h-14 rounded object-cover" />
-                    <div>
-                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
-                            Cho thuê phòng trọ có gác, giá rẻ gần ĐH Công Thương...
-                        </div>
-                        <div class="text-green-600 font-semibold text-sm">2.8 triệu/tháng</div>
-                        <div class="text-xs text-gray-500">27 giây trước</div>
-                    </div>
-                </div>
-
-                <div class="flex gap-2 items-start">
-                    <img src="https://pt123.cdn.static123.com/images/thumbs/450x300/fit/2025/06/13/z6700095844028-186681c11699e9a986e980c6cfa79e61_1749801645.jpg" alt="tin" class="w-20 h-14 rounded object-cover" />
-                    <div>
-                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
-                            CHO THUÊ NHÀ NGUYÊN CĂN TRẦN QUỐC TOẢN Gần nhà sách...
-                        </div>
-                        <div class="text-green-600 font-semibold text-sm">13 triệu/tháng</div>
-                        <div class="text-xs text-gray-500">5 phút trước</div>
-                    </div>
-                </div>
-
-                <div class="flex gap-2 items-start">
-                    <img src="https://pt123.cdn.static123.com/images/thumbs/450x300/fit/2025/06/13/z6700095844028-186681c11699e9a986e980c6cfa79e61_1749801645.jpg" alt="tin" class="w-20 h-14 rounded object-cover" />
-                    <div>
-                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
-                            Cho Thuê Phòng Có Gác, Nhà Mới Thang Máy, Thoáng Mát
-                        </div>
-                        <div class="text-green-600 font-semibold text-sm">5.5 triệu/tháng</div>
-                        <div class="text-xs text-gray-500">15 phút trước</div>
-                    </div>
-                </div>
-
+            <div class="space-y-4" id="listNew">
             </div>
         </div>
     </div>
 </div>
+<script src="~/js/propertyService.js"></script>
 <script>
+    let urlBase = "https://localhost:7031";
     getListFavorite();
     async function getListFavorite(){
         let listFavoriteItem = await listFavorite();
@@ -120,5 +88,22 @@
             `;
         });
         $('#listFavoriteId').html(html);
+
+
+        listNewPost = await propertyService.getNewPost();
+        //console.log(listNewPost);
+        let htmlNew = '';
+        listNewPost.forEach(item => {
+            htmlNew += `<div style="cursor:pointer" onclick="window.location.href='/Home/NewDetail/${item.id}'" class="flex gap-2 items-start">
+                    <img src="${urlBase + item.images[0].imageUrl}" onerror="handleImageError(this)" alt="tin" class="w-14 h-14 rounded object-cover" />
+                    <div>
+                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
+                            ${item.title}
+                        </div>
+                        <div class="text-xs text-gray-500">${timeAgo(item.publishedAt)}</div>
+                    </div>
+                </div>`
+        });
+        $('#listNew').html(htmlNew);
     }
 </script>

@@ -11,6 +11,7 @@ using RealEstateManagement.Data.Entity.Notification;
 using RealEstateManagement.Data.Entity.Payment;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using RealEstateManagement.Data.Entity.ReportEntity;
+using RealEstateManagement.Data.Entity.Reviews;
 using Property = RealEstateManagement.Data.Entity.PropertyEntity.Property;
 
 

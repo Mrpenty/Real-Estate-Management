@@ -38,6 +38,7 @@ namespace RealEstateManagement.Business.DTO.Properties
         public string Street { get; set; }
         public string DetailedAddress { get; set; }
         public bool IsFavorite { get; set; }
-
+        //Property Post
+        public int PropertyPostId { get; set; }
     }
 }

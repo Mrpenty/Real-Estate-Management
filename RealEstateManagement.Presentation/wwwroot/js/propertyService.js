@@ -112,6 +112,81 @@ const propertyService = {
             throw error;
         }
     },
+
+    async getNewPost() {
+        try {
+
+            const response = await fetch(`https://localhost:7031/api/News/published`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || data.errorMessage || 'Get failed');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Get error:', error);
+            throw error;
+        }
+    },
+
+    async getNewPostDetail(id) {
+        try {
+
+            const response = await fetch(`https://localhost:7031/api/News/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || data.errorMessage || 'Get failed');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Get error:', error);
+            throw error;
+        }
+    },
+
+
+    async getLandlord(landlordId) {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await fetch(`https://localhost:7031/api/Property/${landlordId}/profile-with-properties`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : ''
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || data.errorMessage || 'Get failed');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Get error:', error);
+            throw error;
+        }
+    },
+
 };
 
 // Export the service

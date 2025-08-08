@@ -48,8 +48,17 @@ namespace RealEstateManagement.API.Controllers
             {
                 if (page < 1) page = 1;
                 if (pageSize < 1 || pageSize > 100) pageSize = 10;
+                int userId = 0;
+                var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    var handler = new JwtSecurityTokenHandler();
+                    var token = handler.ReadJwtToken(accessToken);
+                    var userIdClaim = token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+                    if (!int.TryParse(userIdClaim, out userId)) userId = 0;
+                }
 
-                var result = await _propertyService.GetPaginatedPropertiesAsync(page, pageSize);
+                var result = await _propertyService.GetPaginatedPropertiesAsync(page, pageSize, userId);
 
                 if (result == null || !result.Data.Any())
                     return NotFound("Không tìm thấy bất động sản nào");
