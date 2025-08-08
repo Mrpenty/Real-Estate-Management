@@ -15,5 +15,6 @@ namespace RealEstateManagement.Business.Services.NewsService
         Task<NewsImage> AddImageAsync(int newId, NewImageCreateDto dto);
         Task<NewsImage> UpdateImageAsync(NewsImage updatedImage);
         Task<IEnumerable<NewsImageDto>> GetImagesByNewsIdAsync(int newId);
+        Task<bool> DeleteImageAsync(int newId, int imageId);
     }
 }

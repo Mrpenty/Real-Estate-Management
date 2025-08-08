@@ -1,19 +1,154 @@
 @{
     Layout = "../Shared/_Layout.cshtml";
 }
-<div class="section bg-white p-6 rounded-xl mx-auto mt-12 border mb-8 max-w-5xl shadow-lg">
-    <h2 class="text-2xl font-bold mb-8 text-center">Chọn gói quảng cáo cho bài đăng</h2>
-    <div class="flex items-center justify-center gap-4">
-        <button id="package-prev" type="button" class="p-2 rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none transition disabled:opacity-50" aria-label="Trước">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+<div class="section bg-white p-8 rounded-2xl mx-auto mt-8 border mb-8 max-w-6xl shadow-xl">
+    <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-4 text-gray-800">Chọn gói quảng cáo cho bài đăng</h2>
+        <p class="text-gray-600 text-lg">Lựa chọn gói phù hợp để bài đăng của bạn được hiển thị tốt nhất</p>
+    </div>
+    
+    <div class="flex items-center justify-center gap-6 mb-8">
+        <button id="package-prev" type="button" class="p-3 rounded-full bg-orange-100 hover:bg-orange-200 focus:outline-none transition-all duration-200 disabled:opacity-50 shadow-md" aria-label="Trước">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
         </button>
-        <div id="package-list" class="flex gap-6"></div>
-        <button id="package-next" type="button" class="p-2 rounded-full bg-gray-100 hover:bg-gray-200 focus:outline-none transition disabled:opacity-50" aria-label="Sau">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        <div id="package-list" class="flex gap-8"></div>
+        <button id="package-next" type="button" class="p-3 rounded-full bg-orange-100 hover:bg-orange-200 focus:outline-none transition-all duration-200 disabled:opacity-50 shadow-md" aria-label="Sau">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
         </button>
     </div>
-    <button id="skip-package-btn" type="button" class="mt-8 px-8 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-semibold block mx-auto shadow">Bỏ qua</button>
+    
+    <div class="text-center">
+        <button id="skip-package-btn" type="button" class="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
+            <i class="fas fa-arrow-left mr-2"></i>Bỏ qua và về trang chủ
+        </button>
+    </div>
 </div>
+
+<style>
+.package-card {
+    transition: all 0.3s ease;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+.package-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.package-card.featured {
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    color: white;
+    transform: scale(1.05);
+    z-index: 10;
+    box-shadow: 0 25px 50px rgba(255, 107, 53, 0.3);
+}
+
+.package-card.featured:hover {
+    transform: scale(1.05) translateY(-5px);
+}
+
+.package-card.regular {
+    background: white;
+    color: #374151;
+    border: 2px solid #e5e7eb;
+}
+
+.package-card.regular:hover {
+    border-color: #ff6b35;
+}
+
+.price-tag {
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    display: inline-block;
+    margin: 10px 0;
+}
+
+.featured .price-tag {
+    background: white;
+    color: #ff6b35;
+}
+
+.select-btn {
+    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.select-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
+}
+
+.featured .select-btn {
+    background: white;
+    color: #ff6b35;
+    border: 2px solid white;
+}
+
+.featured .select-btn:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.feature-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.featured .feature-list li {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.regular .feature-list li {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.package-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 24px;
+}
+
+.featured .package-icon {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.regular .package-icon {
+    background: #ff6b35;
+    color: white;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 let packages = [];
 let currentIndex = 0;
@@ -27,42 +162,148 @@ function getPropertyIdFromUrl() {
 
 propertyId = getPropertyIdFromUrl();
 if (!propertyId) {
-    alert('Không tìm thấy propertyId!');
-    window.location.href = '/';
+    Swal.fire({
+        icon: 'error',
+        title: 'Lỗi!',
+        text: 'Không tìm thấy thông tin bài đăng!',
+        confirmButtonColor: '#ff6b35'
+    }).then(() => {
+        window.location.href = '/';
+    });
 }
 
 async function loadPackages() {
-    const res = await fetch('https://localhost:7031/api/PromotionPackage/GetAllPackage');
-    packages = await res.json();
-    renderPackages();
+    try {
+        const res = await fetch('https://localhost:7031/api/PromotionPackage/GetAllPackage');
+        if (!res.ok) {
+            throw new Error('Không thể tải danh sách gói');
+        }
+        packages = await res.json();
+        console.log('Dữ liệu gói từ API:', packages);
+        
+        // Log thông tin từng gói để debug
+        packages.forEach((pkg, index) => {
+            console.log(`Gói ${index + 1}:`, {
+                id: pkg.id,
+                name: pkg.name,
+                level: pkg.level,
+                levelType: typeof pkg.level,
+                price: pkg.price,
+                durationInDays: pkg.durationInDays
+            });
+        });
+        
+        renderPackages();
+    } catch (error) {
+        console.error('Lỗi khi tải gói:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi!',
+            text: 'Không thể tải danh sách gói quảng cáo',
+            confirmButtonColor: '#ff6b35'
+        });
+    }
 }
 
 function renderPackages() {
     const list = document.getElementById('package-list');
     if (!list || packages.length === 0) return;
+    
     const total = packages.length;
     const idxs = [
         (currentIndex + total - 1) % total,
         currentIndex % total,
         (currentIndex + 1) % total
     ];
+    
     list.innerHTML = idxs.map((idx, pos) => {
         const pkg = packages[idx];
         const isCenter = pos === 1;
+        const cardClass = isCenter ? 'package-card featured' : 'package-card regular';
+        
+        // Validate và sanitize dữ liệu
+        const safeName = pkg.name || 'Gói không tên';
+        const safePrice = pkg.price || 0;
+        const safeDuration = pkg.durationInDays || 0;
+        const safeLevel = pkg.level || 'basic';
+        const safeDescription = pkg.description || 'Gói quảng cáo chất lượng cao';
+        
+        console.log(`Rendering package ${idx}:`, {
+            name: safeName,
+            level: safeLevel,
+            price: safePrice,
+            duration: safeDuration
+        });
+        
         return `
-        <div class="flex flex-col items-center rounded-2xl shadow-lg border transition-all duration-300 ${isCenter ? 'bg-blue-500 text-white border-blue-600 scale-105 z-10' : 'bg-white text-gray-900 border-gray-200 opacity-80 scale-95'}" style="min-width:300px; max-width:320px;">
-            <h3 class="text-xl font-bold mb-2 mt-6">${pkg.name}</h3>
-            <div class="text-3xl font-extrabold mb-2">${Number(pkg.price).toLocaleString('vi-VN')}<span class="text-base font-medium ${isCenter ? 'text-blue-200' : 'text-gray-400'}"> VNĐ /tháng</span></div>
-            <div class="mb-4 text-sm italic">${pkg.description || ''}</div>
-            <ul class="mb-6 w-11/12 text-sm">
-                <li class="flex justify-between py-1 border-b"><span>Thời hạn</span> <span>${pkg.durationInDays} ngày</span></li>
-                <li class="flex justify-between py-1 border-b"><span>Cấp độ</span> <span>${pkg.level}</span></li>
+        <div class="${cardClass}" style="min-width:320px; max-width:350px; padding: 30px;">
+            <div class="package-icon">
+                <i class="fas fa-${getPackageIcon(safeLevel)}"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-3">${safeName}</h3>
+            <div class="price-tag">
+                ${Number(safePrice).toLocaleString('vi-VN')} VNĐ
+                <div class="text-sm opacity-80">/tháng</div>
+            </div>
+            <div class="mb-6 text-sm italic opacity-80">${safeDescription}</div>
+            <ul class="feature-list">
+                <li>
+                    <span>Thời hạn</span>
+                    <span class="font-semibold">${safeDuration} ngày</span>
+                </li>
+                <li>
+                    <span>Cấp độ</span>
+                    <span class="font-semibold">${safeLevel}</span>
+                </li>
+                <li>
+                    <span>Ưu đãi</span>
+                    <span class="font-semibold">${getPackageBenefit(safeLevel)}</span>
+                </li>
             </ul>
-            <button type="button" class="w-10/12 mb-6 ${isCenter ? 'bg-white text-blue-600 border border-blue-600' : 'bg-blue-500 text-white'} font-semibold py-2 rounded-lg transition select-package-btn hover:bg-blue-600 hover:text-white" data-id="${pkg.id}">Sign Up Now</button>
+            <button type="button" class="select-btn w-full select-package-btn" data-id="${pkg.id}">
+                ${isCenter ? 'Chọn gói này' : 'Đăng ký ngay'}
+            </button>
         </div>
         `;
     }).join('');
+    
     attachSignUpHandlers();
+}
+
+function getPackageIcon(level) {
+    // Kiểm tra level có tồn tại và là string không
+    if (!level || typeof level !== 'string') {
+        console.log('Level không hợp lệ:', level);
+        return 'star';
+    }
+    
+    const levelLower = level.toLowerCase();
+    switch(levelLower) {
+        case 'basic': return 'star';
+        case 'premium': return 'crown';
+        case 'vip': return 'gem';
+        default: 
+            console.log('Level không được nhận diện:', level);
+            return 'star';
+    }
+}
+
+function getPackageBenefit(level) {
+    // Kiểm tra level có tồn tại và là string không
+    if (!level || typeof level !== 'string') {
+        console.log('Level không hợp lệ:', level);
+        return 'Hiển thị cơ bản';
+    }
+    
+    const levelLower = level.toLowerCase();
+    switch(levelLower) {
+        case 'basic': return 'Hiển thị cơ bản';
+        case 'premium': return 'Ưu tiên hiển thị';
+        case 'vip': return 'Hiển thị hàng đầu';
+        default: 
+            console.log('Level không được nhận diện:', level);
+            return 'Hiển thị cơ bản';
+    }
 }
 
 document.getElementById('package-prev').onclick = function() {
@@ -70,6 +311,7 @@ document.getElementById('package-prev').onclick = function() {
     currentIndex = (currentIndex + packages.length - 1) % packages.length;
     renderPackages();
 };
+
 document.getElementById('package-next').onclick = function() {
     if (packages.length === 0) return;
     currentIndex = (currentIndex + 1) % packages.length;
@@ -77,7 +319,20 @@ document.getElementById('package-next').onclick = function() {
 };
 
 document.getElementById('skip-package-btn').onclick = function() {
-    window.location.href = '/';
+    Swal.fire({
+        icon: 'question',
+        title: 'Bỏ qua gói quảng cáo?',
+        text: 'Bạn có chắc muốn bỏ qua và về trang chủ?',
+        showCancelButton: true,
+        confirmButtonColor: '#ff6b35',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Có, về trang chủ',
+        cancelButtonText: 'Ở lại'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '/';
+        }
+    });
 };
 
 function attachSignUpHandlers() {
@@ -85,33 +340,103 @@ function attachSignUpHandlers() {
         btn.onclick = async function() {
             const packageId = this.getAttribute('data-id');
             if (!propertyId) {
-                alert('Không tìm thấy propertyId!');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: 'Không tìm thấy thông tin bài đăng!',
+                    confirmButtonColor: '#ff6b35'
+                });
                 return;
             }
+            
             const pkg = packages.find(p => p.id == packageId);
-            const startDate = new Date();
-            const endDate = new Date(startDate);
-            endDate.setDate(startDate.getDate() + (pkg.durationInDays || 0));
-            const token = localStorage.getItem('authToken');
-            const res = await fetch('https://localhost:7031/api/PropertyPromotion', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-                },
-                body: JSON.stringify({
-                    propertyId: propertyId,
-                    packageId: packageId,
-                    startDate: startDate.toISOString(),
-                    endDate: endDate.toISOString()
-                })
+            
+            // Hiển thị loading
+            Swal.fire({
+                title: 'Đang đăng ký gói...',
+                text: 'Vui lòng chờ trong giây lát',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
             });
-            if (res.ok) {
-                alert('Đăng ký gói thành công!');
-                window.location.href = '/';
-            } else {
-                const err = await res.json().catch(() => ({}));
-                alert('Đăng ký gói thất bại! ' + (err.message || ''));
+            
+            try {
+                const startDate = new Date();
+                const endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + (pkg.durationInDays || 0));
+                
+                const token = localStorage.getItem('authToken');
+                
+                if (!token) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi xác thực',
+                        text: 'Vui lòng đăng nhập lại để tiếp tục',
+                        confirmButtonColor: '#ff6b35'
+                    }).then(() => {
+                        window.location.href = '/Auth/Login';
+                    });
+                    return;
+                }
+                
+                // Log dữ liệu gửi đi
+                const requestData = {
+                    PropertyId: parseInt(propertyId),
+                    PackageId: parseInt(packageId),
+                    StartDate: startDate.toISOString(),
+                    EndDate: endDate.toISOString()
+                };
+                
+                console.log('Dữ liệu gửi đi:', requestData);
+                console.log('Token:', token ? 'Có token' : 'Không có token');
+                
+                const res = await fetch('https://localhost:7031/api/PropertyPromotion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                console.log('Response status:', res.status);
+                console.log('Response headers:', res.headers);
+                
+                if (res.ok) {
+                    const responseData = await res.json();
+                    console.log('Response data:', responseData);
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: `Đăng ký gói "${pkg.name}" thành công!`,
+                        confirmButtonColor: '#ff6b35'
+                    }).then(() => {
+                        window.location.href = '/';
+                    });
+                } else {
+                    const errorText = await res.text();
+                    console.error('Error response:', errorText);
+                    
+                    let errorMessage = 'Đăng ký gói thất bại';
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorMessage = errorJson.message || errorJson.title || errorMessage;
+                    } catch (e) {
+                        errorMessage = errorText || errorMessage;
+                    }
+                    
+                    throw new Error(errorMessage);
+                }
+            } catch (error) {
+                console.error('Lỗi khi đăng ký gói:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: error.message || 'Đăng ký gói thất bại. Vui lòng thử lại!',
+                    confirmButtonColor: '#ff6b35'
+                });
             }
         };
     });

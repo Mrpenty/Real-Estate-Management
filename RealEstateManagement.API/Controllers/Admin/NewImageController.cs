@@ -109,5 +109,63 @@ namespace RealEstateManagement.API.Controllers.Admin
             var updated = await _imageService.UpdateImageAsync(dto);
             return Ok(updated);
         }
+
+        //Xóa ảnh
+        [HttpDelete("{imageId}")]
+        public async Task<IActionResult> DeleteImage(int newId, int imageId)
+        {
+            try
+            {
+                _logger.LogInformation("Deleting image {imageId} for new {newId}", imageId, newId);
+                
+                var result = await _imageService.DeleteImageAsync(newId, imageId);
+                if (!result)
+                {
+                    _logger.LogWarning("Image {imageId} not found for new {newId}", imageId, newId);
+                    return NotFound("Không tìm thấy ảnh");
+                }
+
+                _logger.LogInformation("Image {imageId} deleted successfully for new {newId}", imageId, newId);
+                return Ok(new { message = "Xóa ảnh thành công" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while deleting image {imageId} for new {newId}", imageId, newId);
+                return StatusCode(500, "An error occurred while deleting the image");
+            }
+        }
+
+        //Xóa file vật lý
+        [HttpPost("delete-file")]
+        public async Task<IActionResult> DeleteImageFile([FromBody] DeleteImageFileRequest request)
+        {
+            try
+            {
+                _logger.LogInformation("Deleting image file: {ImageUrl}", request.ImageUrl);
+                
+                var result = await _uploadPicService.DeleteImageAsync(request.ImageUrl);
+                if (result)
+                {
+                    _logger.LogInformation("Image file deleted successfully: {ImageUrl}", request.ImageUrl);
+                    return Ok(new { message = "Xóa file thành công" });
+                }
+                else
+                {
+                    _logger.LogWarning("Image file not found: {ImageUrl}", request.ImageUrl);
+                    return NotFound("Không tìm thấy file");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while deleting image file: {ImageUrl}", request.ImageUrl);
+                return StatusCode(500, "An error occurred while deleting the image file");
+            }
+        }
     }
+
+    public class DeleteImageFileRequest
+    {
+        public string ImageUrl { get; set; } = string.Empty;
+    }
+    
 }

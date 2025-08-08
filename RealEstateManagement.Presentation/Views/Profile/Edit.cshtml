@@ -75,6 +75,14 @@
                 </div>
             </div>
 
+            <!-- Verification Status Info -->
+            <div id="verification-info" class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 class="font-semibold text-blue-800 mb-2">Thông tin xác thực</h4>
+                <p class="text-sm text-blue-700">
+                    Để yêu cầu duyệt hồ sơ, bạn cần điền đầy đủ: Số CCCD, Ngày cấp CCCD, Ngày hết hạn CCCD, Ảnh CCCD mặt trước và Ảnh CCCD mặt sau.
+                </p>
+            </div>
+
             <!-- Action Buttons -->
             <div class="flex justify-end space-x-4 pt-4">
                 <a href="/Profile" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-300">Hủy</a>
@@ -123,16 +131,34 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const hasAllRequiredFields = currentProfile.citizenIdNumber && 
-                                   currentProfile.citizenIdIssuedDate && 
-                                   currentProfile.citizenIdExpiryDate && 
-                                   currentProfile.citizenIdFrontImageUrl && 
-                                   currentProfile.citizenIdBackImageUrl;
+        // Lấy giá trị hiện tại từ form
+        const citizenIdNumber = document.getElementById('citizenIdNumber').value;
+        const citizenIdIssuedDate = document.getElementById('citizenIdIssuedDate').value;
+        const citizenIdExpiryDate = document.getElementById('citizenIdExpiryDate').value;
+        const hasFrontImage = cccdFrontInput.files[0] || currentProfile.citizenIdFrontImageUrl;
+        const hasBackImage = cccdBackInput.files[0] || currentProfile.citizenIdBackImageUrl;
+
+        console.log('Kiểm tra điều kiện duyệt:', {
+            citizenIdNumber: !!citizenIdNumber,
+            citizenIdIssuedDate: !!citizenIdIssuedDate,
+            citizenIdExpiryDate: !!citizenIdExpiryDate,
+            hasFrontImage: !!hasFrontImage,
+            hasBackImage: !!hasBackImage,
+            verificationStatus: currentProfile.verificationStatus
+        });
+
+        const hasAllRequiredFields = citizenIdNumber && 
+                                   citizenIdIssuedDate && 
+                                   citizenIdExpiryDate && 
+                                   hasFrontImage && 
+                                   hasBackImage;
 
         if (hasAllRequiredFields && (currentProfile.verificationStatus === 'none' || currentProfile.verificationStatus === 'rejected')) {
             requestVerificationButton.classList.remove('hidden');
+            console.log('Hiển thị nút yêu cầu duyệt');
         } else {
             requestVerificationButton.classList.add('hidden');
+            console.log('Ẩn nút yêu cầu duyệt');
         }
     }
 
@@ -192,6 +218,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             reader.readAsDataURL(event.target.files[0]);
         }
+        // Kiểm tra điều kiện duyệt sau khi thay đổi ảnh
+        setTimeout(checkVerificationEligibility, 100);
     });
     cccdBackInput.addEventListener('change', function(event) {
         if (event.target.files && event.target.files[0]) {
@@ -201,6 +229,21 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             reader.readAsDataURL(event.target.files[0]);
         }
+        // Kiểm tra điều kiện duyệt sau khi thay đổi ảnh
+        setTimeout(checkVerificationEligibility, 100);
+    });
+
+    // Thêm event listeners cho các trường CCCD để kiểm tra điều kiện duyệt
+    document.getElementById('citizenIdNumber').addEventListener('input', function() {
+        setTimeout(checkVerificationEligibility, 100);
+    });
+    
+    document.getElementById('citizenIdIssuedDate').addEventListener('change', function() {
+        setTimeout(checkVerificationEligibility, 100);
+    });
+    
+    document.getElementById('citizenIdExpiryDate').addEventListener('change', function() {
+        setTimeout(checkVerificationEligibility, 100);
     });
 
     // 3. Handle form submission (chỉ cập nhật thông tin, không thay đổi trạng thái xác thực)
@@ -271,18 +314,41 @@ document.addEventListener('DOMContentLoaded', function () {
             
             const responseData = await profileResponse.json();
             
-            // Cập nhật profile hiện tại
-            currentProfile = { ...currentProfile, ...profileData };
+            // Cập nhật profile hiện tại với dữ liệu mới
+            currentProfile = { 
+                ...currentProfile, 
+                ...profileData,
+                // Cập nhật thông tin CCCD từ form
+                citizenIdNumber: document.getElementById('citizenIdNumber').value,
+                citizenIdIssuedDate: document.getElementById('citizenIdIssuedDate').value,
+                citizenIdExpiryDate: document.getElementById('citizenIdExpiryDate').value,
+                // Cập nhật ảnh CCCD nếu có upload mới
+                citizenIdFrontImageUrl: cccdFrontInput.files[0] ? 'updated' : currentProfile.citizenIdFrontImageUrl,
+                citizenIdBackImageUrl: cccdBackInput.files[0] ? 'updated' : currentProfile.citizenIdBackImageUrl
+            };
+            
+            // Kiểm tra lại điều kiện hiển thị nút yêu cầu duyệt
             checkVerificationEligibility();
             
-            await Swal.fire({
-                icon: 'success',
-                title: 'Thành công!',
-                text: responseData.message,
-                confirmButtonText: 'OK'
-            });
+            // Nếu đủ điều kiện để yêu cầu duyệt, hiển thị thông báo đặc biệt
+            if (requestVerificationButton.classList.contains('hidden') === false) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: 'Thông tin đã được cập nhật. Bạn có thể yêu cầu duyệt hồ sơ ngay bây giờ.',
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: responseData.message,
+                    confirmButtonText: 'OK'
+                });
+            }
             
-            window.location.href = '/Profile';
+            // Không redirect về Profile, ở lại trang Edit để user có thể yêu cầu duyệt
+            // window.location.href = '/Profile';
         } catch (error) {
             await Swal.fire({
                 icon: 'error',

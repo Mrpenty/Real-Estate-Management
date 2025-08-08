@@ -101,5 +101,33 @@ namespace RealEstateManagement.Business.Repositories.NewsRepository
         {
             return await _context.NewsImages.AnyAsync(x => x.Id == newsId);
         }
+
+        public async Task<bool> DeleteImageAsync(int newsId, int imageId)
+        {
+            try
+            {
+                _logger.LogInformation("Deleting image {imageId} for news {newsId}", imageId, newsId);
+                
+                var image = await _context.NewsImages
+                    .FirstOrDefaultAsync(x => x.Id == imageId && x.NewsId == newsId);
+                
+                if (image == null)
+                {
+                    _logger.LogWarning("Image {imageId} not found for news {newsId}", imageId, newsId);
+                    return false;
+                }
+
+                _context.NewsImages.Remove(image);
+                await _context.SaveChangesAsync();
+                
+                _logger.LogInformation("Image {imageId} deleted successfully for news {newsId}", imageId, newsId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting image {imageId} for news {newsId}", imageId, newsId);
+                throw;
+            }
+        }
     }
 }

@@ -126,25 +126,7 @@
     </div>
 </div>
 
-<!-- Post Detail Modal -->
-<div id="postDetailModal" class="modal-overlay hidden">
-    <div class="modal-content max-w-4xl">
-        <div class="modal-header">
-            <h3 class="modal-title">
-                <i class="fas fa-home"></i>
-                <span id="modalPostTitle">Chi tiết bài đăng</span>
-            </h3>
-            <button onclick="closePostDetailModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div id="postDetailContent">
-                <!-- Post detail content will be rendered here -->
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- Status Update Modal -->
 <div id="statusUpdateModal" class="modal-overlay hidden">
@@ -202,7 +184,6 @@
     <script>
         let currentPage = 1, totalPages = 1, allPosts = [];
         let currentSearch = '', currentStatus = '', currentFromDate = '', currentToDate = '';
-        let currentPostDetail = null;
 
         const AdminPostService = window.AdminPostService || {
             async getPosts(status = '', page = 1, pageSize = 10) {
@@ -211,14 +192,6 @@
                     credentials: 'include'
                 });
                 if (!res.ok) throw new Error('Không thể lấy danh sách bài đăng');
-                return await res.json();
-            },
-            async getPostDetail(id) {
-                const res = await fetch(`${ADMIN_POST_API_BASE_URL}/${id}`, {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-                if (!res.ok) throw new Error('Không thể lấy chi tiết bài đăng');
                 return await res.json();
             },
             async updatePostStatus(id, status, rejectReason = null) {
@@ -368,12 +341,12 @@
                     <td class="font-medium">${post.id}</td>
                     <td>
                         <div class="font-medium text-gray-900">${post.title || (post.property && post.property.title) || ''}</div>
-                        <div class="text-sm text-gray-500">${post.property && post.property.address ? post.property.address : ''}</div>
+
                     </td>
                     <td>${post.name || (post.landlord && (post.landlord.fullName || post.landlord.name)) || post.landlordId || ''}</td>
                     <td>
                         <span class="font-medium text-green-600">
-                            ${post.price ? post.price.toLocaleString('vi-VN') + ' VNĐ' : 'N/A'}
+                            ${post.property.price ? post.property.price.toLocaleString('vi-VN') + ' VNĐ' : 'N/A'}
                         </span>
                     </td>
                     <td>${post.createdAt ? new Date(post.createdAt).toLocaleDateString('vi-VN') : ''}</td>
@@ -416,65 +389,12 @@
             }
         }
 
-        async function showPostDetail(id) {
-            try {
-                const post = await AdminPostService.getPostDetail(id);
-                currentPostDetail = post;
-                
-                document.getElementById('modalPostTitle').textContent = post.title || 'Chi tiết bài đăng';
-                document.getElementById('postDetailContent').innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-4">
-                            <div class="form-group">
-                                <label class="form-label">Tiêu đề</label>
-                                <div class="form-input bg-gray-50">${post.title || 'N/A'}</div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Chủ nhà</label>
-                                <div class="form-input bg-gray-50">${post.name || (post.landlord && (post.landlord.fullName || post.landlord.name)) || 'N/A'}</div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Giá</label>
-                                <div class="form-input bg-gray-50">${post.price ? post.price.toLocaleString('vi-VN') + ' VNĐ' : 'N/A'}</div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Trạng thái</label>
-                                <div>${getStatusBadge(post.status, post.statusDisplay)}</div>
-                            </div>
-                        </div>
-                        <div class="space-y-4">
-                            <div class="form-group">
-                                <label class="form-label">Địa chỉ</label>
-                                <div class="form-input bg-gray-50">${post.property && post.property.address ? post.property.address : 'N/A'}</div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Ngày tạo</label>
-                                <div class="form-input bg-gray-50">${post.createdAt ? new Date(post.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Mô tả</label>
-                                <div class="form-input bg-gray-50 form-textarea">${post.description || 'N/A'}</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    ${post.rejectReason ? `
-                        <div class="mt-6">
-                            <label class="form-label">Lý do từ chối</label>
-                            <div class="form-input bg-red-50 text-red-700">${post.rejectReason}</div>
-                        </div>
-                    ` : ''}
-                `;
-                
-                document.getElementById('postDetailModal').classList.remove('hidden');
-            } catch (err) {
-                showError(err.message);
-            }
+        function showPostDetail(id) {
+            // Chuyển trang đến PostDetail với postId
+            window.location.href = `/Admin/PostDetail/${id}`;
         }
 
-        function closePostDetailModal() {
-            document.getElementById('postDetailModal').classList.add('hidden');
-        }
+
 
         function showStatusUpdateModal(postId) {
             const post = allPosts.find(p => p.id === postId);
