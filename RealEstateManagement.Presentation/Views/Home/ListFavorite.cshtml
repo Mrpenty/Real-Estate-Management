@@ -94,11 +94,15 @@
         //console.log(listNewPost);
         let htmlNew = '';
         listNewPost.forEach(item => {
+            const imageUrl = item.images && item.images.length > 0 && item.images[0] && item.images[0].imageUrl 
+                ? (item.images[0].imageUrl.includes('http') ? item.images[0].imageUrl : urlBase + item.images[0].imageUrl)
+                : '/image/default-news.jpg'; // Default image path
+            
             htmlNew += `<div style="cursor:pointer" onclick="window.location.href='/Home/NewDetail/${item.id}'" class="flex gap-2 items-start">
-                    <img src="${urlBase + item.images[0].imageUrl}" onerror="handleImageError(this)" alt="tin" class="w-14 h-14 rounded object-cover" />
+                    <img src="${imageUrl}" onerror="handleImageError(this)" alt="tin" class="w-14 h-14 rounded object-cover" />
                     <div>
                         <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
-                            ${item.title}
+                            ${item.title || 'Không có tiêu đề'}
                         </div>
                         <div class="text-xs text-gray-500">${timeAgo(item.publishedAt)}</div>
                     </div>

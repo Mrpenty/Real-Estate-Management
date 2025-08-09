@@ -47,11 +47,15 @@
         console.log(listNewPost);
         let htmlNew = '';
         listNewPost.forEach(item => {
+            const imageUrl = item.images && item.images.length > 0 && item.images[0] && item.images[0].imageUrl 
+                ? (item.images[0].imageUrl.includes('http') ? item.images[0].imageUrl : urlBase + item.images[0].imageUrl)
+                : '/image/default-news.jpg'; // Default image path
+            
             htmlNew += `<div style="cursor:pointer" onclick="window.location.href='/Home/NewDetail/${item.id}'" class="flex gap-2 items-start">
-                    <img src="${urlBase + item.images[0].imageUrl}" onerror="handleImageError(this)" alt="tin" class="w-14 h-14 rounded object-cover" />
+                    <img src="${imageUrl}" onerror="handleImageError(this)" alt="tin" class="w-14 h-14 rounded object-cover" />
                     <div>
                         <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
-                            ${item.title}
+                            ${item.title || 'Không có tiêu đề'}
                         </div>
                         <div class="text-xs text-gray-500">${timeAgo(item.publishedAt)}</div>
                     </div>
@@ -62,11 +66,15 @@
 
         let html = '';
         listNewPost.forEach(item => {
+            const imageUrl = item.images && item.images.length > 0 && item.images[0] && item.images[0].imageUrl 
+                ? (item.images[0].imageUrl.includes('http') ? item.images[0].imageUrl : urlBase + item.images[0].imageUrl)
+                : '/image/default-news.jpg'; // Default image path
+            
             html += `
                    <div class="bg-white rounded-md shadow-sm border border-gray-200 flex p-4 gap-4 items-start">
 
                     <div class="relative w-40 h-28 flex-shrink-0">
-                            <img onerror="handleImageError(this)" src="${urlBase + item.images[0].imageUrl}" alt="new" class="w-full h-full object-cover rounded-lg">
+                            <img onerror="handleImageError(this)" src="${imageUrl}" alt="new" class="w-full h-full object-cover rounded-lg">
 
                         <div class="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg">
                         </div>
@@ -75,11 +83,11 @@
 
                     <div class="flex-1">
                         <h2  onclick="window.location.href='/Home/NewDetail/${item.id}'" style="cursor:pointer" class="text-blue-800 font-semibold text-base leading-tight">
-                            ${item.title}
+                            ${item.title || 'Không có tiêu đề'}
                         </h2>
 
                         <p class="text-sm text-gray-700 mt-1 line-clamp-2">
-                               ${item.summary}
+                               ${item.summary || 'Không có tóm tắt'}
                         </p>
 
                         <div class="text-xs text-gray-400 mt-1">${timeAgo(item.publishedAt)}</div>

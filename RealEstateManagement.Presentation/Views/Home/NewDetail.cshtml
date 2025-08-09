@@ -91,7 +91,10 @@
         console.log(prop);
         $('.titleId').html(prop.title);
         
-        $('#imgPrimaryUrl').prop('src',prop.images[0].imageUrl);
+        const primaryImageUrl = prop.images && prop.images.length > 0 && prop.images[0] && prop.images[0].imageUrl 
+            ? (prop.images[0].imageUrl.includes('http') ? prop.images[0].imageUrl : urlBase + prop.images[0].imageUrl)
+            : '/image/default-news.jpg';
+        $('#imgPrimaryUrl').prop('src', primaryImageUrl);
         $('.areaId').html(prop.authorName);
         $('.contentId').html(prop.content);
         $('.summaryId').html(prop.summary);
@@ -102,7 +105,9 @@
         $('#listImgs').html('');
         if(prop.images != null){
             prop.images.forEach((url,index) => {
-                var src = url.imageUrl.includes("http") ? url.imageUrl : urlBase + url.imageUrl;
+                const src = url && url.imageUrl 
+                    ? (url.imageUrl.includes("http") ? url.imageUrl : urlBase + url.imageUrl)
+                    : '/image/default-news.jpg';
                 if(index == 0) htmlUrl += `<div onclick="selectImg(this)" class="border-2 border-red-500 rounded p-1 imgDetail">
                                 <img src="${src}" onerror="handleImageError(this)" class="w-20 h-16 object-cover" />
                             </div>`;
@@ -120,11 +125,15 @@
         let htmlNew = '';
         listNewPost.forEach(item => {
             if(item.id != id){
+                const imageUrl = item.images && item.images.length > 0 && item.images[0] && item.images[0].imageUrl 
+                    ? (item.images[0].imageUrl.includes('http') ? item.images[0].imageUrl : urlBase + item.images[0].imageUrl)
+                    : '/image/default-news.jpg';
+                
                 htmlNew += `<div style="cursor:pointer" onclick="window.location.href='/Home/NewDetail/${item.id}'" class="flex gap-2 items-start">
-                        <img src="${urlBase + item.images[0].imageUrl}" onerror="handleImageError(this)" alt="tin" class="w-14 h-14 rounded object-cover" />
+                        <img src="${imageUrl}" onerror="handleImageError(this)" alt="tin" class="w-14 h-14 rounded object-cover" />
                         <div>
                             <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
-                                ${item.title}
+                                ${item.title || 'Không có tiêu đề'}
                             </div>
                             <div class="text-xs text-gray-500">${timeAgo(item.publishedAt)}</div>
                         </div>
