@@ -143,7 +143,7 @@ namespace RealEstateManagement.API.Controllers.Admin
         }
 
         /// <summary>
-        /// Generate and download report (Excel/PDF)
+        /// Generate and download Excel report
         /// </summary>
         [HttpPost("download-report")]
         public async Task<IActionResult> DownloadReport([FromBody] ReportRequestDTO request)
@@ -155,28 +155,22 @@ namespace RealEstateManagement.API.Controllers.Admin
                     return BadRequest(new { success = false, message = "Start date must be before end date" });
                 }
 
-                if (string.IsNullOrEmpty(request.ReportType) || string.IsNullOrEmpty(request.Format))
+                if (string.IsNullOrEmpty(request.ReportType))
                 {
-                    return BadRequest(new { success = false, message = "Report type and format are required" });
+                    return BadRequest(new { success = false, message = "Report type is required" });
                 }
 
                 var validReportTypes = new[] { "daily", "monthly", "property", "user", "revenue" };
-                var validFormats = new[] { "excel", "pdf" };
 
                 if (!validReportTypes.Contains(request.ReportType.ToLower()))
                 {
                     return BadRequest(new { success = false, message = "Invalid report type" });
                 }
 
-                if (!validFormats.Contains(request.Format.ToLower()))
-                {
-                    return BadRequest(new { success = false, message = "Invalid format. Use 'excel' or 'pdf'" });
-                }
-
-                var reportData = await _adminDashboardService.GenerateReportAsync(request);
+                var reportData = await _adminDashboardService.GenerateExcelReportAsync(request);
                 
-                string fileName = $"report_{request.ReportType}_{request.StartDate:yyyyMMdd}_{request.EndDate:yyyyMMdd}.{request.Format}";
-                string contentType = request.Format.ToLower() == "excel" ? "text/csv" : "text/html";
+                string fileName = $"report_{request.ReportType}_{request.StartDate:yyyyMMdd}_{request.EndDate:yyyyMMdd}.xlsx";
+                string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
                 return File(reportData, contentType, fileName);
             }
@@ -186,7 +180,7 @@ namespace RealEstateManagement.API.Controllers.Admin
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error generating report");
+                _logger.LogError(ex, "Error generating Excel report");
                 return StatusCode(500, new { success = false, message = "Internal server error" });
             }
         }

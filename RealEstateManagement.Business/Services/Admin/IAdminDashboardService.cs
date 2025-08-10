@@ -10,6 +10,6 @@ namespace RealEstateManagement.Business.Services.Admin
         Task<List<PropertyStatsDTO>> GetPropertyStatsAsync();
         Task<List<UserStatsDTO>> GetUserStatsAsync();
         Task<List<RevenueStatsDTO>> GetRevenueStatsAsync(DateTime startDate, DateTime endDate);
-        Task<byte[]> GenerateReportAsync(ReportRequestDTO request);
+        Task<byte[]> GenerateExcelReportAsync(ReportRequestDTO request);
     }
 } 
