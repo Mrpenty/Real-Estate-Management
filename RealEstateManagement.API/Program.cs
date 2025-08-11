@@ -10,7 +10,13 @@ using RealEstateManagement.Business.Services.Properties;
 var builder = WebApplication.CreateBuilder(args);
 //signalr để chat
 builder.Services.AddSignalR()
-    .AddMessagePackProtocol();
+    .AddMessagePackProtocol()
+    .AddHubOptions<ChatHub>(options =>
+    {
+        options.EnableDetailedErrors = true;
+        options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+        options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+    });
 
 
 builder.Services.AddControllersServices();
@@ -54,7 +60,10 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
-    endpoints.MapHub<ChatHub>("/chatHub");     
+    endpoints.MapHub<ChatHub>("/chatHub", options =>
+    {
+        options.CloseOnAuthenticationExpiration = true;
+    });
 });
 app.MapControllers();
 app.UseSwaggerServices(app.Environment);

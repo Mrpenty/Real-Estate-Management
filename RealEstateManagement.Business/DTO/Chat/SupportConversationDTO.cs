@@ -30,8 +30,6 @@ namespace RealEstateManagement.Business.DTO.Chat
         public string Content { get; set; }
         public DateTime SentAt { get; set; }
         public bool IsRead { get; set; }
-        public string MessageType { get; set; }
-        public string? AttachmentUrl { get; set; }
         public bool IsFromAdmin { get; set; }
         public string SenderName { get; set; }
         public string SenderRole { get; set; }

@@ -39,12 +39,16 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    
+    <script src="~/js/config.js" asp-append-version="true"></script>
     <script src="~/js/authService.js" asp-append-version="true"></script>
     <script src="~/js/postPropertyService.js"></script>
     <script src="~/js/helper.js" asp-append-version="true"></script>
     <script src="~/js/compareProperty.js" asp-append-version="true"></script>
+    <script src="~/js/userSignalR.js" asp-append-version="true"></script>
+    <script src="~/js/supportChat.js" asp-append-version="true"></script>
 
 
     @await RenderSectionAsync("Styles", required: false)
@@ -419,7 +423,7 @@
             }
             try {
                 const token = localStorage.getItem('authToken');
-                const response = await fetch('https://localhost:7031/api/UserNotification/unread-count', { 
+                const response = await fetch(config.buildApiUrl(config.user.notifications + '/unread-count'), { 
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -476,7 +480,7 @@
             try {
                 // Use the user-specific notifications endpoint instead of all notifications
                 const token = localStorage.getItem('authToken');
-                const response = await fetch('https://localhost:7031/api/UserNotification/my-notifications', { 
+                const response = await fetch(config.buildApiUrl(config.user.notifications + '/my-notifications'), { 
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -694,7 +698,7 @@
         async function refreshNotifications() {
             try {
                 const token = localStorage.getItem('authToken');
-                const response = await fetch('https://localhost:7031/api/UserNotification/my-notifications', { 
+                const response = await fetch(config.buildApiUrl(config.user.notifications + '/my-notifications'), { 
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -742,37 +746,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             updateNavigation();
             updateNotificationCount();
-            checkUnreadSupportMessages();
-            
-            // Add Enter key support for simple chat
-            const simpleChatInput = document.getElementById('simpleChatMessageInput');
-            if (simpleChatInput) {
-                simpleChatInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        sendSimpleSupportMessage();
-                    }
-                });
-            }
-            
-            // Close modal when clicking outside
-            const simpleModal = document.getElementById('simpleSupportChatModal');
-            if (simpleModal) {
-                simpleModal.addEventListener('click', function(e) {
-                    if (e.target === simpleModal) {
-                        closeSimpleSupportChatModal();
-                    }
-                });
-            }
-            
-            // Close modal with Escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    const modal = document.getElementById('simpleSupportChatModal');
-                    if (modal && !modal.classList.contains('hidden')) {
-                        closeSimpleSupportChatModal();
-                    }
-                }
-            });
         });
 
                 // Hàm mới để lấy và cập nhật số dư ví
@@ -796,7 +769,7 @@
                     return;
                 }
 
-                const response = await fetch(`https://localhost:7031/api/Wallet/balance`, {
+                const response = await fetch(config.buildApiUrl(config.user.wallet + '/balance'), {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -825,281 +798,7 @@
             }
         }
 
-        // Support Chat functionality
-        function openSimpleSupportChat() {
-            console.log('openSimpleSupportChat called'); // Debug log
-            
-            if (!authService.isAuthenticated()) {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Vui lòng đăng nhập',
-                    text: 'Bạn cần đăng nhập để có thể liên hệ hỗ trợ.',
-                    confirmButtonText: 'Đăng nhập',
-                    showCancelButton: true,
-                    cancelButtonText: 'Hủy'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/Auth/Login';
-                    }
-                });
-                return;
-            }
-            
-            // Open simple chat modal
-            const modal = document.getElementById('simpleSupportChatModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                console.log('Modal opened successfully'); // Debug log
-                
-                // Focus on input
-                setTimeout(() => {
-                    const input = document.getElementById('simpleChatMessageInput');
-                    if (input) {
-                        input.focus();
-                        console.log('Input focused'); // Debug log
-                    }
-                }, 100);
-                
-                // Load existing conversation if any
-                loadSimpleSupportConversation();
-            } else {
-                console.error('Modal not found!'); // Debug log
-                // Fallback to redirect
-                window.location.href = '/Support/Index';
-            }
-        }
-
-        function closeSimpleSupportChatModal() {
-            document.getElementById('simpleSupportChatModal').classList.add('hidden');
-            document.getElementById('simpleChatMessageInput').value = '';
-        }
-
-        async function loadSimpleSupportConversation() {
-            try {
-                const token = localStorage.getItem('authToken');
-                if (!token) return;
-
-                const response = await fetch('/api/Support/user-conversations', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const conversations = await response.json();
-                    if (conversations.length > 0) {
-                        // Use the first conversation
-                        const conversation = conversations[0];
-                        await loadSimpleSupportMessages(conversation.id);
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading conversation:', error);
-            }
-        }
-
-        async function loadSimpleSupportMessages(conversationId) {
-            try {
-                const token = localStorage.getItem('authToken');
-                if (!token) return;
-
-                const response = await fetch(`/api/Support/conversation/${conversationId}/messages`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const messages = await response.json();
-                    displaySimpleSupportMessages(messages);
-                }
-            } catch (error) {
-                console.error('Error loading messages:', error);
-            }
-        }
-
-        function displaySimpleSupportMessages(messages) {
-            const container = document.getElementById('simpleChatMessages');
-            let html = '';
-            
-            if (messages.length === 0) {
-                html = '<div class="text-center text-gray-500 py-8"><i class="fas fa-comments text-4xl mb-2 text-gray-300"></i><p>Bắt đầu cuộc trò chuyện với admin</p></div>';
-            } else {
-                messages.forEach(message => {
-                    const isFromAdmin = message.isFromAdmin;
-                    const messageClass = isFromAdmin ? 'bg-blue-100 ml-8' : 'bg-white mr-8';
-                    const time = new Date(message.sentAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-                    const senderName = isFromAdmin ? 'Admin' : 'Bạn';
-                    
-                    html += `
-                        <div class="mb-3 ${isFromAdmin ? 'text-right' : 'text-left'}">
-                            <div class="inline-block ${messageClass} rounded-lg px-3 py-2 max-w-xs lg:max-w-md">
-                                <div class="text-sm">${message.content}</div>
-                                <div class="text-xs text-gray-500 mt-1">${time}</div>
-                            </div>
-                            <div class="text-xs text-gray-400 mt-1">${senderName}</div>
-                        </div>
-                    `;
-                });
-            }
-            
-            container.innerHTML = html;
-            container.scrollTop = container.scrollHeight;
-        }
-
-        async function sendSimpleSupportMessage() {
-            const input = document.getElementById('simpleChatMessageInput');
-            const content = input.value.trim();
-            
-            if (!content) {
-                showSimpleErrorMessage('Vui lòng nhập nội dung tin nhắn');
-                return;
-            }
-
-            try {
-                const token = localStorage.getItem('authToken');
-                if (!token) {
-                    showSimpleErrorMessage('Vui lòng đăng nhập lại');
-                    return;
-                }
-
-                // Get or create conversation
-                let conversationId = await getOrCreateSimpleConversation();
-                
-                if (!conversationId) {
-                    showSimpleErrorMessage('Không thể tạo cuộc trò chuyện');
-                    return;
-                }
-
-                // Send message
-                const response = await fetch(`/api/Support/conversation/${conversationId}/send-message`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(content)
-                });
-
-                if (response.ok) {
-                    input.value = '';
-                    await loadSimpleSupportMessages(conversationId);
-                    showSimpleSuccessMessage('Tin nhắn đã được gửi!');
-                } else {
-                    const error = await response.text();
-                    showSimpleErrorMessage('Lỗi: ' + error);
-                }
-            } catch (error) {
-                console.error('Error sending message:', error);
-                showSimpleErrorMessage('Lỗi kết nối: ' + error.message);
-            }
-        }
-
-        async function getOrCreateSimpleConversation() {
-            try {
-                const token = localStorage.getItem('authToken');
-                if (!token) return null;
-
-                // Check if user has existing conversation
-                const response = await fetch('/api/Support/user-conversations', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const conversations = await response.json();
-                    if (conversations.length > 0) {
-                        return conversations[0].id;
-                    }
-                }
-
-                // Create new conversation
-                const createResponse = await fetch('/api/Support/create-conversation', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        initialMessage: 'Bắt đầu cuộc trò chuyện'
-                    })
-                });
-
-                if (createResponse.ok) {
-                    const result = await createResponse.json();
-                    return result.conversationId;
-                }
-            } catch (error) {
-                console.error('Error getting/creating conversation:', error);
-            }
-            return null;
-        }
-
-        function showSimpleSuccessMessage(message) {
-            if (window.Swal) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Thành công!',
-                    text: message,
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            } else {
-                alert(message);
-            }
-        }
-
-        function showSimpleErrorMessage(message) {
-            if (window.Swal) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi!',
-                    text: message,
-                    confirmButtonText: 'Đóng'
-                });
-            } else {
-                alert(message);
-            }
-        }
-
-        // Check for unread support messages
-        async function checkUnreadSupportMessages() {
-            if (!authService.isAuthenticated()) return;
-            
-            try {
-                const token = localStorage.getItem('authToken');
-                const response = await fetch('/api/Support/user-conversations', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const conversations = await response.json();
-                    const totalUnread = conversations.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0);
-                    
-                    // Update unread badge
-                    const unreadBadge = document.getElementById('supportUnreadBadge');
-                    if (unreadBadge) {
-                        if (totalUnread > 0) {
-                            unreadBadge.textContent = totalUnread > 99 ? '99+' : totalUnread;
-                            unreadBadge.classList.remove('hidden');
-                            
-                            // Add pulse animation for new messages
-                            unreadBadge.classList.add('animate-pulse');
-                            setTimeout(() => {
-                                unreadBadge.classList.remove('animate-pulse');
-                            }, 2000);
-                        } else {
-                            unreadBadge.classList.add('hidden');
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking unread support messages:', error);
-            }
-        }
+                // Support Chat functionality moved to supportChat.js
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
