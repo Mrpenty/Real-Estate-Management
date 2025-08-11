@@ -43,50 +43,52 @@
         let listFavoriteItem = await listFavorite();
         //console.log(listFavoriteItem);
         let html = '';
-        listFavoriteItem.forEach(item => {
-            html += `
-                   <div class="bg-white rounded-md shadow-sm border border-gray-200 flex p-4 gap-4 items-start">
+        if(listFavoriteItem){
+            listFavoriteItem.forEach(item => {
+                html += `
+                       <div class="bg-white rounded-md shadow-sm border border-gray-200 flex p-4 gap-4 items-start">
 
-                    <div class="relative w-40 h-28 flex-shrink-0">
-                            <img onerror="handleImageError(this)" src="${item.primaryImageUrl}" on alt="Phòng trọ" class="w-full h-full object-cover rounded-lg">
+                        <div class="relative w-40 h-28 flex-shrink-0">
+                                <img onerror="handleImageError(this)" src="${item.primaryImageUrl}" on alt="Phòng trọ" class="w-full h-full object-cover rounded-lg">
 
-                        <div class="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg">
+                            <div class="absolute inset-0 flex items-center justify-center bg-black/30 rounded-lg">
+                            </div>
+
                         </div>
 
-                    </div>
+                        <div class="flex-1">
+                            <h2  onclick="window.location.href='/Home/Detail/${item.id}'" style="cursor:pointer" class="text-blue-800 font-semibold text-base leading-tight">
+                                ${item.title}
+                            </h2>
 
-                    <div class="flex-1">
-                        <h2  onclick="window.location.href='/Home/Detail/${item.id}'" style="cursor:pointer" class="text-blue-800 font-semibold text-base leading-tight">
-                            ${item.title}
-                        </h2>
+                            <div class="text-green-600 font-semibold mt-1">
+                                       ${formatVietnameseNumber(item.price)} / tháng <span class="text-gray-500 font-normal">· ${item.area} m²</span>
+                            </div>
 
-                        <div class="text-green-600 font-semibold mt-1">
-                                   ${formatVietnameseNumber(item.price)} / tháng <span class="text-gray-500 font-normal">· ${item.area} m²</span>
+                            <div class="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M17.657 16.657L13.414 12m0 0l-4.243 4.243M13.414 12L9.172 7.757m4.242 4.243a4 4 0 11-5.656-5.656 4 4 0 015.656 5.656z" />
+                                </svg>
+                                    ${item.detailedAddress}, ${item.street}, ${item.ward}, ${item.province}
+                            </div>
+
+                            <p class="text-sm text-gray-700 mt-1 line-clamp-2">
+                                   ${item.description}
+                            </p>
+
+                            <div class="text-xs text-gray-400 mt-1">${timeAgo(item.createdAt)}</div>
                         </div>
 
-                        <div class="text-sm text-gray-600 flex items-center gap-1 mt-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M17.657 16.657L13.414 12m0 0l-4.243 4.243M13.414 12L9.172 7.757m4.242 4.243a4 4 0 11-5.656-5.656 4 4 0 015.656 5.656z" />
+                            <button onclick="removeToFavorite(${item.id})" class="mt-1 text-red-500 hover:text-red-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.13 2.44h1.75C14.09 5.01 15.76 4 17.5 4 20 4 22 6 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                             </svg>
-                                ${item.detailedAddress}, ${item.street}, ${item.ward}, ${item.province}
-                        </div>
-
-                        <p class="text-sm text-gray-700 mt-1 line-clamp-2">
-                               ${item.description}
-                        </p>
-
-                        <div class="text-xs text-gray-400 mt-1">${timeAgo(item.createdAt)}</div>
+                        </button>
                     </div>
-
-                        <button onclick="removeToFavorite(${item.id})" class="mt-1 text-red-500 hover:text-red-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.13 2.44h1.75C14.09 5.01 15.76 4 17.5 4 20 4 22 6 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                        </svg>
-                    </button>
-                </div>
-            `;
-        });
+                `;
+            });
+        }
         $('#listFavoriteId').html(html);
 
 

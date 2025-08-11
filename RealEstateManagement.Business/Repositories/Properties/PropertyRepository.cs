@@ -32,6 +32,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.Address).ThenInclude(a => a.Ward)
                 .Include(p => p.Address).ThenInclude(a => a.Street)
                 .Include(p => p.Posts)
+                .Include(p => p.Reviews)
                 .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
@@ -66,6 +67,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
                     .ThenInclude(pa => pa.Amenity)
                 .Include(p=>p.Posts)
                     .ThenInclude(Pa=>Pa.RentalContract)
+                 .Include(p=>p.Reviews)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
         //Sắp xếp theo giá

@@ -248,6 +248,65 @@ function filterStreet() {
     $('#filterStreetId').html(html);
 }
 
+async function clickInterest(id, isExist, interestedStatus) {
+    const token = localStorage.getItem('authToken');
+    if (!token) window.location.href = '/Auth/Login';
+    if (!isExist) {
+        if (!confirm("Bạn muốn quan tâm đến bài đăng này ?")) return;
+        let userId = 0;
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        userId = payload.id;
+        try {
+            const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/AddInterest?renterId=${userId}&propertyId=${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+
+            //const data = await response.json();
+            alert('Thành công');
+            window.location.reload();
+
+            return data;
+        } catch (error) {
+            console.error('Update error:', error);
+            throw error;
+        }
+    }
+    else {
+        let message = "";
+        if (interestedStatus == 0) message = "Bài đăng đã được quan tâm trước đó.Bạn muốn hủy bỏ ?";
+        if (!confirm(message)) return;
+        let userId = 0;
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        userId = payload.id;
+        if (interestedStatus == 0) {
+            try {
+                const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/RemoveInterest?renterId=${userId}&propertyId=${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                //const data = await response.json();
+                alert('Thành công');
+                window.location.reload();
+
+                return data;
+            } catch (error) {
+                console.error('Update error:', error);
+                throw error;
+            }
+        }
+
+    }
+
+
+}
 
 async function addToFavourite(id) {
     try {
@@ -327,9 +386,9 @@ async function listFavorite() {
         });
 
 
-        if (!response.ok) {
-            throw new Error(data.message || data.errorMessage || 'Update failed');
-        }
+        //if (!response.ok) {
+        //    throw new Error(data.message || data.errorMessage || 'Update failed');
+        //}
         const data = await response.json();
 
         return data;
