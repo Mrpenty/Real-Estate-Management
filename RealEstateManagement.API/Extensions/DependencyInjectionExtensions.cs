@@ -79,7 +79,7 @@ namespace RealEstateManagement.API.Extensions
             //user and auth services
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IMailService, MailService>();
-            services.AddScoped<ISmsService, SmsService>();
+            services.AddScoped<ISmsService, ZaloSmsService>();
             services.AddScoped<IProfileService, ProfileService>();
 
             //some suport services

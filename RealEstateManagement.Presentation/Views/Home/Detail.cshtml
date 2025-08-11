@@ -290,6 +290,9 @@
         currentUserId = getCurrentUserIdFromToken();
         console.log('Initialized currentUserId:', currentUserId);
         
+        // Always check if user is the owner first
+        hideReportButtonForOwner();
+        
         // If user is logged in, check report status
         if (currentUserId > 0) {
             checkReportStatus();
@@ -318,6 +321,9 @@
         console.log('Refreshed currentUserId:', currentUserId, 'from:', previousUserId);
         
         if (currentUserId !== previousUserId) {
+            // Always check if user is the owner first
+            hideReportButtonForOwner();
+            
             if (currentUserId > 0) {
                 checkReportStatus();
             } else {
@@ -331,6 +337,14 @@
         const reportBtn = document.getElementById('reportBtn');
         const reportBtnText = document.getElementById('reportBtnText');
         
+        // Check if user is the owner of the post - hide button if so
+        hideReportButtonForOwner();
+        
+        // If user is the owner, don't proceed with button updates
+        if (currentUserId > 0 && currentUserId === landlordId) {
+            return;
+        }
+        
         reportBtnText.textContent = 'Báo xấu';
         reportBtn.onclick = () => {
             Swal.fire({
@@ -342,8 +356,7 @@
                 cancelButtonText: 'Hủy'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Redirect to login page or show login modal
-                    // You can customize this based on your login flow
+                    
                     window.location.href = '/Auth/Login';
                 }
             });
@@ -352,6 +365,22 @@
         // Reset button styling
         reportBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-red-600', 'text-white', 'bg-yellow-600', 'bg-gray-200', 'text-gray-700');
         reportBtn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+    }
+    
+    // Function to hide report button if user is the owner of the post
+    function hideReportButtonForOwner() {
+        const reportBtn = document.getElementById('reportBtn');
+       
+        
+        // Convert both to numbers to ensure proper comparison
+        const currentUserIdNum = Number(currentUserId);
+        const landlordIdNum = Number(landlordId);
+        
+        if (currentUserIdNum > 0 && currentUserIdNum === landlordIdNum) {
+            reportBtn.style.display = 'none';
+        } else {
+            reportBtn.style.display = 'flex';
+        }
     }
     
     // Check if user is logged in before allowing report
@@ -371,8 +400,8 @@
     }
     let reportService = new ReportService();
     
-    getProperty();
     initializeCurrentUserId(); // Initialize currentUserId and check report status
+    getProperty(); // Get property data and then check owner status
 
     function openLandlord(){
         window.location.href= `/Home/Landlord/${landlordId}`;
@@ -417,6 +446,14 @@
     function updateReportButton(data) {
         const reportBtn = document.getElementById('reportBtn');
         const reportBtnText = document.getElementById('reportBtnText');
+        
+        // Check if user is the owner of the post - hide button if so
+        hideReportButtonForOwner();
+        
+        // If user is the owner, don't proceed with button updates
+        if (currentUserId > 0 && currentUserId === landlordId) {
+            return;
+        }
         
         // Reset all classes first
         reportBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-red-600', 'text-white', 'bg-yellow-600', 'bg-gray-200', 'text-gray-700');
@@ -578,6 +615,7 @@
         let prop = await propertyService.getProperty(id);
         //console.log(prop);
         landlordId = prop.landlordId;
+        console.log('getProperty - landlordId set to:', landlordId, 'currentUserId:', currentUserId);
         let addressInfo = prop.detailedAddress + ", " + prop.street + ", " + prop.ward + ", " + prop.province;
         $('.titleId').html(prop.title);
         
@@ -644,6 +682,9 @@
                 </div>`
         });
         $('#listNew').html(htmlNew);
+        
+        // Check if current user is the owner and hide report button if so
+        hideReportButtonForOwner();
     }
 
     function selectImg(el1){
