@@ -59,12 +59,11 @@
                 <div class="flex">
                     <h1 class="text-xl font-bold text-red-600 titleId">
                     </h1>
-                    <div class="flex items-center text-yellow-500 ml-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:15px;height:15px" viewBox="0 0 24 24">
-                            <path d="M12 .587l3.668 7.568L24 9.423l-6 5.854L19.335 24 12 20.202 4.665 24 6 15.277 0 9.423l8.332-1.268z" />
-                        </svg>
-                        <span class="ml-1 font-semibold text-gray-800" id="avgStar"></span>
+                    <div class="flex items-center">
+                        <div class="flex items-center text-gray-500 ml-2"><span id="avgStar"></span></div>
+                        <div style="margin-bottom:2px" class="flex items-center text-yellow-500 ml-2" id="starContainer"></div>
                     </div>
+                    
 
                     <div class="flex items-center text-gray-600 ml-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:15px;height:15px" viewBox="0 0 24 24">
@@ -197,13 +196,14 @@
 </div>
 
 <script src="~/js/propertyService.js"></script>
-<script src="~/js/review.js"></script>
+@* <script src="~/js/review.js"></script> *@
 <script>
     let urlBase = "https://localhost:7031";
     //document.getElementById('listPostId').classList.add("text-orange-500");
     //document.getElementById('listPostId').classList.replace("border-gray-200", "border-orange-500");
     let id = @ViewBag.Id;
     let landlordId = 0;
+    let isOwner = false;
     getProperty();
 
     function openLandlord(){
@@ -212,11 +212,20 @@
 
     async function getProperty(){
         let prop = await propertyService.getProperty(id);
-        console.log(prop);
+        //console.log(prop);
         landlordId = prop.landlordId;
+        const token = localStorage.getItem('authToken');
+        if(token){
+            let userId = 0;
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            userId = payload.id;
+            isOwner = prop.landlordId = userId ? true : false;
+        }
+
         let addressInfo = prop.detailedAddress + ", " + prop.street + ", " + prop.ward + ", " + prop.province;
         $('.titleId').html(prop.title);
-        $('#avgStar').html(prop.rating);
+        renderStarsBody(prop.rating);
+        $('#avgStar').html("(" + prop.rating + ")");
         $('#totalComment').html(prop.commentNo);
         
         $('.landlordUrl').prop('src',prop.landlordProfilePictureUrl?.includes('http') ? prop.landlordProfilePictureUrl : urlBase + prop.landlordProfilePictureUrl)
@@ -282,6 +291,12 @@
                 </div>`
         });
         $('#listNew').html(htmlNew);
+
+        var listReview = await getComment(id);
+            listReview.items.forEach(item => {
+            var commentHTML = createCommentHTML(item,isOwner);
+            list.insertAdjacentElement('afterbegin', commentHTML);
+        });
     }
 
     function selectImg(el1){
@@ -332,19 +347,18 @@
       });
     }
 
-
-    function createCommentHTML(name, text, stars, time) {
+    function createCommentHTML(name, text, stars, time, img) {
       const starsDisplay = '★'.repeat(stars) + ' ☆'.repeat(5 - stars);
       const comment = document.createElement('div');
       comment.className = 'flex space-x-4 items-start';
 
       comment.innerHTML = `
-        <img src="https://i.pravatar.cc/48?u=${Math.random()}" alt="avatar" class="w-12 h-12 rounded-full shadow-sm">
+        <img src="${img}" alt="avatar" class="w-12 h-12 rounded-full shadow-sm">
         <div class="flex-1">
           <div class="bg-gray-50 p-4 rounded-xl shadow-sm hover:shadow transition">
             <div class="flex items-center justify-between mb-1">
               <span class="font-semibold text-gray-800">${name}</span>
-              <span class="text-sm text-gray-500">${time}</span>
+              <span class="text-sm text-gray-500">${timeAgo(time)}</span>
             </div>
             <div class="flex mb-2">
               <span class="text-yellow-400">${starsDisplay}</span>
@@ -400,7 +414,108 @@
       return comment;
     }
 
-    form.addEventListener('submit', function(e) {
+
+    function createCommentHTML(item, isOwner = false) {
+      const starsDisplay = '★'.repeat(item.rating) + '☆'.repeat(5 - item.rating);
+      const comment = document.createElement('div');
+      comment.className = 'flex space-x-4 items-start';
+
+      comment.innerHTML = `
+        <img src="${item.renterImg}" alt="avatar" class="w-12 h-12 rounded-full shadow-sm" style="display:none">
+        <div class="flex-1">
+          <div class="bg-gray-50 p-4 rounded-xl shadow-sm hover:shadow transition">
+            <div class="flex items-center justify-between mb-1">
+              <span style="cursor:pointer" onclick="window.location.href='/Home/Landlord/${item.renterId}'" class="font-semibold text-gray-800">${item.renterName}</span>
+              <span class="text-sm text-gray-500">${timeAgo(item.createdAt)}</span>
+            </div>
+            <div class="flex mb-2">
+              <span class="text-yellow-400">${starsDisplay}</span>
+            </div>
+            <p class="text-gray-700">${item.reviewText}</p>
+            ${isOwner && !item.reply ? `
+                 <button class="text-sm text-blue-500 mt-2 hover:underline replyBtn-${item.reviewId}">Trả lời</button>
+            ` : `<button class="text-sm text-blue-500 mt-2 hover:underline replyBtn-${item.reviewId}" style="display:none">Trả lời</button>`
+            }
+            ${isOwner ? `
+                 <button class="text-sm text-red-500 hover:underline report-btn" style="display:none">Báo cáo</button>
+            ` : ''}
+            <div class="replies space-y-3 mt-3 pl-8 border-l border-gray-200"></div>
+          </div>
+        </div>
+      `;
+      const replyBtn = comment.querySelector('.replyBtn-'+ item.reviewId);
+      const repliesContainer = comment.querySelector('.replies');
+      if(item.reply){
+          const reply = document.createElement('div');
+            reply.className = 'flex space-x-3 items-start';
+            reply.id = `reply-${item.reply.id}`;
+            reply.innerHTML = `
+              <img src="${item.reply.img}" alt="avatar" style="display:none" class="w-9 h-9 rounded-full shadow-sm">
+              <div class="bg-white p-3 rounded-lg shadow-sm flex-1">
+                <div style="cursor:pointer" onclick="window.location.href='/Home/Landlord/${item.reply.landlordId}'" class="font-semibold text-sm">Chủ bài đăng <span class="text-gray-500 text-xs">${timeAgo(item.reply.createdAt)}</span></div>
+                <p class="text-gray-700 text-sm">${item.reply.replyContent}</p>
+                ${isOwner ? `
+                    <button onclick="editReply(${item.reply.id},${item.reviewId})" class="text-sm text-blue-500 mt-2 hover:underline replyBtn">Chỉnh sửa</button>
+                ` : ''}
+              </div>
+            `;
+           repliesContainer.appendChild(reply);
+      }
+      // else{
+
+      // }
+
+
+      replyBtn.addEventListener('click', () => {
+        if (comment.querySelector('.replyForm')) return;
+
+        const replyForm = document.createElement('form');
+        replyForm.className = 'replyForm mt-3';
+        replyForm.id = `replyForm-${item.reply.id}`;
+        replyForm.innerHTML = `
+          <textarea placeholder="Viết trả lời..."
+            class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            rows="2" value="${item.reply?.replyContent ?? ''}">${item.reply?.replyContent ?? ''}</textarea>
+          <button type="submit"
+            class="mt-2 bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-1 rounded-lg">
+            Gửi trả lời
+          </button>
+          <button type="button" onclick="cancelReply(${item.reply.id},${item.reviewId})"
+            class="mt-2 bg-gray-500 hover:bg-gray-600 text-white text-sm px-4 py-1 rounded-lg">
+            Trở lại
+          </button>
+        `;
+
+        replyForm.addEventListener('submit',(e) => {
+          e.preventDefault();
+          const replyText = replyForm.querySelector('textarea').value.trim();
+          let dto = {
+              replyId: replyForm.id.replace('replyForm-',''),
+              replyContent: replyText,
+          }
+          dto['replyId'] = Number(dto['replyId']);
+          //console.log(dto);
+          editReplyComment(dto);
+        });
+
+        repliesContainer.appendChild(replyForm);
+      });
+
+      return comment;
+    }
+
+    async function cancelReply(id,reviewId){
+        $(`#reply-${id}`).show();
+        $(`.replyForm`).hide();
+    }
+
+    async function editReply(id,reviewId){
+        $(`#reply-${id}`).hide();
+        $(`.replyForm`).show();
+        $(`.replyBtn-${reviewId}`).click();
+    }
+
+    form.addEventListener('submit',function(e) {
       e.preventDefault();
       const text = input.value.trim();
       if (text && selectedRating > 0) {
@@ -410,15 +525,6 @@
           rating: selectedRating
         };
         addComment(dto);
-        const now = new Date();
-        const timeStr = timeAgo(now);
-
-        const commentHTML = createCommentHTML('Người dùng', text, selectedRating, timeStr);
-        list.insertAdjacentElement('afterbegin', commentHTML);
-
-        input.value = '';
-        selectedRating = 0;
-        highlightStars(ratingStars, 0, 0);
       } else {
         alert('Vui lòng nhập bình luận và chọn số sao.');
       }

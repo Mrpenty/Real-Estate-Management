@@ -2,6 +2,53 @@
 const API_PROPERTY_LOCATION_BASE_URL = 'https://localhost:7031/api/Property';
 const API_FAVORITE_BASE_URL = 'https://localhost:7031/api/Favorite';
 
+function roundToHalfStar(rating) {
+    const thresholds = [0, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+    for (let i = thresholds.length - 1; i >= 0; i--) {
+        if (rating >= thresholds[i]) return thresholds[i];
+    }
+    return 0;
+}
+
+function renderStarsBody(rating) {
+    const container = document.getElementById("starContainer");
+    container.innerHTML = "";
+
+    rating = roundToHalfStar(rating);
+
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+    const fullStarSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:15px;height:15px">
+        <path fill="gold" stroke="black" stroke-width="1" 
+        d="M12 .587l3.668 7.568L24 9.423l-6 5.854L19.335 24 
+        12 20.202 4.665 24 6 15.277 0 9.423l8.332-1.268z"/>
+    </svg>`;
+
+    const halfStarSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:15px;height:15px">
+        <defs>
+            <linearGradient id="halfGradient" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="50%" stop-color="gold"/>
+                <stop offset="50%" stop-color="white"/>
+            </linearGradient>
+        </defs>
+        <path fill="url(#halfGradient)" stroke="black" stroke-width="1" 
+        d="M12 .587l3.668 7.568L24 9.423l-6 5.854L19.335 24 
+        12 20.202 4.665 24 6 15.277 0 9.423l8.332-1.268z"/>
+    </svg>`;
+
+    const emptyStarSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:15px;height:15px">
+        <path fill="white" stroke="black" stroke-width="1" 
+        d="M12 .587l3.668 7.568L24 9.423l-6 5.854L19.335 24 
+        12 20.202 4.665 24 6 15.277 0 9.423l8.332-1.268z"/>
+    </svg>`;
+
+    for (let i = 0; i < fullStars; i++) container.innerHTML += fullStarSVG;
+    if (hasHalfStar) container.innerHTML += halfStarSVG;
+    for (let i = 0; i < emptyStars; i++) container.innerHTML += emptyStarSVG;
+}
+
 function timeAgo(dateInput) {
     const date = new Date(dateInput);
     const now = new Date();
@@ -249,10 +296,10 @@ function filterStreet() {
 }
 
 async function clickInterest(id, isExist, interestedStatus) {
-    const token = localStorage.getItem('authToken');
-    if (!token) window.location.href = '/Auth/Login';
     if (!isExist) {
         if (!confirm("Bạn muốn quan tâm đến bài đăng này ?")) return;
+        const token = localStorage.getItem('authToken');
+        if (!token) window.location.href = '/Auth/Login';
         let userId = 0;
         const payload = JSON.parse(atob(token.split('.')[1]));
         userId = payload.id;
@@ -279,6 +326,8 @@ async function clickInterest(id, isExist, interestedStatus) {
         let message = "";
         if (interestedStatus == 0) message = "Bài đăng đã được quan tâm trước đó.Bạn muốn hủy bỏ ?";
         if (!confirm(message)) return;
+        const token = localStorage.getItem('authToken');
+        if (!token) window.location.href = '/Auth/Login';
         let userId = 0;
         const payload = JSON.parse(atob(token.split('.')[1]));
         userId = payload.id;
