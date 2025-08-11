@@ -56,5 +56,25 @@ namespace RealEstateManagement.API.Controllers
             if (!ok) return BadRequest(msg);
             return Ok(msg);
         }
+        [HttpGet("post/{propertyPostId:int}")]
+        [AllowAnonymous] // hoặc [Authorize] tùy nghiệp vụ
+        public async Task<IActionResult> GetReviewsByPost(
+            [FromRoute] int propertyPostId,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string sort = "-date")
+        {
+            var result = await _reviewService.GetReviewsByPostAsync(propertyPostId, page, pageSize, sort);
+            return Ok(result);
+        }
+
+        // GET: /api/ReviewQuery/post/123/summary
+        [HttpGet("post/{propertyPostId:int}/summary")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPostRatingSummary([FromRoute] int propertyPostId)
+        {
+            var result = await _reviewService.GetPostRatingSummaryAsync(propertyPostId);
+            return Ok(result);
+        }
     }
 }
