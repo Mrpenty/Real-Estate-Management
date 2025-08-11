@@ -22,5 +22,7 @@ namespace RealEstateManagement.Business.Repositories.Reviews
         Task<bool> HardDeleteReviewAsync(int reviewId);
         Task<RentalContract> GetContractByRenterAndPostAsync(int renterId, int propertyPostId);
         Task<RentalContract> GetCompletedContractAsync(int propertyPostId, int renterId);
+
+        IQueryable<Review> QueryReviewsByPropertyPostId(int propertyPostId);
     }
 }

@@ -89,5 +89,16 @@ namespace RealEstateManagement.Business.Repositories.Reviews
                 c.StartDate.Value.AddMonths(c.ContractDurationMonths) <= DateTime.Now
             );
         }
+        public IQueryable<Review> QueryReviewsByPropertyPostId(int propertyPostId)
+        {
+            // Chỉ lấy review hiển thị và không bị flag.
+            // Join qua Contract để lọc theo PropertyPostId.
+            return _context.Reviews
+                .AsNoTracking()
+                .Include(r => r.Reply)
+                .Include(r => r.Renter)
+                .Include(r => r.Contract) // cần Contract.PropertyPostId
+                .Where(r => r.IsVisible && !r.IsFlagged && r.Contract.PropertyPostId == propertyPostId);
+        }
     }
 }

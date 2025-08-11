@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RealEstateManagement.Business.DTO.Review;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,5 +14,9 @@ namespace RealEstateManagement.Business.Services.Reviews
         Task<(bool IsSuccess, string Message)> AddReplyAsync(int reviewId, int landlordId, string replyContent);
         Task<(bool IsSuccess, string Message)> EditReplyAsync(int replyId, int landlordId, string newContent);
         Task<bool> DeleteReviewWhenReportResolvedAsync(int reviewId);
+            
+        Task<PagedResultDTO<ReviewItemDTO>> GetReviewsByPostAsync(int propertyPostId, int page = 1, int pageSize = 10, string sort = "-date");
+
+        Task<PostRatingSummaryDTO> GetPostRatingSummaryAsync(int propertyPostId);
     }
 }
