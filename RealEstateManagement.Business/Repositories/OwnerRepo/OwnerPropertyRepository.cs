@@ -23,6 +23,8 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         {
             return _context.Properties
                 .Include(p => p.Images)
+                .Include(p => p.Posts)
+                .ThenInclude(p => p.RentalContract)
                 .Include(p => p.Address)
                 .ThenInclude(p => p.Province)
                 .Include(p => p.Address)

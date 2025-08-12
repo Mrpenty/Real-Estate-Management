@@ -630,10 +630,11 @@
                     </div>
                     <div class=" flex flex-col gap-2 items-end">
                         <div class="flex items-center text-yellow-500 ml-2">
-                            <span class="mr-1 font-semibold text-gray-800" id="avgStar">${item.rating}</span>
+                            <span class="mr-1 font-semibold text-gray-800" id="avgStar">${item.rating == 0 ? 'Chưa có đánh giá' : item.rating}</span>
+                            ${item.rating != 0 ? `
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:15px;height:15px" viewBox="0 0 24 24">
                                 <path d="M12 .587l3.668 7.568L24 9.423l-6 5.854L19.335 24 12 20.202 4.665 24 6 15.277 0 9.423l8.332-1.268z" />
-                            </svg>
+                            </svg>` : ''}
                         </div>
 
                         <div class="flex items-center text-gray-600 ml-2">

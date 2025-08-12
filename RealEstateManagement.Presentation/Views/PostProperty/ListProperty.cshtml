@@ -72,6 +72,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-center">
                             <button onclick="window.location.href = '/PostProperty/DetailProperty/${item.id}'" class="text-blue-500 hover:text-blue-700">Sửa</button>
                             <button onclick="deleteProperty(${item.id})" class="ml-2 text-red-500 hover:text-red-700">Xóa</button>
+                            ${item.isExistRenterContract ? `<button onclick="window.location.href='/PostProperty/DetailRenterProperty?propertyId=${item.id}&id=${item.renterContractId}'" class="ml-2 text-green-500 hover:text-green-700">Hợp đồng</button>` : ''}
                         </td>
                     </tr>
             `;
