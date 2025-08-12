@@ -288,5 +288,53 @@ namespace RealEstateManagement.API.Controllers
                 return NotFound("Không tìm thấy người dùng hoặc người dùng không có bất động sản nào.");
             return Ok(result);
         }
+        [HttpGet("{id}/similar")]
+        public async Task<IActionResult> GetSimilar(int id, [FromQuery] int take = 12)
+        {
+            int currentUserId = 0;
+            var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var token = handler.ReadJwtToken(accessToken);
+                var uid = token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+                int.TryParse(uid, out currentUserId);
+            }
+
+            var items = await _propertyService.SuggestSimilarPropertiesAsync(id, take, currentUserId);
+            return Ok(items);
+        }
+
+        [HttpGet("weekly-best-rated")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetWeeklyBestRated(
+            [FromQuery] int top = 5,
+            [FromQuery] int minReviewsInWeek = 1,
+            [FromQuery] DateTime? fromUtc = null,
+            [FromQuery] DateTime? toUtc = null)
+        {
+            try
+            {
+                if (top <= 0) top = 5;
+                if (top > 100) top = 100;
+                if (minReviewsInWeek < 0) minReviewsInWeek = 0;
+
+                int? currentUserId = null;
+                var claim = User?.FindFirst("id")
+                            ?? User?.FindFirst(ClaimTypes.NameIdentifier)
+                            ?? User?.FindFirst(JwtRegisteredClaimNames.Sub);
+                if (claim != null && int.TryParse(claim.Value, out var uid))
+                    currentUserId = uid;
+
+                var result = await _propertyService.GetWeeklyBestRatedPropertiesAsync(
+                    top, minReviewsInWeek, fromUtc, toUtc, currentUserId);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

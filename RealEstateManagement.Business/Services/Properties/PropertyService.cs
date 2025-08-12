@@ -594,5 +594,185 @@ namespace RealEstateManagement.Business.Services.Properties
                 Properties = propertyDtos
             };
         }
+        //Gợi ý bất động sản tương tự
+        public async Task<IEnumerable<HomePropertyDTO>> SuggestSimilarPropertiesAsync(int propertyId, int take = 12, int? currentUserId = 0)
+        {
+            var pivot = await _repository.GetPropertyForSimilarityByIdAsync(propertyId);
+            if (pivot == null) return Enumerable.Empty<HomePropertyDTO>();
+
+            // 1) Ứng viên sơ bộ trên SQL (giảm N)
+            var price = pivot.Price <= 0 ? (decimal?)null : pivot.Price;
+            var area = pivot.Area <= 0 ? (decimal?)null : pivot.Area;
+
+            var q = _repository.QueryApprovedForSimilarity()
+                .Where(p => p.Id != pivot.Id && p.Type == pivot.Type);
+
+            if (pivot.Address?.WardId is int wardId && wardId != 0)
+                q = q.Where(p => p.Address.WardId == wardId || p.Address.ProvinceId == pivot.Address.ProvinceId);
+            else if (pivot.Address?.ProvinceId is int provinceId && provinceId != 0)
+                q = q.Where(p => p.Address.ProvinceId == provinceId);
+
+            if (price.HasValue)
+            {
+                var minP = price.Value * 0.7m;
+                var maxP = price.Value * 1.3m;
+                q = q.Where(p => p.Price >= minP && p.Price <= maxP);
+            }
+            if (area.HasValue)
+            {
+                var minA = area.Value * 0.7m;
+                var maxA = area.Value * 1.3m;
+                q = q.Where(p => p.Area >= minA && p.Area <= maxA);
+            }
+            q = q.Where(p => Math.Abs(p.Bedrooms - pivot.Bedrooms) <= 2);
+
+            var candidates = await q.ToListAsync();
+
+            // 2) Chấm điểm tương đồng (0..1)
+            var pivotAmenityIds = pivot.PropertyAmenities?.Select(pa => pa.Amenity.Id).ToHashSet() ?? new HashSet<int>();
+
+            double W_TYPE = 0.30, W_LOC = 0.25, W_PRICE = 0.20, W_AREA = 0.10, W_BED = 0.05, W_AMEN = 0.10;
+
+            double Score(Property c)
+            {
+                // typeScore
+                double sType = string.Equals(c.Type, pivot.Type, StringComparison.OrdinalIgnoreCase) ? 1.0 : 0.0;
+
+                // locationScore
+                double sLoc = 0.0;
+                if (pivot.Address?.WardId != null && c.Address?.WardId == pivot.Address.WardId) sLoc = 1.0;
+                else if (pivot.Address?.ProvinceId != null && c.Address?.ProvinceId == pivot.Address.ProvinceId) sLoc = 0.6;
+
+                // priceScore
+                double sPrice = 0.5;
+                if (pivot.Price > 0 && c.Price > 0)
+                {
+                    var diff = Math.Abs((double)(c.Price - pivot.Price)) / (double)pivot.Price; // tỉ lệ chênh
+                    sPrice = Math.Max(0.0, 1.0 - Math.Min(diff, 1.0));
+                }
+
+                // areaScore
+                double sArea = 0.5;
+                if (pivot.Area > 0 && c.Area > 0)
+                {
+                    var diff = Math.Abs((double)(c.Area - pivot.Area)) / (double)Math.Max(1, pivot.Area);
+                    sArea = Math.Max(0.0, 1.0 - Math.Min(diff, 1.0));
+                }
+
+                // bedroomsScore
+                double sBed = 1.0 - Math.Min(Math.Abs(c.Bedrooms - pivot.Bedrooms) / 3.0, 1.0);
+
+                // amenitiesScore (Jaccard)
+                var cAmenityIds = c.PropertyAmenities?.Select(pa => pa.Amenity.Id).ToHashSet() ?? new HashSet<int>();
+                double sAmen = 0.0;
+                if (pivotAmenityIds.Count > 0 || cAmenityIds.Count > 0)
+                {
+                    var inter = pivotAmenityIds.Intersect(cAmenityIds).Count();
+                    var union = pivotAmenityIds.Union(cAmenityIds).Count();
+                    sAmen = union == 0 ? 0.0 : (double)inter / union;
+                }
+
+                return W_TYPE * sType + W_LOC * sLoc + W_PRICE * sPrice + W_AREA * sArea + W_BED * sBed + W_AMEN * sAmen;
+            }
+
+            var favorites = currentUserId > 0
+                ? (await _context.UserFavoriteProperties
+                        .Where(f => f.UserId == currentUserId).Select(f => f.PropertyId).ToListAsync())
+                      .ToHashSet()
+                : new HashSet<int>();
+
+            var top = candidates
+                .Select(c => new { P = c, Score = Score(c) })
+                .OrderByDescending(x => x.Score)
+                .ThenByDescending(x => x.P.PropertyPromotions.Any()
+                    ? x.P.PropertyPromotions.Max(pp => pp.PromotionPackage.Level)
+                    : 0)
+                .ThenByDescending(x => x.P.CreatedAt)
+                .Take(take)
+                .Select(x => new HomePropertyDTO
+                {
+                    Id = x.P.Id,
+                    Title = x.P.Title,
+                    Description = x.P.Description,
+                    Type = x.P.Type,
+                    AddressID = x.P.AddressId,
+                    StreetId = x.P.Address?.StreetId,
+                    Street = x.P.Address?.Street?.Name,
+                    ProvinceId = x.P.Address?.ProvinceId,
+                    Province = x.P.Address?.Province?.Name,
+                    WardId = x.P.Address?.WardId,
+                    Ward = x.P.Address?.Ward?.Name,
+                    DetailedAddress = x.P.Address?.DetailedAddress,
+                    Area = x.P.Area,
+                    Bedrooms = x.P.Bedrooms,
+                    IsFavorite = favorites.Contains(x.P.Id),
+                    Price = x.P.Price,
+                    Status = x.P.Status,
+                    Location = x.P.Location,
+                    CreatedAt = x.P.CreatedAt,
+                    ViewsCount = x.P.ViewsCount,
+                    PrimaryImageUrl = x.P.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
+                    LandlordId = x.P.Landlord?.Id ?? 0,
+                    LandlordName = x.P.Landlord?.Name,
+                    LandlordPhoneNumber = x.P.Landlord?.PhoneNumber,
+                    LandlordProfilePictureUrl = x.P.Landlord?.ProfilePictureUrl,
+                    Amenities = x.P.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                    PromotionPackageName = x.P.PropertyPromotions?
+                        .OrderByDescending(pp => pp.PromotionPackage.Level)
+                        .Select(pp => pp.PromotionPackage.Name)
+                        .FirstOrDefault()
+                })
+                .ToList();
+
+            return top;
+        }
+        public async Task<List<WeeklyBestRatedPropertyDTO>> GetWeeklyBestRatedPropertiesAsync(
+            int topN = 12,
+            int minReviewsInWeek = 1,
+            DateTime? fromUtc = null,
+            DateTime? toUtc = null,
+            int? currentUserId = 0)
+        {
+            if (topN <= 0) topN = 12;
+            if (minReviewsInWeek < 0) minReviewsInWeek = 0;
+
+            // Khoảng thời gian mặc định: 7 ngày gần nhất (rolling)
+            var to = toUtc ?? DateTime.UtcNow;
+            var from = fromUtc ?? to.AddDays(-7);
+
+            // Lấy danh sách đã được tính Avg trong repo
+            // Để đảm bảo sau khi lọc minReviews vẫn còn đủ topN, gọi repo với "biên dư"
+            // (ví dụ gấp 3 lần). Tuỳ data thực tế bạn có thể chỉnh hệ số này.
+            int fetchCount = Math.Max(topN * 3, topN);
+            var raw = await _repository.GetWeeklyBestRatedPropertiesAsync(from, to, fetchCount);
+
+            // Lọc theo số review tối thiểu trong tuần
+            var filtered = raw
+                .Where(x => x.WeeklyReviewCount >= minReviewsInWeek)
+                .OrderByDescending(x => x.WeeklyAverageRating)
+                .ThenByDescending(x => x.WeeklyReviewCount)
+                .ThenByDescending(x => x.PromotionLevel)
+                .ThenByDescending(x => x.PropertyCreatedAt)
+                .ThenByDescending(x => x.ViewsCount)
+                .Take(topN)
+                .ToList();
+
+            // Đánh dấu IsFavorite nếu có user
+            if (currentUserId.GetValueOrDefault() > 0)
+            {
+                var uid = currentUserId!.Value;
+                var favIds = await _context.UserFavoriteProperties
+                    .Where(f => f.UserId == uid)
+                    .Select(f => f.PropertyId)
+                    .ToListAsync();
+
+                var favSet = favIds.ToHashSet();
+                foreach (var item in filtered)
+                    item.IsFavorite = favSet.Contains(item.PropertyId);
+            }
+
+            return filtered;
+        }
+
     }
 }

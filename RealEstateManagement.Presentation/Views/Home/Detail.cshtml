@@ -111,6 +111,76 @@
                         </div>
                     </div>
             </div>
+                <!-- Bất động sản tương tự -->
+                <div class="mt-8 bg-white rounded-md shadow-sm p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-semibold text-gray-800">Bất động sản tương tự</h3>
+                        <a id="seeMoreSimilar" href="#" class="text-sm text-blue-600 hover:underline hidden">Xem thêm</a>
+                    </div>
+
+                    <div id="similarList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    <div id="similarEmpty" class="text-sm text-gray-500 mt-3 hidden">Chưa có gợi ý tương tự phù hợp.</div>
+                </div>
+
+                <script>
+                    async function loadSimilar() {
+                        try {
+                            const take = 5;
+                            const res = await fetch(`${urlBase}/api/Property/${@ViewBag.Id}/similar?take=${take}`, {
+                                headers: { 'Accept': 'application/json' }
+                            });
+                            if (!res.ok) throw new Error('Similar API failed');
+                            const items = await res.json();
+                            if (!items || items.length === 0) {
+                                document.getElementById('similarEmpty').classList.remove('hidden');
+                                return;
+                            }
+
+                            const more = document.getElementById('seeMoreSimilar');
+                            if (more && items[0]?.type) {
+                                more.href = `/Home/Search?type=${encodeURIComponent(items[0].type)}`;
+                                more.classList.remove('hidden');
+                            }
+
+                            const wrap = document.getElementById('similarList');
+                            wrap.innerHTML = items.map(renderSimilarCard).join('');
+                        } catch (e) {
+                            console.error(e);
+                            document.getElementById('similarEmpty').classList.remove('hidden');
+                        }
+                    }
+
+                    function renderSimilarCard(p) {
+                        const img = p.primaryImageUrl
+                            ? (p.primaryImageUrl.startsWith('http') ? p.primaryImageUrl : `${urlBase}${p.primaryImageUrl}`)
+                            : '/image/default-property.jpg';
+                        const address = [p.street, p.ward, p.province].filter(Boolean).join(', ');
+                        const priceText = (typeof formatVietnameseNumber === 'function')
+                            ? `${formatVietnameseNumber(p.price)} đ`
+                            : `${(p.price ?? 0).toLocaleString('vi-VN')} đ`;
+
+                        return `
+                        <div class="border rounded-md overflow-hidden hover:shadow transition cursor-pointer"
+                             onclick="window.location.href='/Home/Detail/${p.id}'">
+                            <div class="aspect-video bg-gray-100">
+                                <img src="${img}" onerror="handleImageError(this)" class="w-full h-full object-cover"/>
+                            </div>
+                            <div class="p-3">
+                                <h4 class="font-semibold text-gray-900 line-clamp-2">${escapeHtml(p.title || 'Không có tiêu đề')}</h4>
+                                <div class="mt-1 text-green-600 font-semibold">${priceText}</div>
+                                <div class="text-sm text-gray-600">${p.area} m² · ${p.bedrooms} phòng</div>
+                                <div class="text-xs text-gray-500 mt-1 line-clamp-1">${escapeHtml(address)}</div>
+                            </div>
+                        </div>`;
+                    }
+
+                    function escapeHtml(s) {
+                        return (s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+                    }
+
+                    document.addEventListener('DOMContentLoaded', loadSimilar);
+                </script>
+
         </div>
     </div>
     </div>

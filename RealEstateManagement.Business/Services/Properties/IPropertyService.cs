@@ -42,6 +42,21 @@ namespace RealEstateManagement.Business.Services.Properties
         Task<IEnumerable<HomePropertyDTO>> FilterByTypeAsync(string type);
         // Lấy tất cả property theo landlordId
         Task<UserProfileWithPropertiesDTO?> GetUserProfileWithPropertiesAsync(int userId, int? currentId = null);
-
+        //Gợi ý bđs tương tự
+        Task<IEnumerable<HomePropertyDTO>> SuggestSimilarPropertiesAsync(int propertyId, int take = 12, int? currentUserId = 0);
+        /// <summary>
+        /// Lấy danh sách BĐS có điểm trung bình cao nhất trong khoảng tuần (rolling 7 ngày).
+        /// </summary>
+        /// <param name="topN">Số lượng cần lấy (sau khi lọc minReviews)</param>
+        /// <param name="minReviewsInWeek">Số lượng review tối thiểu trong tuần</param>
+        /// <param name="fromUtc">Thời điểm bắt đầu (UTC). Null = UtcNow - 7 ngày</param>
+        /// <param name="toUtc">Thời điểm kết thúc (UTC). Null = UtcNow</param>
+        /// <param name="currentUserId">User hiện tại (để set IsFavorite). Null/0 = anonymous</param>
+        Task<List<WeeklyBestRatedPropertyDTO>> GetWeeklyBestRatedPropertiesAsync(
+            int topN = 12,
+            int minReviewsInWeek = 1,
+            DateTime? fromUtc = null,
+            DateTime? toUtc = null,
+            int? currentUserId = 0);
     }
 }
