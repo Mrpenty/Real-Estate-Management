@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Nest;
 using RealEstateManagement.Business.DTO.Location;
 using RealEstateManagement.Business.DTO.Properties;
+using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
 using RealEstateManagement.Business.Repositories.FavoriteRepository;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Data.Entity;
@@ -256,7 +257,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 DetailedAddress = p.Address.DetailedAddress,
                 StreetId = p.Address.StreetId,
                 ProvinceId = p.Address.ProvinceId,
-                WardId = p.Address.WardId,
+                WardId = p.Address.WardId
                 Rating = rating,
                 CommentNo = ratingNo,
                 RatingNo = ratingNo

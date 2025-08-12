@@ -1,4 +1,5 @@
 ﻿const API_PROPERTY_BASE_URL = 'https://localhost:7031/api/Property';
+const API_PROPERTY_BASE_URL2 = 'https://localhost:7031/api/OwnerProperty';
 
 const propertyService = {
     async getAllproperty() {
@@ -104,6 +105,36 @@ const propertyService = {
 
             const data = await response.json();
             //console.log(data);
+            if (!response.ok) {
+                throw new Error(data.message || data.errorMessage || 'Get property failed');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Get property error:', error);
+            throw error;
+        }
+    },
+    async getOwnerProperty(id) {
+        try {
+            const token = localStorage.getItem('authToken');
+            let userId = 0;
+            if (token) {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                userId = payload.id;
+            }
+
+            const response = await fetch(`${API_PROPERTY_BASE_URL2}/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                }
+            });
+
+            const data = await response.json();
+
             if (!response.ok) {
                 throw new Error(data.message || data.errorMessage || 'Get property failed');
             }

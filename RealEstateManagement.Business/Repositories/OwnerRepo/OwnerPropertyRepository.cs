@@ -36,6 +36,16 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         {
             return await _context.Properties
                 .Include(p => p.Images)
+                .Include(p => p.Posts)
+                    .ThenInclude(p => p.RentalContract)
+                .Include(p => p.PropertyAmenities)
+                    .ThenInclude(pa => pa.Amenity)
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Province)
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Ward)
+                .Include(p => p.Address)
+                    .ThenInclude(pa => pa.Street)
                 .FirstOrDefaultAsync(p => p.Id == id && p.LandlordId == landlordId);
         }
         public async Task DeleteAsync(Property property)
@@ -44,7 +54,46 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
             await _context.SaveChangesAsync();
         }
 
+        public async Task UpdateAddressAsync(int propertyId, int provinceId, int wardId, int streetId, string detailedAddress)
+        {
+            var property = await _context.Properties
+                .FirstOrDefaultAsync(p => p.Id == propertyId);
 
+            if (property == null)
+                throw new Exception("Property not found");
+
+            // Giả sử bảng Property có cột AddressId liên kết bảng Address
+            var address = await _context.Addresses
+                .FirstOrDefaultAsync(a => a.Id == property.AddressId);
+
+            if (address == null)
+                throw new Exception("Address not found");
+
+            address.ProvinceId = provinceId;
+            address.WardId = wardId;
+            address.StreetId = streetId;
+            address.DetailedAddress = detailedAddress;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAmenitiesAsync(int propertyId, List<int> amenityIds)
+        {
+            // Xoá tiện nghi cũ
+            var existingAmenities = _context.PropertyAmenities
+                .Where(pa => pa.PropertyId == propertyId);
+            _context.PropertyAmenities.RemoveRange(existingAmenities);
+
+            // Thêm tiện nghi mới
+            var newAmenities = amenityIds.Select(aid => new PropertyAmenity
+            {
+                PropertyId = propertyId,
+                AmenityId = aid
+            });
+
+            await _context.PropertyAmenities.AddRangeAsync(newAmenities);
+            await _context.SaveChangesAsync();
+        }
     }
 
 }

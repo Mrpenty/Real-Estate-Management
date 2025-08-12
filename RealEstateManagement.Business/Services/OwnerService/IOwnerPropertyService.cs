@@ -12,7 +12,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
     {
         IQueryable<OwnerPropertyDto> GetPropertiesByLandlordQueryable(int landlordId);
         Task<OwnerPropertyDto> GetPropertyByIdAsync(int id, int landlordId);
-        Task UpdatePropertyAsync(OwnerUpdatePropertyDto dto, int landlordId);
+        Task UpdatePropertyAsync(PropertyCreateRequestDto dto, int landlordId, int propertyId);
         Task DeletePropertyAsync(int id, int landlordId);
         Task<(bool IsSuccess, string Message)> ExtendPostAsync(int postId, int days, int landlordId);
     }

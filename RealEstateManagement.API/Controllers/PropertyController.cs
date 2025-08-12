@@ -76,8 +76,9 @@ namespace RealEstateManagement.API.Controllers
         }
         //Lấy property theo id
         [HttpGet("{id}")]
-        public async Task<ActionResult> GetPropertyById(int id, [FromQuery] int userId = 0)
+        public async Task<ActionResult> GetPropertyById(int id)
         {
+            int userId = 0; 
             var property = await _propertyService.GetPropertyByIdAsync(id, userId);
             if (property == null)
             {
