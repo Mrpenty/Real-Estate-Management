@@ -58,12 +58,6 @@ namespace RealEstateManagement.Business.Services.OwnerService
                         Id = img.Id,
                         Url = img.Url,
                         IsPrimary = img.IsPrimary
-                    }).ToList(),
-                    Posts = entity.Posts.Select(post => new OwnerPropertyPostDto
-                    {
-                        Id = post.Id,
-                        Status = post.Status.ToString(), 
-                        CreatedAt = post.CreatedAt
                     }).ToList()
                 });
         }

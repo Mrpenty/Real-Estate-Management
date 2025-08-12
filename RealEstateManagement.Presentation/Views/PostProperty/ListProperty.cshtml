@@ -638,6 +638,13 @@
                                     class="btn-action btn-delete" title="Xóa">
                                 <i class="fas fa-trash"></i> Xóa
                             </button>
+                            ${item.isExistRenterContract ? `
+                                <button onclick="window.location.href='/PostProperty/DetailRenterProperty?propertyId=${item.id}&id=${item.renterContractId}'"
+                                        class="btn-action btn-create" title="Hợp đồng">
+                                    Hợp đồng
+                                </button>
+                            ` : ''}
+
                         </div>
                     </td>
                 </tr>

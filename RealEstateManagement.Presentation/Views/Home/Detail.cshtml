@@ -271,7 +271,7 @@
 
 <script src="~/js/propertyService.js"></script>
 <script src="~/js/reportService.js"></script>
-@* <script src="~/js/review.js"></script> *@
+<script src="~/js/review.js"></script>
 <script>
     let urlBase = "https://localhost:7031";
     //document.getElementById('listPostId').classList.add("text-orange-500");
@@ -732,11 +732,13 @@
         // Check if current user is the owner and hide report button if so
         hideReportButtonForOwner();
 
+        let commentHTMLBody = "";
         var listReview = await getComment(id);
             listReview.items.forEach(item => {
             var commentHTML = createCommentHTML(item,isOwner);
-            list.insertAdjacentElement('afterbegin', commentHTML);
+            commentHTMLBody += commentHTML.innerHTML;
         });
+        list.innerHTML = commentHTMLBody;
     }
 
     function selectImg(el1){
