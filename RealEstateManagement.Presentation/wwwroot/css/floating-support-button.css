@@ -1,0 +1,115 @@
+/* Floating Support Chat Button Styles */
+.floating-support-btn {
+    animation: pulse 2s infinite;
+    position: relative;
+    z-index: 1000;
+}
+
+.floating-support-btn:hover {
+    transform: scale(1.1);
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+/* Unread Badge */
+#supportUnreadBadge {
+    animation: bounce 1s infinite;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-3px);
+    }
+    60% {
+        transform: translateY(-1px);
+    }
+}
+
+/* Tooltip */
+.floating-support-btn .tooltip {
+    pointer-events: none;
+    z-index: 1001;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .floating-support-btn {
+        bottom: 1rem !important;
+        right: 1rem !important;
+        width: 3.5rem !important;
+        height: 3.5rem !important;
+    }
+    
+    #supportUnreadBadge {
+        min-width: 1.25rem;
+        height: 1.25rem;
+        font-size: 0.625rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .floating-support-btn {
+        bottom: 0.75rem !important;
+        right: 0.75rem !important;
+        width: 3rem !important;
+        height: 3rem !important;
+    }
+    
+    .floating-support-btn i {
+        font-size: 1rem !important;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .floating-support-btn {
+        background-color: #dc2626;
+    }
+    
+    .floating-support-btn:hover {
+        background-color: #b91c1c;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .floating-support-btn {
+        border: 2px solid #ffffff;
+    }
+    
+    #supportUnreadBadge {
+        border: 1px solid #ffffff;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .floating-support-btn {
+        animation: none;
+    }
+    
+    #supportUnreadBadge {
+        animation: none;
+    }
+    
+    .floating-support-btn:hover {
+        transform: none;
+    }
+} 

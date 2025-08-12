@@ -1,4 +1,4 @@
-const NEWS_API_BASE_URL = 'https://localhost:7031/api/News';
+// Sử dụng config thay vì hardcode API endpoints
 let newsList = [];
 let currentPage = 1;
 let pageSize = 10;
@@ -6,7 +6,7 @@ let filteredNews = [];
 
 const NewsService = {
     async getAll() {
-        const res = await fetch(`${NEWS_API_BASE_URL}/All-News`, {
+        const res = await fetch(config.buildApiUrl(config.admin.news.list), {
             method: 'GET',
             credentials: 'include'
         });
@@ -15,7 +15,7 @@ const NewsService = {
     },
 
     async delete(id) {
-        const res = await fetch(`${NEWS_API_BASE_URL}/${id}`, {
+        const res = await fetch(config.buildApiUrl(config.admin.news.delete.replace('{newsId}', id)), {
             method: 'DELETE',
             credentials: 'include'
         });
@@ -24,7 +24,7 @@ const NewsService = {
     },
 
     async publish(id) {
-        const res = await fetch(`${NEWS_API_BASE_URL}/${id}/publish`, {
+        const res = await fetch(config.buildApiUrl(config.admin.news.publish.replace('{newsId}', id)), {
             method: 'PUT',
             credentials: 'include'
         });

@@ -122,12 +122,13 @@
                 <div class="form-group">
                     <label class="form-label">Hình ảnh *</label>
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                        <input type="file" id="sliderImage" accept="image/*" class="hidden" required />
+                        <input type="file" id="sliderImage" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="hidden" />
                         <div id="imagePreview" class="space-y-4">
                             <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
                             <div>
                                 <p class="text-lg font-medium text-gray-700">Tải lên hình ảnh</p>
-                                <p class="text-sm text-gray-500">PNG, JPG, JPEG tối đa 5MB</p>
+                                <p class="text-sm text-gray-500">Định dạng: JPG, JPEG, PNG, GIF, WEBP</p>
+                                <p class="text-sm text-gray-500">Kích thước tối đa: 5MB</p>
                             </div>
                             <button type="button" onclick="document.getElementById('sliderImage').click()" class="btn btn-primary">
                                 <i class="fas fa-upload"></i>
@@ -182,17 +183,40 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/config.js"></script>
     <script>
-        const SLIDER_API_BASE_URL = 'https://localhost:7031/api/Slider';
+        // Sử dụng config thay vì hardcode API endpoints
         let sliders = [];
         let currentDeleteId = null;
         let currentPage = 1;
         let pageSize = 9;
         let filteredSliders = [];
 
+        // Helper function to build image URL
+        function buildImageUrl(imageUrl) {
+            if (!imageUrl) return '/image/no-image.png';
+            
+            // If imageUrl is already a full URL, return it as is
+            if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+                return imageUrl;
+            }
+            
+            // For slider images, always build the full URL
+            // Get the base URL from config
+            const baseUrl = config.buildApiUrl('').replace('/api', '');
+            
+            // If imageUrl doesn't start with '/uploads/', add the correct path
+            if (!imageUrl.startsWith('/uploads/')) {
+                return baseUrl + '/uploads/slider-pictures/' + imageUrl;
+            }
+            
+            // If imageUrl already has /uploads/ path, just add the base URL
+            return baseUrl + imageUrl;
+        }
+
         const SliderService = {
             async getAll() {
-                const res = await fetch(`${SLIDER_API_BASE_URL}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.sliders.list), {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -201,7 +225,7 @@
             },
 
             async getById(id) {
-                const res = await fetch(`${SLIDER_API_BASE_URL}/${id}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.sliders.detail.replace('{sliderId}', id)), {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -210,7 +234,7 @@
             },
 
             async create(formData) {
-                const res = await fetch(`${SLIDER_API_BASE_URL}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.sliders.create), {
                     method: 'POST',
                     credentials: 'include',
                     body: formData
@@ -220,7 +244,7 @@
             },
 
             async update(id, formData) {
-                const res = await fetch(`${SLIDER_API_BASE_URL}/${id}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.sliders.update.replace('{sliderId}', id)), {
                     method: 'PUT',
                     credentials: 'include',
                     body: formData
@@ -230,7 +254,7 @@
             },
 
             async delete(id) {
-                const res = await fetch(`${SLIDER_API_BASE_URL}/${id}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.sliders.delete.replace('{sliderId}', id)), {
                     method: 'DELETE',
                     credentials: 'include'
                 });
@@ -289,7 +313,7 @@
             grid.innerHTML = pageSliders.map(slider => `
                 <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                     <div class="relative">
-                        <img src="${slider.imageUrl ? SLIDER_API_BASE_URL.replace('/api/Slider', '') + slider.imageUrl : '/image/no-image.png'}" 
+                        <img src="${buildImageUrl(slider.imageUrl)}" 
                              alt="${slider.title}" 
                              class="w-full h-48 object-cover" 
                              onerror="this.src='/image/no-image.png'" />
@@ -390,7 +414,8 @@
                 <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
                 <div>
                     <p class="text-lg font-medium text-gray-700">Tải lên hình ảnh</p>
-                    <p class="text-sm text-gray-500">PNG, JPG, JPEG tối đa 5MB</p>
+                    <p class="text-sm text-gray-500">Định dạng: JPG, JPEG, PNG, GIF, WEBP</p>
+                    <p class="text-sm text-gray-500">Kích thước tối đa: 5MB</p>
                 </div>
                 <button type="button" onclick="document.getElementById('sliderImage').click()" class="btn btn-primary">
                     <i class="fas fa-upload"></i>
@@ -411,7 +436,7 @@
                 // Show current image
                 if (slider.imageUrl) {
                     document.getElementById('imagePreview').innerHTML = `
-                        <img src="${SLIDER_API_BASE_URL.replace('/api/Slider', '') + slider.imageUrl}" 
+                        <img src="${buildImageUrl(slider.imageUrl)}" 
                              alt="Current image" class="w-full h-32 object-cover rounded" />
                         <button type="button" onclick="document.getElementById('sliderImage').click()" class="btn btn-primary">
                             <i class="fas fa-upload"></i>
@@ -497,17 +522,47 @@
         document.getElementById('sliderForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            // Validate required fields
+            const title = document.getElementById('sliderTitle').value.trim();
+            if (!title) {
+                showError('Vui lòng nhập tiêu đề slider');
+                return;
+            }
+
+            // Validate image for new slider
+            const sliderId = document.getElementById('sliderId').value;
+            const imageFile = document.getElementById('sliderImage').files[0];
+            
+            if (!sliderId && !imageFile) {
+                showError('Vui lòng chọn hình ảnh cho slider mới');
+                return;
+            }
+
+            // Validate image file if selected
+            if (imageFile) {
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(imageFile.type)) {
+                    showError('Chỉ được upload ảnh định dạng: JPG, JPEG, PNG, GIF, WEBP');
+                    return;
+                }
+                
+                // Validate file size (5MB)
+                const maxSize = 5 * 1024 * 1024;
+                if (imageFile.size > maxSize) {
+                    showError('Kích thước file không được vượt quá 5MB');
+                    return;
+                }
+            }
+
             const formData = new FormData();
-            formData.append('title', document.getElementById('sliderTitle').value);
+            formData.append('title', title);
             formData.append('description', document.getElementById('sliderDescription').value);
             formData.append('isActive', document.getElementById('sliderIsActive').checked);
             
-            const imageFile = document.getElementById('sliderImage').files[0];
             if (imageFile) {
                 formData.append('imageFile', imageFile);
             }
-
-            const sliderId = document.getElementById('sliderId').value;
 
             try {
                 if (sliderId) {
@@ -544,10 +599,27 @@
             }
         });
 
-        // Image preview
+        // Image preview with validation
         document.getElementById('sliderImage').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    showError('Chỉ được upload ảnh định dạng: JPG, JPEG, PNG, GIF, WEBP');
+                    this.value = '';
+                    return;
+                }
+                
+                // Validate file size (5MB = 5 * 1024 * 1024 bytes)
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                if (file.size > maxSize) {
+                    showError('Kích thước file không được vượt quá 5MB');
+                    this.value = '';
+                    return;
+                }
+                
+                // Show preview if validation passes
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     document.getElementById('imagePreview').innerHTML = `
@@ -564,6 +636,8 @@
 
         // Add event listeners for real-time search
         document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+
 
         // Load sliders when page loads
         loadSliders();

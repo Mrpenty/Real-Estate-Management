@@ -8,6 +8,8 @@ using RealEstateManagement.Data.Data;
 using RealEstateManagement.Data.Entity.Notification;
 using RealEstateManagement.Data.Entity.User;
 using RealEstateManagement.Business.Repositories.Repository;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace RealEstateManagement.Business.Repositories.NotificationRepository
 {
@@ -126,10 +128,46 @@ namespace RealEstateManagement.Business.Repositories.NotificationRepository
             return audience.ToLower() switch
             {
                 "all" => await _context.Users.Where(u => u.IsActive).ToListAsync(),
-                "renters" => await _context.Users.Where(u => u.Role == "renter" && u.IsActive).ToListAsync(),
-                "landlords" => await _context.Users.Where(u => u.Role == "landlord" && u.IsActive).ToListAsync(),
+                "renters" => await GetUsersByRoleAsync("Renter"),
+                "landlords" => await GetUsersByRoleAsync("Landlord"),
+                "admin" => await GetUsersByRoleAsync("Admin"),
                 _ => new List<ApplicationUser>()
             };
+        }
+
+        private async Task<IEnumerable<ApplicationUser>> GetUsersByRoleAsync(string roleName)
+        {
+            var userIds = new List<int>();
+
+            // Get users by Identity roles using the AspNetUserRoles table
+            var roleId = await _context.Roles
+                .Where(r => r.NormalizedName == roleName.ToUpper())
+                .Select(r => r.Id)
+                .FirstOrDefaultAsync();
+
+            if (roleId != 0)
+            {
+                var usersInRole = await _context.Set<IdentityUserRole<int>>()
+                    .Where(ur => ur.RoleId == roleId)
+                    .Select(ur => ur.UserId)
+                    .ToListAsync();
+                userIds.AddRange(usersInRole);
+            }
+
+            // Get users by Role property as fallback
+            var usersByProperty = await _context.Users
+                .Where(u => u.Role.ToLower() == roleName.ToLower() && u.IsActive)
+                .Select(u => u.Id)
+                .ToListAsync();
+
+            userIds.AddRange(usersByProperty);
+
+            // Get unique user IDs and return the users
+            var uniqueUserIds = userIds.Distinct().ToList();
+
+            return await _context.Users
+                .Where(u => uniqueUserIds.Contains(u.Id) && u.IsActive)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<ApplicationUser>> GetUsersByIdsAsync(List<int> userIds)

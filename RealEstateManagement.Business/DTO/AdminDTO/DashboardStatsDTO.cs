@@ -70,7 +70,5 @@ namespace RealEstateManagement.Business.DTO.AdminDTO
         public DateTime EndDate { get; set; }
         [Required]
         public string ReportType { get; set; } = string.Empty; // "daily", "monthly", "property", "user", "revenue"
-        [Required]
-        public string Format { get; set; } = string.Empty; // "excel", "pdf"
     }
 } 

@@ -122,7 +122,11 @@
     async function checkReportStatus() {
         try {
             const token = localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token');
-            if (!token) return;
+            if (!token) {
+                // User not logged in, show default button state
+                updateReportButtonForGuest();
+                return;
+            }
             
             let userId;
             try {
@@ -130,32 +134,50 @@
                 userId = payload.id || payload.userId || payload.sub;
             } catch (e) {
                 console.error('Error decoding token:', e);
+                updateReportButtonForGuest();
                 return;
             }
             
-            if (!userId) return;
+            if (!userId) {
+                updateReportButtonForGuest();
+                return;
+            }
             
-            // Check if user has reported this landlord
-            const response = await fetch(`${urlBase}/api/Report/user/${landlordId}/${userId}`, {
+            // Check if user has reported this landlord using the correct endpoint
+            const response = await fetch(`${urlBase}/api/Report/check-status/${landlordId}/User/${userId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
             
+            console.log('API Response status:', response.status);
+            console.log('API Response ok:', response.ok);
+            
+            if (!response.ok) {
+                console.error('Error checking report status:', response.status);
+                updateReportButtonForGuest();
+                return;
+            }
+            
+            const data = await response.json();
+            console.log('Report status data:', data);
+            console.log('hasReported:', data.hasReported);
+            console.log('canReport:', data.canReport);
+            console.log('status:', data.status);
+            
             const reportButton = document.getElementById('reportButton');
-            if (response.ok) {
-                // User has already reported
-                reportButton.innerHTML = '✅ Đã báo cáo';
-                reportButton.className = 'block w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold';
-                reportButton.onclick = () => {
-                    Swal.fire({
-                        icon: 'info',
-                        title: 'Đã báo cáo',
-                        text: 'Bạn đã báo cáo người dùng này rồi.',
-                        confirmButtonText: 'OK'
-                    });
-                };
+            
+            if (data.hasReported && !data.canReport) {
+                // User has already reported and it's pending - allow cancel
+                reportButton.innerHTML = '✅ Hủy báo cáo';
+                reportButton.className = 'block w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold';
+                reportButton.onclick = () => cancelReport(landlordId, userId);
+            } else if (data.hasReported && data.canReport) {
+                // Can report again (was resolved/rejected)
+                reportButton.innerHTML = '⚠️ Báo cáo người dùng';
+                reportButton.className = 'block w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 rounded-lg font-semibold';
+                reportButton.onclick = openReportModal;
             } else {
                 // User hasn't reported yet
                 reportButton.innerHTML = '⚠️ Báo cáo người dùng';
@@ -164,12 +186,60 @@
             }
         } catch (error) {
             console.error('Error checking report status:', error);
+            updateReportButtonForGuest();
         }
+    }
+    
+    // Update report button for guest users (not logged in)
+    function updateReportButtonForGuest() {
+        const reportButton = document.getElementById('reportButton');
+        reportButton.innerHTML = '⚠️ Báo cáo người dùng';
+        reportButton.className = 'block w-full bg-gray-400 hover:bg-gray-500 text-white py-2 rounded-lg font-semibold cursor-not-allowed';
+        reportButton.onclick = () => {
+            Swal.fire({
+                icon: 'info',
+                title: 'Vui lòng đăng nhập',
+                text: 'Bạn cần đăng nhập để có thể báo cáo người dùng này.',
+                confirmButtonText: 'Đăng nhập',
+                showCancelButton: true,
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/Auth/Login';
+                }
+            });
+        };
     }
     
     // Report User Functions
     function openReportModal() {
+        // Check if user is logged in
+        if (!checkUserLogin()) {
+            return;
+        }
         document.getElementById('reportModal').classList.remove('hidden');
+    }
+    
+    // Check if user is logged in
+    function checkUserLogin() {
+        const token = localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token');
+        if (!token) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Vui lòng đăng nhập',
+                text: 'Bạn cần đăng nhập để có thể báo cáo người dùng này.',
+                confirmButtonText: 'Đăng nhập',
+                showCancelButton: true,
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to login page
+                    window.location.href = '/Auth/Login';
+                }
+            });
+            return false;
+        }
+        return true;
     }
     
     function closeReportModal() {
@@ -264,6 +334,15 @@
             console.log('Sending report data:', reportData);
             console.log('Request URL:', `${urlBase}/api/Report/user/${userId}`);
             
+            // Show loading state
+            Swal.fire({
+                title: 'Đang gửi báo cáo...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
             const response = await fetch(`${urlBase}/api/Report/user/${userId}`, {
                 method: 'POST',
                 headers: {
@@ -272,6 +351,9 @@
                 },
                 body: JSON.stringify(reportData)
             });
+            
+            // Close loading dialog
+            Swal.close();
             
             if (!response.ok) {
                 let errorMessage = 'Gửi báo cáo thất bại';
@@ -305,13 +387,13 @@
             closeReportModal();
             
             // Update button status
-            checkReportStatus();
+            refreshReportButton();
             
         } catch (error) {
             console.error('Report error:', error);
             
             // Check if it's a duplicate report error
-            if (error.message.includes('đã report')) {
+            if (error.message.includes('đã report') || error.message.includes('đã báo cáo')) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Đã báo cáo!',
@@ -338,9 +420,40 @@
         }
     });
     
+    // Function to refresh report button state
+    function refreshReportButton() {
+        console.log('Refreshing report button state...');
+        checkReportStatus();
+    }
+    
     // Function to cancel report
     async function cancelReport(targetId, userId) {
         try {
+            // Show confirmation dialog
+            const result = await Swal.fire({
+                icon: 'question',
+                title: 'Xác nhận hủy báo cáo',
+                text: 'Bạn có chắc chắn muốn hủy báo cáo này không?',
+                showCancelButton: true,
+                confirmButtonText: 'Hủy báo cáo',
+                cancelButtonText: 'Đóng',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6'
+            });
+            
+            if (!result.isConfirmed) {
+                return;
+            }
+            
+            // Show loading state
+            Swal.fire({
+                title: 'Đang xử lý...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
             const token = localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token');
             
             const response = await fetch(`${urlBase}/api/Report/user/${targetId}/${userId}`, {
@@ -349,6 +462,9 @@
                     'Authorization': `Bearer ${token}`
                 }
             });
+
+            // Close loading dialog
+            Swal.close();
 
             if (!response.ok) {
                 let errorMessage = 'Hủy báo cáo thất bại';
@@ -362,23 +478,23 @@
                 throw new Error(errorMessage);
             }
 
-            let result;
+            let cancelResult;
             try {
-                result = await response.json();
+                cancelResult = await response.json();
             } catch (e) {
                 const responseText = await response.text();
-                result = { message: responseText };
+                cancelResult = { message: responseText };
             }
 
             Swal.fire({
                 icon: 'success',
                 title: 'Thành công!',
-                text: result.message || 'Đã hủy báo cáo thành công',
+                text: cancelResult.message || 'Đã hủy báo cáo thành công',
                 confirmButtonText: 'OK'
             });
             
             // Update button status
-            checkReportStatus();
+            refreshReportButton();
 
         } catch (error) {
             console.error('Cancel report error:', error);

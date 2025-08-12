@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
+using RealEstateManagement.Business.DTO.Location;
 using System;
 using System.Net.Http;
 using System.Text;
@@ -53,6 +54,77 @@ namespace RealEstateManagement.Business.Services
 
             dynamic result = JsonConvert.DeserializeObject(responseString);
             return result.choices[0].message.content.ToString();
+        }
+
+        public async Task<string> GetPropertyRecommendationAsync(LocationRecommendationRequest request, List<PropertyRecommendationDTO> properties)
+        {
+            try
+            {
+                string prompt = BuildRecommendationPrompt(request, properties);
+
+                var requestBody = new
+                {
+                    model = "gpt-3.5-turbo",
+                    messages = new object[]
+                    {
+                        new { role = "system", content = "Bạn là chuyên gia tư vấn bất động sản. Hãy phân tích và đưa ra lý do tại sao những bất động sản này phù hợp với người dùng dựa trên vị trí và tiêu chí của họ." },
+                        new { role = "user", content = prompt }
+                    },
+                    temperature = 0.7,
+                    max_tokens = 300
+                };
+
+                var json = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
+
+                var response = await _httpClient.PostAsync("https://api.openai.com/v1/chat/completions", content);
+                var responseString = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"OpenAI API error: {(int)response.StatusCode} - {responseString}");
+                }
+
+                dynamic result = JsonConvert.DeserializeObject(responseString);
+                return result.choices[0].message.content.ToString();
+            }
+            catch (Exception ex)
+            {
+                return "Dựa trên vị trí và tiêu chí tìm kiếm của bạn, chúng tôi đã tìm thấy những bất động sản phù hợp nhất.";
+            }
+        }
+
+        private string BuildRecommendationPrompt(LocationRecommendationRequest request, List<PropertyRecommendationDTO> properties)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine($"Người dùng đang tìm kiếm bất động sản tại vị trí: {request.Latitude}, {request.Longitude}");
+            builder.AppendLine($"Bán kính tìm kiếm: {request.RadiusKm}km");
+            
+            if (!string.IsNullOrEmpty(request.PropertyType))
+                builder.AppendLine($"Loại bất động sản: {request.PropertyType}");
+            
+            if (request.MaxPrice.HasValue)
+                builder.AppendLine($"Giá tối đa: {request.MaxPrice} triệu đồng/tháng");
+            
+            if (request.MinBedrooms.HasValue)
+                builder.AppendLine($"Số phòng ngủ tối thiểu: {request.MinBedrooms}");
+            
+            if (!string.IsNullOrEmpty(request.UserPreference))
+                builder.AppendLine($"Sở thích: {request.UserPreference}");
+            
+            builder.AppendLine($"\nĐã tìm thấy {properties.Count} bất động sản phù hợp:");
+            
+            foreach (var prop in properties.Take(5)) // Chỉ lấy 5 bất động sản đầu tiên để phân tích
+            {
+                builder.AppendLine($"- {prop.Title}: {prop.Type}, {prop.Bedrooms} phòng ngủ, {prop.Area}m², {prop.Price} triệu/tháng, cách {prop.DistanceKm:F1}km");
+            }
+            
+            builder.AppendLine("\nHãy đưa ra lý do tại sao những bất động sản này phù hợp với người dùng, dựa trên vị trí, tiêu chí và sở thích của họ.");
+            
+            return builder.ToString();
         }
 
         private async Task<string> BuildPromptFromRequestAsync(RealEstateDescriptionRequest req)

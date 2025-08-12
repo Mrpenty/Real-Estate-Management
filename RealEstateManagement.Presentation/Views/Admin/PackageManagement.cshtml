@@ -201,15 +201,16 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/config.js"></script>
     <script>
-        const PACKAGE_API_BASE_URL = 'https://localhost:7031/api/PromotionPackage';
+        // Sử dụng config thay vì hardcode API endpoints
         let packages = [];
         let currentDeleteId = null;
         let filteredPackages = [];
 
         const PackageService = {
             async getAll() {
-                const res = await fetch(`${PACKAGE_API_BASE_URL}/GetAllPackage`, {
+                const res = await fetch(config.buildApiUrl(config.admin.packages.list), {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -218,7 +219,7 @@
             },
 
             async getById(id) {
-                const res = await fetch(`${PACKAGE_API_BASE_URL}/GetPackageById/${id}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.packages.detail.replace('{packageId}', id)), {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -227,7 +228,7 @@
             },
 
             async create(packageData) {
-                const res = await fetch(`${PACKAGE_API_BASE_URL}/CreatePackage`, {
+                const res = await fetch(config.buildApiUrl(config.admin.packages.create), {
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
@@ -238,7 +239,7 @@
             },
 
             async update(id, packageData) {
-                const res = await fetch(`${PACKAGE_API_BASE_URL}/UpdatePackage/${id}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.packages.update.replace('{packageId}', id)), {
                     method: 'PUT',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
@@ -249,7 +250,7 @@
             },
 
             async delete(id) {
-                const res = await fetch(`${PACKAGE_API_BASE_URL}/DeletePackage/${id}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.packages.delete.replace('{packageId}', id)), {
                     method: 'DELETE',
                     credentials: 'include'
                 });

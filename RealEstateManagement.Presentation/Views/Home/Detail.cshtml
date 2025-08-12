@@ -181,8 +181,8 @@
                     <button class="flex items-center space-x-1 hover:text-blue-600">
                         <span>🔗</span><span>Chia sẻ</span>
                     </button>
-                    <button class="flex items-center space-x-1 hover:text-red-500">
-                        <span>⚠️</span><span>Báo xấu</span>
+                    <button id="reportBtn" onclick="openReportModal()" class="flex items-center space-x-1 hover:text-red-500 px-3 py-1 rounded transition-colors">
+                        <span>⚠️</span><span id="reportBtnText">Báo xấu</span>
                     </button>
                 </div>
             </div>
@@ -195,7 +195,82 @@
     </div>
 </div>
 
+<!-- Report Modal -->
+<div id="reportModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Báo cáo bài đăng</h3>
+                <button onclick="closeReportModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Lý do báo cáo *</label>
+                <select id="reportReason" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <option value="">Chọn lý do</option>
+                    <option value="Thông tin sai sự thật">Thông tin sai sự thật</option>
+                    <option value="Hình ảnh không đúng">Hình ảnh không đúng</option>
+                    <option value="Giá cả không chính xác">Giá cả không chính xác</option>
+                    <option value="Địa chỉ không đúng">Địa chỉ không đúng</option>
+                    <option value="Nội dung không phù hợp">Nội dung không phù hợp</option>
+                    <option value="Spam">Spam</option>
+                    <option value="Khác">Khác</option>
+                </select>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Mô tả chi tiết</label>
+                <textarea id="reportDescription" rows="3" placeholder="Mô tả chi tiết về vấn đề..." 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeReportModal()" 
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+                    Hủy
+                </button>
+                <button id="submitReportBtn" onclick="submitReport()" 
+                        class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
+                    Gửi báo cáo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Status Modal -->
+<div id="reportStatusModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Trạng thái báo cáo</h3>
+                <button onclick="closeReportStatusModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="reportStatusContent" class="mb-4">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+            
+            <div class="flex justify-end">
+                <button onclick="closeReportStatusModal()" 
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="~/js/propertyService.js"></script>
+<script src="~/js/reportService.js"></script>
 @* <script src="~/js/review.js"></script> *@
 <script>
     let urlBase = "https://localhost:7031";
@@ -203,6 +278,163 @@
     //document.getElementById('listPostId').classList.replace("border-gray-200", "border-orange-500");
     let id = @ViewBag.Id;
     let landlordId = 0;
+    // Get current user ID from authentication token
+    let currentUserId = 0;
+    
+    // Function to get current user ID from token
+    function getCurrentUserIdFromToken() {
+        try {
+            // Get current user ID from token
+            let token = localStorage.getItem('authToken');
+            if (!token) {
+                token = localStorage.getItem('accessToken');
+            }
+            if (!token) {
+                token = localStorage.getItem('token');
+            }
+            
+            console.log('Available localStorage keys:', Object.keys(localStorage));
+            console.log('Token found:', !!token);
+            
+            if (!token) {
+                console.log('No token found in localStorage');
+                return 0;
+            }
+            
+            // Decode token to get user ID
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const userId = payload.id || payload.userId || payload.sub;
+                console.log('Decoded token payload:', payload);
+                console.log('User ID:', userId);
+                return userId || 0;
+            } catch (e) {
+                console.error('Error decoding token:', e);
+                return 0;
+            }
+        } catch (error) {
+            console.error('Error getting current user ID:', error);
+            return 0;
+        }
+    }
+    
+    // Initialize currentUserId when page loads
+    function initializeCurrentUserId() {
+        currentUserId = getCurrentUserIdFromToken();
+        console.log('Initialized currentUserId:', currentUserId);
+        
+        // Always check if user is the owner first
+        hideReportButtonForOwner();
+        
+        // If user is logged in, check report status
+        if (currentUserId > 0) {
+            checkReportStatus();
+        } else {
+            // User not logged in, show default report button state
+            updateReportButtonForGuest();
+        }
+        
+        // Add event listener for localStorage changes (login/logout)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'authToken' || e.key === 'accessToken' || e.key === 'token') {
+                console.log('Token changed in localStorage:', e.key);
+                refreshCurrentUserId();
+            }
+        });
+        
+        // Also listen for custom events if you have them
+        window.addEventListener('userLogin', refreshCurrentUserId);
+        window.addEventListener('userLogout', refreshCurrentUserId);
+    }
+    
+    // Function to refresh current user ID (useful after login/logout)
+    function refreshCurrentUserId() {
+        const previousUserId = currentUserId;
+        currentUserId = getCurrentUserIdFromToken();
+        console.log('Refreshed currentUserId:', currentUserId, 'from:', previousUserId);
+        
+        if (currentUserId !== previousUserId) {
+            // Always check if user is the owner first
+            hideReportButtonForOwner();
+            
+            if (currentUserId > 0) {
+                checkReportStatus();
+            } else {
+                updateReportButtonForGuest();
+            }
+        }
+    }
+    
+    // Update report button for guest users (not logged in)
+    function updateReportButtonForGuest() {
+        const reportBtn = document.getElementById('reportBtn');
+        const reportBtnText = document.getElementById('reportBtnText');
+        
+        // Check if user is the owner of the post - hide button if so
+        hideReportButtonForOwner();
+        
+        // If user is the owner, don't proceed with button updates
+        if (currentUserId > 0 && currentUserId === landlordId) {
+            return;
+        }
+        
+        reportBtnText.textContent = 'Báo xấu';
+        reportBtn.onclick = () => {
+            Swal.fire({
+                icon: 'info',
+                title: 'Vui lòng đăng nhập',
+                text: 'Bạn cần đăng nhập để có thể báo cáo bài đăng này.',
+                confirmButtonText: 'Đăng nhập',
+                showCancelButton: true,
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    
+                    window.location.href = '/Auth/Login';
+                }
+            });
+        };
+        
+        // Reset button styling
+        reportBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-red-600', 'text-white', 'bg-yellow-600', 'bg-gray-200', 'text-gray-700');
+        reportBtn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+    }
+    
+    // Function to hide report button if user is the owner of the post
+    function hideReportButtonForOwner() {
+        const reportBtn = document.getElementById('reportBtn');
+       
+        
+        // Convert both to numbers to ensure proper comparison
+        const currentUserIdNum = Number(currentUserId);
+        const landlordIdNum = Number(landlordId);
+        
+        if (currentUserIdNum > 0 && currentUserIdNum === landlordIdNum) {
+            reportBtn.style.display = 'none';
+        } else {
+            reportBtn.style.display = 'flex';
+        }
+    }
+    
+    // Check if user is logged in before allowing report
+    function checkUserLogin() {
+        if (currentUserId <= 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Vui lòng đăng nhập',
+                text: 'Bạn cần đăng nhập để có thể báo cáo. Vui lòng đăng nhập và thử lại.',
+                confirmButtonText: 'Đồng ý',
+                showCancelButton: true,
+                cancelButtonText: 'Hủy'
+            });
+            return false;
+        }
+        return true;
+    }
+    let reportService = new ReportService();
+    
+    initializeCurrentUserId(); // Initialize currentUserId and check report status
+    getProperty(); // Get property data and then check owner status
     let isOwner = false;
     getProperty();
 
@@ -210,10 +442,215 @@
         window.location.href= `/Home/Landlord/${landlordId}`;
     }
 
+    // Report functions
+    function openReportModal() {
+        document.getElementById('reportModal').classList.remove('hidden');
+    }
+
+    function closeReportModal() {
+        document.getElementById('reportModal').classList.add('hidden');
+        // Reset form
+        document.getElementById('reportReason').value = '';
+        document.getElementById('reportDescription').value = '';
+    }
+
+    function closeReportStatusModal() {
+        document.getElementById('reportStatusModal').classList.add('hidden');
+    }
+
+    async function checkReportStatus() {
+        // Check if user is logged in
+        if (!checkUserLogin()) {
+            return;
+        }
+
+        try {
+            const data = await reportService.checkReportStatus(id, 'PropertyPost', currentUserId);
+            updateReportButton(data);
+        } catch (error) {
+            console.error('Error checking report status:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: 'Không thể kiểm tra trạng thái báo cáo',
+                confirmButtonText: 'Đồng ý'
+            });
+        }
+    }
+
+    function updateReportButton(data) {
+        const reportBtn = document.getElementById('reportBtn');
+        const reportBtnText = document.getElementById('reportBtnText');
+        
+        // Check if user is the owner of the post - hide button if so
+        hideReportButtonForOwner();
+        
+        // If user is the owner, don't proceed with button updates
+        if (currentUserId > 0 && currentUserId === landlordId) {
+            return;
+        }
+        
+        // Reset all classes first
+        reportBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-red-600', 'text-white', 'bg-yellow-600', 'bg-gray-200', 'text-gray-700');
+        
+        // Check if user is logged in
+        if (currentUserId <= 0) {
+            updateReportButtonForGuest();
+            return;
+        }
+        
+        if (data.hasReported && !data.canReport) {
+            // Already reported and pending - allow cancel
+            reportBtnText.textContent = 'Hủy báo cáo';
+            reportBtn.onclick = () => cancelReport();
+            reportBtn.classList.add('bg-red-600', 'text-white', 'hover:bg-red-700');
+        } else if (data.hasReported && data.canReport) {
+            // Can report again
+            reportBtnText.textContent = 'Báo cáo lại';
+            reportBtn.onclick = openReportModal;
+            reportBtn.classList.add('bg-yellow-600', 'text-white', 'hover:bg-yellow-700');
+        } else {
+            // Never reported
+            reportBtnText.textContent = 'Báo xấu';
+            reportBtn.onclick = openReportModal;
+            reportBtn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+        }
+    }
+
+    function showReportStatus(data) {
+        Swal.fire({
+            title: 'Trạng thái báo cáo',
+            html: `
+                <div class="text-left">
+                    <p><strong>Trạng thái:</strong> <span class="text-blue-600">${data.status}</span></p>
+                    <p><strong>Ngày báo cáo:</strong> ${data.reportedAt}</p>
+                    ${data.resolvedAt ? `<p><strong>Ngày xử lý:</strong> ${data.resolvedAt}</p>` : ''}
+                    ${data.adminNote ? `<p><strong>Ghi chú của admin:</strong> ${data.adminNote}</p>` : ''}
+                </div>
+            `,
+            icon: 'info',
+            confirmButtonText: 'Đồng ý'
+        });
+    }
+
+    async function submitReport() {
+        // Check if user is logged in
+        if (!checkUserLogin()) {
+            return;
+        }
+
+        const reason = document.getElementById('reportReason').value;
+        const description = document.getElementById('reportDescription').value;
+
+        if (!reason) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Thiếu thông tin',
+                text: 'Vui lòng chọn lý do báo cáo',
+                confirmButtonText: 'Đồng ý'
+            });
+            return;
+        }
+
+        // Show loading
+        Swal.fire({
+            title: 'Đang gửi báo cáo...',
+            text: 'Vui lòng chờ trong giây lát',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        try {
+            const requestBody = {
+                targetId: id,
+                reason: reason,
+                description: description
+            };
+
+            const result = await reportService.reportPropertyPost(currentUserId, requestBody);
+            Swal.close();
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: result.message,
+                confirmButtonText: 'Đồng ý'
+            });
+            closeReportModal();
+            checkReportStatus(); // Refresh button state
+        } catch (error) {
+            console.error('Error submitting report:', error);
+            Swal.close();
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: error.message || 'Có lỗi xảy ra khi gửi báo cáo',
+                confirmButtonText: 'Đồng ý'
+            });
+        }
+    }
+
+    async function cancelReport() {
+        // Check if user is logged in
+        if (!checkUserLogin()) {
+            return;
+        }
+
+        const result = await Swal.fire({
+            title: 'Xác nhận hủy báo cáo',
+            text: 'Bạn có chắc chắn muốn hủy báo cáo này?\n\nHủy báo cáo sẽ xóa hoàn toàn báo cáo của bạn và bạn có thể báo cáo lại sau này.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Hủy báo cáo',
+            cancelButtonText: 'Không'
+        });
+
+        if (result.isConfirmed) {
+            // Show loading
+            Swal.fire({
+                title: 'Đang hủy báo cáo...',
+                text: 'Vui lòng chờ trong giây lát',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                const response = await reportService.cancelPropertyPostReport(id, currentUserId);
+                Swal.close();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: response.message,
+                    confirmButtonText: 'Đồng ý'
+                });
+                checkReportStatus(); // Refresh button state
+            } catch (error) {
+                console.error('Error canceling report:', error);
+                Swal.close();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: error.message || 'Có lỗi xảy ra khi hủy báo cáo',
+                    confirmButtonText: 'Đồng ý'
+                });
+            }
+        }
+    }
+
     async function getProperty(){
         let prop = await propertyService.getProperty(id);
         //console.log(prop);
         landlordId = prop.landlordId;
+        console.log('getProperty - landlordId set to:', landlordId, 'currentUserId:', currentUserId);
         const token = localStorage.getItem('authToken');
         if(token){
             let userId = 0;
@@ -291,6 +728,9 @@
                 </div>`
         });
         $('#listNew').html(htmlNew);
+        
+        // Check if current user is the owner and hide report button if so
+        hideReportButtonForOwner();
 
         var listReview = await getComment(id);
             listReview.items.forEach(item => {

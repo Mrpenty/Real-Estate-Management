@@ -185,40 +185,15 @@
         let currentPage = 1, totalPages = 1, allPosts = [];
         let currentSearch = '', currentStatus = '', currentFromDate = '', currentToDate = '';
 
-        const AdminPostService = window.AdminPostService || {
-            async getPosts(status = '', page = 1, pageSize = 10) {
-                const res = await fetch(`${ADMIN_POST_API_BASE_URL}?status=${status || ''}&page=${page}&pageSize=${pageSize}`, {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-                if (!res.ok) throw new Error('Không thể lấy danh sách bài đăng');
-                return await res.json();
-            },
-            async updatePostStatus(id, status, rejectReason = null) {
-                const body = rejectReason ? { status, rejectReason } : { status };
-                const res = await fetch(`${ADMIN_POST_API_BASE_URL}/${id}/status`, {
-                    method: 'PUT',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-                if (!res.ok) throw new Error('Không thể cập nhật trạng thái bài đăng');
-                return await res.json();
-            },
-            async deletePost(id) {
-                const res = await fetch(`${ADMIN_POST_API_BASE_URL}/${id}`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
-                if (!res.ok) throw new Error('Không thể xóa bài đăng');
-                return true;
-            }
-        };
+        // Sử dụng AdminPostService từ file riêng biệt
 
         async function loadPosts(page = 1, status = '', search = '', fromDate = '', toDate = '') {
             try {
                 showLoading(true);
-                const data = await AdminPostService.getPosts(status, page, 10);
+                const params = { page, pageSize: 10 };
+                if (status) params.status = status;
+                
+                const data = await AdminPostService.getPosts(params);
                 allPosts = data.posts || [];
                 let filtered = [...allPosts];
                 
@@ -439,7 +414,16 @@
             const rejectReason = document.getElementById('rejectReason').value;
             
             try {
-                await AdminPostService.updatePostStatus(postId, newStatus, newStatus === '3' ? rejectReason : null);
+                // Chuyển đổi status từ string sang number nếu cần
+                let statusToSend = newStatus;
+                if (newStatus === '1') statusToSend = 'pending';
+                else if (newStatus === '2') statusToSend = 'approved';
+                else if (newStatus === '3') statusToSend = 'rejected';
+                else if (newStatus === '4') statusToSend = 'rented';
+                else if (newStatus === '5') statusToSend = 'sold';
+                else if (newStatus === '0') statusToSend = 'draft';
+                
+                await AdminPostService.updatePostStatus(postId, statusToSend, newStatus === '3' ? rejectReason : null);
                 showSuccess('Cập nhật trạng thái thành công!');
                 closeStatusModal();
                 loadPosts(currentPage, currentStatus, currentSearch, currentFromDate, currentToDate);
