@@ -125,6 +125,13 @@ namespace RealEstateManagement.Presentation.Controllers
         }
 
         [HttpGet]
+        public IActionResult ViewContract(int id)
+        {
+            ViewBag.Id = id;
+            return View();
+        }
+
+        [HttpGet]
         public IActionResult CreateContract(int propertyPostId)
         {
             if (propertyPostId <= 0)

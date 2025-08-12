@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static RealEstateManagement.Data.Entity.PropertyEntity.PropertyPost;
 
 namespace RealEstateManagement.Business.Services.OwnerService
 {
@@ -49,6 +50,12 @@ namespace RealEstateManagement.Business.Services.OwnerService
                         Id = img.Id,
                         Url = img.Url,
                         IsPrimary = img.IsPrimary
+                    }).ToList(),
+                    Posts = entity.Posts.Select(post => new OwnerPropertyPostDto
+                    {
+                        Id = post.Id,
+                        Status = post.Status.ToString(), 
+                        CreatedAt = post.CreatedAt
                     }).ToList()
                 });
         }
@@ -70,6 +77,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 Location = entity.Location,
                 Bedrooms = entity.Bedrooms,
                 Area = entity.Area,
+                Type = entity.Type,
                 Images = entity.Images?.Select(img => new OwnerPropertyImageDto
                 {
                     Id = img.Id,
@@ -81,30 +89,78 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 {
                     Id = post.Id,
                     Status = post.Status.ToString(),
-                    CreatedAt = post.CreatedAt
-                }).ToList()
+                    RentalContract = post.RentalContract == null ? null : new RentalContractViewDto
+                    {
+                        Id = post.RentalContract.Id,
+                        PropertyPostId = post.RentalContract.PropertyPostId,
+                        DepositAmount = post.RentalContract.DepositAmount,
+                        MonthlyRent = post.RentalContract.MonthlyRent,
+                        ContractDurationMonths = post.RentalContract.ContractDurationMonths,
+                        PaymentCycle = post.RentalContract.PaymentCycle,
+                        PaymentDayOfMonth = post.RentalContract.PaymentDayOfMonth,
+                        StartDate = post.RentalContract.StartDate,
+                        EndDate = post.RentalContract.EndDate,
+                        PaymentMethod = post.RentalContract.PaymentMethod,
+                        ContactInfo = post.RentalContract.ContactInfo,
+                        Status = post.RentalContract.Status,
+                        CreatedAt = post.RentalContract.CreatedAt,
+                        ConfirmedAt = post.RentalContract.ConfirmedAt
+                    }
+                }).ToList(),
+
+                Amenities = entity.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                PrimaryImageUrl = entity.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
+                ImageUrls = entity.Images?.Select(c => c.Url).ToList(),
+                Street = entity.Address?.Street?.Name,
+                Province = entity.Address?.Province?.Name,
+                Ward = entity.Address?.Ward?.Name,
+                DetailedAddress = entity.Address?.DetailedAddress,
+                StreetId = entity.Address?.StreetId,
+                ProvinceId = entity.Address?.ProvinceId,
+                WardId = entity.Address?.WardId
             };
 
             return dto;
         }
 
-
-        public async Task UpdatePropertyAsync(OwnerUpdatePropertyDto dto, int landlordId)
+        public async Task UpdatePropertyAsync(PropertyCreateRequestDto dto, int landlordId, int propertyId)
         {
-            var property = await _ownerPropertyRepo.GetByIdAsync(dto.Id, landlordId);
+            var property = await _ownerPropertyRepo.GetByIdAsync(propertyId, landlordId);
             if (property == null)
                 throw new Exception("Property not found or not owned by landlord.");
 
+            if (property.Posts.Any(post =>
+    post.Status == PropertyPostStatus.Sold ||
+    post.Status == PropertyPostStatus.Rented))
+            {
+                throw new InvalidOperationException("Bạn không thể Update bài viết này do bài viết này đã rơi vào 1 trong 2 trạng thái: Rented hoặc Sold.");
+            }
             property.Title = dto.Title;
             property.Description = dto.Description;
             property.Price = dto.Price;
             property.Area = dto.Area;
             property.Bedrooms = dto.Bedrooms;
-            // ...
+            property.Type = dto.Type;
+            property.Location = dto.Location;
 
+            if (dto.ProvinceId != null || dto.WardId != null || dto.StreetId != null || !string.IsNullOrEmpty(dto.DetailedAddress))
+            {
+                await _ownerPropertyRepo.UpdateAddressAsync(propertyId, dto.ProvinceId, dto.WardId, dto.StreetId, dto.DetailedAddress);
+            }
+
+            // Xử lý cập nhật Amenities nếu cần
+            if (dto.AmenityIds != null && dto.AmenityIds.Any())
+            {
+                await _ownerPropertyRepo.UpdateAmenitiesAsync(propertyId, dto.AmenityIds);
+            }
+
+            var post = property.Posts.FirstOrDefault();
+            if (post != null && post.Status != PropertyPostStatus.Draft)
+            {
+                post.Status = PropertyPostStatus.Pending;
+            }
             await _ownerPropertyRepo.UpdateAsync(property);
         }
-
 
         public async Task DeletePropertyAsync(int id, int landlordId)
         {
@@ -126,8 +182,10 @@ namespace RealEstateManagement.Business.Services.OwnerService
 
             if (post.Status is PropertyPost.PropertyPostStatus.Rejected
                 or PropertyPost.PropertyPostStatus.Sold
+                or PropertyPost.PropertyPostStatus.Approved
+                or PropertyPost.PropertyPostStatus.Draft
                 or PropertyPost.PropertyPostStatus.Rented)
-                return (false, "Cannot extend a post that is rejected, sold, or rented.");
+                return (false, "Cannot extend a post that is rejected, draft, sold, or rented.");
 
             if (days <= 0 || days > 90) // giới hạn tối đa 90 ngày
                 return (false, "Invalid extension period. Max 90 days allowed.");

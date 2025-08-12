@@ -1,94 +1,692 @@
 ﻿@{
-    Layout = "~/Views/Shared/_RenterLayout.cshtml";
-    ViewData["Title"] = "Đăng tin mới";
+    Layout = "../Shared/_LayoutV2.cshtml";
 }
-<div class="bg-white px-6 pt-6 border-b" style="position:fixed;width:100%;z-index:999">
-    <h1 class="text-2xl font-semibold mb-4">Danh sách tin đăng</h1>
 
-@*     <div class="flex space-x-6 text-sm font-medium">
-        <button data-scroll="AreaId" class="tab-btn text-orange-600 border-b-2 border-orange-600 pb-2">
-            Khu vực
-        </button>
-        <button data-scroll="DescriptionInformationId" class="tab-btn text-gray-600 hover:text-orange-600 pb-2">
-            Thông tin mô tả
-        </button>
-        <button data-scroll="ImageId" class="tab-btn text-gray-600 hover:text-orange-600 pb-2">
-            Hình ảnh
-        </button>
-        <button data-scroll="ContactId" class="tab-btn text-gray-600 hover:text-orange-600 pb-2">
-            Thông tin liên hệ
-        </button>
-    </div> *@
-</div>
-<div class="bg-white p-6 rounded ml-20 mr-20 mt-8 border mb-8" style="margin-top:9rem">
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý bài đăng</title>
+    <!-- Thư viện jQuery và DataTables -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/jquery.dataTables.min.css">
+    <!-- Font Awesome cho icon -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <!-- Tailwind CSS cho styling đơn giản -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* CSS gốc của bạn */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <a class="btn btn-success mb-4" href="/PostProperty/CreateProperty" >Tạo tin mới</a>
-    <div class="">
-        <div>
-            <table id="listProperty" class="w-full divide-y divide-gray-200 bg-white border">
-                <thead class="bg-gray-100 border">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiêu đề</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Danh mục</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase text-right tracking-wider">Diện tích (m<sup>2</sup>)</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase text-center tracking-wider">Địa chỉ</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase text-center tracking-wider">Ngày tạo</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
-                    </tr>
-                </thead>
-                <tbody id="propertyList" class="divide-y divide-gray-200">
-                </tbody>
-            </table>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .action-bar {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .btn-create {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+            .btn-create:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+                color: white;
+                text-decoration: none;
+            }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+            }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 1.5rem;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        #listProperty {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            #listProperty thead {
+                background: #f8f9fa;
+            }
+
+            #listProperty th {
+                padding: 1rem;
+                font-weight: 600;
+                color: #495057;
+                border-bottom: 2px solid #dee2e6;
+                text-align: left;
+            }
+
+            #listProperty td {
+                padding: 1rem;
+                border-bottom: 1px solid #dee2e6;
+                vertical-align: middle;
+            }
+
+            #listProperty tbody tr {
+                transition: all 0.3s ease;
+            }
+
+                #listProperty tbody tr:hover {
+                    background-color: #f8f9ff;
+                    transform: scale(1.01);
+                }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn-action {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .btn-edit {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+            .btn-edit:hover {
+                background-color: #1976d2;
+                color: white;
+                transform: translateY(-1px);
+            }
+
+        .btn-delete {
+            background-color: #ffebee;
+            color: #d32f2f;
+        }
+
+            .btn-delete:hover {
+                background-color: #d32f2f;
+                color: white;
+                transform: translateY(-1px);
+            }
+
+        .price-tag {
+            font-weight: 600;
+            color: #28a745;
+            background: #e8f5e8;
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+        }
+
+        .address-info {
+            max-width: 200px;
+            line-height: 1.4;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+
+            .empty-state i {
+                font-size: 4rem;
+                color: #ddd;
+                margin-bottom: 1rem;
+            }
+
+        /* DataTables custom styling */
+        .dataTables_wrapper {
+            padding: 1rem;
+        }
+
+        .dataTables_filter input {
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            padding: 8px 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+            .dataTables_filter input:focus {
+                border-color: #667eea;
+            }
+
+        .dataTables_paginate .paginate_button {
+            border-radius: 8px !important;
+            margin: 0 2px !important;
+        }
+
+        /* Modal styling */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            border-radius: 15px;
+            max-width: 400px;
+            text-align: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-modal {
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+            .btn-modal:hover {
+                transform: translateY(-2px);
+            }
+
+        .btn-confirm {
+            background-color: #d32f2f;
+            color: white;
+        }
+
+        .btn-cancel {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .action-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .stats-cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        #listProperty {
+            font-size: 0.875rem;
+        }
+
+            #listProperty th, #listProperty td {
+                padding: 0.5rem;
+            }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title" style="color: orange"><i class="fas fa-building" style="color: orange"></i> Quản Lý Bài Đăng</h1>
+            <p class="page-subtitle" style="color: orange" >Quản lý và theo dõi tất cả bài đăng bất động sản của bạn</p>
         </div>
 
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-number" id="totalProperties">0</div>
+                <div class="stat-label">Tổng bài đăng</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="approvedProperties">0</div>
+                <div class="stat-label">Đang hoạt động</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingProperties">0</div>
+                <div class="stat-label">Chờ duyệt</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="expiredProperties">0</div>
+                <div class="stat-label">Hết hạn</div>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <div>
+                <h3 style="color: #333; margin: 0;">Danh Sách Bài Đăng</h3>
+            </div>
+            <a href="/PostProperty/CreateProperty" class="btn-create">
+                <i class="fas fa-plus"></i>
+                Tạo tin mới
+            </a>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-container">
+            <div class="table-header">
+                <i class="fas fa-table"></i> Danh sách bất động sản
+            </div>
+
+            <div id="loadingState" class="loading">
+                <div class="loading-spinner"></div>
+                <p>Đang tải dữ liệu...</p>
+            </div>
+
+            <div id="tableWrapper" style="display: none;">
+                <table id="listProperty">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">STT</th>
+                            <th>Tiêu đề</th>
+                            <th style="width: 120px;">Giá</th>
+                            <th style="width: 100px;">Danh mục</th>
+                            <th style="width: 200px;">Địa chỉ</th>
+                            <th style="width: 120px;">Ngày tạo</th>
+                            <th style="width: 140px;">Trạng thái</th>
+                            <th style="width: 120px;">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="propertyList"></tbody>
+                </table>
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <i class="fas fa-home"></i>
+                <h3>Chưa có bài đăng nào</h3>
+                <p>Hãy tạo bài đăng đầu tiên của bạn để bắt đầu</p>
+            </div>
+        </div>
     </div>
-</div>
 
+    <!-- Custom Modal -->
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <p id="modalMessage"></p>
+            <div class="modal-buttons">
+                <button id="modalConfirmBtn" class="btn-modal btn-confirm">Xác nhận</button>
+                <button id="modalCancelBtn" class="btn-modal btn-cancel">Hủy</button>
+            </div>
+        </div>
+    </div>
 
-<script>
-     let isAuthen = authService.isAuthenticated();
-     if(!isAuthen){
-         window.location.href = '/Auth/Login';
-     }
+    <script>
 
-    document.getElementById('ListPostId').classList.add('font-bold', 'text-blue-800');
-    getAllBylandlordProperty();
-    async function getAllBylandlordProperty(){
-        let list = await propertyRenterService.getAllBylandlordProperty();
-        $('#propertyList').html('');
-        let html = '';
-        list.forEach((item,index) => {
+        const API_PROPERTY_BASE_URL_V2 = 'https://localhost:7031/api/OwnerProperty';
+
+        // Hàm tiện ích
+        function timeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) return "1 ngày trước";
+            if (diffDays < 7) return `${diffDays} ngày trước`;
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)} tuần trước`;
+            return `${Math.floor(diffDays / 30)} tháng trước`;
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
+        }
+
+        function getStatusBadge(status) {
+            if (!status || status === 'Chưa có bài đăng') {
+                return '<span class="status-badge status-inactive">Chưa có bài đăng</span>';
+            }
+            switch (status) {
+                case 'Approved':
+                    return '<span class="status-badge status-active">Đã duyệt</span>';
+                case 'Pending':
+                    return '<span class="status-badge status-pending">Chờ duyệt</span>';
+                default:
+                    return '<span class="status-badge status-inactive">' + status + '</span>';
+            }
+        }
+
+        // Cập nhật trạng thái thống kê
+        function updateStats(total, approved, pending, expired) {
+            document.getElementById('totalProperties').textContent = total;
+            document.getElementById('approvedProperties').textContent = approved;
+            document.getElementById('pendingProperties').textContent = pending;
+            document.getElementById('expiredProperties').textContent = expired;
+        }
+
+        // --- CUSTOM MODAL UTILITIES ---
+        let deleteCallback = null;
+        const customModal = document.getElementById('customModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+        function showCustomModal(message, isConfirmation, onConfirm) {
+            modalMessage.textContent = message;
+            customModal.style.display = 'flex';
+
+            // Xử lý nút tùy thuộc vào loại modal (xác nhận hay thông báo)
+            if (isConfirmation) {
+                modalConfirmBtn.style.display = 'inline-block';
+                modalConfirmBtn.onclick = () => {
+                    hideCustomModal();
+                    if (onConfirm) onConfirm();
+                };
+                modalCancelBtn.style.display = 'inline-block';
+                modalCancelBtn.onclick = hideCustomModal;
+            } else {
+                modalConfirmBtn.style.display = 'none';
+                modalCancelBtn.style.display = 'inline-block';
+                modalCancelBtn.textContent = 'Đóng';
+                modalCancelBtn.onclick = hideCustomModal;
+            }
+        }
+
+        function hideCustomModal() {
+            customModal.style.display = 'none';
+        }
+
+        // Service để xóa bài đăng
+        async function deleteProperty(id) {
+            showCustomModal("Bạn có chắc chắn muốn xóa bài đăng này?", true, async () => {
+                try {
+                    // Dữ liệu mock
+                    // Nếu muốn test API thực, bỏ comment dòng dưới và sửa URL
+                    // let response = await fetch(`${API_PROPERTY_BASE_URL_V2}/DeleteProperty?id=${id}`, { ... });
+                    const response = { ok: true, status: 200 }; // Mock response thành công
+
+                    if (response.ok) {
+                        showCustomModal("Xóa bài đăng thành công!", false);
+                        await getAllBylandlordProperty(); // Tải lại dữ liệu
+                    } else {
+                        showCustomModal("Có lỗi xảy ra khi xóa bài đăng!", false);
+                    }
+                } catch (error) {
+                    console.error('Delete property error:', error);
+                    showCustomModal("Có lỗi xảy ra khi xóa bài đăng!", false);
+                }
+            });
+        }
+
+        // Lấy danh sách bài đăng và hiển thị lên UI
+        async function getAllBylandlordProperty() {
+            try {
+                document.getElementById('loadingState').style.display = 'block';
+                document.getElementById('tableWrapper').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'none';
+                 const token = localStorage.getItem('authToken');
+                 const response = await fetch(`${API_PROPERTY_BASE_URL_V2}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const list = await response.json();
+
+                 if (!list || list.length === 0) {
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('emptyState').style.display = 'block';
+                    updateStats(0, 0, 0);
+                    return;
+                }
+
+                // Cập nhật thống kê
+                let approvedCount = list.filter(item => item.posts.length > 0 && item.posts[0].status === 'Approved').length;
+                let pendingCount = list.filter(item => item.posts.length > 0 && item.posts[0].status === 'Pending').length;
+                let expiredCount = list.filter(item => item.posts.length > 0 && item.posts[0].status === 'Expired').length;
+                updateStats(list.length, approvedCount, pendingCount, expiredCount);
+
+                // Clear existing table data
+                $('#propertyList').html('');
+
+                let html = '';
+        list.forEach((item, index) => {
+            let postStatus = item.posts.length > 0 ? item.posts[0].status : 'Chưa có bài đăng';
             html += `
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap">${++index}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${item.title}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${item.price}đ</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">${item.type}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">${item.area}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${item.detailedAddress} ${item.street} <br/> ${item.ward} ${item.province}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${timeAgo(item.createdAt)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">
-                            <button onclick="window.location.href = '/PostProperty/DetailProperty/${item.id}'" class="text-blue-500 hover:text-blue-700">Sửa</button>
-                            <button onclick="deleteProperty(${item.id})" class="ml-2 text-red-500 hover:text-red-700">Xóa</button>
-                        </td>
-                    </tr>
+                <tr>
+                    <td class="text-center">${index + 1}</td>
+                    <td>
+                        <div style="font-weight: 600; color: #333; margin-bottom: 4px;">
+                            ${item.title}
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        <span class="price-tag">${formatPrice(item.price)}</span>
+                    </td>
+                    <td class="text-center">
+                        <span style="background: #e8f4fd; color: #1976d2; padding: 4px 8px; border-radius: 6px; font-size: 0.875rem;">
+                            ${item.type}
+                        </span>
+                    </td>
+                    <td class="address-info">
+                        <div>${item.detailedAddress}</div>
+                        <div style="color: #666; font-size: 0.875rem;">
+                            ${item.street}, ${item.ward}, ${item.province}
+                        </div>
+                    </td>
+                    <td class="text-center" style="color: #666; font-size: 0.875rem;">
+                        ${timeAgo(item.createdAt)}
+                    </td>
+                    <td class="text-center">
+                        ${getStatusBadge(postStatus)}
+                    </td>
+                    <td class="text-center">
+                        <div class="action-buttons">
+                            <button onclick="window.location.href = '/PostProperty/DetailProperty/${item.id}'"
+                                    class="btn-action btn-edit" title="Chỉnh sửa">
+                                <i class="fas fa-edit"></i> Sửa
+                            </button>
+                            <button onclick="deleteProperty(${item.id})"
+                                    class="btn-action btn-delete" title="Xóa">
+                                <i class="fas fa-trash"></i> Xóa
+                            </button>
+                        </div>
+                    </td>
+                </tr>
             `;
         });
-        $('#propertyList').html(html);
-        $('#listProperty').DataTable({
-          language: {
-            search: "Tìm kiếm:",
-            paginate: {
-              previous: "Trước",
-              next: "Sau"
+
+                $('#propertyList').html(html);
+
+                // Hide loading and show table
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('tableWrapper').style.display = 'block';
+
+                // Initialize DataTable
+                if ($.fn.DataTable.isDataTable('#listProperty')) {
+                    $('#listProperty').DataTable().destroy();
+                }
+
+                $('#listProperty').DataTable({
+                    language: {
+                        search: "Tìm kiếm:",
+                        lengthMenu: "Hiển thị _MENU_ mục",
+                        info: "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
+                        infoEmpty: "Hiển thị 0 đến 0 của 0 mục",
+                        infoFiltered: "(lọc từ _MAX_ mục)",
+                        zeroRecords: "Không tìm thấy dữ liệu phù hợp",
+                        paginate: {
+                            first: "Đầu",
+                            last: "Cuối",
+                            previous: "Trước",
+                            next: "Sau"
+                        }
+                    },
+                    pageLength: 10,
+                    order: [[5, 'desc']], // Sắp xếp theo ngày tạo
+                    responsive: true
+                });
+
+            } catch (error) {
+                console.error('Error loading properties:', error);
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'block';
+                showCustomModal('Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại!', false);
             }
-          }
+        }
+
+        // Khởi tạo trang
+        document.addEventListener('DOMContentLoaded', () => {
+            getAllBylandlordProperty();
         });
-    }
-    
-    async function deleteProperty(id){
-        await propertyRenterService.deleteProperty(id);
-    }
-</script>
+    </script>
+</body>
+</html>

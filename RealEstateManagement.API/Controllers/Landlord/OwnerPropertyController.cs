@@ -55,18 +55,16 @@ namespace RealEstateManagement.API.Controllers.Landlord
 
         // UPDATE: Cập nhật BĐS
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProperty([FromQuery] int id, [FromBody] OwnerUpdatePropertyDto dto)
+        public async Task<IActionResult> UpdateProperty(int id, [FromBody] PropertyCreateRequestDto dto)
         {
             var landlordId = GetCurrentLandlordId();
-            dto.Id = id; // Bắt buộc gán lại để fix ID từ route
-            await _ownerPropertyService.UpdatePropertyAsync(dto, landlordId);
+            await _ownerPropertyService.UpdatePropertyAsync(dto, landlordId, id);
             return Ok(new { id });
         }
 
-
         // DELETE: Xoá BĐS
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProperty([FromQuery] int id)
+        public async Task<IActionResult> DeleteProperty(int id)
         {
             var landlordId = GetCurrentLandlordId();
             await _ownerPropertyService.DeletePropertyAsync(id, landlordId);

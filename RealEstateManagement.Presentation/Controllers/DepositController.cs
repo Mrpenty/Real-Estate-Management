@@ -27,5 +27,11 @@ namespace RealEstateManagement.Presentation.Controllers
             ViewBag.Message = $"Giao dịch đã bị hủy hoặc không thành công: {desc}";
             return View(); // Trả về Views/Deposit/Cancel.cshtml
         }
+
+        [HttpGet("TransactionHistory")] // Đặt một route mới cho view
+        public IActionResult TransactionHistory()
+        {
+            return View();
+        }
     }
 }

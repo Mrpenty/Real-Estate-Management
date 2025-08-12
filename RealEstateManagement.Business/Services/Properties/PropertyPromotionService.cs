@@ -80,8 +80,9 @@ namespace RealEstateManagement.Business.Services.Properties
             {
                 WalletId = wallet.Id,
                 Amount = -package.Price,
-                Type = "Non",
+                Type = "Deduct",
                 Description = $"Đăng ký gói {package.Name} cho PropertyId={dto.PropertyId}",
+                Status = "Success",
                 CreatedAt = DateTime.UtcNow
             };
             _context.WalletTransactions.Add(walletTransaction);
