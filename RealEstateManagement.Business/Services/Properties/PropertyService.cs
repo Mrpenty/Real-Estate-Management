@@ -257,7 +257,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 DetailedAddress = p.Address.DetailedAddress,
                 StreetId = p.Address.StreetId,
                 ProvinceId = p.Address.ProvinceId,
-                WardId = p.Address.WardId
+                WardId = p.Address.WardId,
                 Rating = rating,
                 CommentNo = ratingNo,
                 RatingNo = ratingNo

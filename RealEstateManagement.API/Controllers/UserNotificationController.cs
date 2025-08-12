@@ -8,7 +8,6 @@ namespace RealEstateManagement.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class UserNotificationController : ControllerBase
     {
         private readonly INotificationService _notificationService;

@@ -125,6 +125,9 @@
                         <div class="p-4 border-b border-gray-200">
                             <h3 class="text-lg font-semibold text-gray-900">Thông báo</h3>
                         </div>
+                        <div id="notificationList" class="p-4">
+                            <!-- Notifications will be loaded here -->
+                        </div>
                     </div>
 
                     <!-- Auth Buttons / User Menu -->
@@ -453,24 +456,52 @@
         // Hàm cập nhật số lượng thông báo chưa đọc khi vào trang
         async function updateNotificationCount() {
             const notificationCount = document.getElementById('notificationCount');
+            console.log('updateNotificationCount called');
+            console.log('authService.isAuthenticated():', authService.isAuthenticated());
+            
             if (!authService.isAuthenticated()) {
+                console.log('User not authenticated, skipping notification count update');
                 if (notificationCount) notificationCount.textContent = '';
                 return;
             }
             try {
                 const token = localStorage.getItem('authToken');
-                const response = await fetch(config.buildApiUrl(config.user.notifications + '/unread-count'), { 
+                if (!token) {
+                    console.warn('No auth token found for notification count update');
+                    if (notificationCount) notificationCount.textContent = '';
+                    return;
+                }
+                
+                const apiUrl = config.buildApiUrl(config.user.notifications + '/unread-count');
+                console.log('config.user.notifications for count:', config.user.notifications);
+                console.log('config.buildApiUrl result for count:', apiUrl);
+                console.log('Fetching notification count from:', apiUrl);
+                console.log('Token being sent for count:', token ? token.substring(0, 20) + '...' : 'No token');
+                console.log('Authorization header for count:', `Bearer ${token ? token.substring(0, 20) + '...' : 'No token'}`);
+                
+                const response = await fetch(apiUrl, { 
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
-                if (!response.ok) throw new Error('Failed to fetch notification count');
+                
+                console.log('Notification count response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Notification count API Error:', response.status, errorText);
+                    throw new Error(`API Error: ${response.status} - ${errorText}`);
+                }
+                
                 const data = await response.json();
+                console.log('Notification count data:', data);
+                
                 const unreadCount = data.data?.unreadCount || 0;
                 notificationCount.textContent = unreadCount > 0 ? unreadCount : '';
-            } catch {
+            } catch (error) {
+                console.error('Error updating notification count:', error);
                 if (notificationCount) notificationCount.textContent = '';
             }
         }
@@ -499,8 +530,12 @@
         // Sửa getNotificationList để toggle modal
         async function getNotificationList(event) {
             event.preventDefault();
+            console.log('getNotificationList called');
             const isAuthenticated = authService.isAuthenticated();
+            console.log('isAuthenticated:', isAuthenticated);
+            
             if (!isAuthenticated) {
+                console.log('User not authenticated, redirecting to login');
                 window.location.href = '/Auth/Login';
                 return;
             }
@@ -516,15 +551,36 @@
             try {
                 // Use the user-specific notifications endpoint instead of all notifications
                 const token = localStorage.getItem('authToken');
-                const response = await fetch(config.buildApiUrl(config.user.notifications + '/my-notifications'), { 
+                if (!token) {
+                    throw new Error('No authentication token found');
+                }
+                
+                const apiUrl = config.buildApiUrl(config.user.notifications + '/my-notifications');
+                console.log('config.user.notifications:', config.user.notifications);
+                console.log('config.buildApiUrl result:', apiUrl);
+                console.log('Fetching notifications from:', apiUrl);
+                console.log('Token being sent:', token ? token.substring(0, 20) + '...' : 'No token');
+                console.log('Authorization header:', `Bearer ${token ? token.substring(0, 20) + '...' : 'No token'}`);
+                
+                const response = await fetch(apiUrl, { 
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
-                if (!response.ok) throw new Error('Failed to fetch notifications');
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API Error:', response.status, errorText);
+                    throw new Error(`API Error: ${response.status} - ${errorText}`);
+                }
+                
                 const data = await response.json();
+                console.log('Notifications data:', data);
+                
                 const notifications = data.data || [];
                 // Update unread count
                 const unreadCount = notifications.filter(n => !n.isRead).length;
@@ -534,7 +590,8 @@
                 renderNotificationsWithTabs(notifications);
                 dropdown.classList.remove('hidden');
             } catch (error) {
-                notificationList.innerHTML = '<p class="text-red-500 text-center p-2">Lỗi khi tải thông báo.</p>';
+                console.error('Error in getNotificationList:', error);
+                notificationList.innerHTML = `<p class="text-red-500 text-center p-2">Lỗi khi tải thông báo: ${error.message}</p>`;
             }
         }
 
@@ -677,7 +734,7 @@
                 const token = localStorage.getItem('authToken');
                 
                 // Mark notification as read
-                const markReadResponse = await fetch(`https://localhost:7031/api/UserNotification/mark-as-read/${notification.notificationId}`, {
+                const markReadResponse = await fetch(config.buildApiUrl(config.user.notifications + `/mark-as-read/${notification.notificationId}`), {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -686,7 +743,7 @@
                 });
 
                 // Get notification detail
-                const response = await fetch(`https://localhost:7031/api/Notification/${notification.notificationId}`, {
+                const response = await fetch(config.buildApiUrl(`/api/Notification/${notification.notificationId}`), {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -780,9 +837,136 @@
 
         // Update navigation and notification count on load
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Content Loaded - Starting initialization');
+            console.log('Auth service available:', typeof authService !== 'undefined');
+            console.log('Config available:', typeof config !== 'undefined');
+            
+            if (typeof authService !== 'undefined') {
+                console.log('Is authenticated:', authService.isAuthenticated());
+                const token = localStorage.getItem('authToken');
+                console.log('Token exists:', !!token);
+                if (token) {
+                    console.log('Token length:', token.length);
+                    console.log('Token starts with:', token.substring(0, 20) + '...');
+                    
+                    // Check token validity
+                    checkTokenValidity();
+                }
+            }
+            
+            if (typeof config !== 'undefined') {
+                console.log('API Base URL:', config.apiBaseUrl);
+                console.log('User notifications endpoint:', config.user.notifications);
+                
+                // Test API connectivity
+                testApiConnectivity();
+                
+                // Test token with API if user is authenticated
+                if (authService.isAuthenticated()) {
+                    testTokenWithAPI();
+                }
+            }
+            
             updateNavigation();
             updateNotificationCount();
         });
+        
+        // Test API connectivity
+        async function testApiConnectivity() {
+            try {
+                console.log('Testing API connectivity...');
+                const response = await fetch(config.apiBaseUrl + '/api/UserNotification/my-notifications', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                console.log('API connectivity test response status:', response.status);
+                if (response.status === 401) {
+                    console.log('API is reachable but requires authentication (401)');
+                } else if (response.status === 200) {
+                    console.log('API is reachable and working');
+                } else {
+                    console.log('API response:', response.status, response.statusText);
+                }
+            } catch (error) {
+                console.error('API connectivity test failed:', error);
+            }
+        }
+        
+        // Test token with authenticated API call
+        async function testTokenWithAPI() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                console.log('No token to test');
+                return;
+            }
+            
+            try {
+                console.log('Testing token with authenticated API call...');
+                const response = await fetch(config.buildApiUrl(config.user.notifications + '/my-notifications'), {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Token test response status:', response.status);
+                if (response.status === 200) {
+                    console.log('Token is valid and working!');
+                } else if (response.status === 401) {
+                    console.log('Token is invalid or expired (401)');
+                    const errorText = await response.text();
+                    console.log('Error response:', errorText);
+                } else {
+                    console.log('Unexpected response:', response.status, response.statusText);
+                }
+            } catch (error) {
+                console.error('Token test failed:', error);
+            }
+        }
+        
+        // Check token validity
+        function checkTokenValidity() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                console.log('No token found');
+                return false;
+            }
+            
+            // Clean the token (remove any extra whitespace or quotes)
+            const cleanToken = token.trim().replace(/^["']|["']$/g, '');
+            if (cleanToken !== token) {
+                console.log('Token had extra characters, cleaned');
+                localStorage.setItem('authToken', cleanToken);
+            }
+            
+            try {
+                const payload = JSON.parse(atob(cleanToken.split('.')[1]));
+                const now = Date.now() / 1000;
+                const exp = payload.exp;
+                
+                console.log('Token payload:', payload);
+                console.log('Current time:', now);
+                console.log('Token expiration:', exp);
+                console.log('Token expired:', now > exp);
+                console.log('Time until expiration:', exp - now, 'seconds');
+                
+                if (now > exp) {
+                    console.log('Token has expired, clearing...');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('authTokenExpiry');
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error parsing token:', error);
+                console.log('Token format might be invalid');
+                return false;
+            }
+        }
 
                 // Hàm mới để lấy và cập nhật số dư ví
         async function updateWalletBalance() {
