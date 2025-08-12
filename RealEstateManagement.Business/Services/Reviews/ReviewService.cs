@@ -1,4 +1,6 @@
-﻿using RealEstateManagement.Business.Repositories.Reviews;
+﻿using Microsoft.EntityFrameworkCore;
+using RealEstateManagement.Business.DTO.Review;
+using RealEstateManagement.Business.Repositories.Reviews;
 using RealEstateManagement.Data.Entity.Reviews;
 using System;
 using System.Collections.Generic;
@@ -101,6 +103,85 @@ namespace RealEstateManagement.Business.Services.Reviews
         public async Task<bool> DeleteReviewWhenReportResolvedAsync(int reviewId)
         {
             return await _repo.HardDeleteReviewAsync(reviewId);
+        }
+        public async Task<PagedResultDTO<ReviewItemDTO>> GetReviewsByPostAsync(int propertyPostId, int page = 1, int pageSize = 10, string sort = "-date")
+        {
+            if (page <= 0) page = 1;
+            if (pageSize <= 0 || pageSize > 100) pageSize = 10;
+
+            var q = _repo.QueryReviewsByPropertyPostId(propertyPostId);
+
+            // sort: "-date" (mới nhất), "date" (cũ nhất), "-rating" (sao cao trước), "rating" (sao thấp trước)
+            q = sort switch
+            {
+                "date" => q.OrderBy(r => r.CreatedAt),
+                "-rating" => q.OrderByDescending(r => r.Rating).ThenByDescending(r => r.CreatedAt),
+                "rating" => q.OrderBy(r => r.Rating).ThenByDescending(r => r.CreatedAt),
+                _ => q.OrderByDescending(r => r.CreatedAt),
+            };
+
+            var total = await q.CountAsync();
+
+            var items = await q
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(r => new ReviewItemDTO
+                {
+                    ReviewId = r.Id,
+                    Rating = r.Rating,
+                    ReviewText = r.ReviewText,
+                    CreatedAt = r.CreatedAt,
+                    RenterId = r.RenterId,
+                    RenterName = r.Renter != null ? (r.Renter.Name ?? r.Renter.UserName) : $"Renter#{r.RenterId}",
+                    Reply = r.Reply == null ? null : new ReviewReplyDTO
+                    {
+                        Id = r.Reply.Id,
+                        LandlordId = r.Reply.LandlordId,
+                        ReplyContent = r.Reply.ReplyContent,
+                        CreatedAt = r.Reply.CreatedAt
+                    }
+                })
+                .ToListAsync();
+
+            return new PagedResultDTO<ReviewItemDTO>
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = total,
+                Items = items
+            };
+        }
+
+        public async Task<PostRatingSummaryDTO> GetPostRatingSummaryAsync(int propertyPostId)
+        {
+            var q = _repo.QueryReviewsByPropertyPostId(propertyPostId);
+
+            var total = await q.CountAsync();
+            var avg = total == 0 ? 0 : await q.AverageAsync(r => (double)r.Rating);
+
+            // Đếm theo sao
+            var buckets = await q
+                .GroupBy(r => r.Rating)
+                .Select(g => new { Rating = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            int c1 = buckets.Where(b => b.Rating == 1).Select(b => b.Count).FirstOrDefault();
+            int c2 = buckets.Where(b => b.Rating == 2).Select(b => b.Count).FirstOrDefault();
+            int c3 = buckets.Where(b => b.Rating == 3).Select(b => b.Count).FirstOrDefault();
+            int c4 = buckets.Where(b => b.Rating == 4).Select(b => b.Count).FirstOrDefault();
+            int c5 = buckets.Where(b => b.Rating == 5).Select(b => b.Count).FirstOrDefault();
+
+            return new PostRatingSummaryDTO
+            {
+                PropertyPostId = propertyPostId,
+                TotalReviews = total,
+                AverageRating = Math.Round(avg, 2),
+                CountStar1 = c1,
+                CountStar2 = c2,
+                CountStar3 = c3,
+                CountStar4 = c4,
+                CountStar5 = c5
+            };
         }
     }
 }

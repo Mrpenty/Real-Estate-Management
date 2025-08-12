@@ -9,6 +9,7 @@ using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.AddressEnity;
 using RealEstateManagement.Data.Entity.PropertyEntity;
+using RealEstateManagement.Data.Entity.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -93,6 +94,7 @@ namespace RealEstateManagement.Business.Services.Properties
         {
             var properties = await _repository.GetAllAsync();
             var favoriteUsers = await _context.UserFavoriteProperties.Where(c => c.UserId == userId).ToListAsync();
+            var interestedProp = await _context.InterestedProperties.Where(c => c.RenterId == userId).ToListAsync();
 
             var result = new List<HomePropertyDTO>();
             //properties = properties.ToList();
@@ -128,6 +130,9 @@ namespace RealEstateManagement.Business.Services.Properties
             {
                 try
                 {
+                    var ratingNo = p.Reviews.Where(c => !c.IsFlagged && c.IsVisible).Count();
+                    var ratingSum = p.Reviews.Where(c => !c.IsFlagged && c.IsVisible).Sum(c => c.Rating);
+                    var rating = ratingNo > 0 ? ratingSum / ratingNo : 0;
                     result.Add(new HomePropertyDTO
                     {
                         Id = p.Id,
@@ -152,7 +157,11 @@ namespace RealEstateManagement.Business.Services.Properties
                         ViewsCount = p.ViewsCount,
                         PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
                         LandlordId = p.Landlord?.Id ?? 0,
+                        IsInterested = interestedProp.Any(c => c.PropertyId == p.Id),
+                        InterestedStatus = interestedProp.FirstOrDefault(c => c.PropertyId == p.Id)?.Status ?? InterestedStatus.None,
                         LandlordName = p.Landlord?.Name,
+                        Rating = rating,
+                        RatingNo = ratingNo,
                         LandlordPhoneNumber = p.Landlord?.PhoneNumber,
                         LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
                         Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
@@ -202,6 +211,10 @@ namespace RealEstateManagement.Business.Services.Properties
             }
 
             var isFavorite = await _repositoryFavorite.GetFavoritePropertyByIdAsync(userId, id);
+
+            var ratingNo = p.Reviews.Where(c => !c.IsFlagged && c.IsVisible).Count();
+            var ratingSum = p.Reviews.Where(c => !c.IsFlagged && c.IsVisible).Sum(c => c.Rating);
+            var rating = ratingNo > 0 ? ratingSum / ratingNo : 0;
             return new PropertyDetailDTO
             {
                 Id = p.Id,
@@ -245,6 +258,10 @@ namespace RealEstateManagement.Business.Services.Properties
                 StreetId = p.Address.StreetId,
                 ProvinceId = p.Address.ProvinceId,
                 WardId = p.Address.WardId
+                Rating = rating,
+                CommentNo = ratingNo,
+                RatingNo = ratingNo
+
             };
         }
         public async Task<IEnumerable<HomePropertyDTO>> FilterByPriceAsync([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice)

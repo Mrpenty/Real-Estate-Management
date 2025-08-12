@@ -56,8 +56,23 @@
                     <span class="text-yellow-500 text-lg font-bold">⭐⭐⭐⭐⭐</span>
                     <span class="bg-red-500 text-white text-xs px-2 py-1 rounded uppercase font-semibold">Tin VIP Nổi Bật</span>
                 </div> *@
-                <h1 class="text-xl font-bold text-red-600 titleId">
-                </h1>
+                <div class="flex">
+                    <h1 class="text-xl font-bold text-red-600 titleId">
+                    </h1>
+                    <div class="flex items-center">
+                        <div class="flex items-center text-gray-500 ml-2"><span id="avgStar"></span></div>
+                        <div style="margin-bottom:2px" class="flex items-center text-yellow-500 ml-2" id="starContainer"></div>
+                    </div>
+                    
+
+                    <div class="flex items-center text-gray-600 ml-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:15px;height:15px" viewBox="0 0 24 24">
+                            <path d="M20 2H4C1.8 2 0 3.8 0 6v12c0 2.2 1.8 4 4 4h4v2.4c0 .6.4 1 1 1 .2 0 .5-.1.7-.3L14.3 22H20c2.2 0 4-1.8 4-4V6c0-2.2-1.8-4-4-4z" />
+                        </svg>
+                        <span class="ml-1"><span id ="totalComment"></span><span> bình luận</span></span>
+                    </div>
+                </div>
+
                 <div class="flex items-center text-green-600 font-semibold text-lg space-x-2">
                     <span class="priceId"></span>
                     <span class="text-black font-normal">•</span>
@@ -111,6 +126,23 @@
                         </div>
                     </div>
             </div>
+                <h2 class="text-lg font-semibold text-gray-700 mb-2 mt-3">Bình luận & Đánh giá</h2>
+                <div class="items-start space-x-4">
+                    <form id="commentForm" class="mb-8">
+                        <div class="flex items-center mb-3 space-x-1" id="ratingStars">
+                        </div>
+
+                        <textarea id="commentInput" placeholder="Viết bình luận của bạn..."
+                                  class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+                                  rows="3"></textarea>
+                        <button type="submit"
+                                class="mt-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg shadow transition">
+                            Gửi bình luận
+                        </button>
+                    </form>
+                    <div class="space-y-4" id="commentList">
+                    </div>
+                </div>
         </div>
     </div>
     </div>
@@ -164,12 +196,14 @@
 </div>
 
 <script src="~/js/propertyService.js"></script>
+@* <script src="~/js/review.js"></script> *@
 <script>
     let urlBase = "https://localhost:7031";
     //document.getElementById('listPostId').classList.add("text-orange-500");
     //document.getElementById('listPostId').classList.replace("border-gray-200", "border-orange-500");
     let id = @ViewBag.Id;
     let landlordId = 0;
+    let isOwner = false;
     getProperty();
 
     function openLandlord(){
@@ -180,11 +214,22 @@
         let prop = await propertyService.getProperty(id);
         //console.log(prop);
         landlordId = prop.landlordId;
+        const token = localStorage.getItem('authToken');
+        if(token){
+            let userId = 0;
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            userId = payload.id;
+            isOwner = prop.landlordId = userId ? true : false;
+        }
+
         let addressInfo = prop.detailedAddress + ", " + prop.street + ", " + prop.ward + ", " + prop.province;
         $('.titleId').html(prop.title);
+        renderStarsBody(prop.rating);
+        $('#avgStar').html("(" + prop.rating + ")");
+        $('#totalComment').html(prop.commentNo);
         
         $('.landlordUrl').prop('src',prop.landlordProfilePictureUrl?.includes('http') ? prop.landlordProfilePictureUrl : urlBase + prop.landlordProfilePictureUrl)
-        $('#imgPrimaryUrl').prop('src',prop.primaryImageUrl.includes("http") ? prop.primaryImageUrl : urlBase + prop.primaryImageUrl);
+        $('#imgPrimaryUrl').prop('src',prop.primaryImageUrl?.includes("http") ? prop.primaryImageUrl : urlBase + prop.primaryImageUrl);
         $('.areaId').html(prop.area);
         $('.addressId').html(addressInfo);
         $('.priceId').html(formatVietnameseNumber(prop.price) + " đ");
@@ -246,6 +291,12 @@
                 </div>`
         });
         $('#listNew').html(htmlNew);
+
+        var listReview = await getComment(id);
+            listReview.items.forEach(item => {
+            var commentHTML = createCommentHTML(item,isOwner);
+            list.insertAdjacentElement('afterbegin', commentHTML);
+        });
     }
 
     function selectImg(el1){
@@ -256,5 +307,227 @@
         const img = el1.querySelector('img');
         document.getElementById('imgPrimaryUrl').src = img.src;
     }
+
+    //comment
+    const form = document.getElementById('commentForm');
+    const input = document.getElementById('commentInput');
+    const list = document.getElementById('commentList');
+    const ratingStars = document.getElementById('ratingStars');
+
+    let selectedRating = 0;
+
+    renderStars(ratingStars, (rating) => selectedRating = rating);
+
+    function renderStars(container, callback) {
+      container.innerHTML = '';
+      let localRating = 0;
+      for (let i = 1; i <= 5; i++) {
+        const star = document.createElement('span');
+        star.innerHTML = '★';
+        star.className = 'text-2xl cursor-pointer text-gray-300 hover:text-yellow-400 transition';
+        star.dataset.value = i;
+
+        star.addEventListener('mouseover', () => highlightStars(container, i, localRating));
+        star.addEventListener('mouseout', () => highlightStars(container, localRating, localRating));
+        star.addEventListener('click', () => {
+          localRating = i;
+          highlightStars(container, i, localRating);
+          callback(i);
+        });
+
+        container.appendChild(star);
+      }
+    }
+
+    function highlightStars(container, rating, selected) {
+      const stars = container.querySelectorAll('span');
+      stars.forEach((star, index) => {
+        star.classList.remove('text-yellow-400', 'text-gray-300');
+        star.classList.add(index < rating ? 'text-yellow-400' : 'text-gray-300');
+      });
+    }
+
+    function createCommentHTML(name, text, stars, time, img) {
+      const starsDisplay = '★'.repeat(stars) + ' ☆'.repeat(5 - stars);
+      const comment = document.createElement('div');
+      comment.className = 'flex space-x-4 items-start';
+
+      comment.innerHTML = `
+        <img src="${img}" alt="avatar" class="w-12 h-12 rounded-full shadow-sm">
+        <div class="flex-1">
+          <div class="bg-gray-50 p-4 rounded-xl shadow-sm hover:shadow transition">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-semibold text-gray-800">${name}</span>
+              <span class="text-sm text-gray-500">${timeAgo(time)}</span>
+            </div>
+            <div class="flex mb-2">
+              <span class="text-yellow-400">${starsDisplay}</span>
+            </div>
+            <p class="text-gray-700">${text}</p>
+            <button class="text-sm text-blue-500 mt-2 hover:underline replyBtn">Trả lời</button>
+            <button class="text-sm text-red-500 hover:underline report-btn">Báo cáo</button>
+            <div class="replies space-y-3 mt-3 pl-8 border-l border-gray-200"></div>
+          </div>
+        </div>
+      `;
+
+
+      const replyBtn = comment.querySelector('.replyBtn');
+      const repliesContainer = comment.querySelector('.replies');
+
+      replyBtn.addEventListener('click', () => {
+        if (comment.querySelector('.replyForm')) return;
+
+        const replyForm = document.createElement('form');
+        replyForm.className = 'replyForm mt-3';
+        replyForm.innerHTML = `
+          <textarea placeholder="Viết trả lời..."
+            class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            rows="2"></textarea>
+          <button type="submit"
+            class="mt-2 bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-1 rounded-lg">
+            Gửi trả lời
+          </button>
+        `;
+
+        replyForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const replyText = replyForm.querySelector('textarea').value.trim();
+          if (replyText) {
+            const reply = document.createElement('div');
+            reply.className = 'flex space-x-3 items-start';
+            reply.innerHTML = `
+              <img src="https://i.pravatar.cc/36?u=${Math.random()}" alt="avatar" class="w-9 h-9 rounded-full shadow-sm">
+              <div class="bg-white p-3 rounded-lg shadow-sm flex-1">
+                <div class="font-semibold text-sm">Người trả lời <span class="text-gray-500 text-xs">vừa xong</span></div>
+                <p class="text-gray-700 text-sm">${replyText}</p>
+              </div>
+            `;
+            repliesContainer.appendChild(reply);
+            replyForm.remove();
+          }
+        });
+
+        repliesContainer.appendChild(replyForm);
+      });
+
+      return comment;
+    }
+
+
+    function createCommentHTML(item, isOwner = false) {
+      const starsDisplay = '★'.repeat(item.rating) + '☆'.repeat(5 - item.rating);
+      const comment = document.createElement('div');
+      comment.className = 'flex space-x-4 items-start';
+
+      comment.innerHTML = `
+        <img src="${item.renterImg}" alt="avatar" class="w-12 h-12 rounded-full shadow-sm" style="display:none">
+        <div class="flex-1">
+          <div class="bg-gray-50 p-4 rounded-xl shadow-sm hover:shadow transition">
+            <div class="flex items-center justify-between mb-1">
+              <span style="cursor:pointer" onclick="window.location.href='/Home/Landlord/${item.renterId}'" class="font-semibold text-gray-800">${item.renterName}</span>
+              <span class="text-sm text-gray-500">${timeAgo(item.createdAt)}</span>
+            </div>
+            <div class="flex mb-2">
+              <span class="text-yellow-400">${starsDisplay}</span>
+            </div>
+            <p class="text-gray-700">${item.reviewText}</p>
+            ${isOwner && !item.reply ? `
+                 <button class="text-sm text-blue-500 mt-2 hover:underline replyBtn-${item.reviewId}">Trả lời</button>
+            ` : `<button class="text-sm text-blue-500 mt-2 hover:underline replyBtn-${item.reviewId}" style="display:none">Trả lời</button>`
+            }
+            ${isOwner ? `
+                 <button class="text-sm text-red-500 hover:underline report-btn" style="display:none">Báo cáo</button>
+            ` : ''}
+            <div class="replies space-y-3 mt-3 pl-8 border-l border-gray-200"></div>
+          </div>
+        </div>
+      `;
+      const replyBtn = comment.querySelector('.replyBtn-'+ item.reviewId);
+      const repliesContainer = comment.querySelector('.replies');
+      if(item.reply){
+          const reply = document.createElement('div');
+            reply.className = 'flex space-x-3 items-start';
+            reply.id = `reply-${item.reply.id}`;
+            reply.innerHTML = `
+              <img src="${item.reply.img}" alt="avatar" style="display:none" class="w-9 h-9 rounded-full shadow-sm">
+              <div class="bg-white p-3 rounded-lg shadow-sm flex-1">
+                <div style="cursor:pointer" onclick="window.location.href='/Home/Landlord/${item.reply.landlordId}'" class="font-semibold text-sm">Chủ bài đăng <span class="text-gray-500 text-xs">${timeAgo(item.reply.createdAt)}</span></div>
+                <p class="text-gray-700 text-sm">${item.reply.replyContent}</p>
+                ${isOwner ? `
+                    <button onclick="editReply(${item.reply.id},${item.reviewId})" class="text-sm text-blue-500 mt-2 hover:underline replyBtn">Chỉnh sửa</button>
+                ` : ''}
+              </div>
+            `;
+           repliesContainer.appendChild(reply);
+      }
+      // else{
+
+      // }
+
+
+      replyBtn.addEventListener('click', () => {
+        if (comment.querySelector('.replyForm')) return;
+
+        const replyForm = document.createElement('form');
+        replyForm.className = 'replyForm mt-3';
+        replyForm.id = `replyForm-${item.reply.id}`;
+        replyForm.innerHTML = `
+          <textarea placeholder="Viết trả lời..."
+            class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            rows="2" value="${item.reply?.replyContent ?? ''}">${item.reply?.replyContent ?? ''}</textarea>
+          <button type="submit"
+            class="mt-2 bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-1 rounded-lg">
+            Gửi trả lời
+          </button>
+          <button type="button" onclick="cancelReply(${item.reply.id},${item.reviewId})"
+            class="mt-2 bg-gray-500 hover:bg-gray-600 text-white text-sm px-4 py-1 rounded-lg">
+            Trở lại
+          </button>
+        `;
+
+        replyForm.addEventListener('submit',(e) => {
+          e.preventDefault();
+          const replyText = replyForm.querySelector('textarea').value.trim();
+          let dto = {
+              replyId: replyForm.id.replace('replyForm-',''),
+              replyContent: replyText,
+          }
+          dto['replyId'] = Number(dto['replyId']);
+          //console.log(dto);
+          editReplyComment(dto);
+        });
+
+        repliesContainer.appendChild(replyForm);
+      });
+
+      return comment;
+    }
+
+    async function cancelReply(id,reviewId){
+        $(`#reply-${id}`).show();
+        $(`.replyForm`).hide();
+    }
+
+    async function editReply(id,reviewId){
+        $(`#reply-${id}`).hide();
+        $(`.replyForm`).show();
+        $(`.replyBtn-${reviewId}`).click();
+    }
+
+    form.addEventListener('submit',function(e) {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (text && selectedRating > 0) {
+        let dto = {
+          propertyPostId: id,
+          reviewText: text,
+          rating: selectedRating
+        };
+        addComment(dto);
+      } else {
+        alert('Vui lòng nhập bình luận và chọn số sao.');
+      }
+    });
 
 </script>

@@ -78,7 +78,7 @@ const propertyService = {
             if (!response.ok) {
                 throw new Error(data.message || data.errorMessage || 'Get property failed');
             }
-
+            console.log(data.data);
             return data.data; // Trả về mảng data từ phản hồi
         } catch (error) {
             console.error('Get property error:', error);
@@ -104,7 +104,7 @@ const propertyService = {
             });
 
             const data = await response.json();
-
+            //console.log(data);
             if (!response.ok) {
                 throw new Error(data.message || data.errorMessage || 'Get property failed');
             }

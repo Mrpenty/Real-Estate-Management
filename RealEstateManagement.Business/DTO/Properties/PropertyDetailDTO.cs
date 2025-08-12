@@ -48,5 +48,9 @@ namespace RealEstateManagement.Business.DTO.Properties
         public int? StreetId { get; set; }
         public bool IsFavorite { get; set; }
 
+        public float? Rating { get; set; }
+        public int? RatingNo { get; set; }
+        public int? CommentNo { get; set; }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RealEstateManagement.Data.Entity.User;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,5 +41,9 @@ namespace RealEstateManagement.Business.DTO.Properties
         public bool IsFavorite { get; set; }
         //Property Post
         public int PropertyPostId { get; set; }
+        public bool IsInterested { get; set; }
+        public InterestedStatus InterestedStatus { get; set; }
+        public float? Rating { get; set; }
+        public int? RatingNo { get; set; }
     }
 }
