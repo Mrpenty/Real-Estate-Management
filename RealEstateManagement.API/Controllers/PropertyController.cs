@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.OData.Query;
 using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Services.Favorite;
 using RealEstateManagement.Business.Services.Properties;
+using System.Drawing.Printing;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -78,6 +79,14 @@ namespace RealEstateManagement.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult> GetPropertyById(int id, [FromQuery] int userId = 0)
         {
+            var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var token = handler.ReadJwtToken(accessToken);
+                var uid = token.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+                int.TryParse(uid, out userId);
+            }
             var property = await _propertyService.GetPropertyByIdAsync(id, userId);
             if (property == null)
             {
@@ -289,7 +298,7 @@ namespace RealEstateManagement.API.Controllers
             return Ok(result);
         }
         [HttpGet("{id}/similar")]
-        public async Task<IActionResult> GetSimilar(int id, [FromQuery] int take = 12)
+        public async Task<IActionResult> GetSimilarPaged(int id, [FromQuery] int page = 1, [FromQuery] int pageSize = 1)
         {
             int currentUserId = 0;
             var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
@@ -301,8 +310,15 @@ namespace RealEstateManagement.API.Controllers
                 int.TryParse(uid, out currentUserId);
             }
 
-            var items = await _propertyService.SuggestSimilarPropertiesAsync(id, take, currentUserId);
-            return Ok(items);
+            try
+            {
+                var result = await _propertyService.SuggestSimilarPropertiesPagedAsync(id, page, pageSize, currentUserId);
+                return Ok(result); // { Page, PageSize, TotalItems, Items }
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(new { message = "Bất động sản không tồn tại." });
+            }
         }
 
         [HttpGet("weekly-best-rated")]

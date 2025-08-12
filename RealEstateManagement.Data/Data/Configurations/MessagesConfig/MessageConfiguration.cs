@@ -10,12 +10,6 @@ public partial class ApplicationUserConfiguration
         {
             builder.HasKey(m => m.Id);
 
-            // Relationships
-            //builder.HasOne(m => m.Conversation)
-            //    .WithMany(c => c.Messages)
-            //    .HasForeignKey(m => m.ConversationId)
-            //    .OnDelete(DeleteBehavior.Cascade);
-
             builder.HasOne(m => m.Sender)
                 .WithMany(u => u.MessagesSent)
                 .HasForeignKey(m => m.SenderId)

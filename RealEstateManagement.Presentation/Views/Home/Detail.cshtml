@@ -115,38 +115,105 @@
                 <div class="mt-8 bg-white rounded-md shadow-sm p-4">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-lg font-semibold text-gray-800">Bất động sản tương tự</h3>
-                        <a id="seeMoreSimilar" href="#" class="text-sm text-blue-600 hover:underline hidden">Xem thêm</a>
+                        <a id="seeMoreSimilar"
+                           href="#"
+                           class="hidden group inline-flex items-center justify-center w-9 h-9 rounded-full border border-gray-300 text-gray-600
+          hover:text-orange-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                           aria-label="Xem thêm bất động sản tương tự">
+                            <span class="sr-only">Xem thêm</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 class="w-5 h-5 transition-transform transform group-hover:translate-x-0.5">
+                                <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </a>
+
                     </div>
 
                     <div id="similarList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    <div id="similarPager" class="flex items-center justify-center gap-3 mt-3 hidden">
+                        <button id="simPrev"
+                                class="px-3 py-1 border rounded hover:border-orange-500 hover:text-orange-500">
+                            ‹ Trước
+                        </button>
+                        <span id="simInfo" class="text-sm text-gray-600"></span>
+                        <button id="simNext"
+                                class="px-3 py-1 border rounded hover:border-orange-500 hover:text-orange-500">
+                            Sau ›
+                        </button>
+                    </div>
                     <div id="similarEmpty" class="text-sm text-gray-500 mt-3 hidden">Chưa có gợi ý tương tự phù hợp.</div>
                 </div>
 
                 <script>
-                    async function loadSimilar() {
+                    let simPage = 1;
+                    let simPageSize = 3; // đang test thì để 1–3 tuỳ bạn
+                    let simTotalItems = 0;
+                    let simTotalPages = 1;
+
+                    async function loadSimilar(page = 1) {
                         try {
-                            const take = 5;
-                            const res = await fetch(`${urlBase}/api/Property/${@ViewBag.Id}/similar?take=${take}`, {
+                            simPage = Math.max(1, page);
+
+                            const res = await fetch(`${urlBase}/api/Property/${@ViewBag.Id}/similar?page=${simPage}&pageSize=${simPageSize}`, {
                                 headers: { 'Accept': 'application/json' }
                             });
                             if (!res.ok) throw new Error('Similar API failed');
-                            const items = await res.json();
-                            if (!items || items.length === 0) {
-                                document.getElementById('similarEmpty').classList.remove('hidden');
+
+                            // Kỳ vọng dạng trả về từ service:
+                            // { page, pageSize, totalItems, items: [...] }
+                            const data = await res.json();
+
+                            const items = data.items || [];
+                            simPage = data.page || simPage;
+                            simPageSize = data.pageSize || simPageSize;
+                            simTotalItems = data.totalItems || 0;
+                            simTotalPages = Math.max(1, Math.ceil(simTotalItems / simPageSize));
+
+                            const wrap = document.getElementById('similarList');
+                            const empty = document.getElementById('similarEmpty');
+                            const pager = document.getElementById('similarPager');
+
+                            if (!items.length) {
+                                wrap.innerHTML = '';
+                                empty.classList.remove('hidden');
+                                pager.classList.add('hidden');
                                 return;
                             }
 
+                            empty.classList.add('hidden');
+                            wrap.innerHTML = items.map(renderSimilarCard).join('');
+
+                            // “Xem thêm” link (nếu bạn vẫn muốn hiện)
                             const more = document.getElementById('seeMoreSimilar');
                             if (more && items[0]?.type) {
                                 more.href = `/Home/Search?type=${encodeURIComponent(items[0].type)}`;
                                 more.classList.remove('hidden');
                             }
 
-                            const wrap = document.getElementById('similarList');
-                            wrap.innerHTML = items.map(renderSimilarCard).join('');
+                            // Cập nhật pager
+                            document.getElementById('simInfo').textContent =
+                                `Trang ${simPage}/${simTotalPages} • ${simTotalItems} tin`;
+
+                            const prev = document.getElementById('simPrev');
+                            const next = document.getElementById('simNext');
+                            prev.disabled = (simPage <= 1);
+                            next.disabled = (simPage >= simTotalPages);
+
+                            pager.classList.remove('hidden');
+
+                            // gắn handler 1 lần
+                            if (!prev._bound) {
+                                prev.addEventListener('click', () => loadSimilar(simPage - 1));
+                                prev._bound = true;
+                            }
+                            if (!next._bound) {
+                                next.addEventListener('click', () => loadSimilar(simPage + 1));
+                                next._bound = true;
+                            }
                         } catch (e) {
                             console.error(e);
                             document.getElementById('similarEmpty').classList.remove('hidden');
+                            document.getElementById('similarPager').classList.add('hidden');
                         }
                     }
 
@@ -160,26 +227,27 @@
                             : `${(p.price ?? 0).toLocaleString('vi-VN')} đ`;
 
                         return `
-                        <div class="border rounded-md overflow-hidden hover:shadow transition cursor-pointer"
-                             onclick="window.location.href='/Home/Detail/${p.id}'">
+                          <div class="border rounded-md overflow-hidden hover:shadow transition cursor-pointer"
+                               onclick="window.location.href='/Home/Detail/${p.id}'">
                             <div class="aspect-video bg-gray-100">
-                                <img src="${img}" onerror="handleImageError(this)" class="w-full h-full object-cover"/>
+                              <img src="${img}" onerror="handleImageError(this)" class="w-full h-full object-cover"/>
                             </div>
                             <div class="p-3">
-                                <h4 class="font-semibold text-gray-900 line-clamp-2">${escapeHtml(p.title || 'Không có tiêu đề')}</h4>
-                                <div class="mt-1 text-green-600 font-semibold">${priceText}</div>
-                                <div class="text-sm text-gray-600">${p.area} m² · ${p.bedrooms} phòng</div>
-                                <div class="text-xs text-gray-500 mt-1 line-clamp-1">${escapeHtml(address)}</div>
+                              <h4 class="font-semibold text-gray-900 line-clamp-2">${escapeHtml(p.title || 'Không có tiêu đề')}</h4>
+                              <div class="mt-1 text-green-600 font-semibold">${priceText}</div>
+                              <div class="text-sm text-gray-600">${p.area} m² · ${p.bedrooms} phòng</div>
+                              <div class="text-xs text-gray-500 mt-1 line-clamp-1">${escapeHtml(address)}</div>
                             </div>
-                        </div>`;
+                          </div>`;
                     }
 
                     function escapeHtml(s) {
                         return (s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
                     }
 
-                    document.addEventListener('DOMContentLoaded', loadSimilar);
+                    document.addEventListener('DOMContentLoaded', () => loadSimilar(1));
                 </script>
+
 
         </div>
     </div>
@@ -254,7 +322,7 @@
         $('.titleId').html(prop.title);
         
         $('.landlordUrl').prop('src',prop.landlordProfilePictureUrl?.includes('http') ? prop.landlordProfilePictureUrl : urlBase + prop.landlordProfilePictureUrl)
-        $('#imgPrimaryUrl').prop('src',prop.primaryImageUrl.includes("http") ? prop.primaryImageUrl : urlBase + prop.primaryImageUrl);
+        // $('#imgPrimaryUrl').prop('src',prop.primaryImageUrl.includes("http") ? prop.primaryImageUrl : urlBase + prop.primaryImageUrl);
         $('.areaId').html(prop.area);
         $('.addressId').html(addressInfo);
         $('.priceId').html(formatVietnameseNumber(prop.price) + " đ");

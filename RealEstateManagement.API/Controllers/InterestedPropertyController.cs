@@ -67,8 +67,15 @@ namespace RealEstateManagement.API.Controllers
         [HttpPost("AddInterest")]
         public async Task<ActionResult<InterestedPropertyDTO>> AddInterest([FromQuery] int renterId, [FromQuery] int propertyId)
         {
-            var result = await _service.AddInterestAsync(renterId, propertyId);
-            return Ok(result);
+            try
+            {
+                var result = await _service.AddInterestAsync(renterId, propertyId);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex) // LandlordRejected -> không cho quan tâm lại
+            {
+                return Conflict(new { message = ex.Message }); // 409
+            }
         }
 
         /// <summary>
