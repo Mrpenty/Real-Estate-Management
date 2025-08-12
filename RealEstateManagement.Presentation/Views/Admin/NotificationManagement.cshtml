@@ -220,8 +220,9 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/config.js"></script>
     <script>
-        const NOTIFICATION_API_BASE_URL = 'https://localhost:7031/api/Notification';
+        // Sử dụng config thay vì hardcode API endpoints
         let notifications = [];
         let currentDeleteId = null;
         let currentPage = 1;
@@ -230,7 +231,7 @@
 
         const NotificationService = {
             async getAll() {
-                const res = await fetch(`${NOTIFICATION_API_BASE_URL}/all`, {
+                const res = await fetch(config.buildApiUrl(config.admin.notifications.list), {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -239,7 +240,7 @@
             },
 
             async getById(id) {
-                const res = await fetch(`${NOTIFICATION_API_BASE_URL}/${id}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.notifications.detail.replace('{notificationId}', id)), {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -248,7 +249,7 @@
             },
 
             async create(notificationData) {
-                const res = await fetch(`${NOTIFICATION_API_BASE_URL}/create`, {
+                const res = await fetch(config.buildApiUrl(config.admin.notifications.create), {
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
@@ -259,7 +260,7 @@
             },
 
             async update(notificationData) {
-                const res = await fetch(`${NOTIFICATION_API_BASE_URL}/update`, {
+                const res = await fetch(config.buildApiUrl(config.admin.notifications.update), {
                     method: 'PUT',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
@@ -270,7 +271,7 @@
             },
 
             async delete(id) {
-                const res = await fetch(`${NOTIFICATION_API_BASE_URL}/delete/${id}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.notifications.delete.replace('{notificationId}', id)), {
                     method: 'DELETE',
                     credentials: 'include'
                 });

@@ -8,7 +8,7 @@ using RealEstateManagement.Business.Services.Properties;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace RealEstateManagement.API.Controllers
+namespace RealEstateManagement.API.Controllers.Home
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -282,7 +282,7 @@ namespace RealEstateManagement.API.Controllers
             }
 
             // Truyền currentId vào service (nếu không login, currentId = 0)
-            var result = await _propertyService.GetUserProfileWithPropertiesAsync(userId, currentId == 0 ? null : (int?)currentId);
+            var result = await _propertyService.GetUserProfileWithPropertiesAsync(userId, currentId == 0 ? null : currentId);
 
             if (result == null)
                 return NotFound("Không tìm thấy người dùng hoặc người dùng không có bất động sản nào.");

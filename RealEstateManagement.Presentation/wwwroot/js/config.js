@@ -1,4 +1,3 @@
-// Configuration file for API endpoints and other settings
 window.config = {
     // API Base URL
     apiBaseUrl: 'https://localhost:7031',
@@ -47,39 +46,56 @@ window.config = {
             propertyPostsStatus: '/api/Admin/PropertyPosts/{postId}/status'
         },
         packages: {
-            list: '/api/PromotionPackage/admin-list',
-            create: '/api/PromotionPackage/create',
-            update: '/api/PromotionPackage/update/{packageId}',
-            delete: '/api/PromotionPackage/delete/{packageId}'
+            list: '/api/PromotionPackage/GetAllPackage',
+            detail: '/api/PromotionPackage/GetPackageById/{packageId}',
+            create: '/api/PromotionPackage/CreatePackage',
+            update: '/api/PromotionPackage/UpdatePackage/{packageId}',
+            delete: '/api/PromotionPackage/DeletePackage/{packageId}'
         },
         notifications: {
-            list: '/api/Notification/admin-list',
+            list: '/api/Notification/all',
+            detail: '/api/Notification/{notificationId}',
             create: '/api/Notification/create',
-            update: '/api/Notification/update/{notificationId}',
+            update: '/api/Notification/update',
             delete: '/api/Notification/delete/{notificationId}'
         },
         news: {
-            list: '/api/News/admin-list',
-            create: '/api/News/create',
-            update: '/api/News/update/{newsId}',
-            delete: '/api/News/delete/{newsId}'
+            list: '/api/News/All-News',
+            published: '/api/News/published',
+            detail: '/api/News/{newsId}',
+            bySlug: '/api/News/slug/{slug}',
+            create: '/api/News',
+            update: '/api/News/{newsId}',
+            publish: '/api/News/{newsId}/publish',
+            delete: '/api/News/{newsId}',
+            images: {
+                list: '/api/NewImage?newId={newsId}',
+                upload: '/api/NewImage/upload?newId={newsId}',
+                create: '/api/NewImage?newId={newsId}',
+                update: '/api/NewImage/{imageId}?newId={newsId}',
+                delete: '/api/NewImage/{imageId}?newId={newsId}',
+                deleteFile: '/api/NewImage/delete-file'
+            }
         },
         sliders: {
-            list: '/api/Slider/admin-list',
-            create: '/api/Slider/create',
-            update: '/api/Slider/update/{sliderId}',
-            delete: '/api/Slider/delete/{sliderId}'
+            list: '/api/Slider',
+            detail: '/api/Slider/{sliderId}',
+            create: '/api/Slider',
+            update: '/api/Slider/{sliderId}',
+            delete: '/api/Slider/{sliderId}'
         },
         amenities: {
-            list: '/api/Amenity/admin-list',
-            create: '/api/Amenity/create',
-            update: '/api/Amenity/update/{amenityId}',
-            delete: '/api/Amenity/delete/{amenityId}'
+            list: '/api/Amenity',
+            detail: '/api/Amenity/{amenityId}',
+            create: '/api/Amenity',
+            update: '/api/Amenity/{amenityId}',
+            delete: '/api/Amenity/{amenityId}'
         },
         reports: {
-            list: '/api/Report/admin-list',
+            list: '/api/Report/admin/all',
             detail: '/api/Report/{reportId}',
-            update: '/api/Report/admin-update/{reportId}'
+            resolve: '/api/Report/{reportId}/resolve',
+            reject: '/api/Report/{reportId}/reject'
         },
         support: {
             list: '/api/chat/admin/all-support-conversations',

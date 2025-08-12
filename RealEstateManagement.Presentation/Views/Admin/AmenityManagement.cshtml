@@ -164,8 +164,9 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/config.js"></script>
     <script>
-        const AMENITY_API_BASE_URL = 'https://localhost:7031/api/Amenity';
+        // Sử dụng config thay vì hardcode API endpoints
         let amenities = [];
         let currentDeleteId = null;
         let currentPage = 1;
@@ -174,7 +175,7 @@
 
         const AmenityService = {
             async getAll() {
-                const res = await fetch(`${AMENITY_API_BASE_URL}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.amenities.list), {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -184,7 +185,7 @@
             },
 
             async getPaged(page = 1, pageSize = 10) {
-                const res = await fetch(`${AMENITY_API_BASE_URL}/paged?page=${page}&pageSize=${pageSize}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.amenities.list + `/paged?page=${page}&pageSize=${pageSize}`), {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -194,7 +195,7 @@
             },
 
             async create(amenityData) {
-                const res = await fetch(`${AMENITY_API_BASE_URL}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.amenities.create), {
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
@@ -205,7 +206,7 @@
             },
 
             async update(id, amenityData) {
-                const res = await fetch(`${AMENITY_API_BASE_URL}/${id}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.amenities.update.replace('{amenityId}', id)), {
                     method: 'PUT',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
@@ -216,7 +217,7 @@
             },
 
             async delete(id) {
-                const res = await fetch(`${AMENITY_API_BASE_URL}/${id}`, {
+                const res = await fetch(config.buildApiUrl(config.admin.amenities.delete.replace('{amenityId}', id)), {
                     method: 'DELETE',
                     credentials: 'include'
                 });

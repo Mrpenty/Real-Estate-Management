@@ -4,7 +4,7 @@ using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Services.Properties;
 using RealEstateManagement.Business.Services.SearchProperties;
 
-namespace RealEstateManagement.API.Controllers
+namespace RealEstateManagement.API.Controllers.Home
 {
     [Route("api/[controller]")]
     [ApiController]

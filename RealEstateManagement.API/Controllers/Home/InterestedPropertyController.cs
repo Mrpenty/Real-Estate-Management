@@ -7,7 +7,7 @@ using RealEstateManagement.Data.Entity.User;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace RealEstateManagement.API.Controllers
+namespace RealEstateManagement.API.Controllers.Home
 {
     [Route("api/Property/[controller]")]
     [ApiController]
@@ -94,7 +94,7 @@ namespace RealEstateManagement.API.Controllers
                 await _service.UpdateStatusAsync(id, status);
                 return NoContent();
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }

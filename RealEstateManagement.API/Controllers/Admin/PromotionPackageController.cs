@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.Services.PromotionPackages;
 using RealEstateManagement.Business.DTO.PromotionPackageDTO;
 
-namespace RealEstateManagement.API.Controllers
+namespace RealEstateManagement.API.Controllers.Admin
 {
     [Route("api/[controller]")]
     [ApiController]

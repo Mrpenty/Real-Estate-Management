@@ -6,7 +6,7 @@ using RealEstateManagement.Business.Services.Favorite;
 using RealEstateManagement.Business.Services.Properties;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace RealEstateManagement.API.Controllers
+namespace RealEstateManagement.API.Controllers.Home
 {
     [Route("api/[controller]")]
     [ApiController]
