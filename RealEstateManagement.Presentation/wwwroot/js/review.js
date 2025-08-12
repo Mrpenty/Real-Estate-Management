@@ -25,6 +25,35 @@
     }
 }
 
+async function listInterest() {
+    const token = localStorage.getItem('authToken');
+    try { 
+        if (!token) window.location.href = '/Auth/Login';
+        let userId = 0;
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        userId = payload.id;
+        const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/ByRenter/${userId}`, {
+            method: 'GET',
+            headers: {
+                //'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            //body: JSON.stringify(dto)
+        });
+
+        const data = await response.json();
+        //$(`#heart-icon-${id}`).attr('fill', 'none');
+        console.log(data);
+
+        return data;
+    } catch (error) {
+        console.error('Update error:', error);
+        throw error;
+    }
+
+}
+
 async function editReplyComment(dto) {
     try {
         const token = localStorage.getItem('authToken');

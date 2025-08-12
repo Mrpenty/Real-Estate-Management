@@ -118,7 +118,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
         {
             var contract = await _repository.GetByRentalContractIdAsync(contractId);
             if (contract == null)
-                throw new Exception("Không tìm thấy hợp đồng.");
+                throw new ArgumentException("Không tìm thấy hợp đồng.");
 
             // ✅ Kiểm tra dữ liệu
             if (dto.DepositAmount < 0 || dto.MonthlyRent <= 0)

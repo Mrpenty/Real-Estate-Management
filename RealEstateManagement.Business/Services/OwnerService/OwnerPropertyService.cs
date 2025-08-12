@@ -43,6 +43,14 @@ namespace RealEstateManagement.Business.Services.OwnerService
                     Ward = entity.Address.Ward.Name,
                     Street = entity.Address.Street.Name,
                     CreatedAt = entity.CreatedAt,
+                    Posts = entity.Posts.Select(post => new OwnerPropertyPostDto
+                    {
+                        Id = post.Id,
+                        Status = post.Status.ToString(),
+                        CreatedAt = post.CreatedAt
+                    }).ToList(),
+                    IsExistRenterContract = entity.Posts.Any(post => post.RentalContract != null),
+                    RenterContractId = entity.Posts.Any(post => post.RentalContract != null) ? entity.Posts.FirstOrDefault().RentalContract.Id : 0,
                     Type = entity.Type,
                     DetailedAddress = entity.Address.DetailedAddress,
                     Images = entity.Images.Select(img => new OwnerPropertyImageDto

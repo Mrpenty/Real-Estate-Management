@@ -74,6 +74,14 @@ namespace RealEstateManagement.Presentation.Controllers
             }
         }
 
+        [HttpGet]
+        public IActionResult DetailRenterProperty(int propertyId, int id = 0)
+        {
+            ViewBag.PropertyId = propertyId;
+            ViewBag.Id = id;
+            return View();
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> Compare([FromBody] JsonElement model)

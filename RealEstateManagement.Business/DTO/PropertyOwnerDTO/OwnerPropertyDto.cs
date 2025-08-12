@@ -27,6 +27,8 @@
         public string? Street { get; set; }
         public string? DetailedAddress { get; set; }
         public DateTime CreatedAt { get; set; }
+        public bool IsExistRenterContract { get; set; }
+        public int? RenterContractId { get; set; }
     }
 
 
