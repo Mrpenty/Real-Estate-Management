@@ -125,7 +125,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 properties = properties.Where(p => Streets.Contains(p.Address.Street.Id));
             }
 
-
+            var now = DateTime.UtcNow;
             foreach (var p in properties)
             {
                 try
@@ -133,6 +133,18 @@ namespace RealEstateManagement.Business.Services.Properties
                     var ratingNo = p.Reviews.Where(c => !c.IsFlagged && c.IsVisible).Count();
                     var ratingSum = p.Reviews.Where(c => !c.IsFlagged && c.IsVisible).Sum(c => c.Rating);
                     var rating = ratingNo > 0 ? ratingSum / ratingNo : 0;
+                    var interested = interestedProp.FirstOrDefault(c => c.PropertyId == p.Id);
+
+                    //quy doi ra gio (sau 1h => 2h)
+                    var startTime = 1;
+                    var endTime = 2;
+
+                    var isReminderRenterConfirmInterested = interested?.Status == InterestedStatus.WaitingForRenterReply
+                        && now.Subtract(interested.InterestedAt).TotalHours >= startTime
+                        && now.Subtract(interested.InterestedAt).TotalHours <= endTime ? 1 
+                        : interested?.Status == InterestedStatus.WaitingForRenterReply 
+                        && now.Subtract(interested.InterestedAt).TotalHours > endTime ? 2 : 0;
+
                     result.Add(new HomePropertyDTO
                     {
                         Id = p.Id,
@@ -158,7 +170,9 @@ namespace RealEstateManagement.Business.Services.Properties
                         PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
                         LandlordId = p.Landlord?.Id ?? 0,
                         IsInterested = interestedProp.Any(c => c.PropertyId == p.Id),
-                        InterestedStatus = interestedProp.FirstOrDefault(c => c.PropertyId == p.Id)?.Status ?? InterestedStatus.None,
+                        InterestedStatus = interested?.Status ?? InterestedStatus.None,
+                        InterestedId = interested?.Id ?? 0,
+                        IsReminderRenterConfirmInterested = isReminderRenterConfirmInterested,
                         LandlordName = p.Landlord?.Name,
                         Rating = rating,
                         RatingNo = ratingNo,

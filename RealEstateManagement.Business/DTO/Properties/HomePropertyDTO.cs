@@ -41,9 +41,14 @@ namespace RealEstateManagement.Business.DTO.Properties
         public bool IsFavorite { get; set; }
         //Property Post
         public int PropertyPostId { get; set; }
+        public int InterestedId { get; set; }
         public bool IsInterested { get; set; }
         public InterestedStatus InterestedStatus { get; set; }
         public float? Rating { get; set; }
         public int? RatingNo { get; set; }
+        public int IsReminderRenterConfirmInterested { get; set; }
+        //0 => none
+        //1 => reminder
+        //2 => expire
     }
 }
