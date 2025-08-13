@@ -1,139 +1,126 @@
 
 ﻿@{
-    // ViewData["Title"] = "Home Page";
     Layout = "~/Views/Shared/_LayoutV2.cshtml";
 }
-<style>
-    .text-orange-500 {
-        color: rgb(249 115 22 / var(--tw-text-opacity, 1)) !important;
-    }
 
-    .d-none{
-        display:none;
-    }
+<link rel="stylesheet" href="~/css/property-detail.css" />
 
-    .imgDetail{
-        cursor:pointer;
-    }
-
-    a {
-        color: black !important;
-    }
-
-        a:hover {
-            color: rgb(249 115 22 / var(--tw-text-opacity, 1)) !important;
-            border-color: rgb(249 115 22 / var(--tw-border-opacity, 1));
-        }
-</style>
-@* <h1 class="text-xl font-bold mb-4">Kênh thông tin Phòng Trọ số 1 Việt Nam</h1> *@
-@* <nav class="text-sm text-blue-600 space-x-1 mb-2">
-    <a href="#" class="hover:underline">Cho thuê phòng trọ</a> /
-    <a href="#" class="hover:underline">Hồ Chí Minh</a> /
-    <a href="#" class="hover:underline">Quận 7</a> /
-    <span class="text-gray-700">Pass phòng cửa sổ lớn 175 Nguyễn Thị Thập</span>
-</nav> *@
-
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6" style="margin-top:2rem">
-
-    <div class="md:col-span-2">
-        <div class="grid gap-6">
-            <div class="bg-white rounded-md shadow-sm p-4">
-                <div class="relative aspect-video w-full bg-white rounded-md overflow-hidden">
-                    <img src="" id="imgPrimaryUrl" onerror="handleImageError(this)" alt="preview" class="object-cover w-full h-full"/>
-@*                     <div class="absolute bottom-2 left-2 text-white text-xs bg-black/70 px-2 py-1 rounded">0:00 / 0:34</div> *@
+<div class="property-detail-container">
+    <div class="property-detail-grid">
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Image Gallery -->
+            <div class="image-gallery">
+                <div class="primary-image-container">
+                    <img src="" id="imgPrimaryUrl" onerror="propertyDetailManager.handleImageError(this)" alt="preview" class="primary-image"/>
                 </div>
-
-                <div id="listImgs" class="flex space-x-2 mt-4 overflow-x-auto">
-@*                     <div class="border-2 border-red-500 rounded p-1">
-                        <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" class="w-20 h-16 object-cover" />
-                    </div>
-                    <img src="https://pt123.cdn.static123.com/images/thumbs/900x600/fit/2025/06/19/2_1750340748.jpg" class="w-20 h-16 object-cover rounded" /> *@
+                <div id="listImgs" class="image-thumbnails">
+                    <!-- Thumbnails will be populated by JavaScript -->
                 </div>
             </div>
 
-            <div class="bg-white rounded-md shadow-sm p-4">
-@*                 <div class="flex items-center space-x-2 mb-2">
-                    <span class="text-yellow-500 text-lg font-bold">⭐⭐⭐⭐⭐</span>
-                    <span class="bg-red-500 text-white text-xs px-2 py-1 rounded uppercase font-semibold">Tin VIP Nổi Bật</span>
-                </div> *@
-                <div class="flex">
-                    <h1 class="text-xl font-bold text-red-600 titleId">
+            <!-- Content Section -->
+            <div class="content-section">
+                <div class="property-header">
+                    <h1 class="property-title titleId">
+                        <!-- Title will be populated by JavaScript -->
                     </h1>
-                    <div class="flex items-center">
-                        <div class="flex items-center text-gray-500 ml-2"><span id="avgStar"></span></div>
-                        <div style="margin-bottom:2px" class="flex items-center text-yellow-500 ml-2" id="starContainer"></div>
+                    <div class="property-rating">
+                        <div class="rating-stars">
+                            <div class="flex items-center text-gray-500" id="starContainer"></div>
+                        </div>
+                        <div class="rating-text">
+                            <span id="avgStar"></span>
                     </div>
-                    
-
-                    <div class="flex items-center text-gray-600 ml-2">
+                        <div class="comment-count">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:15px;height:15px" viewBox="0 0 24 24">
                             <path d="M20 2H4C1.8 2 0 3.8 0 6v12c0 2.2 1.8 4 4 4h4v2.4c0 .6.4 1 1 1 .2 0 .5-.1.7-.3L14.3 22H20c2.2 0 4-1.8 4-4V6c0-2.2-1.8-4-4-4z" />
                         </svg>
-                        <span class="ml-1"><span id ="totalComment"></span><span> bình luận</span></span>
+                            <span><span id="totalComment"></span> bình luận</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex items-center text-green-600 font-semibold text-lg space-x-2">
-                    <span class="priceId"></span>
-                    <span class="text-black font-normal">•</span>
-                    <span class="text-gray-700 text-base"><span class="areaId"></span> m²</span>
-                    <span class="ml-auto text-sm text-gray-500">Cập nhật: <span class="timeAgoId"></span></span>
+                <div class="property-meta">
+                    <div class="price-info">
+                        <span class="price priceId"></span>
+                        <span class="text-black">•</span>
+                        <span class="area"><span class="areaId"></span> m²</span>
+                    </div>
+                    <span class="update-time">Cập nhật: <span class="timeAgoId"></span></span>
                 </div>
-                <div class="text-sm text-gray-800 space-y-1">
-                    <p><span class="font-medium text-gray-600">Quận huyện:</span> <a href="#" class="text-blue-600 hover:underline wardId" ></a></p>
-                    <p><span class="font-medium text-gray-600">Tỉnh thành:</span> <a href="#" class="text-blue-600 hover:underline provinceId" ></a></p>
-                    <p><span class="font-medium text-gray-600">Địa chỉ:</span> <span class="addressId"></span></p>
-                    <p><span class="font-medium text-gray-600">Mã tin:</span> #<span id="propId"></span></p>
-                    <p><span class="font-medium text-gray-600">Ngày đăng:</span> <span id="createTimeId"></span></p>
+
+                <div class="property-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Quận huyện:</span>
+                        <a href="#" class="detail-link wardId"></a>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Tỉnh thành:</span>
+                        <a href="#" class="detail-link provinceId"></a>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Địa chỉ:</span>
+                        <span class="detail-value addressId"></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Mã tin:</span>
+                        <span class="detail-value">#<span id="propId"></span></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Ngày đăng:</span>
+                        <span class="detail-value" id="createTimeId"></span>
+                    </div>
                 </div>
-                <h2 class="text-lg font-semibold text-gray-700 mb-2 mt-3">Thông tin mô tả</h2>
-                <div class="text-sm text-gray-800 space-y-2 leading-relaxed">
+
+                <h2 class="section-title">Thông tin mô tả</h2>
+                <div class="description">
                     <p><strong class="titleId"></strong></p>
                     <p>Giá thuê: <span class="priceId"></span>/tháng</p>
                     <p>Cọc: 1 tháng</p>
                     <p class="descriptionId"></p>
                 </div>
-                <h2 class="text-lg font-semibold text-gray-700 mb-2 mt-3">Vị trí & bản đồ</h2>
+
+                <h2 class="section-title">Vị trí & bản đồ</h2>
                 <p class="text-sm text-gray-800 block mb-1">
                     <div class="d-none">📍 Địa chỉ: <span class="addressId"></span></div>
-                    <a href="#" class="text-blue-600 hover:underline ml-1">Xem bản đồ lớn</a>
+                    <a href="#" class="text-orange-600 hover:underline ml-1">Xem bản đồ lớn</a>
                 </p>
-                <div class="w-full h-64 rounded overflow-hidden border">
+                <div class="map-container">
                     <iframe id="mapFrame"
-                            class="w-full h-full"
-                            style="border:0"
+                            class="map-frame"
                             allowfullscreen=""
                             loading="lazy"></iframe>
                 </div>
-                <h2 class="text-lg font-semibold text-gray-700 mb-2 mt-3">Thông tin liên hệ</h2>
-                <div class="flex items-start space-x-4">
-                    <div style="cursor:pointer" onclick="openLandlord()" class="w-14 h-14 bg-gray-200 rounded-full flex-shrink-0">
+
+                <h2 class="section-title">Thông tin liên hệ</h2>
+                <div class="contact-section">
+                    <div class="contact-avatar" onclick="propertyDetailManager.openLandlord()">
                          <img class="landlordUrl" style="border-radius:5rem;height:100%;width:100%"/>
                     </div>
-                    <div class="flex-1">
-                        <div class="flex items-center space-x-2">
-                            <p style="cursor:pointer" onclick="openLandlord()" class="font-semibold text-gray-800 contactName"></p>
-                            <span style="display:none" class="text-green-600 text-xs font-medium">● Đang hoạt động</span>
+                    <div class="contact-info">
+                        <div class="contact-name" onclick="propertyDetailManager.openLandlord()">
+                            <span class="contactName"></span>
                         </div>
-                        <p style="display:none" class="text-sm text-gray-500">1 tin đăng • Tham gia từ: 19/06/2025</p>
-                        <div class="flex space-x-2 mt-2">
-                            <a href="tel:0369864430" class="bg-green-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-green-600">
+                        <div class="contact-actions">
+                            <a href="tel:0369864430" class="contact-btn phone">
                                 📞 <span class="contactPhone"></span>
                             </a>
-                            <a href="#" class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700">
+                            <a href="#" class="contact-btn zalo">
                                 💬 Nhắn Zalo
                             </a>
                         </div>
                     </div>
             </div>
-                <!-- Bất động sản tương tự -->
-                <div class="mt-8 bg-white rounded-md shadow-sm p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-lg font-semibold text-gray-800">Bất động sản tương tự</h3>
+            </div>
+
+            <!-- Similar Properties -->
+            <div class="similar-section">
+                <div class="similar-header">
+                    <h3 class="similar-title">Bất động sản tương tự</h3>
                         <a id="seeMoreSimilar"
                            href="#"
-                           class="hidden group inline-flex items-center justify-center w-9 h-9 rounded-full border border-gray-300 text-gray-600
-          hover:text-orange-500 hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                       class="see-more-btn"
                            aria-label="Xem thêm bất động sản tương tự">
                             <span class="sr-only">Xem thêm</span>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -141,188 +128,77 @@
                                 <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                         </a>
-
                     </div>
 
-                    <div id="similarList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                    <div id="similarPager" class="flex items-center justify-center gap-3 mt-3 hidden">
-                        <button id="simPrev"
-                                class="px-3 py-1 border rounded hover:border-orange-500 hover:text-orange-500">
-                            ‹ Trước
-                        </button>
-                        <span id="simInfo" class="text-sm text-gray-600"></span>
-                        <button id="simNext"
-                                class="px-3 py-1 border rounded hover:border-orange-500 hover:text-orange-500">
-                            Sau ›
-                        </button>
-                    </div>
-                    <div id="similarEmpty" class="text-sm text-gray-500 mt-3 hidden">Chưa có gợi ý tương tự phù hợp.</div>
+                <div id="similarList" class="similar-grid"></div>
+                <div id="similarPager" class="similar-pager hidden">
+                    <button id="simPrev" class="pager-btn">‹ Trước</button>
+                    <span id="simInfo" class="pager-info"></span>
+                    <button id="simNext" class="pager-btn">Sau ›</button>
                 </div>
-
-                <script>
-                    let simPage = 1;
-                    let simPageSize = 3; // đang test thì để 1–3 tuỳ bạn
-                    let simTotalItems = 0;
-                    let simTotalPages = 1;
-
-                    async function loadSimilar(page = 1) {
-                        try {
-                            simPage = Math.max(1, page);
-
-                            const res = await fetch(`${urlBase}/api/Property/${@ViewBag.Id}/similar?page=${simPage}&pageSize=${simPageSize}`, {
-                                headers: { 'Accept': 'application/json' }
-                            });
-                            if (!res.ok) throw new Error('Similar API failed');
-
-                            // Kỳ vọng dạng trả về từ service:
-                            // { page, pageSize, totalItems, items: [...] }
-                            const data = await res.json();
-
-                            const items = data.items || [];
-                            simPage = data.page || simPage;
-                            simPageSize = data.pageSize || simPageSize;
-                            simTotalItems = data.totalItems || 0;
-                            simTotalPages = Math.max(1, Math.ceil(simTotalItems / simPageSize));
-
-                            const wrap = document.getElementById('similarList');
-                            const empty = document.getElementById('similarEmpty');
-                            const pager = document.getElementById('similarPager');
-
-                            if (!items.length) {
-                                wrap.innerHTML = '';
-                                empty.classList.remove('hidden');
-                                pager.classList.add('hidden');
-                                return;
-                            }
-
-                            empty.classList.add('hidden');
-                            wrap.innerHTML = items.map(renderSimilarCard).join('');
-
-                            // “Xem thêm” link (nếu bạn vẫn muốn hiện)
-                            const more = document.getElementById('seeMoreSimilar');
-                            if (more && items[0]?.type) {
-                                more.href = `/Home/Search?type=${encodeURIComponent(items[0].type)}`;
-                                more.classList.remove('hidden');
-                            }
-
-                            // Cập nhật pager
-                            document.getElementById('simInfo').textContent =
-                                `Trang ${simPage}/${simTotalPages} • ${simTotalItems} tin`;
-
-                            const prev = document.getElementById('simPrev');
-                            const next = document.getElementById('simNext');
-                            prev.disabled = (simPage <= 1);
-                            next.disabled = (simPage >= simTotalPages);
-
-                            pager.classList.remove('hidden');
-
-                            // gắn handler 1 lần
-                            if (!prev._bound) {
-                                prev.addEventListener('click', () => loadSimilar(simPage - 1));
-                                prev._bound = true;
-                            }
-                            if (!next._bound) {
-                                next.addEventListener('click', () => loadSimilar(simPage + 1));
-                                next._bound = true;
-                            }
-                        } catch (e) {
-                            console.error(e);
-                            document.getElementById('similarEmpty').classList.remove('hidden');
-                            document.getElementById('similarPager').classList.add('hidden');
-                        }
-                    }
-
-                    function renderSimilarCard(p) {
-                        const img = p.primaryImageUrl
-                            ? (p.primaryImageUrl.startsWith('http') ? p.primaryImageUrl : `${urlBase}${p.primaryImageUrl}`)
-                            : '/image/default-property.jpg';
-                        const address = [p.street, p.ward, p.province].filter(Boolean).join(', ');
-                        const priceText = (typeof formatVietnameseNumber === 'function')
-                            ? `${formatVietnameseNumber(p.price)} đ`
-                            : `${(p.price ?? 0).toLocaleString('vi-VN')} đ`;
-
-                        return `
-                          <div class="border rounded-md overflow-hidden hover:shadow transition cursor-pointer"
-                               onclick="window.location.href='/Home/Detail/${p.id}'">
-                            <div class="aspect-video bg-gray-100">
-                              <img src="${img}" onerror="handleImageError(this)" class="w-full h-full object-cover"/>
+                <div id="similarEmpty" class="similar-empty hidden">Chưa có gợi ý tương tự phù hợp.</div>
                             </div>
-                            <div class="p-3">
-                              <h4 class="font-semibold text-gray-900 line-clamp-2">${escapeHtml(p.title || 'Không có tiêu đề')}</h4>
-                              <div class="mt-1 text-green-600 font-semibold">${priceText}</div>
-                              <div class="text-sm text-gray-600">${p.area} m² · ${p.bedrooms} phòng</div>
-                              <div class="text-xs text-gray-500 mt-1 line-clamp-1">${escapeHtml(address)}</div>
-                            </div>
-                          </div>`;
-                    }
-
-                    function escapeHtml(s) {
-                        return (s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-                    }
-
-                    document.addEventListener('DOMContentLoaded', () => loadSimilar(1));
-                </script>
-
-
         </div>
-    </div>
-    </div>
-    <div>
-        <div style="height: max-content;" class="w-full max-w-xs bg-white p-4 rounded-md shadow-sm space-y-4 text-sm">
-            <div class="space-y-4 text-center">
-                <div style="cursor:pointer" onclick="openLandlord()" class="w-20 h-20 mx-auto rounded-full border bg-gray-100 flex items-center justify-center">
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Contact Card -->
+            <div class="sidebar-card contact-card">
+                <div class="contact-avatar-large" onclick="propertyDetailManager.openLandlord()">
                     <img class="landlordUrl" style="border-radius:5rem;height:100%;width:100%"/>
                 </div>
 
-                <div>
-                    <p style="cursor:pointer" onclick="openLandlord()" class="font-semibold text-gray-800 contactName"></p>
-                    <p style="display:none" class="text-sm text-gray-500">
-                        <span class="text-green-500">●</span> Đang hoạt động
-                    </p>
+                <div class="contact-name-large" onclick="propertyDetailManager.openLandlord()">
+                    <span class="contactName"></span>
                 </div>
 
-                <p style="display:none" class="text-sm text-gray-500">1 tin đăng • Tham gia từ: 19/06/2025</p>
-
-                <div class="space-y-2">
-                    <a href="tel:0369864430" id="contactPhone" class="block w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold">
+                <div class="contact-actions-vertical">
+                    <a href="tel:0369864430" id="contactPhone" class="contact-btn-vertical phone">
                         📞 <span class="contactPhone"></span>
                     </a>
-                    <a href="#" class="block w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold">
+                    <a href="#" class="contact-btn-vertical zalo">
                         💬 Nhắn Zalo
                     </a>
                 </div>
 
-                <div class="flex justify-around text-sm text-gray-600 pt-2 border-t">
-                    <button id="addFavoriteDetail" onclick="addToFavourite(@ViewBag.Id);" class="d-none flex items-center space-x-1 hover:text-blue-600">
-                        <span>♡</span><span>Lưu tin</span>
+                <div class="action-buttons">
+                    <button id="addFavoriteDetail" onclick="propertyDetailManager.addToFavorites()" class="d-none action-btn favorite">
+                        <span>♡</span>
+                        <span>Lưu tin</span>
                     </button>
-                    <button id="removeFavoriteDetail" onclick="removeToFavorite(@ViewBag.Id);" style="color:red" class="d-none flex items-center space-x-1 hover:text-blue-600">
-                        <span>♡</span><span>Bỏ lưu tin</span>
+                    <button id="removeFavoriteDetail" onclick="propertyDetailManager.removeFromFavorites()" class="d-none action-btn favorite">
+                        <span>♡</span>
+                        <span>Bỏ lưu tin</span>
                     </button>
-                    <button class="flex items-center space-x-1 hover:text-blue-600">
-                        <span>🔗</span><span>Chia sẻ</span>
+                    <button class="action-btn">
+                        <span>🔗</span>
+                        <span>Chia sẻ</span>
                     </button>
-                    <button id="reportBtn" onclick="openReportModal()" class="flex items-center space-x-1 hover:text-red-500 px-3 py-1 rounded transition-colors">
-                        <span>⚠️</span><span id="reportBtnText">Báo xấu</span>
+                    <button id="reportBtn" onclick="propertyDetailManager.openReportModal()" class="action-btn report">
+                        <span>⚠️</span>
+                        <span id="reportBtnText">Báo xấu</span>
                     </button>
                 </div>
             </div>
+
+            <!-- News List -->
+            <div class="sidebar-card">
+                <h3 class="font-semibold text-gray-800 mb-2">Tin mới đăng</h3>
+                <div class="news-list" id="listNew">
+                    <!-- News items will be populated by JavaScript -->
         </div>
-        <div style="height: max-content;" class="w-full mt-4 max-w-xs bg-white p-4 rounded-md shadow-sm space-y-4 text-sm">
-            <h3 class="font-semibold text-gray-800 mb-2">Tin mới đăng</h3>
-            <div class="space-y-4" id="listNew">
             </div>
         </div>
     </div>
 </div>
 
 <!-- Report Modal -->
-<div id="reportModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+<div id="reportModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 modal-overlay">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white modal-content">
         <div class="mt-3">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-medium text-gray-900">Báo cáo bài đăng</h3>
-                <button onclick="closeReportModal()" class="text-gray-400 hover:text-gray-600">
+                <button onclick="propertyDetailManager.closeReportModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -331,7 +207,7 @@
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Lý do báo cáo *</label>
-                <select id="reportReason" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                <select id="reportReason" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
                     <option value="">Chọn lý do</option>
                     <option value="Thông tin sai sự thật">Thông tin sai sự thật</option>
                     <option value="Hình ảnh không đúng">Hình ảnh không đúng</option>
@@ -346,15 +222,15 @@
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Mô tả chi tiết</label>
                 <textarea id="reportDescription" rows="3" placeholder="Mô tả chi tiết về vấn đề..." 
-                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
             </div>
             
             <div class="flex justify-end space-x-3">
-                <button onclick="closeReportModal()" 
+                <button onclick="propertyDetailManager.closeReportModal()" 
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
                     Hủy
                 </button>
-                <button id="submitReportBtn" onclick="submitReport()" 
+                <button id="submitReportBtn" onclick="propertyDetailManager.submitReport()" 
                         class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
                     Gửi báo cáo
                 </button>
@@ -364,12 +240,12 @@
 </div>
 
 <!-- Report Status Modal -->
-<div id="reportStatusModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+<div id="reportStatusModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 modal-overlay">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white modal-content">
         <div class="mt-3">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-medium text-gray-900">Trạng thái báo cáo</h3>
-                <button onclick="closeReportStatusModal()" class="text-gray-400 hover:text-gray-600">
+                <button onclick="propertyDetailManager.closeReportStatusModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -381,7 +257,7 @@
             </div>
             
             <div class="flex justify-end">
-                <button onclick="closeReportStatusModal()" 
+                <button onclick="propertyDetailManager.closeReportStatusModal()" 
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
                     Đóng
                 </button>
@@ -394,703 +270,25 @@
 <script src="~/js/reportService.js"></script>
 <script src="~/js/review.js"></script>
 <script>
-    let urlBase = "https://localhost:7031";
-    //document.getElementById('listPostId').classList.add("text-orange-500");
-    //document.getElementById('listPostId').classList.replace("border-gray-200", "border-orange-500");
-    let id = @ViewBag.Id;
-    let landlordId = 0;
-    // Get current user ID from authentication token
-    let currentUserId = 0;
+    // Set the current property ID from ViewBag
+    window.currentPropertyId = @ViewBag.Id;
     
-    // Function to get current user ID from token
-    function getCurrentUserIdFromToken() {
-        try {
-            // Get current user ID from token
-            let token = localStorage.getItem('authToken');
-            if (!token) {
-                token = localStorage.getItem('accessToken');
-            }
-            if (!token) {
-                token = localStorage.getItem('token');
-            }
-            
-            console.log('Available localStorage keys:', Object.keys(localStorage));
-            console.log('Token found:', !!token);
-            
-            if (!token) {
-                console.log('No token found in localStorage');
-                return 0;
-            }
-            
-            // Decode token to get user ID
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                const userId = payload.id || payload.userId || payload.sub;
-                console.log('Decoded token payload:', payload);
-                console.log('User ID:', userId);
-                return userId || 0;
-            } catch (e) {
-                console.error('Error decoding token:', e);
-                return 0;
-            }
-        } catch (error) {
-            console.error('Error getting current user ID:', error);
-            return 0;
-        }
-    }
+    // Debug logging
+    console.log('ViewBag.Id:', @ViewBag.Id);
+    console.log('window.currentPropertyId:', window.currentPropertyId);
     
-    // Initialize currentUserId when page loads
-    function initializeCurrentUserId() {
-        currentUserId = getCurrentUserIdFromToken();
-        console.log('Initialized currentUserId:', currentUserId);
-        
-        // Always check if user is the owner first
-        hideReportButtonForOwner();
-        
-        // If user is logged in, check report status
-        if (currentUserId > 0) {
-            checkReportStatus();
-        } else {
-            // User not logged in, show default report button state
-            updateReportButtonForGuest();
-        }
-        
-        // Add event listener for localStorage changes (login/logout)
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'authToken' || e.key === 'accessToken' || e.key === 'token') {
-                console.log('Token changed in localStorage:', e.key);
-                refreshCurrentUserId();
-            }
-        });
-        
-        // Also listen for custom events if you have them
-        window.addEventListener('userLogin', refreshCurrentUserId);
-        window.addEventListener('userLogout', refreshCurrentUserId);
-    }
-    
-    // Function to refresh current user ID (useful after login/logout)
-    function refreshCurrentUserId() {
-        const previousUserId = currentUserId;
-        currentUserId = getCurrentUserIdFromToken();
-        console.log('Refreshed currentUserId:', currentUserId, 'from:', previousUserId);
-        
-        if (currentUserId !== previousUserId) {
-            // Always check if user is the owner first
-            hideReportButtonForOwner();
-            
-            if (currentUserId > 0) {
-                checkReportStatus();
-            } else {
-                updateReportButtonForGuest();
-            }
+    // Ensure the ID is valid
+    if (!window.currentPropertyId || window.currentPropertyId === 0) {
+        console.error('Invalid property ID:', window.currentPropertyId);
+        // Try to extract from URL as fallback
+        const pathParts = window.location.pathname.split('/');
+        const idIndex = pathParts.indexOf('Detail');
+        if (idIndex !== -1 && pathParts[idIndex + 1]) {
+            window.currentPropertyId = pathParts[idIndex + 1];
+            console.log('Extracted ID from URL:', window.currentPropertyId);
         }
     }
-    
-    // Update report button for guest users (not logged in)
-    function updateReportButtonForGuest() {
-        const reportBtn = document.getElementById('reportBtn');
-        const reportBtnText = document.getElementById('reportBtnText');
-        
-        // Check if user is the owner of the post - hide button if so
-        hideReportButtonForOwner();
-        
-        // If user is the owner, don't proceed with button updates
-        if (currentUserId > 0 && currentUserId === landlordId) {
-            return;
-        }
-        
-        reportBtnText.textContent = 'Báo xấu';
-        reportBtn.onclick = () => {
-            Swal.fire({
-                icon: 'info',
-                title: 'Vui lòng đăng nhập',
-                text: 'Bạn cần đăng nhập để có thể báo cáo bài đăng này.',
-                confirmButtonText: 'Đăng nhập',
-                showCancelButton: true,
-                cancelButtonText: 'Hủy'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    
-                    window.location.href = '/Auth/Login';
-                }
-            });
-        };
-        
-        // Reset button styling
-        reportBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-red-600', 'text-white', 'bg-yellow-600', 'bg-gray-200', 'text-gray-700');
-        reportBtn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-    }
-    
-    // Function to hide report button if user is the owner of the post
-    function hideReportButtonForOwner() {
-        const reportBtn = document.getElementById('reportBtn');
-       
-        
-        // Convert both to numbers to ensure proper comparison
-        const currentUserIdNum = Number(currentUserId);
-        const landlordIdNum = Number(landlordId);
-        
-        if (currentUserIdNum > 0 && currentUserIdNum === landlordIdNum) {
-            reportBtn.style.display = 'none';
-        } else {
-            reportBtn.style.display = 'flex';
-        }
-    }
-    
-    // Check if user is logged in before allowing report
-    function checkUserLogin() {
-        if (currentUserId <= 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Vui lòng đăng nhập',
-                text: 'Bạn cần đăng nhập để có thể báo cáo. Vui lòng đăng nhập và thử lại.',
-                confirmButtonText: 'Đồng ý',
-                showCancelButton: true,
-                cancelButtonText: 'Hủy'
-            });
-            return false;
-        }
-        return true;
-    }
-    let reportService = new ReportService();
-    
-    initializeCurrentUserId(); // Initialize currentUserId and check report status
-    getProperty(); // Get property data and then check owner status
-    let isOwner = false;
-    getProperty();
-
-    function openLandlord(){
-        window.location.href= `/Home/Landlord/${landlordId}`;
-    }
-
-    // Report functions
-    function openReportModal() {
-        document.getElementById('reportModal').classList.remove('hidden');
-    }
-
-    function closeReportModal() {
-        document.getElementById('reportModal').classList.add('hidden');
-        // Reset form
-        document.getElementById('reportReason').value = '';
-        document.getElementById('reportDescription').value = '';
-    }
-
-    function closeReportStatusModal() {
-        document.getElementById('reportStatusModal').classList.add('hidden');
-    }
-
-    async function checkReportStatus() {
-        // Check if user is logged in
-        if (!checkUserLogin()) {
-            return;
-        }
-
-        try {
-            const data = await reportService.checkReportStatus(id, 'PropertyPost', currentUserId);
-            updateReportButton(data);
-        } catch (error) {
-            console.error('Error checking report status:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Lỗi!',
-                text: 'Không thể kiểm tra trạng thái báo cáo',
-                confirmButtonText: 'Đồng ý'
-            });
-        }
-    }
-
-    function updateReportButton(data) {
-        const reportBtn = document.getElementById('reportBtn');
-        const reportBtnText = document.getElementById('reportBtnText');
-        
-        // Check if user is the owner of the post - hide button if so
-        hideReportButtonForOwner();
-        
-        // If user is the owner, don't proceed with button updates
-        if (currentUserId > 0 && currentUserId === landlordId) {
-            return;
-        }
-        
-        // Reset all classes first
-        reportBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-red-600', 'text-white', 'bg-yellow-600', 'bg-gray-200', 'text-gray-700');
-        
-        // Check if user is logged in
-        if (currentUserId <= 0) {
-            updateReportButtonForGuest();
-            return;
-        }
-        
-        if (data.hasReported && !data.canReport) {
-            // Already reported and pending - allow cancel
-            reportBtnText.textContent = 'Hủy báo cáo';
-            reportBtn.onclick = () => cancelReport();
-            reportBtn.classList.add('bg-red-600', 'text-white', 'hover:bg-red-700');
-        } else if (data.hasReported && data.canReport) {
-            // Can report again
-            reportBtnText.textContent = 'Báo cáo lại';
-            reportBtn.onclick = openReportModal;
-            reportBtn.classList.add('bg-yellow-600', 'text-white', 'hover:bg-yellow-700');
-        } else {
-            // Never reported
-            reportBtnText.textContent = 'Báo xấu';
-            reportBtn.onclick = openReportModal;
-            reportBtn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-        }
-    }
-
-    function showReportStatus(data) {
-        Swal.fire({
-            title: 'Trạng thái báo cáo',
-            html: `
-                <div class="text-left">
-                    <p><strong>Trạng thái:</strong> <span class="text-blue-600">${data.status}</span></p>
-                    <p><strong>Ngày báo cáo:</strong> ${data.reportedAt}</p>
-                    ${data.resolvedAt ? `<p><strong>Ngày xử lý:</strong> ${data.resolvedAt}</p>` : ''}
-                    ${data.adminNote ? `<p><strong>Ghi chú của admin:</strong> ${data.adminNote}</p>` : ''}
-                </div>
-            `,
-            icon: 'info',
-            confirmButtonText: 'Đồng ý'
-        });
-    }
-
-    async function submitReport() {
-        // Check if user is logged in
-        if (!checkUserLogin()) {
-            return;
-        }
-
-        const reason = document.getElementById('reportReason').value;
-        const description = document.getElementById('reportDescription').value;
-
-        if (!reason) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Thiếu thông tin',
-                text: 'Vui lòng chọn lý do báo cáo',
-                confirmButtonText: 'Đồng ý'
-            });
-            return;
-        }
-
-        // Show loading
-        Swal.fire({
-            title: 'Đang gửi báo cáo...',
-            text: 'Vui lòng chờ trong giây lát',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        try {
-            const requestBody = {
-                targetId: id,
-                reason: reason,
-                description: description
-            };
-
-            const result = await reportService.reportPropertyPost(currentUserId, requestBody);
-            Swal.close();
-            Swal.fire({
-                icon: 'success',
-                title: 'Thành công!',
-                text: result.message,
-                confirmButtonText: 'Đồng ý'
-            });
-            closeReportModal();
-            checkReportStatus(); // Refresh button state
-        } catch (error) {
-            console.error('Error submitting report:', error);
-            Swal.close();
-            Swal.fire({
-                icon: 'error',
-                title: 'Lỗi!',
-                text: error.message || 'Có lỗi xảy ra khi gửi báo cáo',
-                confirmButtonText: 'Đồng ý'
-            });
-        }
-    }
-
-    async function cancelReport() {
-        // Check if user is logged in
-        if (!checkUserLogin()) {
-            return;
-        }
-
-        const result = await Swal.fire({
-            title: 'Xác nhận hủy báo cáo',
-            text: 'Bạn có chắc chắn muốn hủy báo cáo này?\n\nHủy báo cáo sẽ xóa hoàn toàn báo cáo của bạn và bạn có thể báo cáo lại sau này.',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Hủy báo cáo',
-            cancelButtonText: 'Không'
-        });
-
-        if (result.isConfirmed) {
-            // Show loading
-            Swal.fire({
-                title: 'Đang hủy báo cáo...',
-                text: 'Vui lòng chờ trong giây lát',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            try {
-                const response = await reportService.cancelPropertyPostReport(id, currentUserId);
-                Swal.close();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Thành công!',
-                    text: response.message,
-                    confirmButtonText: 'Đồng ý'
-                });
-                checkReportStatus(); // Refresh button state
-            } catch (error) {
-                console.error('Error canceling report:', error);
-                Swal.close();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi!',
-                    text: error.message || 'Có lỗi xảy ra khi hủy báo cáo',
-                    confirmButtonText: 'Đồng ý'
-                });
-            }
-        }
-    }
-
-    async function getProperty(){
-        let prop = await propertyService.getProperty(id);
-        //console.log(prop);
-        landlordId = prop.landlordId;
-        console.log('getProperty - landlordId set to:', landlordId, 'currentUserId:', currentUserId);
-        const token = localStorage.getItem('authToken');
-        if(token){
-            let userId = 0;
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            userId = payload.id;
-            isOwner = prop.landlordId = userId ? true : false;
-        }
-
-        let addressInfo = prop.detailedAddress + ", " + prop.street + ", " + prop.ward + ", " + prop.province;
-        $('.titleId').html(prop.title);
-        renderStarsBody(prop.rating);
-        $('#avgStar').html("(" + prop.rating + ")");
-        $('#totalComment').html(prop.commentNo);
-        
-        $('.landlordUrl').prop('src',prop.landlordProfilePictureUrl?.includes('http') ? prop.landlordProfilePictureUrl : urlBase + prop.landlordProfilePictureUrl)
-        // $('#imgPrimaryUrl').prop('src',prop.primaryImageUrl.includes("http") ? prop.primaryImageUrl : urlBase + prop.primaryImageUrl);
-        $('.areaId').html(prop.area);
-        $('.addressId').html(addressInfo);
-        $('.priceId').html(formatVietnameseNumber(prop.price) + " đ");
-        $('.timeAgoId').html(timeAgo(prop.createdAt));
-        $('.descriptionId').html(prop.description);
-        $('.wardId').html(prop.ward);
-        $('.provinceId').html(prop.province);
-        $('#propId').html(prop.id);
-        $('#createTimeId').html(formatVietnameseDateTime(prop.createdAt));
-        $('.contactPhone').html(prop.landlordPhoneNumber);
-        $('.contactName').html(prop.landlordName);
-        if(!prop.isFavorite) $('#addFavoriteDetail').removeClass('d-none');
-        else $('#removeFavoriteDetail').removeClass('d-none');
-        let htmlUrl = "";
-        $('#listImgs').html('');
-        if(prop.imageUrls != null){
-            prop.imageUrls.forEach((url,index) => {
-                var src = url.includes("http") ? url : urlBase + url;
-                if(index == 0) htmlUrl += `<div onclick="selectImg(this)" class="border-2 border-red-500 rounded p-1 imgDetail">
-                                <img src="${src}" onerror="handleImageError(this)" class="w-20 h-16 object-cover" />
-                            </div>`;
-                else htmlUrl += `
-                                 <div onclick="selectImg(this)" class="border-2 border-white rounded p-1 imgDetail">
-                                    <img src="${src}" onerror="handleImageError(this)" class="w-20 h-16 object-cover" />
-                                 </div>`;
-            });
-            $('#listImgs').html(htmlUrl);
-        }
-
-        if (prop.location != null) {
-            let lCoor = prop.location.split(',');
-            const lat = lCoor[0];
-            const lng = lCoor[1];
-
-            $('#mapFrame').attr('src', `https://www.google.com/maps?q=${lat},${lng}&output=embed`);
-        }
-        else {
-            const encodedLocation = encodeURIComponent(addressInfo);
-            $('#mapFrame').attr('src', `https://www.google.com/maps?q=${encodedLocation}&output=embed`);
-        }
-
-        //console.log(prop);
-        listNewPost = await propertyService.getNewPost();
-        //console.log(listNewPost);
-        let htmlNew = '';
-        listNewPost.forEach(item => {
-            const imageUrl = item.images && item.images.length > 0 && item.images[0] && item.images[0].imageUrl 
-                ? (item.images[0].imageUrl.includes('http') ? item.images[0].imageUrl : urlBase + item.images[0].imageUrl)
-                : '/image/default-news.jpg'; // Default image path
-            
-            htmlNew += `<div style="cursor:pointer" onclick="window.location.href='/Home/NewDetail/${item.id}'" class="flex gap-2 items-start">
-                    <img src="${imageUrl}" onerror="handleImageError(this)" alt="tin" class="w-14 h-14 rounded object-cover" />
-                    <div>
-                        <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
-                            ${item.title || 'Không có tiêu đề'}
-                        </div>
-                        <div class="text-xs text-gray-500">${timeAgo(item.publishedAt)}</div>
-                    </div>
-                </div>`
-        });
-        $('#listNew').html(htmlNew);
-        
-        // Check if current user is the owner and hide report button if so
-        hideReportButtonForOwner();
-
-        let commentHTMLBody = "";
-        var listReview = await getComment(id);
-            listReview.items.forEach(item => {
-            var commentHTML = createCommentHTML(item,isOwner);
-            commentHTMLBody += commentHTML.innerHTML;
-        });
-        list.innerHTML = commentHTMLBody;
-    }
-
-    function selectImg(el1){
-        document.querySelectorAll('.imgDetail').forEach(function(el) {
-            el.classList.replace("border-red-500", "border-white");
-        });
-        el1.classList.replace("border-white", "border-red-500");
-        const img = el1.querySelector('img');
-        document.getElementById('imgPrimaryUrl').src = img.src;
-    }
-
-    //comment
-    const form = document.getElementById('commentForm');
-    const input = document.getElementById('commentInput');
-    const list = document.getElementById('commentList');
-    const ratingStars = document.getElementById('ratingStars');
-
-    let selectedRating = 0;
-
-    renderStars(ratingStars, (rating) => selectedRating = rating);
-
-    function renderStars(container, callback) {
-      container.innerHTML = '';
-      let localRating = 0;
-      for (let i = 1; i <= 5; i++) {
-        const star = document.createElement('span');
-        star.innerHTML = '★';
-        star.className = 'text-2xl cursor-pointer text-gray-300 hover:text-yellow-400 transition';
-        star.dataset.value = i;
-
-        star.addEventListener('mouseover', () => highlightStars(container, i, localRating));
-        star.addEventListener('mouseout', () => highlightStars(container, localRating, localRating));
-        star.addEventListener('click', () => {
-          localRating = i;
-          highlightStars(container, i, localRating);
-          callback(i);
-        });
-
-        container.appendChild(star);
-      }
-    }
-
-    function highlightStars(container, rating, selected) {
-      const stars = container.querySelectorAll('span');
-      stars.forEach((star, index) => {
-        star.classList.remove('text-yellow-400', 'text-gray-300');
-        star.classList.add(index < rating ? 'text-yellow-400' : 'text-gray-300');
-      });
-    }
-
-    function createCommentHTML(name, text, stars, time, img) {
-      const starsDisplay = '★'.repeat(stars) + ' ☆'.repeat(5 - stars);
-      const comment = document.createElement('div');
-      comment.className = 'flex space-x-4 items-start';
-
-      comment.innerHTML = `
-        <img src="${img}" alt="avatar" class="w-12 h-12 rounded-full shadow-sm">
-        <div class="flex-1">
-          <div class="bg-gray-50 p-4 rounded-xl shadow-sm hover:shadow transition">
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-semibold text-gray-800">${name}</span>
-              <span class="text-sm text-gray-500">${timeAgo(time)}</span>
-            </div>
-            <div class="flex mb-2">
-              <span class="text-yellow-400">${starsDisplay}</span>
-            </div>
-            <p class="text-gray-700">${text}</p>
-            <button class="text-sm text-blue-500 mt-2 hover:underline replyBtn">Trả lời</button>
-            <button class="text-sm text-red-500 hover:underline report-btn">Báo cáo</button>
-            <div class="replies space-y-3 mt-3 pl-8 border-l border-gray-200"></div>
-          </div>
-        </div>
-      `;
-
-
-      const replyBtn = comment.querySelector('.replyBtn');
-      const repliesContainer = comment.querySelector('.replies');
-
-      replyBtn.addEventListener('click', () => {
-        if (comment.querySelector('.replyForm')) return;
-
-        const replyForm = document.createElement('form');
-        replyForm.className = 'replyForm mt-3';
-        replyForm.innerHTML = `
-          <textarea placeholder="Viết trả lời..."
-            class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            rows="2"></textarea>
-          <button type="submit"
-            class="mt-2 bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-1 rounded-lg">
-            Gửi trả lời
-          </button>
-        `;
-
-        replyForm.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const replyText = replyForm.querySelector('textarea').value.trim();
-          if (replyText) {
-            const reply = document.createElement('div');
-            reply.className = 'flex space-x-3 items-start';
-            reply.innerHTML = `
-              <img src="https://i.pravatar.cc/36?u=${Math.random()}" alt="avatar" class="w-9 h-9 rounded-full shadow-sm">
-              <div class="bg-white p-3 rounded-lg shadow-sm flex-1">
-                <div class="font-semibold text-sm">Người trả lời <span class="text-gray-500 text-xs">vừa xong</span></div>
-                <p class="text-gray-700 text-sm">${replyText}</p>
-              </div>
-            `;
-            repliesContainer.appendChild(reply);
-            replyForm.remove();
-          }
-        });
-
-        repliesContainer.appendChild(replyForm);
-      });
-
-      return comment;
-    }
-
-
-    function createCommentHTML(item, isOwner = false) {
-      const starsDisplay = '★'.repeat(item.rating) + '☆'.repeat(5 - item.rating);
-      const comment = document.createElement('div');
-      comment.className = 'flex space-x-4 items-start';
-
-      comment.innerHTML = `
-        <img src="${item.renterImg}" alt="avatar" class="w-12 h-12 rounded-full shadow-sm" style="display:none">
-        <div class="flex-1">
-          <div class="bg-gray-50 p-4 rounded-xl shadow-sm hover:shadow transition">
-            <div class="flex items-center justify-between mb-1">
-              <span style="cursor:pointer" onclick="window.location.href='/Home/Landlord/${item.renterId}'" class="font-semibold text-gray-800">${item.renterName}</span>
-              <span class="text-sm text-gray-500">${timeAgo(item.createdAt)}</span>
-            </div>
-            <div class="flex mb-2">
-              <span class="text-yellow-400">${starsDisplay}</span>
-            </div>
-            <p class="text-gray-700">${item.reviewText}</p>
-            ${isOwner && !item.reply ? `
-                 <button class="text-sm text-blue-500 mt-2 hover:underline replyBtn-${item.reviewId}">Trả lời</button>
-            ` : `<button class="text-sm text-blue-500 mt-2 hover:underline replyBtn-${item.reviewId}" style="display:none">Trả lời</button>`
-            }
-            ${isOwner ? `
-                 <button class="text-sm text-red-500 hover:underline report-btn" style="display:none">Báo cáo</button>
-            ` : ''}
-            <div class="replies space-y-3 mt-3 pl-8 border-l border-gray-200"></div>
-          </div>
-        </div>
-      `;
-      const replyBtn = comment.querySelector('.replyBtn-'+ item.reviewId);
-      const repliesContainer = comment.querySelector('.replies');
-      if(item.reply){
-          const reply = document.createElement('div');
-            reply.className = 'flex space-x-3 items-start';
-            reply.id = `reply-${item.reply.id}`;
-            reply.innerHTML = `
-              <img src="${item.reply.img}" alt="avatar" style="display:none" class="w-9 h-9 rounded-full shadow-sm">
-              <div class="bg-white p-3 rounded-lg shadow-sm flex-1">
-                <div style="cursor:pointer" onclick="window.location.href='/Home/Landlord/${item.reply.landlordId}'" class="font-semibold text-sm">Chủ bài đăng <span class="text-gray-500 text-xs">${timeAgo(item.reply.createdAt)}</span></div>
-                <p class="text-gray-700 text-sm">${item.reply.replyContent}</p>
-                ${isOwner ? `
-                    <button onclick="editReply(${item.reply.id},${item.reviewId})" class="text-sm text-blue-500 mt-2 hover:underline replyBtn">Chỉnh sửa</button>
-                ` : ''}
-              </div>
-            `;
-           repliesContainer.appendChild(reply);
-      }
-      // else{
-
-      // }
-
-
-      replyBtn.addEventListener('click', () => {
-        if (comment.querySelector('.replyForm')) return;
-
-        const replyForm = document.createElement('form');
-        replyForm.className = 'replyForm mt-3';
-        replyForm.id = `replyForm-${item.reply.id}`;
-        replyForm.innerHTML = `
-          <textarea placeholder="Viết trả lời..."
-            class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            rows="2" value="${item.reply?.replyContent ?? ''}">${item.reply?.replyContent ?? ''}</textarea>
-          <button type="submit"
-            class="mt-2 bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-1 rounded-lg">
-            Gửi trả lời
-          </button>
-          <button type="button" onclick="cancelReply(${item.reply.id},${item.reviewId})"
-            class="mt-2 bg-gray-500 hover:bg-gray-600 text-white text-sm px-4 py-1 rounded-lg">
-            Trở lại
-          </button>
-        `;
-
-        replyForm.addEventListener('submit',(e) => {
-          e.preventDefault();
-          const replyText = replyForm.querySelector('textarea').value.trim();
-          let dto = {
-              replyId: replyForm.id.replace('replyForm-',''),
-              replyContent: replyText,
-          }
-          dto['replyId'] = Number(dto['replyId']);
-          //console.log(dto);
-          editReplyComment(dto);
-        });
-
-        repliesContainer.appendChild(replyForm);
-      });
-
-      return comment;
-    }
-
-    async function cancelReply(id,reviewId){
-        $(`#reply-${id}`).show();
-        $(`.replyForm`).hide();
-    }
-
-    async function editReply(id,reviewId){
-        $(`#reply-${id}`).hide();
-        $(`.replyForm`).show();
-        $(`.replyBtn-${reviewId}`).click();
-    }
-
-    form.addEventListener('submit',function(e) {
-      e.preventDefault();
-      const text = input.value.trim();
-      if (text && selectedRating > 0) {
-        let dto = {
-          propertyPostId: id,
-          reviewText: text,
-          rating: selectedRating
-        };
-        addComment(dto);
-      } else {
-        alert('Vui lòng nhập bình luận và chọn số sao.');
-      }
-    });
-
 </script>
+<script src="~/js/property-detail.js"></script>
+<script src="~/js/reportService.js"></script>
+

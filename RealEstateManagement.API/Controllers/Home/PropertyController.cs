@@ -77,7 +77,7 @@ namespace RealEstateManagement.API.Controllers.Home
         }
         //Lấy property theo id
         [HttpGet("{id}")]
-        public async Task<ActionResult> GetPropertyById(int id)
+        public async Task<ActionResult> GetPropertyById(int id, int userId)
         {
             var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             if (!string.IsNullOrEmpty(accessToken))

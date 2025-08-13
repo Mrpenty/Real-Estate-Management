@@ -33,6 +33,20 @@
                 // Debug: Check if PropertyPostId is set correctly
                 console.log('ViewBag.PropertyPostId:', '@ViewBag.PropertyPostId');
                 console.log('Hidden input value:', document.getElementById('propertyPostId').value);
+                
+                // Validate PropertyPostId
+                const propertyPostId = document.getElementById('propertyPostId').value;
+                if (!propertyPostId || propertyPostId === 'undefined' || propertyPostId === 'null' || propertyPostId === '') {
+                    console.error('Invalid PropertyPostId:', propertyPostId);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi dữ liệu',
+                        text: 'Không tìm thấy ID bài đăng hợp lệ. Vui lòng quay lại trang tạo bài đăng.',
+                        confirmButtonColor: '#ff6b35'
+                    }).then(() => {
+                        window.location.href = '/PostProperty/CreateProperty';
+                    });
+                }
             </script>
             
             <div class="space-y-6">
@@ -219,16 +233,49 @@ document.getElementById('create-contract-form').addEventListener('submit', async
     }
     
     // Get current user ID from token or session
-    let ownerId = 1; // Default to 1 if not available
+    let ownerId = null;
     
     // Try to get user info from token
     if (token) {
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            ownerId = payload.nameid || payload.sub || 1;
+            ownerId = payload.nameid || payload.sub || payload.id || payload.userId;
+            console.log('Parsed token payload:', payload);
+            console.log('Extracted ownerId:', ownerId);
         } catch (e) {
-            console.log('Could not parse token, using default ownerId');
+            console.error('Error parsing token:', e);
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi xác thực',
+                text: 'Không thể xác định người dùng. Vui lòng đăng nhập lại.',
+                confirmButtonColor: '#ff6b35'
+            });
+            return;
         }
+    }
+    
+    if (!ownerId) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi xác thực',
+            text: 'Không thể xác định người dùng. Vui lòng đăng nhập lại.',
+            confirmButtonColor: '#ff6b35'
+        });
+        return;
+    }
+    
+    // Get propertyPostId from hidden input and validate
+    const propertyPostId = document.getElementById('propertyPostId').value;
+    console.log('PropertyPostId from form:', propertyPostId);
+    
+    if (!propertyPostId || propertyPostId === 'undefined' || propertyPostId === 'null' || propertyPostId === '') {
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi dữ liệu',
+            text: 'Không tìm thấy ID bài đăng. Vui lòng quay lại trang tạo bài đăng.',
+            confirmButtonColor: '#ff6b35'
+        });
+        return;
     }
     
     const data = {
@@ -258,14 +305,13 @@ document.getElementById('create-contract-form').addEventListener('submit', async
             }
         });
 
-        // Get propertyPostId from hidden input
-        const propertyPostId = document.getElementById('propertyPostId').value;
-        console.log('PropertyPostId:', propertyPostId);
-        
-        if (!propertyPostId) {
-            alert('Không tìm thấy ID bài đăng. Vui lòng thử lại.');
-            return;
-        }
+        // Log API call details for debugging
+        console.log('Making API call with:', {
+            url: `${API_BASE_URL}/owner/rental-contracts/${ownerId}/${propertyPostId}`,
+            ownerId: ownerId,
+            propertyPostId: propertyPostId,
+            data: data
+        });
         
         const response = await fetch(`${API_BASE_URL}/owner/rental-contracts/${ownerId}/${propertyPostId}`, {
             method: 'POST',
@@ -276,9 +322,22 @@ document.getElementById('create-contract-form').addEventListener('submit', async
             body: JSON.stringify(data)
         });
 
+        console.log('API Response status:', response.status);
+        console.log('API Response headers:', response.headers);
+
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(errorText || 'Failed to create contract');
+            console.error('API Error response:', errorText);
+            
+            let errorMessage = 'Đã có lỗi xảy ra khi tạo hợp đồng';
+            try {
+                const errorJson = JSON.parse(errorText);
+                errorMessage = errorJson.message || errorMessage;
+            } catch (e) {
+                errorMessage = errorText || errorMessage;
+            }
+            
+            throw new Error(errorMessage);
         }
 
         // Close loading and show success
