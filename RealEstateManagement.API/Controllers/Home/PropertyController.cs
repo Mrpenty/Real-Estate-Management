@@ -79,7 +79,7 @@ namespace RealEstateManagement.API.Controllers.Home
         [HttpGet("{id}")]
         public async Task<ActionResult> GetPropertyById(int id, int userId)
         {
-            int userId = 0;
+            //int userId = 0;
             var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             if (!string.IsNullOrEmpty(accessToken))
             {
