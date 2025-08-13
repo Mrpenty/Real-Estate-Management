@@ -33,5 +33,11 @@ namespace RealEstateManagement.Business.Repositories.Properties
         //Lấy tất cả property theo landlordId
         Task<ApplicationUser?> GetUserByIdAsync(int userId);
         Task<List<Property>> GetPropertiesByLandlordIdAsync(int landlordId);
+        //Gợi ý bđs tương tự
+        IQueryable<Property> QueryApprovedForSimilarity(); // base query có Include cần thiết
+        Task<Property?> GetPropertyForSimilarityByIdAsync(int id);
+
+        Task<List<WeeklyBestRatedPropertyDTO>> GetWeeklyBestRatedPropertiesAsync(DateTime fromUtc, DateTime toUtc, int topN);
     }
+
 }

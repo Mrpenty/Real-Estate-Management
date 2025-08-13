@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Nest;
 using RealEstateManagement.Business.DTO.Location;
 using RealEstateManagement.Business.DTO.Properties;
-using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
+using RealEstateManagement.Business.DTO.Review;
 using RealEstateManagement.Business.Repositories.FavoriteRepository;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Data.Entity;
@@ -611,5 +611,213 @@ namespace RealEstateManagement.Business.Services.Properties
                 Properties = propertyDtos
             };
         }
+        //Gợi ý bất động sản tương tự
+        public async Task<PagedResultDTO<HomePropertyDTO>> SuggestSimilarPropertiesPagedAsync(
+            int propertyId, int page = 1, int pageSize = 1, int? currentUserId = 0)
+        {
+            page = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+
+            var pivot = await _repository.GetPropertyForSimilarityByIdAsync(propertyId)
+                       ?? throw new KeyNotFoundException("Property not found");
+
+            var price = pivot.Price <= 0 ? (decimal?)null : pivot.Price;
+            var area = pivot.Area <= 0 ? (decimal?)null : pivot.Area;
+
+            // 1) Ứng viên sơ bộ (giữ nguyên như code cũ)
+            var q = _repository.QueryApprovedForSimilarity()
+                .Where(p => p.Id != pivot.Id && p.Type == pivot.Type);
+
+            if (pivot.Address?.WardId is int wardId && wardId != 0)
+                q = q.Where(p => p.Address.WardId == wardId || p.Address.ProvinceId == pivot.Address.ProvinceId);
+            else if (pivot.Address?.ProvinceId is int provinceId && provinceId != 0)
+                q = q.Where(p => p.Address.ProvinceId == provinceId);
+
+            if (price.HasValue)
+            {
+                var minP = price.Value * 0.7m;
+                var maxP = price.Value * 1.3m;
+                q = q.Where(p => p.Price >= minP && p.Price <= maxP);
+            }
+            if (area.HasValue)
+            {
+                var minA = area.Value * 0.7m;
+                var maxA = area.Value * 1.3m;
+                q = q.Where(p => p.Area >= minA && p.Area <= maxA);
+            }
+            q = q.Where(p => Math.Abs(p.Bedrooms - pivot.Bedrooms) <= 2);
+
+            // Lấy ứng viên đầy đủ để chấm điểm (giữ nguyên includes từ QueryApprovedForSimilarity)
+            var candidates = await q.ToListAsync();
+
+            // 2) Scoring (y như cũ)
+            var pivotAmenityIds = pivot.PropertyAmenities?.Select(pa => pa.Amenity.Id).ToHashSet() ?? new HashSet<int>();
+            double W_TYPE = 0.30, W_LOC = 0.25, W_PRICE = 0.20, W_AREA = 0.10, W_BED = 0.05, W_AMEN = 0.10;
+
+            double Score(Property c)
+            {
+                double sType = string.Equals(c.Type, pivot.Type, StringComparison.OrdinalIgnoreCase) ? 1.0 : 0.0;
+
+                double sLoc = 0.0;
+                if (pivot.Address?.WardId != null && c.Address?.WardId == pivot.Address.WardId) sLoc = 1.0;
+                else if (pivot.Address?.ProvinceId != null && c.Address?.ProvinceId == pivot.Address.ProvinceId) sLoc = 0.6;
+
+                double sPrice = 0.5;
+                if (pivot.Price > 0 && c.Price > 0)
+                {
+                    var diff = Math.Abs((double)(c.Price - pivot.Price)) / (double)pivot.Price;
+                    sPrice = Math.Max(0.0, 1.0 - Math.Min(diff, 1.0));
+                }
+
+                double sArea = 0.5;
+                if (pivot.Area > 0 && c.Area > 0)
+                {
+                    var diff = Math.Abs((double)(c.Area - pivot.Area)) / (double)Math.Max(1, pivot.Area);
+                    sArea = Math.Max(0.0, 1.0 - Math.Min(diff, 1.0));
+                }
+
+                double sBed = 1.0 - Math.Min(Math.Abs(c.Bedrooms - pivot.Bedrooms) / 3.0, 1.0);
+
+                var cAmenityIds = c.PropertyAmenities?.Select(pa => pa.Amenity.Id).ToHashSet() ?? new HashSet<int>();
+                double sAmen = 0.0;
+                if (pivotAmenityIds.Count > 0 || cAmenityIds.Count > 0)
+                {
+                    var inter = pivotAmenityIds.Intersect(cAmenityIds).Count();
+                    var union = pivotAmenityIds.Union(cAmenityIds).Count();
+                    sAmen = union == 0 ? 0.0 : (double)inter / union;
+                }
+
+                return W_TYPE * sType + W_LOC * sLoc + W_PRICE * sPrice + W_AREA * sArea + W_BED * sBed + W_AMEN * sAmen;
+            }
+
+            // Chấm điểm + sắp xếp
+            var ranked = candidates
+                .Select(c => new { P = c, Score = Score(c) })
+                .OrderByDescending(x => x.Score)
+                .ThenByDescending(x => x.P.PropertyPromotions.Any()
+                    ? x.P.PropertyPromotions.Max(pp => pp.PromotionPackage.Level)
+                    : 0)
+                .ThenByDescending(x => x.P.CreatedAt)
+                .ToList();
+
+            var total = ranked.Count;
+
+            // 3) Phân trang
+            var pageItems = ranked
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(x => x.P)
+                .ToList();
+
+            // 4) Đánh dấu IsFavorite & map DTO (y như cũ)
+            var favorites = currentUserId > 0
+                ? (await _context.UserFavoriteProperties
+                        .Where(f => f.UserId == currentUserId).Select(f => f.PropertyId).ToListAsync())
+                      .ToHashSet()
+                : new HashSet<int>();
+
+            var items = pageItems.Select(p => new HomePropertyDTO
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Description = p.Description,
+                Type = p.Type,
+                AddressID = p.AddressId,
+                StreetId = p.Address?.StreetId,
+                Street = p.Address?.Street?.Name,
+                ProvinceId = p.Address?.ProvinceId,
+                Province = p.Address?.Province?.Name,
+                WardId = p.Address?.WardId,
+                Ward = p.Address?.Ward?.Name,
+                DetailedAddress = p.Address?.DetailedAddress,
+                Area = p.Area,
+                Bedrooms = p.Bedrooms,
+                IsFavorite = favorites.Contains(p.Id),
+                Price = p.Price,
+                Status = p.Status,
+                Location = p.Location,
+                CreatedAt = p.CreatedAt,
+                ViewsCount = p.ViewsCount,
+                PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
+                LandlordId = p.Landlord?.Id ?? 0,
+                LandlordName = p.Landlord?.Name,
+                LandlordPhoneNumber = p.Landlord?.PhoneNumber,
+                LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
+                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                PromotionPackageName = p.PropertyPromotions?
+                    .OrderByDescending(pp => pp.PromotionPackage.Level)
+                    .Select(pp => pp.PromotionPackage.Name)
+                    .FirstOrDefault()
+            }).ToList();
+
+            return new PagedResultDTO<HomePropertyDTO>
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = total,
+                Items = items
+            };
+        }
+        public async Task<PagedResultDTO<WeeklyBestRatedPropertyDTO>> GetWeeklyBestRatedPropertiesPagedAsync(
+            int page = 1,
+            int pageSize = 12,
+            int minReviewsInWeek = 1,
+            DateTime? fromUtc = null,
+            DateTime? toUtc = null,
+            int? currentUserId = 0)
+        {
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 12;
+            if (pageSize > 100) pageSize = 100;
+            if (minReviewsInWeek < 0) minReviewsInWeek = 0;
+
+            var to = toUtc ?? DateTime.UtcNow;
+            var from = fromUtc ?? to.AddDays(-7);
+
+            var fetchCount = Math.Max(page * pageSize * 3, pageSize);
+
+            var rawTop = await _repository.GetWeeklyBestRatedPropertiesAsync(from, to, fetchCount);
+
+            var filteredSorted = rawTop
+                .Where(x => x.WeeklyReviewCount >= minReviewsInWeek)
+                .OrderByDescending(x => x.WeeklyAverageRating)
+                .ThenByDescending(x => x.WeeklyReviewCount)
+                .ThenByDescending(x => x.PromotionLevel)
+                .ThenByDescending(x => x.PropertyCreatedAt)
+                .ThenByDescending(x => x.ViewsCount)
+                .ToList();
+
+            var totalItems = filteredSorted.Count;
+
+            var items = filteredSorted
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            if (currentUserId.GetValueOrDefault() > 0 && items.Count > 0)
+            {
+                var uid = currentUserId!.Value;
+                var propIds = items.Select(i => i.PropertyId).ToList();
+
+                var favIds = await _context.UserFavoriteProperties
+                    .Where(f => f.UserId == uid && propIds.Contains(f.PropertyId))
+                    .Select(f => f.PropertyId)
+                    .ToListAsync();
+
+                var favSet = favIds.ToHashSet();
+                foreach (var item in items)
+                    item.IsFavorite = favSet.Contains(item.PropertyId);
+            }
+
+            return new PagedResultDTO<WeeklyBestRatedPropertyDTO>
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                Items = items
+            };
+        }
+
+
     }
 }

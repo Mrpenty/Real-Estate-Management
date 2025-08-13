@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Business.DTO.Properties;
+using RealEstateManagement.Business.Repositories.Chat.Messages;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Data.Entity.PropertyEntity;
@@ -16,11 +17,12 @@ namespace RealEstateManagement.Business.Services.Properties
     {
         private readonly IInterestedPropertyRepository _repository;
         private readonly IPropertyPostRepository _postRepo; // Giả sử bạn đã inject IPropertyPostRepository để cập nhật trạng thái PropertyPost
-
-        public InterestedPropertyService(IInterestedPropertyRepository repository, IPropertyPostRepository postRepo)
+        private readonly IMessageRepository _msgReadRepo;
+        public InterestedPropertyService(IInterestedPropertyRepository repository, IPropertyPostRepository postRepo, IMessageRepository msgReadRepo)
         {
             _repository = repository;
             _postRepo = postRepo;
+            _msgReadRepo = msgReadRepo;
         }
 
         private InterestedPropertyDTO MapToDTO(InterestedProperty entity)
@@ -39,6 +41,16 @@ namespace RealEstateManagement.Business.Services.Properties
                 LandlordConfirmed = entity.LandlordConfirmed
             };
         }
+        private void ResetForReopen(InterestedProperty ip)
+        {
+            ip.Status = InterestedStatus.WaitingForRenterReply;
+            ip.RenterConfirmed = false;
+            ip.LandlordConfirmed = false;
+            ip.RenterReplyAt = null;
+            ip.LandlordReplyAt = null;
+            ip.InterestedAt = DateTime.UtcNow;
+        }
+        // CHANGED: logic xác nhận theo nghiệp vụ mới
         public async Task<bool> ConfirmInterestAsync(int interestedPropertyId, bool isRenter, bool confirmed)
         {
             var ip = await _repository.GetByIdAsync(interestedPropertyId);
@@ -46,76 +58,111 @@ namespace RealEstateManagement.Business.Services.Properties
 
             if (isRenter)
             {
-                ip.RenterConfirmed = confirmed;
-                ip.RenterReplyAt = DateTime.UtcNow;
-                ip.Status = confirmed ? InterestedStatus.RenterWantToRent : InterestedStatus.RenterNotRent;
-                // Nếu renter chọn KHÔNG thì kết thúc luôn, không hỏi landlord nữa
-                if (!confirmed)
+                if (ip.Status != InterestedStatus.WaitingForRenterReply)
+                    throw new InvalidOperationException("Không ở bước chờ renter xác nhận.");
+
+                ip.RenterReplyAt = DateTime.UtcNow;      
+                ip.RenterConfirmed = confirmed;          
+
+                if (confirmed)
                 {
-                    ip.LandlordConfirmed = false;
-                    ip.LandlordReplyAt = null;
+                    ip.Status = InterestedStatus.WaitingForLandlordReply;
                 }
+                else
+                {
+                    ip.Status = InterestedStatus.None;    
+                    ip.LandlordConfirmed = false;       
+                    ip.LandlordReplyAt = null;            
+                }
+
+                await _repository.UpdateAsync(ip);
+                return true;
             }
             else
             {
-                ip.LandlordConfirmed = confirmed;
-                ip.LandlordReplyAt = DateTime.UtcNow;
-                ip.Status = confirmed ? InterestedStatus.LandlordAccepted : InterestedStatus.LandlordRejected;
-            }
+                if (ip.Status != InterestedStatus.WaitingForLandlordReply)
+                    throw new InvalidOperationException("Không ở bước chờ landlord xác nhận.");
 
-            // Nếu cả 2 đều xác nhận YES thì chuyển trạng thái DealSuccess và PropertyPost sang Rented
-            if (ip.RenterConfirmed && ip.LandlordConfirmed)
-            {
+                ip.LandlordReplyAt = DateTime.UtcNow;
+                ip.LandlordConfirmed = confirmed; 
+
+                if (!confirmed)
+                {
+                    ip.Status = InterestedStatus.LandlordRejected;
+                    await _repository.UpdateAsync(ip);       
+                    return true;
+                }
+
+ 
                 ip.Status = InterestedStatus.DealSuccess;
-                // Update PropertyPost status (giả sử đã inject IPropertyPostRepository _postRepo)
+
                 if (_postRepo != null)
                 {
                     var post = await _postRepo.GetByPropertyIdAsync(ip.PropertyId);
                     if (post != null)
                     {
-                        post.Status = PropertyPost.PropertyPostStatus.Rented;
-                        await _postRepo.UpdateAsync(post);
+                        post.Status = PropertyPost.PropertyPostStatus.Rented; 
+                        await _postRepo.UpdateAsync(post);                 
                     }
                 }
-            }
 
-            await _repository.UpdateAsync(ip);
-            return true;
+                await _repository.UpdateAsync(ip); 
+
+                // CHANGED: đóng tất cả quan tâm khác của cùng property (None)
+                var others = await _repository.GetByPropertyAsync(ip.PropertyId); // đã include Renter
+                foreach (var other in others.Where(o => o.Id != ip.Id))
+                {
+                    // Chỉ đóng những bản chưa kết thúc
+                    if (other.Status != InterestedStatus.DealSuccess &&
+                        other.Status != InterestedStatus.LandlordRejected &&
+                        other.Status != InterestedStatus.None)
+                    {
+                        other.Status = InterestedStatus.None; // CHANGED
+                                                              // có thể reset cờ/ thời gian nếu muốn
+                        other.RenterConfirmed = false;
+                        other.LandlordConfirmed = false;
+                        other.RenterReplyAt = null;
+                        other.LandlordReplyAt = null;
+                        await _repository.UpdateAsync(other); // đơn giản, chấp nhận nhiều lần Save
+                    }
+                }
+
+                return true;
+            }
         }
+
 
         // Tạo mới hoặc lấy lại nếu đã quan tâm
         public async Task<InterestedPropertyDTO> AddInterestAsync(int renterId, int propertyId)
         {
             var existing = await _repository.GetByRenterAndPropertyAsync(renterId, propertyId);
 
-            if (existing != null)
+            if (existing == null)
             {
-                // Nếu status là RenterNotRent (hoặc LandlordRejected, v.v.) thì cho phép renter "hồi sinh" lại quan tâm này
-                if (existing.Status == InterestedStatus.RenterNotRent ||
-                    existing.Status == InterestedStatus.LandlordRejected)
+                var ip = new InterestedProperty
                 {
-                    existing.Status = InterestedStatus.WaitingForRenterReply; // hoặc None, tuỳ bạn
-                    existing.RenterConfirmed = false;
-                    existing.LandlordConfirmed = false;
-                    existing.RenterReplyAt = null;
-                    existing.LandlordReplyAt = null;
-                    existing.InterestedAt = DateTime.UtcNow;
-                    await _repository.UpdateAsync(existing);
-                }
-                // Nếu đang trong trạng thái khác thì có thể trả về luôn
-                return MapToDTO(existing);
+                    RenterId = renterId,
+                    PropertyId = propertyId,
+                    InterestedAt = DateTime.UtcNow,
+                    Status = InterestedStatus.WaitingForRenterReply
+                };
+                var added = await _repository.AddAsync(ip);
+                return MapToDTO(added);
             }
-             
-            // Nếu chưa từng quan tâm thì tạo mới
-            var ip = new InterestedProperty
+
+
+            if (existing.Status == InterestedStatus.LandlordRejected) 
+                throw new InvalidOperationException("Landlord đã từ chối. Không thể quan tâm lại bất động sản này.");
+
+            // Nếu None => cho phép mở lại = WaitingForRenterReply
+            if (existing.Status == InterestedStatus.None) // CHANGED
             {
-                RenterId = renterId,
-                PropertyId = propertyId,
-                InterestedAt = DateTime.UtcNow,
-                Status = InterestedStatus.None
-            };
-            var added = await _repository.AddAsync(ip);
-            return MapToDTO(added);
+                ResetForReopen(existing);                 // CHANGED
+                await _repository.UpdateAsync(existing);  // CHANGED
+            }
+
+            // Nếu đang Waiting... hoặc DealSuccess => trả về trạng thái hiện tại
+            return MapToDTO(existing);
         }
 
         public async Task<bool> RemoveInterestAsync(int renterId, int propertyId)
@@ -142,11 +189,23 @@ namespace RealEstateManagement.Business.Services.Properties
         {
             var ip = await _repository.GetByIdAsync(id);
             if (ip == null) throw new Exception("Interest not found");
+
+            // Không cho tự ý gán về LandlordRejected/DealSuccess từ ngoài
+            if (status == InterestedStatus.LandlordRejected || status == InterestedStatus.DealSuccess) // CHANGED
+                throw new InvalidOperationException("Không thể set trực tiếp trạng thái này.");
+
             ip.Status = status;
-            if (status == InterestedStatus.RenterWantToRent || status == InterestedStatus.RenterNotRent)
-                ip.RenterReplyAt = DateTime.UtcNow;
-            else if (status == InterestedStatus.LandlordAccepted || status == InterestedStatus.LandlordRejected)
-                ip.LandlordReplyAt = DateTime.UtcNow;
+
+            if (status == InterestedStatus.WaitingForRenterReply)
+                ip.RenterReplyAt = null;
+            else if (status == InterestedStatus.WaitingForLandlordReply)
+                ip.LandlordReplyAt = null;
+            else if (status == InterestedStatus.None)
+            {
+                ip.RenterConfirmed = false;
+                ip.LandlordConfirmed = false;
+            }
+
             await _repository.UpdateAsync(ip);
         }
 
@@ -199,6 +258,21 @@ namespace RealEstateManagement.Business.Services.Properties
                 HasNextPage = page < totalPages,
                 HasPreviousPage = page > 1
             };
+        }
+        private async Task<DateTime> GetLastActivityAsync(InterestedProperty ip, int landlordId)
+        {
+            var last = ip.InterestedAt;
+
+            if (ip.RenterReplyAt.HasValue && ip.RenterReplyAt.Value > last) last = ip.RenterReplyAt.Value;
+            if (ip.LandlordReplyAt.HasValue && ip.LandlordReplyAt.Value > last) last = ip.LandlordReplyAt.Value;
+
+            // lấy lastMessageAt từ conversation (nếu có)
+            var (lastMsgAt, _) = await _msgReadRepo
+                .GetLastConversationActivityAsync(ip.RenterId, landlordId, ip.PropertyId);
+
+            if (lastMsgAt.HasValue && lastMsgAt.Value > last) last = lastMsgAt.Value;
+
+            return last;
         }
     }
 

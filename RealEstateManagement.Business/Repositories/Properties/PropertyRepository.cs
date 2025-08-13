@@ -349,7 +349,97 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .AsNoTracking()
                 .ToListAsync();
         }
+        //Gợi ý bđs tương tự
+        public IQueryable<Property> QueryApprovedForSimilarity()
+        {
+            return _context.Properties
+                .Include(p => p.Images)
+                .Include(p => p.Landlord)
+                .Include(p => p.Address).ThenInclude(a => a.Province)
+                .Include(p => p.Address).ThenInclude(a => a.Ward)
+                .Include(p => p.Address).ThenInclude(a => a.Street)
+                .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
+                .Include(p => p.Posts)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
+                .AsNoTracking();
+        }
 
+        public Task<Property?> GetPropertyForSimilarityByIdAsync(int id)
+        {
+            return QueryApprovedForSimilarity()
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+        public async Task<List<WeeklyBestRatedPropertyDTO>> GetWeeklyBestRatedPropertiesAsync(
+            DateTime fromUtc, DateTime toUtc, int topN)
+        {
+            return await _context.Reviews
+                .Where(r => r.CreatedAt >= fromUtc && r.CreatedAt <= toUtc && r.IsVisible && !r.IsFlagged)
+                .GroupBy(r => r.PropertyId)
+                .Select(g => new
+                {
+                    PropertyId = g.Key,
+                    WeeklyAverageRating = g.Average(r => r.Rating),
+                    WeeklyReviewCount = g.Count()
+                })
+                .Join(
+                    _context.Properties
+                        .Include(p => p.Images)
+                        .Include(p => p.Address).ThenInclude(a => a.Province)
+                        .Include(p => p.Address).ThenInclude(a => a.Ward)
+                        .Include(p => p.Address).ThenInclude(a => a.Street)
+                        .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage),
+                    g => g.PropertyId,
+                    p => p.Id,
+                    (g, p) => new WeeklyBestRatedPropertyDTO
+                    {
+                        PropertyId = p.Id,
+                        Title = p.Title,
+                        Type = p.Type,
+                        Price = p.Price,
+                        Area = p.Area,
+                        Bedrooms = p.Bedrooms,
+
+                        PrimaryImageUrl =
+                            p.Images.Where(img => img.IsPrimary)
+                                    .OrderBy(img => img.Order)
+                                    .Select(img => img.Url)
+                                    .FirstOrDefault()
+                            ?? p.Images.OrderBy(img => img.Order)
+                                       .Select(img => img.Url)
+                                       .FirstOrDefault(),
+
+                        // Tránh ?. bằng kiểm tra null
+                        Province = (p.Address != null && p.Address.Province != null)
+                                    ? p.Address.Province.Name
+                                    : null,
+                        Ward = (p.Address != null && p.Address.Ward != null)
+                                    ? p.Address.Ward.Name
+                                    : null,
+                        Street = (p.Address != null && p.Address.Street != null)
+                                    ? p.Address.Street.Name
+                                    : null,
+
+                        IsFavorite = false, // set ở Service nếu cần
+
+                        WeeklyAverageRating = g.WeeklyAverageRating,
+                        WeeklyReviewCount = g.WeeklyReviewCount,
+
+                        PromotionLevel = p.PropertyPromotions
+                            .Where(pp => pp.EndDate >= DateTime.UtcNow && pp.PromotionPackage != null)
+                            .OrderByDescending(pp => pp.PromotionPackage.Level)
+                            .Select(pp => pp.PromotionPackage.Level)
+                            .FirstOrDefault(),
+
+                        PropertyCreatedAt = p.CreatedAt,
+                        ViewsCount = p.ViewsCount
+                    }
+                )
+                .OrderByDescending(x => x.WeeklyAverageRating)
+                .ThenByDescending(x => x.WeeklyReviewCount)
+                .ThenByDescending(x => x.PromotionLevel)
+                .Take(topN)
+                .ToListAsync();
+        }
 
     }
 }

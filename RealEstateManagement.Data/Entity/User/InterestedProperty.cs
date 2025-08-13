@@ -24,12 +24,17 @@ namespace RealEstateManagement.Data.Entity.User
     }
     public enum InterestedStatus
     {
-        None = 0, 
-        WaitingForRenterReply = 1,
-        RenterWantToRent = 2,
-        RenterNotRent = 3,
-        LandlordAccepted = 4,
-        LandlordRejected = 5,
-        DealSuccess = 6 
+        None = 1,
+        WaitingForRenterReply = 2,
+        WaitingForLandlordReply = 3,
+        LandlordRejected = 4,
+        DealSuccess = 5
     }
+    //None = 0, 
+    //WaitingForRenterReply = 1,
+    //RenterWantToRent = 2,
+    //RenterNotRent = 3,
+    //LandlordAccepted = 4,
+    //LandlordRejected = 5,
+    //DealSuccess = 6
 }

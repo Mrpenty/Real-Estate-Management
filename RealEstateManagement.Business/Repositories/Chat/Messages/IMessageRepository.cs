@@ -15,5 +15,7 @@ namespace RealEstateManagement.Business.Repositories.Chat.Messages
         Task<Message?> GetByIdAsync(int id);
         Task DeleteAsync(Message message);
         Task UpdateAsync(Message message);
+        Task<(DateTime? lastMessageAt, int? conversationId)> GetLastConversationActivityAsync(int renterId, int landlordId, int propertyId);
+
     }
 }

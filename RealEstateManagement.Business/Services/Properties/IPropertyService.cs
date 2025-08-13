@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.DTO.Location;
 using RealEstateManagement.Business.DTO.Properties;
+using RealEstateManagement.Business.DTO.Review;
 using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.AddressEnity;
 using System;
@@ -42,6 +43,26 @@ namespace RealEstateManagement.Business.Services.Properties
         Task<IEnumerable<HomePropertyDTO>> FilterByTypeAsync(string type);
         // Lấy tất cả property theo landlordId
         Task<UserProfileWithPropertiesDTO?> GetUserProfileWithPropertiesAsync(int userId, int? currentId = null);
+        //Gợi ý bđs tương tự
+        //Task<IEnumerable<HomePropertyDTO>> SuggestSimilarPropertiesAsync(int propertyId, int take = 12, int? currentUserId = 0);
 
+        // thêm method phân trang
+        Task<PagedResultDTO<HomePropertyDTO>> SuggestSimilarPropertiesPagedAsync(
+            int propertyId, int page = 1, int pageSize = 12, int? currentUserId = 0);
+        /// <summary>
+        /// Lấy danh sách BĐS có điểm trung bình cao nhất trong khoảng tuần (rolling 7 ngày).
+        /// </summary>
+        /// <param name="topN">Số lượng cần lấy (sau khi lọc minReviews)</param>
+        /// <param name="minReviewsInWeek">Số lượng review tối thiểu trong tuần</param>
+        /// <param name="fromUtc">Thời điểm bắt đầu (UTC). Null = UtcNow - 7 ngày</param>
+        /// <param name="toUtc">Thời điểm kết thúc (UTC). Null = UtcNow</param>
+        /// <param name="currentUserId">User hiện tại (để set IsFavorite). Null/0 = anonymous</param>
+        Task<PagedResultDTO<WeeklyBestRatedPropertyDTO>> GetWeeklyBestRatedPropertiesPagedAsync(
+            int page = 1,
+            int pageSize = 12,
+            int minReviewsInWeek = 1,
+            DateTime? fromUtc = null,
+            DateTime? toUtc = null,
+            int? currentUserId = 0);
     }
 }

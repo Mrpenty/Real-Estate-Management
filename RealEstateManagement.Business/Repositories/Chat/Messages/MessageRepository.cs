@@ -51,5 +51,37 @@ namespace RealEstateManagement.Business.Repositories.Chat.Messages
             _context.Message.Update(message);
             await _context.SaveChangesAsync();
         }
+        public async Task<(DateTime? lastMessageAt, int? conversationId)> GetLastConversationActivityAsync(int renterId, int landlordId, int propertyId)
+
+        {
+            // Tìm đúng cuộc trò chuyện giữa renter-landlord cho property này
+            var conv = await _context.Conversation
+                .Where(c => c.RenterId == renterId
+                         && c.LandlordId == landlordId
+                         && c.PropertyId == propertyId)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.LastSentAt,     // nếu bạn có cột này thì dùng nó
+                    HasLast = c.LastSentAt != null
+                })
+                .FirstOrDefaultAsync();
+
+            if (conv == null)
+                return (null, null);
+
+            // Nếu đã có LastSentAt trên Conversation thì dùng luôn (nhanh nhất)
+            if (conv.HasLast)
+                return (conv.LastSentAt, conv.Id);
+
+            // Nếu không có LastSentAt, fallback tính từ Messages (giữ entity y nguyên)
+            var lastMsgTime = await _context.Message
+                .Where(m => m.ConversationId == conv.Id)
+                .OrderByDescending(m => m.SentAt)
+                .Select(m => (DateTime?)m.SentAt)
+                .FirstOrDefaultAsync();
+
+            return (lastMsgTime, conv.Id);
+        }
     }
 }
