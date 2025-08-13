@@ -322,7 +322,6 @@ namespace RealEstateManagement.API.Controllers
         }
 
         [HttpGet("weekly-best-rated")]
-        [AllowAnonymous]
         public async Task<IActionResult> GetWeeklyBestRated(
             [FromQuery] int top = 5,
             [FromQuery] int minReviewsInWeek = 1,
@@ -342,15 +341,24 @@ namespace RealEstateManagement.API.Controllers
                 if (claim != null && int.TryParse(claim.Value, out var uid))
                     currentUserId = uid;
 
-                var result = await _propertyService.GetWeeklyBestRatedPropertiesAsync(
-                    top, minReviewsInWeek, fromUtc, toUtc, currentUserId);
+                // Gọi method Paged: page=1, pageSize=top
+                var paged = await _propertyService.GetWeeklyBestRatedPropertiesPagedAsync(
+                    page: 1,
+                    pageSize: top,
+                    minReviewsInWeek: minReviewsInWeek,
+                    fromUtc: fromUtc,
+                    toUtc: toUtc,
+                    currentUserId: currentUserId
+                );
 
-                return Ok(result);
+                // Giữ behavior cũ: trả về List<>
+                return Ok(paged.Items);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
     }
 }

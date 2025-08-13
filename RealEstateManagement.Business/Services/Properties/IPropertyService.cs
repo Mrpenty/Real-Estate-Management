@@ -57,8 +57,9 @@ namespace RealEstateManagement.Business.Services.Properties
         /// <param name="fromUtc">Thời điểm bắt đầu (UTC). Null = UtcNow - 7 ngày</param>
         /// <param name="toUtc">Thời điểm kết thúc (UTC). Null = UtcNow</param>
         /// <param name="currentUserId">User hiện tại (để set IsFavorite). Null/0 = anonymous</param>
-        Task<List<WeeklyBestRatedPropertyDTO>> GetWeeklyBestRatedPropertiesAsync(
-            int topN = 12,
+        Task<PagedResultDTO<WeeklyBestRatedPropertyDTO>> GetWeeklyBestRatedPropertiesPagedAsync(
+            int page = 1,
+            int pageSize = 12,
             int minReviewsInWeek = 1,
             DateTime? fromUtc = null,
             DateTime? toUtc = null,

@@ -742,53 +742,66 @@ namespace RealEstateManagement.Business.Services.Properties
                 Items = items
             };
         }
-        public async Task<List<WeeklyBestRatedPropertyDTO>> GetWeeklyBestRatedPropertiesAsync(
-            int topN = 12,
+        public async Task<PagedResultDTO<WeeklyBestRatedPropertyDTO>> GetWeeklyBestRatedPropertiesPagedAsync(
+            int page = 1,
+            int pageSize = 12,
             int minReviewsInWeek = 1,
             DateTime? fromUtc = null,
             DateTime? toUtc = null,
             int? currentUserId = 0)
         {
-            if (topN <= 0) topN = 12;
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 12;
+            if (pageSize > 100) pageSize = 100;
             if (minReviewsInWeek < 0) minReviewsInWeek = 0;
 
-            // Khoảng thời gian mặc định: 7 ngày gần nhất (rolling)
             var to = toUtc ?? DateTime.UtcNow;
             var from = fromUtc ?? to.AddDays(-7);
 
-            // Lấy danh sách đã được tính Avg trong repo
-            // Để đảm bảo sau khi lọc minReviews vẫn còn đủ topN, gọi repo với "biên dư"
-            // (ví dụ gấp 3 lần). Tuỳ data thực tế bạn có thể chỉnh hệ số này.
-            int fetchCount = Math.Max(topN * 3, topN);
-            var raw = await _repository.GetWeeklyBestRatedPropertiesAsync(from, to, fetchCount);
+            var fetchCount = Math.Max(page * pageSize * 3, pageSize);
 
-            // Lọc theo số review tối thiểu trong tuần
-            var filtered = raw
+            var rawTop = await _repository.GetWeeklyBestRatedPropertiesAsync(from, to, fetchCount);
+
+            var filteredSorted = rawTop
                 .Where(x => x.WeeklyReviewCount >= minReviewsInWeek)
                 .OrderByDescending(x => x.WeeklyAverageRating)
                 .ThenByDescending(x => x.WeeklyReviewCount)
                 .ThenByDescending(x => x.PromotionLevel)
                 .ThenByDescending(x => x.PropertyCreatedAt)
                 .ThenByDescending(x => x.ViewsCount)
-                .Take(topN)
                 .ToList();
 
-            // Đánh dấu IsFavorite nếu có user
-            if (currentUserId.GetValueOrDefault() > 0)
+            var totalItems = filteredSorted.Count;
+
+            var items = filteredSorted
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            if (currentUserId.GetValueOrDefault() > 0 && items.Count > 0)
             {
                 var uid = currentUserId!.Value;
+                var propIds = items.Select(i => i.PropertyId).ToList();
+
                 var favIds = await _context.UserFavoriteProperties
-                    .Where(f => f.UserId == uid)
+                    .Where(f => f.UserId == uid && propIds.Contains(f.PropertyId))
                     .Select(f => f.PropertyId)
                     .ToListAsync();
 
                 var favSet = favIds.ToHashSet();
-                foreach (var item in filtered)
+                foreach (var item in items)
                     item.IsFavorite = favSet.Contains(item.PropertyId);
             }
 
-            return filtered;
+            return new PagedResultDTO<WeeklyBestRatedPropertyDTO>
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                Items = items
+            };
         }
+
 
     }
 }
