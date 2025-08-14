@@ -25,5 +25,7 @@ namespace RealEstateManagement.Business.DTO.PromotionPackageDTO
         public int Level { get; set; }
 
         public bool IsActive { get; set; } = true;
+
+    
     }
 } 
