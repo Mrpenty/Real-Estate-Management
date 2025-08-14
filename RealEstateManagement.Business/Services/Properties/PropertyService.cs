@@ -88,25 +88,23 @@ namespace RealEstateManagement.Business.Services.Properties
         }
 
         public async Task<PaginatedResponseDTO<HomePropertyDTO>> GetPaginatedPropertiesAsync(int page = 1, int pageSize = 10, 
-                int? userId = 0, string type = "room", string provinces = "", string wards = "", string streets = "",
+                int? userId = 0, string type = "", string provinces = "", string wards = "", string streets = "",
                 int minPrice = 0, int maxPrice = 100,
-                int minArea = 0, int maxArea = 100, int minRoom = 0, int maxRoom = 15)
+                int minArea = 0, int maxArea = 100, int minRoom = 0,  int maxRoom = 15)
         {
             var properties = await _repository.GetAllAsync();
-            var favoriteUsers = await _context.UserFavoriteProperties.Where(c => c.UserId == userId).ToListAsync();
             var interestedProp = await _context.InterestedProperties.Where(c => c.RenterId == userId).ToListAsync();
+            var favoriteUsers = await _context.UserFavoriteProperties.Where(c => c.UserId == userId).ToListAsync();
 
             var result = new List<HomePropertyDTO>();
-            //properties = properties.ToList();
 
-            properties = properties.Where(c => c.Type == type);
+            // Apply type filter only if type is specified and not empty
+            if (!string.IsNullOrEmpty(type) && type.Trim() != "")
+            {
+                properties = properties.Where(p => p.Type.ToLower() == type.ToLower());
+            }
 
-            properties = properties.Where(p => p.Price >= minPrice * 1000000 && p.Price <= maxPrice * 1000000);
-
-            properties = properties.Where(p => p.Area >= minArea && p.Area <= maxArea);
-
-            properties = properties.Where(p => p.Bedrooms >= minRoom && p.Bedrooms <= maxRoom);
-
+            // Apply other filters
             if (!string.IsNullOrEmpty(provinces))
             {
                 var Provinces = provinces.Split(',').Select(c => int.Parse(c)).ToList();

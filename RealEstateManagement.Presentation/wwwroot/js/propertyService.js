@@ -4,9 +4,9 @@ var API_PROPERTY_BASE_URL2 = 'https://localhost:7031/api/OwnerProperty';
 const propertyService = {
     async getAllproperty() {
         try {
-            const urlParams = new URLSearchParams(window.location.search);
-            let type = urlParams.get('type');
-            if (type == null || type == undefined) type = "room";
+            // Remove type filtering completely - always show all properties
+            // const urlParams = new URLSearchParams(window.location.search);
+            // let type = urlParams.get('type');
 
             let listLocationSelected = sessionStorage.getItem('selectedLocationLists');
             let provinceId = sessionStorage.getItem('provinceId');
@@ -40,18 +40,11 @@ const propertyService = {
             } else {
                 body = {};
             }
-            //console.log(body);
-            //body['provinces'] = provinces;
-            //body['wards'] = wards;
-            //body['streets'] = streets;
-            //body['type'] = type;
-            //body['userId'] = userId;
 
-            // Gửi bộ lọc qua query string cho endpoint paginated
+            // Build query parameters - NO TYPE parameter, show all properties
             const queryParams = new URLSearchParams({
                 page: '1',
                 pageSize: '10',
-                type: type,
                 provinces: provinces.join(','),
                 wards: wards.join(','),
                 streets: streets.join(','),
@@ -62,9 +55,11 @@ const propertyService = {
                 maxArea: body.maxArea ?? 100,
                 minRoom: body.minRoom ?? 0,
                 maxRoom: body.maxRoom ?? 15
-            }).toString();
+            });
 
-            let response = await fetch(`${API_PROPERTY_BASE_URL}/homepage-paginated?${queryParams}`, {
+            // Do NOT add type parameter - always show all types
+
+            let response = await fetch(`${API_PROPERTY_BASE_URL}/homepage-paginated?${queryParams.toString()}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

@@ -16,7 +16,7 @@ namespace RealEstateManagement.Business.Services.Properties
     {
         Task<IEnumerable<HomePropertyDTO>> GetAllPropertiesAsync(int? userId = 0);
         Task<PaginatedResponseDTO<HomePropertyDTO>> GetPaginatedPropertiesAsync(int page = 1, int pageSize = 10, 
-                int? userId = 0, string type = "room", string provinces = "",string wards = "", string streets = "", 
+                int? userId = 0, string type = "", string provinces = "",string wards = "", string streets = "", 
                 int minPrice = 0, int maxPrice = 100,
                 int minArea = 0, int maxArea = 100, int minRoom = 0,  int maxRoom = 15);
         Task<IEnumerable<HomePropertyDTO>> GetPropertiesByUserAsync(int? userId);
