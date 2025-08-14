@@ -66,13 +66,13 @@
 </div>
 
 <!-- Report User Modal -->
-<div id="reportModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+<div id="reportModal" class="report-modal-overlay" style="display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important;">
+    <div class="report-modal-content">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold text-gray-900">Báo cáo người dùng</h3>
             <button onclick="closeReportModal()" class="text-gray-400 hover:text-gray-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    <path stroke-linecap="round" stroke-linejoin-round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
         </div>
@@ -108,10 +108,78 @@
     </div>
 </div>
 
+<style>
+    /* Custom CSS for report modal to override Bootstrap */
+    .report-modal-overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        z-index: 9999 !important;
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transition: all 0.3s ease !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .report-modal-overlay.show {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+    
+    .report-modal-content {
+        background: white !important;
+        border-radius: 0.5rem !important;
+        padding: 1.5rem !important;
+        width: 100% !important;
+        max-width: 28rem !important;
+        margin: auto !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    }
+    
+    /* Ensure modal is hidden by default */
+    #reportModal {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+    
+    #reportModal.show {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="~/js/propertyService.js"></script>
 <script>
     let urlBase = "https://localhost:7031";
+    
+    // Hide report modal by default when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        hideReportModal();
+        
+        // Force hide modal with multiple methods
+        const modal = document.getElementById('reportModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.style.visibility = 'hidden';
+            modal.style.opacity = '0';
+            modal.style.pointerEvents = 'none';
+            modal.classList.remove('show');
+        }
+    });
+    
     getList();
     let landlordId = @ViewBag.LandlordId;
     
@@ -123,8 +191,9 @@
         try {
             const token = localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token');
             if (!token) {
-                // User not logged in, show default button state
+                // User not logged in, show default button state and hide modal
                 updateReportButtonForGuest();
+                hideReportModal();
                 return;
             }
             
@@ -135,11 +204,13 @@
             } catch (e) {
                 console.error('Error decoding token:', e);
                 updateReportButtonForGuest();
+                hideReportModal();
                 return;
             }
             
             if (!userId) {
                 updateReportButtonForGuest();
+                hideReportModal();
                 return;
             }
             
@@ -157,6 +228,7 @@
             if (!response.ok) {
                 console.error('Error checking report status:', response.status);
                 updateReportButtonForGuest();
+                hideReportModal();
                 return;
             }
             
@@ -187,6 +259,7 @@
         } catch (error) {
             console.error('Error checking report status:', error);
             updateReportButtonForGuest();
+            hideReportModal();
         }
     }
     
@@ -209,6 +282,9 @@
                 }
             });
         };
+        
+        // Hide the report modal for guest users
+        hideReportModal();
     }
     
     // Report User Functions
@@ -217,13 +293,19 @@
         if (!checkUserLogin()) {
             return;
         }
-        document.getElementById('reportModal').classList.remove('hidden');
+        
+        // Show the modal
+        const modal = document.getElementById('reportModal');
+        modal.classList.add('show'); // Add show class to show the modal
     }
     
     // Check if user is logged in
     function checkUserLogin() {
         const token = localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token');
         if (!token) {
+            // Hide the report modal
+            hideReportModal();
+            
             Swal.fire({
                 icon: 'warning',
                 title: 'Vui lòng đăng nhập',
@@ -243,9 +325,35 @@
     }
     
     function closeReportModal() {
-        document.getElementById('reportModal').classList.add('hidden');
+        const modal = document.getElementById('reportModal');
+        modal.classList.remove('show'); // Remove show class to hide the modal
         document.getElementById('reportForm').reset();
     }
+    
+    // Hide report modal
+    function hideReportModal() {
+        const modal = document.getElementById('reportModal');
+        modal.classList.remove('show'); // Remove show class to hide the modal
+    }
+    
+    // Add event listeners for modal
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('reportModal');
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeReportModal();
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeReportModal();
+            }
+        });
+    });
     
     // Handle report form submission
     document.getElementById('reportForm').addEventListener('submit', async function(e) {

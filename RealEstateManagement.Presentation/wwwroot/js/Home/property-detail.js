@@ -218,7 +218,7 @@ class PropertyDetailManager {
         this.updateElement('.titleId', prop.title);
         this.renderStarsBody(prop.rating);
         this.updateElement('#avgStar', `(${prop.rating})`);
-        this.updateElement('#totalComment', prop.commentNo);
+        this.updateElement('#totalCommentCount', prop.commentNo || 0);
         
         // Update landlord info with null check
         if (prop.landlordProfilePictureUrl) {
@@ -271,8 +271,11 @@ class PropertyDetailManager {
         // Update map
         this.updateMap(prop);
         
-        // Load comments
-        this.loadComments();
+        // Load comments - handled by ReviewManager
+        // Wait for ReviewManager to be initialized
+        setTimeout(() => {
+            this.loadCommentsWithRetry();
+        }, 100);
     }
 
     updateElement(selector, value) {
@@ -631,24 +634,92 @@ class PropertyDetailManager {
         }
     }
 
-    loadComments() {
-        if (typeof getComment === 'function') {
-            getComment(this.currentId).then(listReview => {
-                let commentHTMLBody = "";
-                listReview.items.forEach(item => {
-                    if (typeof createCommentHTML === 'function') {
-                        var commentHTML = createCommentHTML(item, this.isOwner);
-                        commentHTMLBody += commentHTML.innerHTML;
-                    }
-                });
+    // Comments are now handled by ReviewManager
+    // loadComments() method removed - use window.reviewManager.loadComments() instead
+    
+    // Fallback method to load comments if ReviewManager is not available
+    async loadCommentsFallback() {
+        try {
+            if (typeof getComment === 'function') {
+                const commentsData = await getComment(this.currentId);
                 
-                const list = document.getElementById('commentList');
-                if (list) {
-                    list.innerHTML = commentHTMLBody;
+                // Update comment count in UI
+                let commentCount = 0;
+                if (commentsData && commentsData.data) {
+                    commentCount = Array.isArray(commentsData.data) ? commentsData.data.length : 0;
+                } else if (commentsData && Array.isArray(commentsData)) {
+                    commentCount = commentsData.length;
+                } else if (commentsData && commentsData.items) {
+                    commentCount = Array.isArray(commentsData.items) ? commentsData.items.length : 0;
                 }
-            });
+                
+                // Update both comment count displays
+                this.updateElement('#totalCommentCount', commentCount);
+                this.updateElement('.comment-count span span', commentCount);
+                
+                // Try to display comments if ReviewManager becomes available
+                if (window.reviewManager && commentsData && commentsData.items) {
+                    const transformedComments = commentsData.items.map(comment => {
+                        // Transform replies if they exist
+                        let transformedReplies = [];
+                        
+                        // Check for single reply object (API format: reply: {...})
+                        if (comment.reply && typeof comment.reply === 'object') {
+                            transformedReplies = [{
+                                id: comment.reply.id || 'unknown',
+                                userName: 'Chủ nhà', // Since it's landlordId, we'll use a default name
+                                content: comment.reply.replyContent || 'Không có nội dung',
+                                createdAt: comment.reply.createdAt
+                            }];
+                        }
+                        // Check for replies array (fallback format)
+                        else if (comment.replies && Array.isArray(comment.replies)) {
+                            transformedReplies = comment.replies.map(reply => ({
+                                id: reply.replyId || reply.id,
+                                userName: reply.userName || reply.renterName || reply.ownerName || 'Người dùng',
+                                content: reply.content || reply.replyText || reply.replyContent || 'Không có nội dung',
+                                createdAt: reply.createdAt
+                            }));
+                        }
+                        
+                        return {
+                            id: comment.reviewId || comment.id,
+                            rating: comment.rating || 0,
+                            content: comment.reviewText || comment.content || 'Không có nội dung',
+                            userName: comment.renterName || comment.userName || 'Người dùng',
+                            createdAt: comment.createdAt,
+                            replies: transformedReplies
+                        };
+                    });
+                    
+                    window.reviewManager.comments = transformedComments;
+                    window.reviewManager.totalComments = transformedComments.length;
+                    window.reviewManager.displayComments();
+                }
+            }
+        } catch (error) {
+            console.error('Error in fallback comment loading:', error);
         }
     }
+    
+    // Method to load comments with retry logic
+    loadCommentsWithRetry() {
+        if (window.reviewManager) {
+            window.reviewManager.loadComments();
+        } else {
+            // Retry after a short delay
+            setTimeout(() => {
+                if (window.reviewManager) {
+                    window.reviewManager.loadComments();
+                } else {
+                    // Try to load comments directly as fallback
+                    this.loadCommentsFallback();
+                }
+            }, 500);
+        }
+    }
+    
+
 
     // Report functions
     openReportModal() {
