@@ -35,11 +35,11 @@ body {
 }
 
 a {
-    color: black !important;
+    color: black ;
 }
 
     a:hover {
-        color: rgb(37 99 235 / var(--tw-text-opacity, 1)) !important;
+        color: rgb(37 99 235 / var(--tw-text-opacity, 1)) ;
     }
 
 /* Đảm bảo input trong .relative có chiều cao tối thiểu và padding đều để icon căn giữa */

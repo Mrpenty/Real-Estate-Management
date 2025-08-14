@@ -254,6 +254,7 @@
 
      const apiBaseUrl = 'https://localhost:7031/api';
      const baseUrl = 'https://localhost:7031';
+     const backendBaseUrl = 'https://localhost:7031'; // Base URL cho ảnh
      const provinceSelect = $('#province-select');
      const wardSelect = $('#ward-select');
      const streetSelect = $('#street-select');
@@ -298,7 +299,8 @@
      getOwnerProperty();
      async function getOwnerProperty(){
         itemPropertyBody = await propertyService.getOwnerProperty(@ViewBag.Id);
-        console.log(itemPropertyBody);
+        console.log('Full itemPropertyBody:', itemPropertyBody);
+        console.log('Image URLs from API:', itemPropertyBody.imageUrls);
 
         // ✅ Kiểm tra status ngay sau khi lấy dữ liệu
             // Giả sử postDetail là object nhận từ API
@@ -380,26 +382,121 @@
         }
 
 
-        itemPropertyBody.imageUrls.forEach(url =>{
-            const wrapper = document.createElement('div');
-            wrapper.className = "relative";
+        // Debug: Log dữ liệu ảnh để kiểm tra
+        console.log('itemPropertyBody:', itemPropertyBody);
+        console.log('imageUrls:', itemPropertyBody.imageUrls);
+        
+        // Hiển thị ảnh cũ từ database
+        if (itemPropertyBody.imageUrls && itemPropertyBody.imageUrls.length > 0) {
+            itemPropertyBody.imageUrls.forEach((url, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = "relative group border-2 rounded-md" + (index === 0 ? ' border-blue-500' : ' border-transparent');
+                wrapper.style.cursor = 'pointer';
+                wrapper.setAttribute('data-index', index);
+                wrapper.setAttribute('data-old-image', 'true');
+                wrapper.setAttribute('data-file-index', index);
+                wrapper.setAttribute('data-old-url', url);
 
-            const img = document.createElement('img');
-            img.src = url;
-            img.className = "w-full h-32 object-cover rounded-md shadow";
+                const img = document.createElement('img');
+                
+                                 // Xử lý URL ảnh để đảm bảo đúng format
+                 let imageUrl = url;
+                 
+                 // Debug: Kiểm tra URL ảnh
+                 console.log('Processing image URL:', {
+                     original: url,
+                     type: typeof url,
+                     length: url ? url.length : 0,
+                     startsWithHttp: url ? url.startsWith('http') : false,
+                     startsWithSlash: url ? url.startsWith('/') : false
+                 });
+                 
+                 if (url && !url.startsWith('http') && !url.startsWith('//')) {
+                     // Nếu URL không có protocol, thêm base URL của backend
+                     if (url.startsWith('/')) {
+                         imageUrl = backendBaseUrl + url;
+                     } else {
+                         imageUrl = backendBaseUrl + '/' + url;
+                     }
+                 }
+                 
+                 console.log('Original URL:', url);
+                 console.log('Processed URL:', imageUrl);
+                
+                img.src = imageUrl;
+                img.className = "w-full h-32 object-cover rounded-md shadow";
+                
+                // Xử lý lỗi khi ảnh không load được
+                img.onerror = function() {
+                    console.error('Failed to load image:', imageUrl);
+                    this.src = '/image/upload-image.png'; // Ảnh placeholder khi lỗi
+                    this.style.opacity = '0.5';
+                };
+                
+                // Xử lý khi ảnh load thành công
+                img.onload = function() {
+                    console.log('Image loaded successfully:', imageUrl);
+                };
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.innerHTML = "<span>&times;</span>";
-            deleteBtn.type = "button";
-            deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600";
-            deleteBtn.onclick = () => {
-                wrapper.remove();
-            };
+                // Icon ảnh đại diện
+                const primaryIcon = document.createElement('div');
+                primaryIcon.className = "absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full z-10";
+                primaryIcon.innerHTML = index === 0 ? 'Ảnh đại diện' : '';
+                primaryIcon.style.display = index === 0 ? 'block' : 'none';
 
-            wrapper.appendChild(img);
-            wrapper.appendChild(deleteBtn);
-            previewContainer.appendChild(wrapper);
-        });
+                // Click chọn làm ảnh đại diện
+                wrapper.onclick = function() {
+                    const clickedIndex = parseInt(this.getAttribute('data-file-index'));
+                    primaryImageIndex = clickedIndex;
+                    
+                    // Update border và icon cho tất cả
+                    Array.from(previewContainer.children).forEach((child) => {
+                        child.classList.remove('border-blue-500');
+                        child.classList.add('border-transparent');
+                        const icon = child.querySelector('div');
+                        if (icon) icon.style.display = 'none';
+                    });
+                    
+                    this.classList.remove('border-transparent');
+                    this.classList.add('border-blue-500');
+                    primaryIcon.style.display = 'block';
+                    
+                    // Cập nhật lại primaryImageIndex
+                    updatePrimaryImageIndex();
+                };
+
+                // Nút xóa ảnh
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = "<span>&times;</span>";
+                deleteBtn.type = "button";
+                deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600 z-20";
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    
+                    // Xóa ảnh cũ khỏi danh sách
+                    const oldUrl = wrapper.getAttribute('data-old-url');
+                    if (oldUrl) {
+                        console.log('Đã xóa ảnh cũ:', oldUrl);
+                        
+                        // Cập nhật lại itemPropertyBody.imageUrls để phản ánh trạng thái hiện tại
+                        const currentIndex = itemPropertyBody.imageUrls.indexOf(oldUrl);
+                        if (currentIndex > -1) {
+                            itemPropertyBody.imageUrls.splice(currentIndex, 1);
+                        }
+                    }
+                    
+                    wrapper.remove();
+                    
+                    // Cập nhật lại primary image sau khi xóa
+                    updatePrimaryImageIndex();
+                };
+
+                wrapper.appendChild(img);
+                wrapper.appendChild(primaryIcon);
+                wrapper.appendChild(deleteBtn);
+                previewContainer.appendChild(wrapper);
+            });
+        }
 
         setTimeout(() => {
             wardSelect.val(itemPropertyBody.wardId);
@@ -530,15 +627,214 @@
                 return;
             }
         }
-        alert("Lưu thành công");
-             window.location.href = `/PostProperty/ListProperty`;
-             return;
+        // Xử lý ảnh - có thể có ảnh mới hoặc chỉ xóa ảnh cũ
+        const currentImages = Array.from(previewContainer.children);
+        const hasNewImages = imageFiles.length > 0;
+        const hasOldImages = currentImages.some(img => img.getAttribute('data-old-image') === 'true');
+        
+        // Cập nhật primaryImageIndex dựa trên ảnh hiện tại trong preview
+        updatePrimaryImageIndex();
+        
+        // Xử lý ảnh cũ bị xóa
+        const hasOldImagesDeleted = handleOldImagesDeletion();
+        
+        // Luôn gọi uploadImages để xử lý ảnh (xóa ảnh cũ, upload mới nếu có)
+        try {
+            await uploadImages(propertyId);
+            if (hasNewImages) {
+                alert("Cập nhật property và ảnh thành công!");
+            } else if (hasOldImagesDeleted) {
+                alert("Cập nhật property thành công! Đã xóa ảnh cũ.");
+            } else {
+                alert("Cập nhật property thành công!");
+            }
+        } catch (error) {
+            alert("Cập nhật property thành công nhưng có lỗi khi xử lý ảnh: " + error.message);
+        }
+        
+        // Refresh preview ảnh để hiển thị đúng
+        refreshImagePreview();
+        
+        // Chuyển hướng về trang danh sách
+        window.location.href = `/PostProperty/ListProperty`;
+        return;
         };
 
-    let propertyImageCreateDto = [];
-    function delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
+         let propertyImageCreateDto = [];
+     function delay(ms) {
+         return new Promise(resolve => setTimeout(resolve, ms));
+     }
+
+     // Hàm helper để cập nhật primary image index
+     function updatePrimaryImageIndex() {
+         const currentImages = Array.from(previewContainer.children);
+         if (currentImages.length > 0) {
+             const primaryImage = currentImages.find(img => img.classList.contains('border-blue-500'));
+             if (primaryImage) {
+                 const primaryIndex = parseInt(primaryImage.getAttribute('data-file-index'));
+                 if (!isNaN(primaryIndex)) {
+                     primaryImageIndex = primaryIndex;
+                 }
+             } else {
+                 // Nếu không có ảnh nào được chọn làm primary, chọn ảnh đầu tiên
+                 primaryImageIndex = 0;
+                 if (currentImages[0]) {
+                     currentImages[0].classList.remove('border-transparent');
+                     currentImages[0].classList.add('border-blue-500');
+                     const icon = currentImages[0].querySelector('div');
+                     if (icon) icon.style.display = 'block';
+                 }
+             }
+         }
+     }
+
+     // Hàm helper để xử lý ảnh cũ bị xóa
+     function handleOldImagesDeletion() {
+         const currentImages = Array.from(previewContainer.children);
+         const remainingOldImages = currentImages.filter(img => img.getAttribute('data-old-image') === 'true');
+         const originalOldImages = itemPropertyBody.imageUrls || [];
+         
+         if (remainingOldImages.length < originalOldImages.length) {
+             console.log('Có ảnh cũ bị xóa:', originalOldImages.length - remainingOldImages.length, 'ảnh');
+             
+             // Cập nhật lại itemPropertyBody.imageUrls để phản ánh trạng thái hiện tại
+             itemPropertyBody.imageUrls = remainingOldImages.map(img => img.getAttribute('data-old-url')).filter(url => url);
+             
+             return true; // Có ảnh bị xóa
+         }
+         
+         return false; // Không có ảnh nào bị xóa
+     }
+
+     // Hàm helper để refresh preview ảnh
+     function refreshImagePreview() {
+         // Xóa tất cả ảnh hiện tại
+         previewContainer.innerHTML = "";
+         
+         // Nếu có ảnh mới, hiển thị ảnh mới
+         if (imageFiles.length > 0) {
+             imageFiles.forEach((file, index) => {
+                 if (file.type.startsWith("image/")) {
+                     const reader = new FileReader();
+                     reader.onload = () => {
+                         const wrapper = document.createElement('div');
+                         wrapper.className = "relative group border-2 rounded-md" + (index === primaryImageIndex ? ' border-blue-500' : ' border-transparent');
+                         wrapper.style.cursor = 'pointer';
+                         wrapper.setAttribute('data-index', index);
+                         wrapper.setAttribute('data-file-index', index);
+
+                         const img = document.createElement('img');
+                         img.src = reader.result;
+                         img.className = "w-full h-32 object-cover rounded-md shadow";
+
+                         const primaryIcon = document.createElement('div');
+                         primaryIcon.className = "absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full z-10";
+                         primaryIcon.innerHTML = index === primaryImageIndex ? 'Ảnh đại diện' : '';
+                         primaryIcon.style.display = index === primaryImageIndex ? 'block' : 'none';
+
+                         const deleteBtn = document.createElement('button');
+                         deleteBtn.innerHTML = "<span>&times;</span>";
+                         deleteBtn.type = "button";
+                         deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600 z-20";
+                         deleteBtn.onclick = (e) => {
+                             e.stopPropagation();
+                             const fileIndex = parseInt(wrapper.getAttribute('data-file-index'));
+                             imageFiles.splice(fileIndex, 1);
+                             
+                             if (primaryImageIndex === fileIndex) {
+                                 primaryImageIndex = 0;
+                             } else if (primaryImageIndex > fileIndex) {
+                                 primaryImageIndex--;
+                             }
+                             
+                             wrapper.remove();
+                             updatePrimaryImageIndex();
+                         };
+
+                         wrapper.appendChild(img);
+                         wrapper.appendChild(primaryIcon);
+                         wrapper.appendChild(deleteBtn);
+                         previewContainer.appendChild(wrapper);
+                     };
+                     reader.readAsDataURL(file);
+                 }
+             });
+         }
+         // Nếu không có ảnh mới, hiển thị ảnh cũ còn lại
+         else if (itemPropertyBody.imageUrls && itemPropertyBody.imageUrls.length > 0) {
+             itemPropertyBody.imageUrls.forEach((url, index) => {
+                 const wrapper = document.createElement('div');
+                 wrapper.className = "relative group border-2 rounded-md" + (index === 0 ? ' border-blue-500' : ' border-transparent');
+                 wrapper.style.cursor = 'pointer';
+                 wrapper.setAttribute('data-index', index);
+                 wrapper.setAttribute('data-old-image', 'true');
+                 wrapper.setAttribute('data-file-index', index);
+                 wrapper.setAttribute('data-old-url', url);
+
+                 const img = document.createElement('img');
+                 
+                 // Xử lý URL ảnh để đảm bảo đúng format
+                 let imageUrl = url;
+                 
+                 // Debug: Kiểm tra URL ảnh trong refresh
+                 console.log('Processing image URL in refresh:', {
+                     original: url,
+                     type: typeof url,
+                     length: url ? url.length : 0,
+                     startsWithHttp: url ? url.startsWith('http') : false,
+                     startsWithSlash: url ? url.startsWith('/') : false
+                 });
+                 
+                 if (url && !url.startsWith('http') && !url.startsWith('//')) {
+                     // Nếu URL không có protocol, thêm base URL của backend
+                     if (url.startsWith('/')) {
+                         imageUrl = backendBaseUrl + url;
+                     } else {
+                         imageUrl = backendBaseUrl + '/' + url;
+                     }
+                 }
+                 
+                 console.log('Original URL in refresh:', url);
+                 console.log('Processed URL in refresh:', imageUrl);
+                 
+                 img.src = imageUrl;
+                 img.className = "w-full h-32 object-cover rounded-md shadow";
+                 
+                 img.onerror = function() {
+                     console.error('Failed to load image in refresh:', imageUrl);
+                     this.src = '/image/upload-image.png';
+                     this.style.opacity = '0.5';
+                 };
+
+                 const primaryIcon = document.createElement('div');
+                 primaryIcon.className = "absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full z-10";
+                 primaryIcon.innerHTML = index === 0 ? 'Ảnh đại diện' : '';
+                 primaryIcon.style.display = index === 0 ? 'block' : 'none';
+
+                 const deleteBtn = document.createElement('button');
+                 deleteBtn.innerHTML = "<span>&times;</span>";
+                 deleteBtn.type = "button";
+                 deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600 z-20";
+                 deleteBtn.onclick = (e) => {
+                     e.stopPropagation();
+                     const oldUrl = wrapper.getAttribute('data-old-url');
+                     if (oldUrl) {
+                         const currentIndex = itemPropertyBody.imageUrls.indexOf(oldUrl);
+                         if (currentIndex > -1) {
+                             itemPropertyBody.imageUrls.splice(currentIndex, 1);
+                         }
+                     }
+                     wrapper.remove();
+                     updatePrimaryImageIndex();
+                 };
+
+                 wrapper.appendChild(img);
+                 wrapper.appendChild(primaryIcon);
+                 wrapper.appendChild(deleteBtn);
+                 previewContainer.appendChild(wrapper);
+             });
+         }
+     }
 
     async function fetchLocationAndSetPropertyData() {
        const location = `${addressInfo.val()} ${streetSelect.find("option:selected").text()} ${wardSelect.find("option:selected").text()} ${provinceSelect.find("option:selected").text()}`;
@@ -568,54 +864,106 @@
          async function uploadImages(propertyId) {
              const token = localStorage.getItem('authToken');
 
-             for (let idx = 0; idx < imageFiles.length; idx++) {
-                 const file = imageFiles[idx];
+             // Lấy danh sách ảnh hiện tại trong preview
+             const currentImages = Array.from(previewContainer.children);
+             const remainingOldImages = currentImages.filter(img => img.getAttribute('data-old-image') === 'true');
+             
+             // Nếu không có ảnh mới và không có ảnh cũ nào được giữ lại
+             if (imageFiles.length === 0 && remainingOldImages.length === 0) {
+                 console.log('Không có ảnh nào, cần xóa tất cả ảnh cũ');
+                 
+                 // Xóa tất cả ảnh cũ khỏi database
+                 try {
+                     const clearResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/clear`, {
+                         method: 'DELETE',
+                         headers: {
+                             ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                         }
+                     });
+                     
+                     if (!clearResponse.ok) {
+                         console.warn('Không thể xóa ảnh cũ khỏi database');
+                     } else {
+                         console.log('Đã xóa tất cả ảnh cũ khỏi database');
+                     }
+                 } catch (error) {
+                     console.warn('Lỗi khi xóa ảnh cũ khỏi database:', error);
+                 }
+                 
+                 return;
+             }
 
-                 // Upload file lên server trước
-                 const formData = new FormData();
-                 formData.append('file', file);
-
-                 const uploadResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/upload`, {
-                     method: 'POST',
+             // Xóa tất cả ảnh cũ khỏi database trước khi upload ảnh mới
+             try {
+                 const clearResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/clear`, {
+                     method: 'DELETE',
                      headers: {
                          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-                     },
-                     body: formData
+                     }
                  });
-
-                 if (!uploadResponse.ok) {
-                     const error = await uploadResponse.text();
-                     alert(`Upload ảnh thất bại: ${error}`);
-                     return;
+                 
+                 if (!clearResponse.ok) {
+                     console.warn('Không thể xóa ảnh cũ khỏi database, tiếp tục xử lý');
+                 } else {
+                     console.log('Đã xóa tất cả ảnh cũ khỏi database');
                  }
+             } catch (error) {
+                 console.warn('Lỗi khi xóa ảnh cũ khỏi database:', error);
+             }
 
-                 const uploadResult = await uploadResponse.json();
-                 const imageUrl = uploadResult.imageUrl;
+             // Upload ảnh mới (nếu có)
+             if (imageFiles.length > 0) {
+                 for (let idx = 0; idx < imageFiles.length; idx++) {
+                     const file = imageFiles[idx];
 
-                 // Lưu thông tin ảnh vào database
-                 const dto = {
-                     url: imageUrl,
-                     isPrimary: idx === primaryImageIndex,
-                     order: idx
-                 };
+                     // Upload file lên server trước
+                     const formData = new FormData();
+                     formData.append('file', file);
 
-                 const saveResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images`, {
-                     method: 'POST',
-                     headers: {
-                         'Content-Type': 'application/json',
-                         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-                     },
-                     body: JSON.stringify(dto)
-                 });
+                     const uploadResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/upload`, {
+                         method: 'POST',
+                         headers: {
+                             ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                         },
+                         body: formData
+                     });
 
-                 if (!saveResponse.ok) {
-                     const error = await saveResponse.text();
-                     alert(`Lưu thông tin ảnh thất bại: ${error}`);
-                     return;
+                     if (!uploadResponse.ok) {
+                         const error = await uploadResponse.text();
+                         throw new Error(`Upload ảnh thất bại: ${error}`);
+                     }
+
+                     const uploadResult = await uploadResponse.json();
+                     const imageUrl = uploadResult.imageUrl;
+                     
+                     // Debug: Log URL ảnh được trả về từ API
+                     console.log('Image URL from API:', imageUrl);
+
+                     // Lưu thông tin ảnh vào database với primary image đúng
+                     const dto = {
+                         url: imageUrl,
+                         isPrimary: idx === primaryImageIndex,
+                         order: idx
+                     };
+
+                     const saveResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images`, {
+                         method: 'POST',
+                         headers: {
+                             'Content-Type': 'application/json',
+                             ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                         },
+                         body: JSON.stringify(dto)
+                     });
+
+                     if (!saveResponse.ok) {
+                         const error = await saveResponse.text();
+                         throw new Error(`Lưu thông tin ảnh thất bại: ${error}`);
+                     }
+                     
+                     // Debug: Log kết quả lưu ảnh
+                     const savedImage = await saveResponse.json();
+                     console.log('Saved image to database:', savedImage);
                  }
-
-                 alert('Lưu thông tin thành công');
-                 window.location.href = '/PostProperty/ListProperty';
              }
          }
 
@@ -759,6 +1107,8 @@
      imageUpload.addEventListener('change', () => {
          try {
                  imageFiles = [];
+                 
+                 // Xóa tất cả ảnh cũ khỏi preview khi upload ảnh mới
                  previewContainer.innerHTML = "";
 
                   const fileAlls = Array.from(imageUpload.files);
@@ -768,45 +1118,143 @@
                       return;
                   }
 
-
                  const files = fileAlls.slice(0, 8);
                  imageFiles = files;
+                 
+                 // Reset primaryImageIndex về 0 khi upload ảnh mới
+                 primaryImageIndex = 0;
+                 
+                 // Kiểm tra kích thước file
                  for (const file of files) {
-                 if (file.size > 5 * 1024 * 1024) {
+                     if (file.size > 5 * 1024 * 1024) {
                          alert(`Ảnh "${file.name}" vượt quá 5MB. Vui lòng chọn ảnh nhẹ hơn.`);
                          imageUpload.value = "";
                          return;
                      }
                  }
 
+                 // Hiển thị preview ảnh mới
+                 files.forEach((file, index) => {
+                     if (!file.type.startsWith("image/")) return;
 
+                     const reader = new FileReader();
+                     reader.onload = () => {
+                         const wrapper = document.createElement('div');
+                         wrapper.className = "relative group border-2 rounded-md" + (index === 0 ? ' border-blue-500' : ' border-transparent');
+                         wrapper.style.cursor = 'pointer';
+                         wrapper.setAttribute('data-index', index);
+                         wrapper.setAttribute('data-file-index', index);
 
-                  files.forEach((file, index) => {
-                      if (!file.type.startsWith("image/")) return;
+                         const img = document.createElement('img');
+                         img.src = reader.result;
+                         img.className = "w-full h-32 object-cover rounded-md shadow";
 
-                      const reader = new FileReader();
-                      reader.onload = () => {
-                          const wrapper = document.createElement('div');
-                          wrapper.className = "relative";
+                         // Icon ảnh đại diện
+                         const primaryIcon = document.createElement('div');
+                         primaryIcon.className = "absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full z-10";
+                         primaryIcon.innerHTML = index === 0 ? 'Ảnh đại diện' : '';
+                         primaryIcon.style.display = index === 0 ? 'block' : 'none';
 
-                          const img = document.createElement('img');
-                          img.src = reader.result;
-                          img.className = "w-full h-32 object-cover rounded-md shadow";
+                         // Click chọn làm ảnh đại diện
+                         wrapper.onclick = function() {
+                             const clickedIndex = parseInt(this.getAttribute('data-file-index'));
+                             primaryImageIndex = clickedIndex;
+                             
+                             // Update border và icon cho tất cả
+                             Array.from(previewContainer.children).forEach((child) => {
+                                 child.classList.remove('border-blue-500');
+                                 child.classList.add('border-transparent');
+                                 const icon = child.querySelector('div');
+                                 if (icon) icon.style.display = 'none';
+                             });
+                             
+                             this.classList.remove('border-transparent');
+                             this.classList.add('border-blue-500');
+                             primaryIcon.style.display = 'block';
+                             
+                             // Cập nhật lại primaryImageIndex
+                             updatePrimaryImageIndex();
+                         };
 
-                          const deleteBtn = document.createElement('button');
-                          deleteBtn.innerHTML = "<span>&times;</span>";
-                          deleteBtn.type = "button";
-                          deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600";
-                          deleteBtn.onclick = () => {
-                              wrapper.remove();
-                          };
+                         // Nút xóa ảnh
+                         const deleteBtn = document.createElement('button');
+                         deleteBtn.innerHTML = "<span>&times;</span>";
+                         deleteBtn.type = "button";
+                         deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600 z-20";
+                         deleteBtn.onclick = (e) => {
+                             e.stopPropagation();
+                             
+                             // Xóa file khỏi mảng
+                             const fileIndex = parseInt(wrapper.getAttribute('data-file-index'));
+                             files.splice(fileIndex, 1);
+                             imageFiles = files;
+                             
+                             // Nếu xóa ảnh đại diện thì reset về 0
+                             if (primaryImageIndex === fileIndex) {
+                                 primaryImageIndex = 0;
+                             } else if (primaryImageIndex > fileIndex) {
+                                 // Nếu ảnh đại diện ở vị trí sau ảnh bị xóa, giảm index
+                                 primaryImageIndex--;
+                             }
+                             
+                             // Cập nhật lại data-file-index cho các wrapper còn lại và render lại preview
+                             previewContainer.innerHTML = "";
+                             files.forEach((file, idx) => {
+                                 if (file.type.startsWith("image/")) {
+                                     const reader = new FileReader();
+                                     reader.onload = () => {
+                                         const newWrapper = document.createElement('div');
+                                         newWrapper.className = "relative group border-2 rounded-md" + (idx === primaryImageIndex ? ' border-blue-500' : ' border-transparent');
+                                         newWrapper.style.cursor = 'pointer';
+                                         newWrapper.setAttribute('data-index', idx);
+                                         newWrapper.setAttribute('data-file-index', idx);
 
-                          wrapper.appendChild(img);
-                          wrapper.appendChild(deleteBtn);
-                          previewContainer.appendChild(wrapper);
-                      };
-                      reader.readAsDataURL(file);
-                  });
+                                         const newImg = document.createElement('img');
+                                         newImg.src = reader.result;
+                                         newImg.className = "w-full h-32 object-cover rounded-md shadow";
+
+                                         const newPrimaryIcon = document.createElement('div');
+                                         newPrimaryIcon.className = "absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full z-10";
+                                         newPrimaryIcon.innerHTML = idx === primaryImageIndex ? 'Ảnh đại diện' : '';
+                                         newPrimaryIcon.style.display = idx === primaryImageIndex ? 'block' : 'none';
+
+                                         const newDeleteBtn = document.createElement('button');
+                                         newDeleteBtn.innerHTML = "<span>&times;</span>";
+                                         newDeleteBtn.type = "button";
+                                         newDeleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600 z-20";
+                                         newDeleteBtn.onclick = (e) => {
+                                             e.stopPropagation();
+                                             const newFileIndex = parseInt(newWrapper.getAttribute('data-file-index'));
+                                             files.splice(newFileIndex, 1);
+                                             imageFiles = files;
+                                             
+                                             if (primaryImageIndex === newFileIndex) {
+                                                 primaryImageIndex = 0;
+                                             } else if (primaryImageIndex > newFileIndex) {
+                                                 primaryImageIndex--;
+                                             }
+                                             
+                                             newWrapper.remove();
+                                             updatePrimaryImageIndex();
+                                         };
+
+                                         newWrapper.appendChild(newImg);
+                                         newWrapper.appendChild(newPrimaryIcon);
+                                         newWrapper.appendChild(newDeleteBtn);
+                                         previewContainer.appendChild(newWrapper);
+                                     };
+                                     reader.readAsDataURL(file);
+                                 }
+                             });
+                         };
+
+                         wrapper.appendChild(img);
+                         wrapper.appendChild(primaryIcon);
+                         wrapper.appendChild(deleteBtn);
+                         previewContainer.appendChild(wrapper);
+                     };
+                     reader.readAsDataURL(file);
+                 });
          } catch (error) {
              console.log(error);
          }
