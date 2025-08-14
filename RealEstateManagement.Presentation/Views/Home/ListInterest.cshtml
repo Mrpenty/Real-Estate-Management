@@ -35,8 +35,6 @@
         </div>
     </div>
 </div>
-<script src="~/js/review.js"></script>
-<script src="~/js/propertyService.js"></script>
 <script>
     let urlBase = "https://localhost:7031";
     getListFavorite();
@@ -92,7 +90,6 @@
                             <h2  onclick="window.location.href='/Home/Detail/${item.id}'" style="cursor:pointer" class="text-blue-800 font-semibold text-base leading-tight">
                                 ${item.title} 
                             </h2>
-                            <span style="color:red">${i1.status == 0 ? 'Đang quan tâm' : ''}<span class="text-xs text-gray-400 ml-2">${timeAgo(i1.interestedAt)}</span></span>
                             
                             <div class="text-green-600 font-semibold mt-1">
                                        ${formatVietnameseNumber(item.price)} / tháng <span class="text-gray-500 font-normal">· ${item.area} m²</span>

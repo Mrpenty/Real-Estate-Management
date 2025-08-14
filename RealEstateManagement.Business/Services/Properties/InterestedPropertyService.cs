@@ -33,7 +33,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 Id = entity.Id,
                 PropertyId = entity.PropertyId,
                 RenterId = entity.RenterId,
-                InterestedAt = entity.InterestedAt,
+                InterestedAt = entity.InterestedAt.AddHours(7),
                 Status = (int)entity.Status,
                 RenterReplyAt = entity.RenterReplyAt,
                 LandlordReplyAt = entity.LandlordReplyAt,

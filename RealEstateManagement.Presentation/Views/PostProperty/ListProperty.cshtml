@@ -598,6 +598,7 @@
                 $('#propertyList').html('');
 
                 let html = '';
+                console.log(list);
         list.forEach((item, index) => {
             let postStatus = item.posts.length > 0 ? item.posts[0].status : 'Chưa có bài đăng';
             html += `

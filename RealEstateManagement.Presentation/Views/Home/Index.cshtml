@@ -584,10 +584,10 @@
                         </button>
                         <button
                             id="interest-${item.id}"
-                            onclick="clickInterest(${item.id},${item.isInterested},${item.interestedStatus})"
+                            onclick="clickInterest(${item.id},${item.isInterested},${item.interestedStatus},${item.isReminderRenterConfirmInterested},${item.interestedId})"
                             class="p-2 bg-white rounded-full shadow hover:bg-blue-100 transition-all duration-200"
                         >
-                            ${item.isInterested ? '<i class="fa-solid fa-square-plus" style="color:red"></i>' : '<i class="fa-solid fa-square-plus"></i>'}
+                            ${item.isInterested && item.interestedStatus != 1 ? '<i class="fa-solid fa-square-plus" style="color:red"></i>' : '<i class="fa-solid fa-square-plus"></i>'}
                             
                         </button>
                     </div>
@@ -602,6 +602,7 @@
                     >
                         ${item.title}
                     </h3>
+                    ${StatusInterest(item)}
                     <div class="text-xl font-bold text-green-600 mt-2">
                         ${formatVietnameseNumber(item.price)} / tháng
                     </div>
@@ -1066,6 +1067,18 @@
         } catch (error) {
             console.error("Không thể giải mã token:", error);
             return null;
+        }
+    }
+    function StatusInterest(item){
+        if(!item.isInterested) return "";
+        if(item.interestedStatus == 2){
+            if(item.isReminderRenterConfirmInterested == 2) return `<span style="color:red">Quá hạn xác nhận quan tâm</span>`;
+            if(item.isReminderRenterConfirmInterested == 1) return `<span style="color:green">Xác nhận quan tâm lại</span>`;
+            if(item.isReminderRenterConfirmInterested == 0) return `<span style="color:blue">Chờ phản hồi hệ thống</span>`;
+        }
+        if(item.interestedStatus == 0) return "";
+        if(item.interestedStatus == 3){
+            if(item.isReminderRenterConfirmInterested == 0) return `<span style="color:blue">Chờ xác nhận từ người cho thuê</span>`;
         }
     }
 </script>
