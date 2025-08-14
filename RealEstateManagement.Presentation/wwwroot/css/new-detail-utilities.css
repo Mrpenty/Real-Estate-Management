@@ -1,0 +1,173 @@
+/* Additional Utility Classes and Enhancements for NewDetail */
+
+/* Enhanced Animations */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.6s ease-out;
+}
+
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.slide-in-right {
+    animation: slideInRight 0.6s ease-out;
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Enhanced Hover Effects */
+.news-item:hover {
+    transform: translateX(6px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced Loading States */
+.loading-skeleton .content-section {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+.loading-skeleton .news-title {
+    height: 2rem;
+    background: #e0e0e0;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.loading-skeleton .news-meta {
+    height: 1.5rem;
+    background: #e0e0e0;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.loading-skeleton .news-content p {
+    height: 1rem;
+    background: #e0e0e0;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+}
+
+.loading-skeleton .news-summary {
+    height: 3rem;
+    background: #e0e0e0;
+    border-radius: 8px;
+}
+
+/* Enhanced Focus States for Accessibility */
+.news-item:focus {
+    outline: 2px solid #f97316;
+    outline-offset: 2px;
+}
+
+/* Enhanced Error States */
+.image-error {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    font-weight: 500;
+}
+
+.image-error::before {
+    content: "🖼️";
+    margin-right: 0.5rem;
+    font-size: 1.5rem;
+    filter: grayscale(1);
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 768px) {
+    .new-detail-container {
+        padding: 0 0.75rem;
+    }
+    
+    .news-item-image {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .sidebar {
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .new-detail-container {
+        padding: 0 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .content-section,
+    .sidebar {
+        padding: 1rem;
+    }
+    
+    .news-title {
+        font-size: 1.25rem;
+    }
+    
+    .news-item-image {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .sidebar {
+        display: none;
+    }
+    
+    .new-detail-container {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .content-section {
+        box-shadow: none;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .news-title {
+        color: #000;
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .news-title {
+        color: #000;
+    }
+    
+    .author-name {
+        color: #000;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .news-item {
+        transition: none;
+    }
+    
+    .fade-in,
+    .slide-in-left,
+    .slide-in-right {
+        animation: none;
+    }
+} 

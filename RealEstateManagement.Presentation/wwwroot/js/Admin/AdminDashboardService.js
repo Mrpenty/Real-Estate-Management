@@ -202,18 +202,16 @@ const AdminDashboardService = {
     },
 
     /**
-     * Tải xuống báo cáo
+     * Tải xuống báo cáo Excel
      * @param {string} reportType - Loại báo cáo (daily, monthly, property, user, revenue)
-     * @param {string} format - Định dạng (excel, pdf)
      * @param {Date} startDate - Ngày bắt đầu
      * @param {Date} endDate - Ngày kết thúc
      * @returns {Promise<boolean>}
      */
-    async downloadReport(reportType, format, startDate, endDate) {
+    async downloadReport(reportType, startDate, endDate) {
         try {
             const requestBody = {
                 reportType: reportType,
-                format: format,
                 startDate: startDate.toISOString(),
                 endDate: endDate.toISOString()
             };
@@ -236,7 +234,7 @@ const AdminDashboardService = {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `report_${reportType}_${startDate.toISOString().split('T')[0]}_${endDate.toISOString().split('T')[0]}.${format}`;
+            a.download = `report_${reportType}_${startDate.toISOString().split('T')[0]}_${endDate.toISOString().split('T')[0]}.xlsx`;
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);

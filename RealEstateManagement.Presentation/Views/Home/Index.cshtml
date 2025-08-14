@@ -76,6 +76,26 @@
             margin-top: 5px;
         }
 
+        /* Advanced Search Button */
+        .advanced-search-button {
+            background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+            white-space: nowrap;
+            font-size: 14px;
+        }
+
+        .advanced-search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 108, 53, 0.3);
+        }
+
 </style>
 <!-- Search Bar chồng lên Slider -->
 <div class="slider">
@@ -290,11 +310,13 @@
     const locationList = document.getElementById("location-list");
     let selectedLocationLists = [];
     const selectedLocationsEl = document.getElementById("location-selected-list");
-    if (type1 == null || type1 == undefined) type1 = "room";
-
-    let el = document.getElementById(type1);
-    if (el) {
-        el.classList.add("active");
+    
+    // Only add active class if type is specified in URL
+    if (type1 && type1 !== null && type1 !== undefined) {
+        let el = document.getElementById(type1);
+        if (el) {
+            el.classList.add("active");
+        }
     }
 
     let listLocationSelected = sessionStorage.getItem('selectedLocationLists');
@@ -345,7 +367,7 @@
             }
 
             if (properties && properties.length > 0) {
-                // Phân chia danh sách
+                // Phân chia danh sách - hiển thị tất cả bất động sản
                 const featuredProperties = properties.filter(item => item.promotionPackageName != null);
                 const recommendedProperties = properties.filter(item => item.promotionPackageName == null)
                     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -357,7 +379,7 @@
                 });
                 document.getElementById('featuredProperties').innerHTML = featuredHtml || '<p>Không có bất động sản nổi bật.</p>';
 
-                // Hiển thị Bất động sản dành cho bạn
+                // Hiển thị Bất động sản dành cho bạn (tất cả loại)
                 let recommendedHtml = '';
                 recommendedProperties.forEach(item => {
                     recommendedHtml += createPropertyCard(item);
@@ -584,10 +606,10 @@
                         </button>
                         <button
                             id="interest-${item.id}"
-                            onclick="clickInterest(${item.id},${item.isInterested},${item.interestedStatus})"
+                            onclick="clickInterest(${item.id},${item.isInterested},${item.interestedStatus},${item.isReminderRenterConfirmInterested},${item.interestedId})"
                             class="p-2 bg-white rounded-full shadow hover:bg-blue-100 transition-all duration-200"
                         >
-                            ${item.isInterested ? '<i class="fa-solid fa-square-plus" style="color:red"></i>' : '<i class="fa-solid fa-square-plus"></i>'}
+                            ${item.isInterested && item.interestedStatus != 1 ? '<i class="fa-solid fa-square-plus" style="color:red"></i>' : '<i class="fa-solid fa-square-plus"></i>'}
                             
                         </button>
                     </div>
@@ -602,6 +624,7 @@
                     >
                         ${item.title}
                     </h3>
+                    ${StatusInterest(item)}
                     <div class="text-xl font-bold text-green-600 mt-2">
                         ${formatVietnameseNumber(item.price)} / tháng
                     </div>
@@ -630,10 +653,11 @@
                     </div>
                     <div class=" flex flex-col gap-2 items-end">
                         <div class="flex items-center text-yellow-500 ml-2">
-                            <span class="mr-1 font-semibold text-gray-800" id="avgStar">${item.rating}</span>
+                            <span class="mr-1 font-semibold text-gray-800" id="avgStar">${item.rating == 0 ? 'Chưa có đánh giá' : item.rating}</span>
+                            ${item.rating != 0 ? `
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:15px;height:15px" viewBox="0 0 24 24">
                                 <path d="M12 .587l3.668 7.568L24 9.423l-6 5.854L19.335 24 12 20.202 4.665 24 6 15.277 0 9.423l8.332-1.268z" />
-                            </svg>
+                            </svg>` : ''}
                         </div>
 
                         <div class="flex items-center text-gray-600 ml-2">
@@ -794,32 +818,50 @@
 
     // Search function
     function performSearch() {
-        //const location = document.querySelector('#locationBtn span:first-child').textContent.replace('📍 ', '');
-        //const searchText = document.getElementById('searchInput').value;
-        //const propertyType = document.querySelector('#propertyTypeBtn span:first-child').textContent;
-        //const minPriceValue = minPrice;
-        //const maxPriceValue = maxPrice;
-        //const area = document.querySelector('#areaBtn span:first-child').textContent;
-        //const tab = document.querySelector('.tab-item.active').dataset.tab;
-
         const provinceSelected = document.getElementById('provinceSelected').dataset.id;
+        const provinceName = document.getElementById('provinceSelected').dataset.value;
+        const searchText = document.getElementById('searchInput').value;
+        const activeTab = document.querySelector('.tab-item.active');
+        // Type is completely optional - only include if a tab is actually selected
+        const propertyType = activeTab ? activeTab.dataset.type : null;
+        
         const filterData = {
-            //location: selectedLocationLists.length == 0 ? provinceSelected : selectedLocationLists,
-            //searchText,
-            //propertyType,
+            type: propertyType, // This can be null if no tab is selected
+            province: provinceSelected,
+            provinceName: provinceName,
+            keyword: searchText,
             minRoom: $('#minInput').val(),
             maxRoom: $('#maxInput').val(),
             minPrice: $('#minInputPrice').val(),
             maxPrice: $('#maxInputPrice').val(),
             minArea: $('#minInputArea').val(),
             maxArea: $('#maxInputArea').val(),
-            //type: tab === 'rent' ? 'room' : (tab === 'buy' ? 'apartment' : 'project') // Map tab to type
+            selectedLocations: selectedLocationLists
         };
-        sessionStorage.setItem('selectedLocationLists',JSON.stringify(selectedLocationLists));
-        sessionStorage.setItem('provinceId',provinceSelected);
-        sessionStorage.setItem('provinceName',$('#provinceSelected').data('value'));
-        sessionStorage.setItem('filterData', JSON.stringify(filterData));
-        window.location.reload();
+        
+        // Store data in sessionStorage
+        sessionStorage.setItem('selectedLocationLists', JSON.stringify(selectedLocationLists));
+        sessionStorage.setItem('provinceId', provinceSelected);
+        sessionStorage.setItem('provinceName', provinceName);
+        sessionStorage.setItem('searchFilterData', JSON.stringify(filterData));
+        
+        // Redirect to search page with parameters
+        const searchParams = new URLSearchParams();
+        // Only add type if it's actually selected
+        if (propertyType && propertyType.trim() !== '') {
+            searchParams.append('type', propertyType);
+        }
+        if (provinceSelected) searchParams.append('province', provinceSelected);
+        if (searchText) searchParams.append('keyword', searchText);
+        if (filterData.minRoom) searchParams.append('minRoom', filterData.minRoom);
+        if (filterData.maxRoom) searchParams.append('maxRoom', filterData.maxRoom);
+        if (filterData.minPrice) searchParams.append('minPrice', filterData.minPrice);
+        if (filterData.maxPrice) searchParams.append('maxPrice', filterData.maxPrice);
+        if (filterData.minArea) searchParams.append('minArea', filterData.minArea);
+        if (filterData.maxArea) searchParams.append('maxArea', filterData.maxArea);
+        
+        const searchUrl = `/Home/Search?${searchParams.toString()}`;
+        window.location.href = searchUrl;
     }
 
     // Enter key search
@@ -1065,6 +1107,18 @@
         } catch (error) {
             console.error("Không thể giải mã token:", error);
             return null;
+        }
+    }
+    function StatusInterest(item){
+        if(!item.isInterested) return "";
+        if(item.interestedStatus == 2){
+            if(item.isReminderRenterConfirmInterested == 2) return `<span style="color:red">Quá hạn xác nhận quan tâm</span>`;
+            if(item.isReminderRenterConfirmInterested == 1) return `<span style="color:green">Xác nhận quan tâm lại</span>`;
+            if(item.isReminderRenterConfirmInterested == 0) return `<span style="color:blue">Chờ phản hồi hệ thống</span>`;
+        }
+        if(item.interestedStatus == 0) return "";
+        if(item.interestedStatus == 3){
+            if(item.isReminderRenterConfirmInterested == 0) return `<span style="color:blue">Chờ xác nhận từ người cho thuê</span>`;
         }
     }
 </script>

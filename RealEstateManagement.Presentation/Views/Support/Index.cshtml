@@ -1,0 +1,380 @@
+@{
+    ViewData["Title"] = "Hỗ trợ khách hàng";
+    Layout = "~/Views/Shared/_LayoutV2.cshtml";
+}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">Hỗ trợ khách hàng</h1>
+            <p class="text-gray-600">Chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7</p>
+        </div>
+
+        <!-- Create New Support Request -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Tạo yêu cầu hỗ trợ mới</h2>
+            <form id="supportForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tiêu đề *</label>
+                        <input type="text" id="subject" name="subject" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Mô tả ngắn gọn vấn đề của bạn">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Danh mục</label>
+                        <select id="category" name="category"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="General">Chung</option>
+                            <option value="Technical">Kỹ thuật</option>
+                            <option value="Billing">Thanh toán</option>
+                            <option value="Property">Bất động sản</option>
+                            <option value="Other">Khác</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Mức độ ưu tiên</label>
+                        <select id="priority" name="priority"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="Low">Thấp</option>
+                            <option value="Normal" selected>Bình thường</option>
+                            <option value="High">Cao</option>
+                            <option value="Urgent">Khẩn cấp</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" 
+                                class="w-full bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                            Gửi yêu cầu hỗ trợ
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nội dung chi tiết *</label>
+                    <textarea id="initialMessage" name="initialMessage" rows="4" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Mô tả chi tiết vấn đề của bạn..."></textarea>
+                </div>
+            </form>
+        </div>
+
+        <!-- Existing Support Conversations -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Yêu cầu hỗ trợ của tôi</h2>
+            <div id="supportConversations" class="space-y-4">
+                <!-- Conversations will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Support Chat Modal -->
+<div id="supportChatModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900" id="chatModalTitle">Hỗ trợ</h3>
+                <button onclick="closeSupportChatModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div id="chatMessages" class="h-96 overflow-y-auto border rounded-md p-4 mb-4 bg-gray-50">
+                <!-- Messages will be loaded here -->
+            </div>
+            
+            <div class="flex space-x-2">
+                <input type="text" id="chatMessageInput" 
+                       class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Nhập tin nhắn...">
+                <button onclick="sendSupportMessage()" 
+                        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    Gửi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/supportService.js"></script>
+<script>
+    let currentSupportConversationId = null;
+    let supportConnection = null;
+
+    // Initialize support page
+    document.addEventListener('DOMContentLoaded', function() {
+        loadSupportConversations();
+        initializeSupportSignalR();
+    });
+
+    // Handle form submission
+    document.getElementById('supportForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            subject: document.getElementById('subject').value,
+            category: document.getElementById('category').value,
+            priority: document.getElementById('priority').value,
+            initialMessage: document.getElementById('initialMessage').value
+        };
+
+        try {
+            const response = await fetch('/api/Support/create-conversation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                showSuccessMessage('Yêu cầu hỗ trợ đã được tạo thành công!');
+                document.getElementById('supportForm').reset();
+                loadSupportConversations();
+            } else {
+                const error = await response.text();
+                showErrorMessage('Lỗi: ' + error);
+            }
+        } catch (error) {
+            showErrorMessage('Lỗi kết nối: ' + error.message);
+        }
+    });
+
+    async function loadSupportConversations() {
+        try {
+            const response = await fetch('/api/Support/user-conversations', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+
+            if (response.ok) {
+                const conversations = await response.json();
+                displaySupportConversations(conversations);
+            } else {
+                showErrorMessage('Không thể tải danh sách yêu cầu hỗ trợ');
+            }
+        } catch (error) {
+            showErrorMessage('Lỗi kết nối: ' + error.message);
+        }
+    }
+
+    function displaySupportConversations(conversations) {
+        const container = document.getElementById('supportConversations');
+        
+        if (conversations.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-center py-8">Bạn chưa có yêu cầu hỗ trợ nào.</p>';
+            return;
+        }
+
+        let html = '';
+        conversations.forEach(conversation => {
+            const statusColor = getStatusColor(conversation.status);
+            const priorityColor = getPriorityColor(conversation.priority);
+            
+            html += `
+                <div class="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer" 
+                     onclick="openSupportChat(${conversation.id}, '${conversation.subject}')">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-semibold text-gray-800">${conversation.subject}</h3>
+                        <div class="flex space-x-2">
+                            <span class="px-2 py-1 text-xs rounded-full ${statusColor}">${conversation.status}</span>
+                            <span class="px-2 py-1 text-xs rounded-full ${priorityColor}">${conversation.priority}</span>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-600 mb-2">
+                        <span class="font-medium">Danh mục:</span> ${conversation.category} | 
+                        <span class="font-medium">Tạo lúc:</span> ${new Date(conversation.createdAt).toLocaleDateString('vi-VN')}
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        ${conversation.lastMessage ? conversation.lastMessage.substring(0, 100) + '...' : 'Chưa có tin nhắn'}
+                    </div>
+                    ${conversation.unreadCount > 0 ? `<div class="mt-2"><span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">${conversation.unreadCount} tin nhắn mới</span></div>` : ''}
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+    }
+
+    function getStatusColor(status) {
+        switch (status) {
+            case 'Open': return 'bg-blue-100 text-blue-800';
+            case 'InProgress': return 'bg-yellow-100 text-yellow-800';
+            case 'Resolved': return 'bg-green-100 text-green-800';
+            case 'Closed': return 'bg-gray-100 text-gray-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    }
+
+    function getPriorityColor(priority) {
+        switch (priority) {
+            case 'Low': return 'bg-gray-100 text-gray-800';
+            case 'Normal': return 'bg-blue-100 text-blue-800';
+            case 'High': return 'bg-orange-100 text-orange-800';
+            case 'Urgent': return 'bg-red-100 text-red-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    }
+
+    async function openSupportChat(conversationId, subject) {
+        currentSupportConversationId = conversationId;
+        document.getElementById('chatModalTitle').textContent = subject;
+        document.getElementById('supportChatModal').classList.remove('hidden');
+        
+        await loadSupportMessages(conversationId);
+        joinSupportConversation(conversationId);
+    }
+
+    function closeSupportChatModal() {
+        document.getElementById('supportChatModal').classList.add('hidden');
+        if (currentSupportConversationId) {
+            leaveSupportConversation(currentSupportConversationId);
+            currentSupportConversationId = null;
+        }
+    }
+
+    async function loadSupportMessages(conversationId) {
+        try {
+            const response = await fetch(`/api/Support/conversation/${conversationId}/messages`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+
+            if (response.ok) {
+                const messages = await response.json();
+                displaySupportMessages(messages);
+            } else {
+                showErrorMessage('Không thể tải tin nhắn');
+            }
+        } catch (error) {
+            showErrorMessage('Lỗi kết nối: ' + error.message);
+        }
+    }
+
+    function displaySupportMessages(messages) {
+        const container = document.getElementById('chatMessages');
+        let html = '';
+        
+        messages.forEach(message => {
+            const isFromAdmin = message.isFromAdmin;
+            const messageClass = isFromAdmin ? 'bg-blue-100 ml-8' : 'bg-white mr-8';
+            const time = new Date(message.sentAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            
+            html += `
+                <div class="mb-3 ${isFromAdmin ? 'text-right' : 'text-left'}">
+                    <div class="inline-block ${messageClass} rounded-lg px-3 py-2 max-w-xs lg:max-w-md">
+                        <div class="text-sm">${message.content}</div>
+                        <div class="text-xs text-gray-500 mt-1">${time}</div>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1">${message.senderName}</div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        container.scrollTop = container.scrollHeight;
+    }
+
+    async function sendSupportMessage() {
+        if (!currentSupportConversationId) return;
+        
+        const input = document.getElementById('chatMessageInput');
+        const content = input.value.trim();
+        
+        if (!content) return;
+
+        try {
+            const response = await fetch(`/api/Support/conversation/${currentSupportConversationId}/send-message`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify(content)
+            });
+
+            if (response.ok) {
+                input.value = '';
+                await loadSupportMessages(currentSupportConversationId);
+            } else {
+                const error = await response.text();
+                showErrorMessage('Lỗi: ' + error);
+            }
+        } catch (error) {
+            showErrorMessage('Lỗi kết nối: ' + error.message);
+        }
+    }
+
+    // Enter key to send message
+    document.getElementById('chatMessageInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendSupportMessage();
+        }
+    });
+
+    function initializeSupportSignalR() {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+
+        supportConnection = new signalR.HubConnectionBuilder()
+            .withUrl('/chatHub', { accessTokenFactory: () => token })
+            .build();
+
+        supportConnection.start()
+            .then(() => {
+                console.log('Support SignalR connected');
+                setupSupportSignalRHandlers();
+            })
+            .catch(err => console.error('Support SignalR error:', err));
+    }
+
+    function setupSupportSignalRHandlers() {
+        if (!supportConnection) return;
+
+        supportConnection.on('SupportMessageReceived', (data) => {
+            if (data.conversationId === currentSupportConversationId) {
+                loadSupportMessages(currentSupportConversationId);
+            }
+            // Update conversation list if needed
+            loadSupportConversations();
+        });
+
+        supportConnection.on('SupportStatusUpdated', (data) => {
+            if (data.conversationId === currentSupportConversationId) {
+                // Update status display
+                loadSupportConversations();
+            }
+        });
+    }
+
+    function joinSupportConversation(conversationId) {
+        if (supportConnection && supportConnection.state === 'Connected') {
+            supportConnection.invoke('JoinConversation', conversationId.toString());
+        }
+    }
+
+    function leaveSupportConversation(conversationId) {
+        if (supportConnection && supportConnection.state === 'Connected') {
+            supportConnection.invoke('LeaveConversation', conversationId.toString());
+        }
+    }
+
+    function showSuccessMessage(message) {
+        // Implement success message display
+        alert(message); // Replace with better UI
+    }
+
+    function showErrorMessage(message) {
+        // Implement error message display
+        alert(message); // Replace with better UI
+    }
+</script> 

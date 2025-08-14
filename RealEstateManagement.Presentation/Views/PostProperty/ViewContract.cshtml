@@ -1,0 +1,185 @@
+﻿@{
+    Layout = "../Shared/_LayoutV2.cshtml";
+    ViewData["Title"] = "Chi tiết hợp đồng thuê";
+}
+
+<div id="contractContainer" class="max-w-4xl mx-auto bg-white p-6 rounded shadow mt-10">
+    <h1 class="text-2xl font-semibold mb-6">Chi tiết hợp đồng thuê</h1>
+    <div id="loading" class="text-center py-10 text-gray-500">Đang tải dữ liệu hợp đồng...</div>
+    <dl id="contractDetails" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 hidden">
+        <!-- Dữ liệu sẽ được render bằng JS -->
+    </dl>
+    <div id="error" class="text-red-600 text-center hidden mt-6">Không tìm thấy hợp đồng.</div>
+</div>
+
+<!-- Nút Update -->
+<button id="btnEditContract" class="mt-6 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded">
+    Cập nhật hợp đồng
+</button>
+
+<!-- Form Update (ẩn ban đầu) -->
+<form id="updateContractForm" class="mt-6 bg-gray-50 p-4 rounded shadow hidden" novalidate>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label class="block font-semibold mb-1" for="depositAmount">Tiền đặt cọc (VND)</label>
+            <input type="number" id="depositAmount" name="depositAmount" class="w-full border border-gray-300 rounded px-3 py-2" required />
+        </div>
+        <div>
+            <label class="block font-semibold mb-1" for="monthlyRent">Giá thuê hàng tháng (VND)</label>
+            <input type="number" id="monthlyRent" name="monthlyRent" class="w-full border border-gray-300 rounded px-3 py-2" required />
+        </div>
+        <div>
+            <label class="block font-semibold mb-1" for="contractDurationMonths">Thời hạn hợp đồng (tháng)</label>
+            <input type="number" id="contractDurationMonths" name="contractDurationMonths" class="w-full border border-gray-300 rounded px-3 py-2" required />
+        </div>
+        <div>
+            <label class="block font-semibold mb-1" for="paymentCycle">Chu kỳ thanh toán</label>
+            <select id="paymentCycle" name="paymentCycle" class="w-full border border-gray-300 rounded px-3 py-2" required>
+                <option value="0">Hàng tháng</option>
+                <option value="1">Hàng quý</option>
+                <option value="2">Hàng năm</option>
+            </select>
+        </div>
+        <div>
+            <label class="block font-semibold mb-1" for="paymentDayOfMonth">Ngày thanh toán trong tháng</label>
+            <input type="number" id="paymentDayOfMonth" name="paymentDayOfMonth" min="1" max="31" class="w-full border border-gray-300 rounded px-3 py-2" required />
+        </div>
+        <div>
+            <label class="block font-semibold mb-1" for="paymentMethod">Phương thức thanh toán</label>
+            <input type="text" id="paymentMethod" name="paymentMethod" class="w-full border border-gray-300 rounded px-3 py-2" required />
+        </div>
+        <div class="md:col-span-2">
+            <label class="block font-semibold mb-1" for="contactInfo">Thông tin liên hệ</label>
+            <textarea id="contactInfo" name="contactInfo" class="w-full border border-gray-300 rounded px-3 py-2" rows="3" required></textarea>
+        </div>
+        <div>
+            <label class="block font-semibold mb-1" for="startDate">Ngày bắt đầu hợp đồng</label>
+            <input type="date" id="startDate" name="startDate" class="w-full border border-gray-300 rounded px-3 py-2" required />
+        </div>
+
+    </div>
+    <div class="mt-4 flex gap-4">
+        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded">Lưu</button>
+        <button type="button" id="btnCancelUpdate" class="bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded">Hủy</button>
+    </div>
+</form>
+
+<script>
+    const contractId = @ViewBag.Id;
+    const token = localStorage.getItem('authToken');
+    let contract = null; // Biến toàn cục lưu dữ liệu hợp đồng
+
+    async function loadContract() {
+        try {
+            const response = await fetch(`https://localhost:7031/api/owner/rental-contracts/${contractId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                }
+            });
+            if (!response.ok) throw new Error('Không thể lấy dữ liệu hợp đồng');
+            contract = await response.json();
+
+            if (!contract || !contract.id) {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('loading').classList.add('hidden');
+            const details = document.getElementById('contractDetails');
+            details.classList.remove('hidden');
+
+            const paymentCycleText = ["Hàng tháng", "Hàng quý", "Hàng năm"][contract.paymentCycle] ?? "Không xác định";
+            const statusText = ["Chờ xác nhận", "Đã xác nhận", "Đã hủy"][contract.status] ?? "Không xác định";
+
+            details.innerHTML = `
+                <dt class="font-semibold">Mã hợp đồng:</dt><dd>${contract.id}</dd>
+                <dt class="font-semibold">Mã bài đăng:</dt><dd>${contract.propertyPostId}</dd>
+                <dt class="font-semibold">Tiền đặt cọc:</dt><dd>${contract.depositAmount.toLocaleString()} VND</dd>
+                <dt class="font-semibold">Giá thuê hàng tháng:</dt><dd>${contract.monthlyRent.toLocaleString()} VND</dd>
+                <dt class="font-semibold">Thời hạn hợp đồng (tháng):</dt><dd>${contract.contractDurationMonths}</dd>
+                <dt class="font-semibold">Chu kỳ thanh toán:</dt><dd>${paymentCycleText}</dd>
+                <dt class="font-semibold">Ngày thanh toán trong tháng:</dt><dd>${contract.paymentDayOfMonth}</dd>
+                <dt class="font-semibold">Ngày bắt đầu hợp đồng:</dt><dd>${new Date(contract.startDate).toLocaleDateString()}</dd>
+                <dt class="font-semibold">Phương thức thanh toán:</dt><dd>${contract.paymentMethod}</dd>
+                <dt class="font-semibold">Thông tin liên hệ:</dt><dd>${contract.contactInfo}</dd>
+                <dt class="font-semibold">Trạng thái hợp đồng:</dt><dd>${statusText}</dd>
+                <dt class="font-semibold">Ngày tạo hợp đồng:</dt><dd>${new Date(contract.createdAt).toLocaleString()}</dd>
+                <dt class="font-semibold">Ngày xác nhận:</dt><dd>${contract.confirmedAt ? new Date(contract.confirmedAt).toLocaleString() : 'Chưa xác nhận'}</dd>
+            `;
+        } catch (error) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.remove('hidden');
+            console.error(error);
+        }
+    }
+
+    loadContract();
+
+    const btnEditContract = document.getElementById('btnEditContract');
+    const updateForm = document.getElementById('updateContractForm');
+    const btnCancelUpdate = document.getElementById('btnCancelUpdate');
+
+    btnEditContract.addEventListener('click', () => {
+        if (!contract) return alert('Dữ liệu hợp đồng chưa được tải xong.');
+
+        // Hiện form update và ẩn nút cập nhật
+        updateForm.classList.remove('hidden');
+        btnEditContract.classList.add('hidden');
+
+        // Điền dữ liệu hợp đồng vào form
+        document.getElementById('depositAmount').value = contract.depositAmount;
+        document.getElementById('monthlyRent').value = contract.monthlyRent;
+        document.getElementById('contractDurationMonths').value = contract.contractDurationMonths;
+        document.getElementById('paymentCycle').value = contract.paymentCycle;
+        document.getElementById('paymentDayOfMonth').value = contract.paymentDayOfMonth;
+        document.getElementById('paymentMethod').value = contract.paymentMethod;
+        document.getElementById('contactInfo').value = contract.contactInfo;
+        document.getElementById('startDate').value = contract.startDate ? new Date(contract.startDate).toISOString().split('T')[0] : '';
+
+    });
+
+    btnCancelUpdate.addEventListener('click', () => {
+        updateForm.classList.add('hidden');
+        btnEditContract.classList.remove('hidden');
+    });
+
+    updateForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const data = {
+            depositAmount: Number(document.getElementById('depositAmount').value),
+            monthlyRent: Number(document.getElementById('monthlyRent').value),
+            contractDurationMonths: Number(document.getElementById('contractDurationMonths').value),
+            paymentCycle: Number(document.getElementById('paymentCycle').value),
+            paymentDayOfMonth: Number(document.getElementById('paymentDayOfMonth').value),
+            startDate: document.getElementById('startDate').value ? new Date(document.getElementById('startDate').value).toISOString() : null,
+            paymentMethod: document.getElementById('paymentMethod').value.trim(),
+            contactInfo: document.getElementById('contactInfo').value.trim()
+        };
+
+        try {
+            const response = await fetch(`https://localhost:7031/api/owner/rental-contracts/${contractId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) throw new Error('Cập nhật hợp đồng thất bại');
+
+            alert('Cập nhật hợp đồng thành công!');
+            updateForm.classList.add('hidden');
+            btnEditContract.classList.remove('hidden');
+
+            await loadContract(); // tải lại dữ liệu mới
+        } catch (error) {
+            alert(error.message);
+            console.error(error);
+        }
+    });
+</script>

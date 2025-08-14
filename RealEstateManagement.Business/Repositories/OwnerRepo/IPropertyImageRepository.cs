@@ -14,7 +14,8 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         Task<bool> HasAnyImage(int id);
         Task<bool> PropertyExistsAsync(int propertyId);
         Task<PropertyImage> UpdateImageAsync(PropertyImage updatedImage);
-
+        Task<bool> ClearAllImagesAsync(int propertyId);
+        Task<bool> DeleteImageAsync(int propertyId, int imageId);
     }
 
 }

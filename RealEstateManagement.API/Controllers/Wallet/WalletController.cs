@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Net.payOS;
 using RealEstateManagement.Business.Services.OwnerService;
 using RealEstateManagement.Business.Services.Wallet;
+using RealEstateManagement.Data.Entity.Payment;
 using System.Security.Claims;
 
 namespace RealEstateManagement.API.Controllers.Wallet
@@ -38,7 +39,8 @@ namespace RealEstateManagement.API.Controllers.Wallet
             {
                 var userId = GetCurrentUserId(); // tự viết extension lấy ID từ token
             var balance = await _walletService.GetBalanceAsync(userId);
-            return Ok(new { balance = balance });
+                var walletId = await _walletService.GetWalletIdByUserIdAsync(userId);
+                return Ok(new { balance = balance, walletId = walletId });
             }
             catch (Exception ex)
             {

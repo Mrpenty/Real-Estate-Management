@@ -12,20 +12,25 @@
         public int Bedrooms { get; set; }
         public decimal Area { get; set; }
 
-        public List<OwnerPropertyImageDto> Images { get; set; }
-        public List<OwnerPropertyPostDto> Posts { get; set; }
+        public List<string> ImageUrls { get; set; } = new List<string>();
+        public string? PrimaryImageUrl { get; set; }
+        public List<OwnerPropertyImageDto> Images { get; set; } = new List<OwnerPropertyImageDto>();
+        public List<OwnerPropertyPostDto> Posts { get; set; } = new List<OwnerPropertyPostDto>();
+        public List<string> Amenities { get; set; } = new List<string>();
 
-        //them
         public string Type { get; set; }
         public int? ProvinceId { get; set; }
-        public string Province { get; set; }
+        public string? Province { get; set; }
         public int? WardId { get; set; }
-        public string Ward { get; set; }
+        public string? Ward { get; set; }
         public int? StreetId { get; set; }
-        public string Street { get; set; }
-        public string DetailedAddress { get; set; }
+        public string? Street { get; set; }
+        public string? DetailedAddress { get; set; }
         public DateTime CreatedAt { get; set; }
+        public bool IsExistRenterContract { get; set; }
+        public int? RenterContractId { get; set; }
     }
+
 
     public class OwnerPropertyImageDto
     {
@@ -39,5 +44,8 @@
         public int Id { get; set; }
         public string Status { get; set; }
         public DateTime CreatedAt { get; set; }
+
+        public RentalContractViewDto? RentalContract { get; set; }
     }
+
 }

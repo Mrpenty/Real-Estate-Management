@@ -29,7 +29,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 PackageId = entity.PackageId,
                 StartDate = entity.StartDate,
                 EndDate = entity.EndDate,
-                IsActive = true // hoặc lấy từ entity nếu có
+                IsActive = true
             });
         }
 
@@ -44,7 +44,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 PackageId = entity.PackageId,
                 StartDate = entity.StartDate,
                 EndDate = entity.EndDate,
-                IsActive = true // hoặc lấy từ entity nếu có
+                IsActive = true 
             };
         }
 
@@ -71,7 +71,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 PropertyId = dto.PropertyId,
                 PackageId = dto.PackageId,
                 StartDate = dto.StartDate,
-                EndDate = dto.EndDate
+                EndDate = dto.StartDate + TimeSpan.FromDays(package.DurationInDays),
             };
             await _repo.AddAsync(entity);
 
@@ -80,8 +80,9 @@ namespace RealEstateManagement.Business.Services.Properties
             {
                 WalletId = wallet.Id,
                 Amount = -package.Price,
-                Type = "Non",
+                Type = "Deduct",
                 Description = $"Đăng ký gói {package.Name} cho PropertyId={dto.PropertyId}",
+                Status = "Success",
                 CreatedAt = DateTime.UtcNow
             };
             _context.WalletTransactions.Add(walletTransaction);
@@ -97,7 +98,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 PackageId = entity.PackageId,
                 StartDate = entity.StartDate,
                 EndDate = entity.EndDate,
-                IsActive = true // hoặc lấy từ entity nếu có
+                IsActive = true 
             };
         }
 
@@ -107,7 +108,6 @@ namespace RealEstateManagement.Business.Services.Properties
             if (existing == null) return null;
             existing.StartDate = dto.StartDate;
             existing.EndDate = dto.EndDate;
-            // Nếu có trường IsActive thì cập nhật luôn
             await _repo.UpdateAsync(existing);
             return new ViewPropertyPromotionDTO
             {
@@ -116,7 +116,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 PackageId = existing.PackageId,
                 StartDate = existing.StartDate,
                 EndDate = existing.EndDate,
-                IsActive = true // hoặc lấy từ entity nếu có
+                IsActive = true 
             };
         }
 

@@ -83,7 +83,6 @@ function timeAgo(dateInput) {
     }
 }
 
-
 function handleImageError(img) {
     img.onerror = null;
     img.src = '/image/no-image.png'; 
@@ -295,8 +294,9 @@ function filterStreet() {
     $('#filterStreetId').html(html);
 }
 
-async function clickInterest(id, isExist, interestedStatus) {
-    if (!isExist) {
+async function clickInterest(id, isExist, interestedStatus, isReminderRenterConfirmInterested, interestId) {
+    //console.log(interestedStatus);
+    if (!isExist || interestedStatus == 1) {
         if (!confirm("Bạn muốn quan tâm đến bài đăng này ?")) return;
         const token = localStorage.getItem('authToken');
         if (!token) window.location.href = '/Auth/Login';
@@ -312,7 +312,8 @@ async function clickInterest(id, isExist, interestedStatus) {
                 }
             });
 
-            //const data = await response.json();
+            const data = await response.json();
+            //console.log(data);
             alert('Thành công');
             window.location.reload();
 
@@ -322,16 +323,16 @@ async function clickInterest(id, isExist, interestedStatus) {
             throw error;
         }
     }
-    else {
+    else if (interestedStatus == 2) {
         let message = "";
-        if (interestedStatus == 0) message = "Bài đăng đã được quan tâm trước đó.Bạn muốn hủy bỏ ?";
-        if (!confirm(message)) return;
-        const token = localStorage.getItem('authToken');
-        if (!token) window.location.href = '/Auth/Login';
-        let userId = 0;
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        userId = payload.id;
-        if (interestedStatus == 0) {
+        if (isReminderRenterConfirmInterested == 0) {
+            message = "Bài đăng đã được quan tâm trước đó.Bạn muốn hủy bỏ ?";
+            if (!confirm(message)) return;
+            const token = localStorage.getItem('authToken');
+            if (!token) window.location.href = '/Auth/Login';
+            let userId = 0;
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            userId = payload.id;
             try {
                 const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/RemoveInterest?renterId=${userId}&propertyId=${id}`, {
                     method: 'DELETE',
@@ -344,6 +345,33 @@ async function clickInterest(id, isExist, interestedStatus) {
                 //const data = await response.json();
                 alert('Thành công');
                 window.location.reload();
+
+                return data;
+            } catch (error) {
+                console.error('Update error:', error);
+                throw error;
+            }
+        }
+        else if (isReminderRenterConfirmInterested == 1) { 
+            message = "Bạn muốn xác nhận lại?";
+            if (!confirm(message)) return;
+            const token = localStorage.getItem('authToken');
+            if (!token) window.location.href = '/Auth/Login';
+            let userId = 0;
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            userId = payload.id;
+            try {
+                const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/${interestId}/confirm?isRenter=true&confirmed=true`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                //alert('Thành công');
+                //window.location.reload();
 
                 return data;
             } catch (error) {

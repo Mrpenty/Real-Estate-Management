@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Presentation.Models;
 using System.Diagnostics;
 
@@ -48,12 +48,25 @@ namespace RealEstateManagement.Presentation.Controllers
             return View();
         }
 
+        public IActionResult ListInterest()
+        {
+            return View();
+        }
+
         public IActionResult Privacy()
         {
             return View();
         }
 
+        public IActionResult Search()
+        {
+            return View();
+        }
 
+        public IActionResult MyReports()
+        {
+            return View();
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

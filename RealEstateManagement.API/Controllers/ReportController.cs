@@ -76,51 +76,74 @@ namespace RealEstateManagement.API.Controllers
         //    await _context.SaveChangesAsync();
         //    return Ok("Đã gửi report phản hồi review.");
         //}
+        
         [HttpPost("post/{userRepoertId}")]
         public async Task<IActionResult> ReportPost([FromBody] ReportCreateDto dto, int userRepoertId)
         {
-
-            // Kiểm tra đã report chưa
-            var existing = await _context.Reports.FirstOrDefaultAsync(r =>
-                r.TargetId == dto.TargetId &&
-                r.TargetType == "PropertyPost" &&
-                r.ReportedByUserId == userRepoertId);
-
-            if (existing != null)
-                return BadRequest(new { message = "Bạn đã report bài đăng này rồi." });
-
-            var report = new Report
-            {
-                TargetId = dto.TargetId,
-                TargetType = "PropertyPost",
-                ReportedByUserId = userRepoertId,
-                ReportedAt = DateTime.UtcNow,
-                Reason = dto.Reason,
-                Description = dto.Description,
-                Status = "Pending"
-            };
-
-            _context.Reports.Add(report);
-            await _context.SaveChangesAsync();
-
-            // Send notification to admins note  {dto.TargetType}
             try
             {
-                await _notificationService.SendNotificationToAdminsAsync(new CreateNotificationDTO
+                // Validate input
+                if (dto == null)
+                    return BadRequest(new { message = "Dữ liệu báo cáo không hợp lệ." });
+
+                if (userRepoertId <= 0)
+                    return BadRequest(new { message = "ID người dùng không hợp lệ." });
+
+                if (dto.TargetId <= 0)
+                    return BadRequest(new { message = "ID mục tiêu không hợp lệ." });
+
+                // Kiểm tra đã report chưa và chưa được xử lý
+                var existing = await _context.Reports.FirstOrDefaultAsync(r =>
+                    r.TargetId == dto.TargetId &&
+                    r.TargetType == "PropertyPost" &&
+                    r.ReportedByUserId == userRepoertId &&
+                    r.Status == "Pending");
+
+                if (existing != null)
+                    return BadRequest(new { message = "Bạn đã report bài đăng này rồi và đang chờ xử lý." });
+
+                var report = new Report
                 {
-                    Title = "Báo cáo mới",
-                    Content = $"Có báo cáo mới từ người dùng ID: {userRepoertId}",
-                    Type = "Report",
-                    Audience = "Admin"
-                });
+                    TargetId = dto.TargetId,
+                    TargetType = "PropertyPost",
+                    ReportedByUserId = userRepoertId,
+                    ReportedAt = DateTime.UtcNow,
+                    Reason = dto.Reason ?? "",
+                    Description = dto.Description ?? "",
+                    Status = "Pending"
+                };
+
+                _context.Reports.Add(report);
+                await _context.SaveChangesAsync();
+
+                // Send notification to admins
+                try
+                {
+                    if (_notificationService != null)
+                    {
+                        await _notificationService.SendNotificationToAdminsAsync(new CreateNotificationDTO
+                        {
+                            Title = "Báo cáo mới",
+                            Content = $"Có báo cáo mới từ người dùng ID: {userRepoertId}",
+                            Type = "Report",
+                            Audience = "Admin"
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log error but don't fail the report creation
+                    Console.WriteLine($"Failed to send notification: {ex.Message}");
+                }
+
+                return Ok(new { message = "Đã gửi report." });
             }
             catch (Exception ex)
             {
-                // Log error but don't fail the report creation
-                Console.WriteLine($"Failed to send notification: {ex.Message}");
+                Console.WriteLine($"Error in ReportPost: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                return StatusCode(500, new { message = "Có lỗi xảy ra khi xử lý báo cáo.", error = ex.Message });
             }
-
-            return Ok(new { message = "Đã gửi report." });
         }
 
         [HttpDelete("post/{targetId}/{userRepoertId}")]
@@ -129,10 +152,11 @@ namespace RealEstateManagement.API.Controllers
             var report = await _context.Reports.FirstOrDefaultAsync(r =>
                 r.TargetId == targetId &&
                 r.TargetType == "PropertyPost" &&
-                r.ReportedByUserId == userRepoertId);
+                r.ReportedByUserId == userRepoertId &&
+                r.Status == "Pending");
 
             if (report == null)
-                return NotFound(new { message = "Bạn chưa report bài đăng này." });
+                return NotFound(new { message = "Bạn chưa report bài đăng này hoặc report đã được xử lý." });
 
             _context.Reports.Remove(report);
             await _context.SaveChangesAsync();
@@ -142,13 +166,15 @@ namespace RealEstateManagement.API.Controllers
         [HttpPost("user/{userRepoertId}")]
         public async Task<IActionResult> ReportUser([FromBody] ReportCreateDto dto, int userRepoertId)
         {
+            // Kiểm tra đã report chưa và chưa được xử lý
             var existing = await _context.Reports.FirstOrDefaultAsync(r =>
                 r.TargetId == dto.TargetId &&
                 r.TargetType == "User" &&
-                r.ReportedByUserId == userRepoertId);
+                r.ReportedByUserId == userRepoertId &&
+                r.Status == "Pending");
 
             if (existing != null)
-                return BadRequest(new { message = "Bạn đã report người dùng này rồi." });
+                return BadRequest(new { message = "Bạn đã report người dùng này rồi và đang chờ xử lý." });
 
             var report = new Report
             {
@@ -187,18 +213,18 @@ namespace RealEstateManagement.API.Controllers
         [HttpDelete("user/{targetId}/{userRepoertId}")]
         public async Task<IActionResult> CancelUserReport(int targetId, int userRepoertId)
         {
-
             var report = await _context.Reports.FirstOrDefaultAsync(r =>
                 r.TargetId == targetId &&
                 r.TargetType == "User" &&
-                r.ReportedByUserId == userRepoertId);
+                r.ReportedByUserId == userRepoertId &&
+                r.Status == "Pending");
 
             if (report == null)
-                return NotFound(new { message = "Bạn chưa report người dùng này." });
+                return NotFound(new { message = "Bạn chưa report người dùng này hoặc report đã được xử lý." });
 
             _context.Reports.Remove(report);
             await _context.SaveChangesAsync();
-            return Ok(new { message = "Đã hủy report người dùng." });
+            return Ok(new { message = "Đã hủy report." });
         }
 
         [HttpGet("admin/all")]
@@ -258,7 +284,7 @@ namespace RealEstateManagement.API.Controllers
         }
 
         [HttpGet("myReport/{userId}")]
-        [Authorize]
+        
         public async Task<IActionResult> UserViewMyReport(int userId)
         {
             var myReports = await _context.Reports
@@ -282,7 +308,7 @@ namespace RealEstateManagement.API.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin")]
+        
         public async Task<IActionResult> GetReportById(int id)
         {
             var report = await _context.Reports
@@ -352,6 +378,39 @@ namespace RealEstateManagement.API.Controllers
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Đã từ chối báo cáo" });
+        }
+
+        [HttpGet("check-status/{targetId}/{targetType}/{userId}")]
+        
+        public async Task<IActionResult> CheckReportStatus(int targetId, string targetType, int userId)
+        {
+            var report = await _context.Reports
+                .Where(r => r.TargetId == targetId && 
+                           r.TargetType == targetType && 
+                           r.ReportedByUserId == userId)
+                .OrderByDescending(r => r.ReportedAt)
+                .FirstOrDefaultAsync();
+
+            if (report == null)
+            {
+                return Ok(new { 
+                    hasReported = false, 
+                    canReport = true,
+                    message = "Chưa có report nào" 
+                });
+            }
+
+            var canReport = report.Status == "Resolved" || report.Status == "Rejected";
+            
+            return Ok(new { 
+                hasReported = true, 
+                canReport = canReport,
+                status = report.Status,
+                reportedAt = report.ReportedAt,
+                resolvedAt = report.ResolvedAt,
+                adminNote = report.AdminNote,
+                message = canReport ? "Có thể report lại" : "Đang chờ xử lý"
+            });
         }
 
     }

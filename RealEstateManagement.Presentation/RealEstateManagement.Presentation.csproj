@@ -29,4 +29,8 @@
 	  <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\js\Landlord\" />
+  </ItemGroup>
+
 </Project>

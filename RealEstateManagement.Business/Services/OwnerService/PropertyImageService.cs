@@ -83,9 +83,62 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 throw;
             }
         }
+        
         public async Task<PropertyImage> UpdateImageAsync(PropertyImage updatedImage)
         {
             return await _imageRepo.UpdateImageAsync(updatedImage);
+        }
+
+        public async Task<bool> ClearAllImagesAsync(int propertyId)
+        {
+            try
+            {
+                _logger.LogInformation("Starting ClearAllImagesAsync for property {PropertyId}", propertyId);
+                
+                // Kiểm tra property có tồn tại không
+                var propertyExists = await _imageRepo.PropertyExistsAsync(propertyId);
+                if (!propertyExists)
+                {
+                    _logger.LogError("Property {PropertyId} not found", propertyId);
+                    return false;
+                }
+
+                var result = await _imageRepo.ClearAllImagesAsync(propertyId);
+                _logger.LogInformation("ClearAllImagesAsync completed for property {PropertyId}, Result: {Result}", propertyId, result);
+                
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ClearAllImagesAsync for property {PropertyId}", propertyId);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteImageAsync(int propertyId, int imageId)
+        {
+            try
+            {
+                _logger.LogInformation("Starting DeleteImageAsync for property {PropertyId}, image {ImageId}", propertyId, imageId);
+                
+                // Kiểm tra property có tồn tại không
+                var propertyExists = await _imageRepo.PropertyExistsAsync(propertyId);
+                if (!propertyExists)
+                {
+                    _logger.LogError("Property {PropertyId} not found", propertyId);
+                    return false;
+                }
+
+                var result = await _imageRepo.DeleteImageAsync(propertyId, imageId);
+                _logger.LogInformation("DeleteImageAsync completed for property {PropertyId}, image {ImageId}, Result: {Result}", propertyId, imageId, result);
+                
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteImageAsync for property {PropertyId}, image {ImageId}", propertyId, imageId);
+                return false;
+            }
         }
 
     }

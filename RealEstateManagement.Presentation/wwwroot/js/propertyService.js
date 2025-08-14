@@ -1,11 +1,12 @@
-﻿const API_PROPERTY_BASE_URL = 'https://localhost:7031/api/Property';
+﻿var API_PROPERTY_BASE_URL = 'https://localhost:7031/api/Property';
+var API_PROPERTY_BASE_URL2 = 'https://localhost:7031/api/OwnerProperty';
 
 const propertyService = {
     async getAllproperty() {
         try {
-            const urlParams = new URLSearchParams(window.location.search);
-            let type = urlParams.get('type');
-            if (type == null || type == undefined) type = "room";
+            // Remove type filtering completely - always show all properties
+            // const urlParams = new URLSearchParams(window.location.search);
+            // let type = urlParams.get('type');
 
             let listLocationSelected = sessionStorage.getItem('selectedLocationLists');
             let provinceId = sessionStorage.getItem('provinceId');
@@ -39,18 +40,11 @@ const propertyService = {
             } else {
                 body = {};
             }
-            //console.log(body);
-            //body['provinces'] = provinces;
-            //body['wards'] = wards;
-            //body['streets'] = streets;
-            //body['type'] = type;
-            //body['userId'] = userId;
 
-            // Gửi bộ lọc qua query string cho endpoint paginated
+            // Build query parameters - NO TYPE parameter, show all properties
             const queryParams = new URLSearchParams({
                 page: '1',
                 pageSize: '10',
-                type: type,
                 provinces: provinces.join(','),
                 wards: wards.join(','),
                 streets: streets.join(','),
@@ -61,9 +55,11 @@ const propertyService = {
                 maxArea: body.maxArea ?? 100,
                 minRoom: body.minRoom ?? 0,
                 maxRoom: body.maxRoom ?? 15
-            }).toString();
+            });
 
-            let response = await fetch(`${API_PROPERTY_BASE_URL}/homepage-paginated?${queryParams}`, {
+            // Do NOT add type parameter - always show all types
+
+            let response = await fetch(`${API_PROPERTY_BASE_URL}/homepage-paginated?${queryParams.toString()}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -104,6 +100,36 @@ const propertyService = {
 
             const data = await response.json();
             //console.log(data);
+            if (!response.ok) {
+                throw new Error(data.message || data.errorMessage || 'Get property failed');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Get property error:', error);
+            throw error;
+        }
+    },
+    async getOwnerProperty(id) {
+        try {
+            const token = localStorage.getItem('authToken');
+            let userId = 0;
+            if (token) {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                userId = payload.id;
+            }
+
+            const response = await fetch(`${API_PROPERTY_BASE_URL2}/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                }
+            });
+
+            const data = await response.json();
+
             if (!response.ok) {
                 throw new Error(data.message || data.errorMessage || 'Get property failed');
             }

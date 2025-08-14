@@ -48,6 +48,7 @@ namespace RealEstateManagement.Presentation.Controllers
         [HttpGet]
         public IActionResult Dashboard()
         {
+            ViewBag.Title = "Admin Dashboard";
             return View();
         }
 
@@ -88,6 +89,12 @@ namespace RealEstateManagement.Presentation.Controllers
         public IActionResult ReportManagement()
         {
             ViewBag.Title = "Quản lý báo cáo";
+            return View();
+        }
+
+        public IActionResult SupportManagement()
+        {
+            ViewBag.Title = "Quản lý hỗ trợ khách hàng";
             return View();
         }
     }

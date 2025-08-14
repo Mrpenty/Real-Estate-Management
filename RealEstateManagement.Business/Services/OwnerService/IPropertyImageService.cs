@@ -13,6 +13,10 @@ namespace RealEstateManagement.Business.Services.OwnerService
         Task<PropertyImage> AddImageAsync(int propertyId, PropertyImageCreateDto dto);
 
         Task<PropertyImage> UpdateImageAsync(PropertyImage updatedImage);
+
+        Task<bool> ClearAllImagesAsync(int propertyId);
+
+        Task<bool> DeleteImageAsync(int propertyId, int imageId);
     }
 
 }

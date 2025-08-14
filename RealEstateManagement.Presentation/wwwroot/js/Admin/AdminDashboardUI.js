@@ -419,7 +419,6 @@ const AdminDashboardUI = {
         
         const button = event.currentTarget;
         const reportType = button.dataset.reportType;
-        const format = button.dataset.format;
         const days = parseInt(button.dataset.days) || 30;
         
         try {
@@ -430,8 +429,8 @@ const AdminDashboardUI = {
             const startDate = new Date();
             startDate.setDate(startDate.getDate() - days);
             
-            await AdminDashboardService.downloadReport(reportType, format, startDate, endDate);
-            this.showSuccess('Báo cáo đã được tải xuống thành công!');
+            await AdminDashboardService.downloadReport(reportType, startDate, endDate);
+            this.showSuccess('Báo cáo Excel đã được tải xuống thành công!');
         } catch (error) {
             console.error('Error downloading report:', error);
             this.showError('Không thể tải xuống báo cáo: ' + error.message);

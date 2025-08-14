@@ -1,8 +1,7 @@
 using Microsoft.Extensions.Logging;
 using RealEstateManagement.Business.DTO.AdminDTO;
 using RealEstateManagement.Business.Repositories.Admin;
-using RealEstateManagement.Business.Services.Admin;
-using System.Text;
+using OfficeOpenXml;
 
 namespace RealEstateManagement.Business.Services.Admin
 {
@@ -95,168 +94,133 @@ namespace RealEstateManagement.Business.Services.Admin
             }
         }
 
-        public async Task<byte[]> GenerateReportAsync(ReportRequestDTO request)
+        public async Task<byte[]> GenerateExcelReportAsync(ReportRequestDTO request)
         {
             try
             {
-                switch (request.Format.ToLower())
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                
+                using (var package = new ExcelPackage())
                 {
-                    case "excel":
-                        return await GenerateExcelReportAsync(request);
-                    case "pdf":
-                        return await GeneratePdfReportAsync(request);
-                    default:
-                        throw new ArgumentException("Unsupported format. Use 'excel' or 'pdf'");
+                    var worksheet = package.Workbook.Worksheets.Add("Report");
+                    
+                    // Set up headers based on report type
+                    switch (request.ReportType.ToLower())
+                    {
+                        case "daily":
+                            var dailyStats = await GetDailyStatsAsync(request.StartDate, request.EndDate);
+                            worksheet.Cells[1, 1].Value = "Date";
+                            worksheet.Cells[1, 2].Value = "New Users";
+                            worksheet.Cells[1, 3].Value = "New Properties";
+                            worksheet.Cells[1, 4].Value = "New Posts";
+                            worksheet.Cells[1, 5].Value = "Revenue";
+                            worksheet.Cells[1, 6].Value = "Views";
+                            
+                            for (int i = 0; i < dailyStats.Count; i++)
+                            {
+                                var stat = dailyStats[i];
+                                worksheet.Cells[i + 2, 1].Value = stat.Date.ToString("yyyy-MM-dd");
+                                worksheet.Cells[i + 2, 2].Value = stat.NewUsers;
+                                worksheet.Cells[i + 2, 3].Value = stat.NewProperties;
+                                worksheet.Cells[i + 2, 4].Value = stat.NewPosts;
+                                worksheet.Cells[i + 2, 5].Value = stat.Revenue;
+                                worksheet.Cells[i + 2, 6].Value = stat.Views;
+                            }
+                            break;
+
+                        case "monthly":
+                            var monthlyStats = await GetMonthlyStatsAsync(request.StartDate.Year);
+                            worksheet.Cells[1, 1].Value = "Month";
+                            worksheet.Cells[1, 2].Value = "Year";
+                            worksheet.Cells[1, 3].Value = "New Users";
+                            worksheet.Cells[1, 4].Value = "New Properties";
+                            worksheet.Cells[1, 5].Value = "New Posts";
+                            worksheet.Cells[1, 6].Value = "Revenue";
+                            worksheet.Cells[1, 7].Value = "Views";
+                            
+                            for (int i = 0; i < monthlyStats.Count; i++)
+                            {
+                                var stat = monthlyStats[i];
+                                worksheet.Cells[i + 2, 1].Value = stat.Month;
+                                worksheet.Cells[i + 2, 2].Value = stat.Year;
+                                worksheet.Cells[i + 2, 3].Value = stat.NewUsers;
+                                worksheet.Cells[i + 2, 4].Value = stat.NewProperties;
+                                worksheet.Cells[i + 2, 5].Value = stat.NewPosts;
+                                worksheet.Cells[i + 2, 6].Value = stat.Revenue;
+                                worksheet.Cells[i + 2, 7].Value = stat.Views;
+                            }
+                            break;
+
+                        case "property":
+                            var propertyStats = await GetPropertyStatsAsync();
+                            worksheet.Cells[1, 1].Value = "Status";
+                            worksheet.Cells[1, 2].Value = "Count";
+                            worksheet.Cells[1, 3].Value = "Total Value";
+                            
+                            for (int i = 0; i < propertyStats.Count; i++)
+                            {
+                                var stat = propertyStats[i];
+                                worksheet.Cells[i + 2, 1].Value = stat.Status;
+                                worksheet.Cells[i + 2, 2].Value = stat.Count;
+                                worksheet.Cells[i + 2, 3].Value = stat.TotalValue;
+                            }
+                            break;
+
+                        case "user":
+                            var userStats = await GetUserStatsAsync();
+                            worksheet.Cells[1, 1].Value = "Role";
+                            worksheet.Cells[1, 2].Value = "Count";
+                            worksheet.Cells[1, 3].Value = "Active Count";
+                            worksheet.Cells[1, 4].Value = "Verified Count";
+                            
+                            for (int i = 0; i < userStats.Count; i++)
+                            {
+                                var stat = userStats[i];
+                                worksheet.Cells[i + 2, 1].Value = stat.Role;
+                                worksheet.Cells[i + 2, 2].Value = stat.Count;
+                                worksheet.Cells[i + 2, 3].Value = stat.ActiveCount;
+                                worksheet.Cells[i + 2, 4].Value = stat.VerifiedCount;
+                            }
+                            break;
+
+                        case "revenue":
+                            var revenueStats = await GetRevenueStatsAsync(request.StartDate, request.EndDate);
+                            worksheet.Cells[1, 1].Value = "Type";
+                            worksheet.Cells[1, 2].Value = "Amount";
+                            worksheet.Cells[1, 3].Value = "Transaction Count";
+                            
+                            for (int i = 0; i < revenueStats.Count; i++)
+                            {
+                                var stat = revenueStats[i];
+                                worksheet.Cells[i + 2, 1].Value = stat.Type;
+                                worksheet.Cells[i + 2, 2].Value = stat.Amount;
+                                worksheet.Cells[i + 2, 3].Value = stat.TransactionCount;
+                            }
+                            break;
+
+                        default:
+                            throw new ArgumentException("Unsupported report type");
+                    }
+
+                    // Auto-fit columns
+                    worksheet.Cells.AutoFitColumns();
+                    
+                    // Style the header row
+                    using (var range = worksheet.Cells[1, 1, 1, worksheet.Dimension.End.Column])
+                    {
+                        range.Style.Font.Bold = true;
+                        range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+                    }
+
+                    return await package.GetAsByteArrayAsync();
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error generating report");
+                _logger.LogError(ex, "Error generating Excel report");
                 throw;
             }
-        }
-
-        private async Task<byte[]> GenerateExcelReportAsync(ReportRequestDTO request)
-        {
-            var csvContent = new StringBuilder();
-            
-            switch (request.ReportType.ToLower())
-            {
-                case "daily":
-                    var dailyStats = await GetDailyStatsAsync(request.StartDate, request.EndDate);
-                    csvContent.AppendLine("Date,NewUsers,NewProperties,NewPosts,Revenue,Views");
-                    foreach (var stat in dailyStats)
-                    {
-                        csvContent.AppendLine($"{stat.Date:yyyy-MM-dd},{stat.NewUsers},{stat.NewProperties},{stat.NewPosts},{stat.Revenue},{stat.Views}");
-                    }
-                    break;
-
-                case "monthly":
-                    var monthlyStats = await GetMonthlyStatsAsync(request.StartDate.Year);
-                    csvContent.AppendLine("Month,Year,NewUsers,NewProperties,NewPosts,Revenue,Views");
-                    foreach (var stat in monthlyStats)
-                    {
-                        csvContent.AppendLine($"{stat.Month},{stat.Year},{stat.NewUsers},{stat.NewProperties},{stat.NewPosts},{stat.Revenue},{stat.Views}");
-                    }
-                    break;
-
-                case "property":
-                    var propertyStats = await GetPropertyStatsAsync();
-                    csvContent.AppendLine("Status,Count,TotalValue");
-                    foreach (var stat in propertyStats)
-                    {
-                        csvContent.AppendLine($"{stat.Status},{stat.Count},{stat.TotalValue}");
-                    }
-                    break;
-
-                case "user":
-                    var userStats = await GetUserStatsAsync();
-                    csvContent.AppendLine("Role,Count,ActiveCount,VerifiedCount");
-                    foreach (var stat in userStats)
-                    {
-                        csvContent.AppendLine($"{stat.Role},{stat.Count},{stat.ActiveCount},{stat.VerifiedCount}");
-                    }
-                    break;
-
-                case "revenue":
-                    var revenueStats = await GetRevenueStatsAsync(request.StartDate, request.EndDate);
-                    csvContent.AppendLine("Type,Amount,TransactionCount");
-                    foreach (var stat in revenueStats)
-                    {
-                        csvContent.AppendLine($"{stat.Type},{stat.Amount},{stat.TransactionCount}");
-                    }
-                    break;
-
-                default:
-                    throw new ArgumentException("Unsupported report type");
-            }
-
-            return Encoding.UTF8.GetBytes(csvContent.ToString());
-        }
-
-        private async Task<byte[]> GeneratePdfReportAsync(ReportRequestDTO request)
-        {
-            // Simple HTML-based PDF generation
-            var htmlContent = new StringBuilder();
-            htmlContent.AppendLine("<!DOCTYPE html>");
-            htmlContent.AppendLine("<html><head><title>Real Estate Management Report</title>");
-            htmlContent.AppendLine("<style>");
-            htmlContent.AppendLine("body { font-family: Arial, sans-serif; margin: 20px; }");
-            htmlContent.AppendLine("table { border-collapse: collapse; width: 100%; margin-top: 20px; }");
-            htmlContent.AppendLine("th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }");
-            htmlContent.AppendLine("th { background-color: #f2f2f2; }");
-            htmlContent.AppendLine("h1 { color: #333; }");
-            htmlContent.AppendLine("</style></head><body>");
-            
-            htmlContent.AppendLine($"<h1>Real Estate Management Report</h1>");
-            htmlContent.AppendLine($"<p><strong>Report Type:</strong> {request.ReportType}</p>");
-            htmlContent.AppendLine($"<p><strong>Period:</strong> {request.StartDate:yyyy-MM-dd} to {request.EndDate:yyyy-MM-dd}</p>");
-            htmlContent.AppendLine($"<p><strong>Generated:</strong> {DateTime.Now:yyyy-MM-dd HH:mm:ss}</p>");
-
-            switch (request.ReportType.ToLower())
-            {
-                case "daily":
-                    var dailyStats = await GetDailyStatsAsync(request.StartDate, request.EndDate);
-                    htmlContent.AppendLine("<table>");
-                    htmlContent.AppendLine("<tr><th>Date</th><th>New Users</th><th>New Properties</th><th>New Posts</th><th>Revenue</th><th>Views</th></tr>");
-                    foreach (var stat in dailyStats)
-                    {
-                        htmlContent.AppendLine($"<tr><td>{stat.Date:yyyy-MM-dd}</td><td>{stat.NewUsers}</td><td>{stat.NewProperties}</td><td>{stat.NewPosts}</td><td>{stat.Revenue:C}</td><td>{stat.Views}</td></tr>");
-                    }
-                    htmlContent.AppendLine("</table>");
-                    break;
-
-                case "monthly":
-                    var monthlyStats = await GetMonthlyStatsAsync(request.StartDate.Year);
-                    htmlContent.AppendLine("<table>");
-                    htmlContent.AppendLine("<tr><th>Month</th><th>Year</th><th>New Users</th><th>New Properties</th><th>New Posts</th><th>Revenue</th><th>Views</th></tr>");
-                    foreach (var stat in monthlyStats)
-                    {
-                        htmlContent.AppendLine($"<tr><td>{stat.Month}</td><td>{stat.Year}</td><td>{stat.NewUsers}</td><td>{stat.NewProperties}</td><td>{stat.NewPosts}</td><td>{stat.Revenue:C}</td><td>{stat.Views}</td></tr>");
-                    }
-                    htmlContent.AppendLine("</table>");
-                    break;
-
-                case "property":
-                    var propertyStats = await GetPropertyStatsAsync();
-                    htmlContent.AppendLine("<table>");
-                    htmlContent.AppendLine("<tr><th>Status</th><th>Count</th><th>Total Value</th></tr>");
-                    foreach (var stat in propertyStats)
-                    {
-                        htmlContent.AppendLine($"<tr><td>{stat.Status}</td><td>{stat.Count}</td><td>{stat.TotalValue:C}</td></tr>");
-                    }
-                    htmlContent.AppendLine("</table>");
-                    break;
-
-                case "user":
-                    var userStats = await GetUserStatsAsync();
-                    htmlContent.AppendLine("<table>");
-                    htmlContent.AppendLine("<tr><th>Role</th><th>Count</th><th>Active Count</th><th>Verified Count</th></tr>");
-                    foreach (var stat in userStats)
-                    {
-                        htmlContent.AppendLine($"<tr><td>{stat.Role}</td><td>{stat.Count}</td><td>{stat.ActiveCount}</td><td>{stat.VerifiedCount}</td></tr>");
-                    }
-                    htmlContent.AppendLine("</table>");
-                    break;
-
-                case "revenue":
-                    var revenueStats = await GetRevenueStatsAsync(request.StartDate, request.EndDate);
-                    htmlContent.AppendLine("<table>");
-                    htmlContent.AppendLine("<tr><th>Type</th><th>Amount</th><th>Transaction Count</th></tr>");
-                    foreach (var stat in revenueStats)
-                    {
-                        htmlContent.AppendLine($"<tr><td>{stat.Type}</td><td>{stat.Amount:C}</td><td>{stat.TransactionCount}</td></tr>");
-                    }
-                    htmlContent.AppendLine("</table>");
-                    break;
-
-                default:
-                    throw new ArgumentException("Unsupported report type");
-            }
-
-            htmlContent.AppendLine("</body></html>");
-
-            return Encoding.UTF8.GetBytes(htmlContent.ToString());
         }
     }
 } 

@@ -1,0 +1,172 @@
+﻿@{
+    Layout = "../Shared/_LayoutV2.cshtml";
+}
+
+<div class="container mx-auto px-4 py-12 max-w-6xl">
+    <div class="bg-white p-8 rounded-2xl shadow-xl border">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-800">Lịch Sử Giao Dịch Ví</h2>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-spinner" class="text-center py-10" style="display: none;">
+            <div class="animate-spin inline-block w-8 h-8 border-4 rounded-full border-orange-500 border-t-transparent"></div>
+            <p class="mt-4 text-gray-600">Đang tải lịch sử giao dịch...</p>
+        </div>
+
+        <!-- Transaction Table -->
+        <div id="transaction-container" class="overflow-x-auto shadow-md rounded-lg" style="display: none;">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã giao dịch</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số tiền</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody id="transaction-table-body" class="bg-white divide-y divide-gray-200">
+                    <!-- Transaction rows will be injected here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- No Transactions Message -->
+        <div id="no-transactions" class="text-center py-10" style="display: none;">
+            <p class="text-gray-500 text-lg">Bạn chưa có giao dịch nào.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const transactionTableBody = document.getElementById('transaction-table-body');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const transactionContainer = document.getElementById('transaction-container');
+        const noTransactionsMessage = document.getElementById('no-transactions');
+        const walletBalanceDisplay = document.getElementById('wallet-balance');
+
+        const API_BASE_URL = 'https://localhost:7031/api/Wallet';
+        const token = localStorage.getItem('authToken');
+
+        if (!token) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi xác thực',
+                text: 'Vui lòng đăng nhập lại để xem lịch sử giao dịch.',
+                confirmButtonColor: '#ff6b35'
+            }).then(() => {
+                window.location.href = '/Auth/Login';
+            });
+            return;
+        }
+
+        loadingSpinner.style.display = 'block';
+
+        try {
+            // Bước 1: Lấy thông tin ví của người dùng để có walletId
+            const walletResponse = await fetch(`${API_BASE_URL}/balance`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!walletResponse.ok) {
+                const errorData = await walletResponse.json();
+                throw new Error(errorData.message || 'Không thể lấy thông tin ví.');
+            }
+
+            const walletData = await walletResponse.json();
+            const walletId = walletData.walletId;
+            const balance = walletData.balance;
+
+            // Kiểm tra nếu walletId không hợp lệ, dừng lại và thông báo lỗi
+            if (!walletId) {
+                throw new Error('Không tìm thấy ID ví. Vui lòng kiểm tra lại tài khoản của bạn.');
+            }
+
+            // Cập nhật số dư ví
+            walletBalanceDisplay.textContent = `${Number(balance).toLocaleString('vi-VN')} VNĐ`;
+
+            // Bước 2: Lấy lịch sử giao dịch từ walletId
+            const transactionResponse = await fetch(`${API_BASE_URL}/transaction-history?walletId=${walletId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!transactionResponse.ok) {
+                const errorText = await transactionResponse.text();
+                try {
+                    const errorData = JSON.parse(errorText);
+                    throw new Error(errorData.message || 'Không thể lấy lịch sử giao dịch.');
+                } catch (e) {
+                    throw new Error(errorText || 'Không thể lấy lịch sử giao dịch.');
+                }
+            }
+
+            const transactions = await transactionResponse.json();
+
+            if (transactions.length === 0) {
+                noTransactionsMessage.style.display = 'block';
+            } else {
+                transactions.forEach(tx => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50';
+
+                    const transactionType = tx.type || 'N/A';
+                    let typeColor = 'text-green-600';
+                    let statusText = tx.status || 'N/A';
+                    if (transactionType.toLowerCase().includes('deposit')) {
+                        typeColor = 'text-blue-600';
+                    } else if (transactionType.toLowerCase().includes('deduct')) {
+                         typeColor = 'text-red-600';
+                    }
+
+                    let statusColor = 'text-gray-500';
+                   
+                    if (statusText.toLowerCase() === 'success') {
+                        statusColor = 'text-green-600';
+                        statusText = 'Thành công';
+                    } else if (statusText.toLowerCase() === 'failed') {
+                        statusColor = 'text-red-600';
+                        statusText = 'Thất bại';
+                    } else if (statusText.toLowerCase() === 'pending') {
+                        statusColor = 'text-yellow-600';
+                        statusText = 'Đang xử lý';
+                    }
+
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${tx.id}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <span class="${typeColor} font-semibold">${Number(tx.amount).toLocaleString('vi-VN')} VNĐ</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${transactionType}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(tx.createdAt).toLocaleDateString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">
+                                ${statusText}
+                            </span>
+                        </td>
+                    `;
+                    transactionTableBody.appendChild(row);
+                });
+                transactionContainer.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Lỗi khi lấy lịch sử giao dịch:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: error.message,
+                confirmButtonColor: '#ff6b35'
+            });
+            noTransactionsMessage.style.display = 'block';
+            noTransactionsMessage.querySelector('p').textContent = `Không thể tải lịch sử giao dịch: ${error.message}`;
+        } finally {
+            loadingSpinner.style.display = 'none';
+        }
+    });
+</script>

@@ -1,0 +1,706 @@
+@{
+    Layout = "~/Views/Shared/_LayoutV2.cshtml";
+    ViewData["Title"] = "Tìm kiếm bất động sản";
+}
+
+<link rel="stylesheet" href="~/css/search.css">
+
+<div class="search-container">
+    <!-- Search Header -->
+    <div class="search-header">
+        <h1>Tìm kiếm bất động sản</h1>
+        <p>Khám phá những ngôi nhà tuyệt vời phù hợp với nhu cầu của bạn</p>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <form id="searchForm" class="search-form">
+            <div class="form-group">
+                <label for="searchType">Loại bất động sản</label>
+                <select id="searchType" name="type">
+                    <option value="">Tất cả loại</option>
+                    <option value="room">Phòng trọ</option>
+                    <option value="apartment">Chung cư</option>
+                    <option value="house">Nhà riêng</option>
+                    <option value="villa">Biệt thự</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="searchProvince">Tỉnh/Thành phố</label>
+                <select id="searchProvince" name="province">
+                    <option value="">Tất cả tỉnh</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="searchKeyword">Từ khóa</label>
+                <input type="text" id="searchKeyword" name="keyword" placeholder="Nhập từ khóa tìm kiếm...">
+            </div>
+            <button type="submit" class="search-btn">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                Tìm kiếm
+            </button>
+        </form>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-header">
+            <h3>Bộ lọc nâng cao</h3>
+            <button type="button" class="filter-toggle" id="filterToggle">Hiện bộ lọc</button>
+        </div>
+        <div class="filter-content" id="filterContent" style="display: none;">
+            <div class="filter-group">
+                <label for="minPrice">Giá tối thiểu </label>
+                <input type="number" id="minPrice" name="minPrice" min="0" placeholder="0">
+            </div>
+            <div class="filter-group">
+                <label for="maxPrice">Giá tối đa </label>
+                <input type="number" id="maxPrice" name="maxPrice" min="0" placeholder="1000">
+            </div>
+            <div class="filter-group">
+                <label for="minArea">Diện tích tối thiểu (m²)</label>
+                <input type="number" id="minArea" name="minArea" min="0" placeholder="0">
+            </div>
+            <div class="filter-group">
+                <label for="maxArea">Diện tích tối đa (m²)</label>
+                <input type="number" id="maxArea" name="maxArea" min="0" placeholder="500">
+            </div>
+            <div class="filter-group">
+                <label for="minRoom">Số phòng tối thiểu</label>
+                <input type="number" id="minRoom" name="minRoom" min="0" placeholder="0">
+            </div>
+            <div class="filter-group">
+                <label for="maxRoom">Số phòng tối đa</label>
+                <input type="number" id="maxRoom" name="maxRoom" min="0" placeholder="10">
+            </div>
+            <div class="filter-group">
+                <label for="searchWard">Quận/Huyện</label>
+                <select id="searchWard" name="ward">
+                    <option value="">Tất cả quận/huyện</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="searchStreet">Đường/Phố</label>
+                <select id="searchStreet" name="street">
+                    <option value="">Tất cả đường/phố</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-section">
+        <div class="results-header">
+            <div class="results-count">
+                Tìm thấy <strong id="totalResults">0</strong> bất động sản
+            </div>
+            <div class="sort-options">
+                <label for="sortBy">Sắp xếp theo:</label>
+                <select id="sortBy" name="sortBy">
+                    <option value="newest">Mới nhất</option>
+                    <option value="price_asc">Giá tăng dần</option>
+                    <option value="price_desc">Giá giảm dần</option>
+                    <option value="area_asc">Diện tích tăng dần</option>
+                    <option value="area_desc">Diện tích giảm dần</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Properties Grid -->
+        <div id="propertiesContainer">
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Đang tải dữ liệu...</p>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination" style="display: none;">
+            <button class="pagination-btn" id="prevPage" disabled>Trước</button>
+            <div id="pageNumbers"></div>
+            <button class="pagination-btn" id="nextPage">Tiếp</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="~/js/helper.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const apiBaseUrl = 'https://localhost:7031/api';
+    let currentPage = 1;
+    let currentPageSize = 12;
+    let totalPages = 0;
+    let totalItems = 0;
+    let currentFilters = {};
+
+    // Initialize
+    loadProvinces();
+    loadAmenities();
+    
+    // Filter toggle
+    document.getElementById('filterToggle').addEventListener('click', function() {
+        const filterContent = document.getElementById('filterContent');
+        const isVisible = filterContent.style.display !== 'none';
+        
+        filterContent.style.display = isVisible ? 'none' : 'grid';
+        this.textContent = isVisible ? 'Hiện bộ lọc' : 'Ẩn bộ lọc';
+        this.classList.toggle('active');
+    });
+
+    // Search form submit
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        currentPage = 1;
+        performSearch();
+    });
+
+    // Province change
+    document.getElementById('searchProvince').addEventListener('change', function() {
+        const provinceId = this.value;
+        loadWards(provinceId);
+        document.getElementById('searchWard').innerHTML = '<option value="">Tất cả quận/huyện</option>';
+        document.getElementById('searchStreet').innerHTML = '<option value="">Tất cả đường/phố</option>';
+    });
+
+    // Ward change
+    document.getElementById('searchWard').addEventListener('change', function() {
+        const wardId = this.value;
+        loadStreets(wardId);
+        document.getElementById('searchStreet').innerHTML = '<option value="">Tất cả đường/phố</option>';
+    });
+
+    // Sort change
+    document.getElementById('sortBy').addEventListener('change', function() {
+        performSearch();
+    });
+
+    // Load provinces
+    async function loadProvinces() {
+        try {
+            const response = await fetch(`${apiBaseUrl}/Property/provinces`);
+            const provinces = await response.json();
+            
+            const provinceSelect = document.getElementById('searchProvince');
+            provinces.forEach(province => {
+                const option = document.createElement('option');
+                option.value = province.id;
+                option.textContent = province.name;
+                provinceSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading provinces:', error);
+        }
+    }
+
+    // Load wards
+    async function loadWards(provinceId) {
+        if (!provinceId) return;
+        
+        try {
+            const response = await fetch(`${apiBaseUrl}/Property/wards/${provinceId}`);
+            const wards = await response.json();
+            
+            const wardSelect = document.getElementById('searchWard');
+            wardSelect.innerHTML = '<option value="">Tất cả quận/huyện</option>';
+            
+            wards.forEach(ward => {
+                const option = document.createElement('option');
+                option.value = ward.id;
+                option.textContent = ward.name;
+                wardSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading wards:', error);
+        }
+    }
+
+    // Load streets
+    async function loadStreets(wardId) {
+        if (!wardId) return;
+        
+        try {
+            const response = await fetch(`${apiBaseUrl}/Property/streets/${wardId}`);
+            const streets = await response.json();
+            
+            const streetSelect = document.getElementById('searchStreet');
+            streetSelect.innerHTML = '<option value="">Tất cả đường/phố</option>';
+            
+            streets.forEach(street => {
+                const option = document.createElement('option');
+                option.value = street.id;
+                option.textContent = street.name;
+                streetSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading streets:', error);
+        }
+    }
+
+    // Load amenities
+    async function loadAmenities() {
+        try {
+            const response = await fetch(`${apiBaseUrl}/Property/amenities`);
+            const amenities = await response.json();
+            // Store amenities for later use if needed
+            window.amenities = amenities;
+        } catch (error) {
+            console.error('Error loading amenities:', error);
+        }
+    }
+
+    // Helper function để xử lý ảnh
+    function getPropertyImageUrl(property) {
+        // Debug: log property data
+        console.log('Property data for image:', property);
+        console.log('Property imageUrls:', property.imageUrls);
+        console.log('Property primaryImageUrl:', property.primaryImageUrl);
+        
+        // Default image
+        const defaultImage = '/image/no-image.png';
+        
+        // Kiểm tra xem có ảnh không
+        if (!property.imageUrls || !Array.isArray(property.imageUrls) || property.imageUrls.length === 0) {
+            // Kiểm tra xem có primaryImageUrl không
+            if (property.primaryImageUrl && property.primaryImageUrl.trim() !== '') {
+                const finalUrl = property.primaryImageUrl.includes('http') ? property.primaryImageUrl : `https://localhost:7031${property.primaryImageUrl}`;
+                console.log('Using primaryImageUrl:', finalUrl);
+                return finalUrl;
+            }
+            console.log('No images found, using default:', defaultImage);
+            return defaultImage;
+        }
+        
+        // Tìm ảnh primary (isPrimary = true)
+        let selectedImage = property.imageUrls.find(img => {
+            if (typeof img === 'object' && img !== null) {
+                return img.isPrimary === true;
+            }
+            return false;
+        });
+        
+        // Nếu không có ảnh primary, lấy ảnh đầu tiên
+        if (!selectedImage) {
+            selectedImage = property.imageUrls[0];
+        }
+        
+        // Xử lý URL ảnh
+        if (selectedImage) {
+            if (typeof selectedImage === 'object' && selectedImage.url) {
+                const imageUrl = selectedImage.url;
+                if (imageUrl && imageUrl.trim() !== '') {
+                    const finalUrl = imageUrl.includes('http') ? imageUrl : `https://localhost:7031${imageUrl}`;
+                    console.log('Using imageUrls[].url:', finalUrl);
+                    return finalUrl;
+                }
+            } else if (typeof selectedImage === 'string' && selectedImage.trim() !== '') {
+                const finalUrl = selectedImage.includes('http') ? selectedImage : `https://localhost:7031${selectedImage}`;
+                console.log('Using imageUrls[] string:', finalUrl);
+                return finalUrl;
+            }
+        }
+        
+        // Kiểm tra xem có primaryImageUrl không (fallback)
+        if (property.primaryImageUrl && property.primaryImageUrl.trim() !== '') {
+            const finalUrl = property.primaryImageUrl.includes('http') ? property.primaryImageUrl : `https://localhost:7031${property.primaryImageUrl}`;
+            console.log('Using primaryImageUrl fallback:', finalUrl);
+            return finalUrl;
+        }
+        
+        console.log('No valid images found, using default:', defaultImage);
+        return defaultImage;
+    }
+
+    // Handle image loading errors
+    function handleImageError(img) {
+        img.src = '/image/no-image.png';
+        img.alt = 'Không có ảnh';
+        img.onerror = null; // Prevent infinite loop
+    }
+
+    // Perform search
+    async function performSearch() {
+        // Build search parameters
+        const searchParams = new URLSearchParams();
+        searchParams.append('page', currentPage);
+        searchParams.append('pageSize', currentPageSize);
+        
+        // Add form data
+        const type = document.getElementById('searchType').value;
+        const province = document.getElementById('searchProvince').value;
+        const keyword = document.getElementById('searchKeyword').value;
+        
+        // Only add type if it has a value
+        if (type && type.trim() !== '') searchParams.append('type', type);
+        if (province) searchParams.append('provinces', province);
+        if (keyword) searchParams.append('keyword', keyword);
+        
+        // Add filter values
+        const minPrice = document.getElementById('minPrice').value;
+        const maxPrice = document.getElementById('maxPrice').value;
+        const minArea = document.getElementById('minArea').value;
+        const maxArea = document.getElementById('maxArea').value;
+        const minRoom = document.getElementById('minRoom').value;
+        const maxRoom = document.getElementById('maxRoom').value;
+        
+        if (minPrice) searchParams.append('minPrice', minPrice);
+        if (maxPrice) searchParams.append('maxPrice', maxPrice);
+        if (minArea) searchParams.append('minArea', minArea);
+        if (maxArea) searchParams.append('maxArea', maxArea);
+        if (minRoom) searchParams.append('minRoom', minRoom);
+        if (maxRoom) searchParams.append('maxRoom', maxRoom);
+        
+        // Add sort
+        const sortBy = document.getElementById('sortBy').value;
+        if (sortBy) searchParams.append('sortBy', sortBy);
+        
+        // Store current filters
+        currentFilters = Object.fromEntries(searchParams.entries());
+        
+        // Show loading
+        showLoading();
+        
+        try {
+            const response = await fetch(`${apiBaseUrl}/Property/homepage-paginated?${searchParams.toString()}`);
+            const result = await response.json();
+            
+            if (response.ok) {
+                displayResults(result);
+            } else {
+                showError(result.message || 'Có lỗi xảy ra khi tìm kiếm');
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+            showError('Không thể kết nối đến server');
+        }
+    }
+
+    // Display results
+    function displayResults(result) {
+        const container = document.getElementById('propertiesContainer');
+        
+        // Debug: log the result data
+        console.log('Search result:', result);
+        console.log('Result data:', result.data);
+        
+        if (!result.data || result.data.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p>Không tìm thấy bất động sản nào phù hợp với tiêu chí tìm kiếm</p>
+                </div>
+            `;
+            document.getElementById('pagination').style.display = 'none';
+            document.getElementById('totalResults').textContent = '0';
+            return;
+        }
+        
+        // Update total results
+        totalItems = result.totalItems || result.data.length;
+        totalPages = Math.ceil(totalItems / currentPageSize);
+        document.getElementById('totalResults').textContent = totalItems;
+        
+        // Render properties
+        const propertiesHtml = result.data.map(property => createPropertyCard(property)).join('');
+        container.innerHTML = propertiesHtml;
+        
+        // Show pagination
+        renderPagination();
+        document.getElementById('pagination').style.display = 'flex';
+    }
+
+    // Create property card
+    function createPropertyCard(property) {
+        // Sử dụng helper function để lấy ảnh
+        const imageUrl = getPropertyImageUrl(property);
+        
+        const price = property.price ? `${formatVietnameseNumber(property.price)}/tháng` : 'Thỏa thuận';
+        const area = property.area ? `${property.area}m²` : 'N/A';
+        const rooms = property.numberOfRooms || 'N/A';
+        
+        // Format địa chỉ
+        const address = property.detailedAddress || property.address || 'Không có địa chỉ';
+        const street = property.street || '';
+        const ward = property.ward || '';
+        const province = property.province || '';
+        const fullAddress = [address, street, ward, province].filter(Boolean).join(', ');
+        
+        return `
+            <div class="property-card">
+                <div class="property-image">
+                    <img src="${imageUrl}" alt="${property.title || 'Bất động sản'}" 
+                         onerror="handleImageError(this)"
+                         loading="lazy">
+                    <div class="property-badge">${property.type || 'BDS'}</div>
+                    <div class="property-price">${price}</div>
+                </div>
+                <div class="property-content">
+                    <h3 class="property-title" onclick="viewProperty(${property.id})" style="cursor: pointer;">
+                        ${property.title || 'Không có tiêu đề'}
+                    </h3>
+                    <div class="property-location">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span>${fullAddress}</span>
+                    </div>
+                    <div class="property-details">
+                        <div class="property-detail">
+                            <div class="property-detail-value">${area}</div>
+                            <div class="property-detail-label">Diện tích</div>
+                        </div>
+                        <div class="property-detail">
+                            <div class="property-detail-value">${rooms}</div>
+                            <div class="property-detail-label">Số phòng</div>
+                        </div>
+                        <div class="property-detail">
+                            <div class="property-detail-value">${timeAgo(property.createdAt)}</div>
+                            <div class="property-detail-label">Đăng lúc</div>
+                        </div>
+                    </div>
+                    <div class="property-actions">
+                        <a href="/Home/Detail/${property.id}" class="action-btn btn-primary">Xem chi tiết</a>
+                        <button class="action-btn btn-outline" onclick="toggleFavorite(event, ${property.id}, ${property.isFavorite || false})">
+                            ${property.isFavorite ? 'Bỏ yêu thích' : 'Yêu thích'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Render pagination
+    function renderPagination() {
+        const pageNumbers = document.getElementById('pageNumbers');
+        const prevBtn = document.getElementById('prevPage');
+        const nextBtn = document.getElementById('nextPage');
+        
+        // Update prev/next buttons
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+        
+        // Generate page numbers
+        let pageNumbersHtml = '';
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbersHtml += `
+                <button class="pagination-btn ${i === currentPage ? 'active' : ''}" 
+                        onclick="goToPage(${i})">${i}</button>
+            `;
+        }
+        
+        pageNumbers.innerHTML = pageNumbersHtml;
+    }
+
+    // Navigation functions
+    window.goToPage = function(page) {
+        currentPage = page;
+        performSearch();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.viewProperty = function(propertyId) {
+        window.location.href = `/Home/Detail/${propertyId}`;
+    };
+
+    window.toggleFavorite = function(event, propertyId, isFavorite) {
+        event.stopPropagation();
+        updateFavorite(propertyId, isFavorite);
+    };
+
+    // Event listeners for pagination
+    document.getElementById('prevPage').addEventListener('click', function() {
+        if (currentPage > 1) {
+            goToPage(currentPage - 1);
+        }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', function() {
+        if (currentPage < totalPages) {
+            goToPage(currentPage + 1);
+        }
+    });
+
+    // Utility functions
+    function showLoading() {
+        document.getElementById('propertiesContainer').innerHTML = `
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Đang tìm kiếm...</p>
+            </div>
+        `;
+        document.getElementById('pagination').style.display = 'none';
+    }
+
+    function showError(message) {
+        document.getElementById('propertiesContainer').innerHTML = `
+            <div class="empty-state">
+                <p style="color: #dc2626;">${message}</p>
+            </div>
+        `;
+        document.getElementById('pagination').style.display = 'none';
+    }
+
+    // Favorite functions
+    async function updateFavorite(id, isFavorite) {
+        const isAuthenticated = checkAuthStatus();
+        if (!isAuthenticated) {
+            window.location.href = '/Auth/Login';
+            return;
+        }
+        
+        try {
+            if (!isFavorite) {
+                await addToFavourite(id);
+            } else {
+                await removeToFavorite(id);
+            }
+        } catch (error) {
+            console.error('Error updating favorite:', error);
+        }
+    }
+
+    function checkAuthStatus() {
+        const token = localStorage.getItem('authToken');
+        return !!token;
+    }
+
+    // Check URL parameters for initial search
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('type') || urlParams.has('province') || urlParams.has('keyword') || 
+        urlParams.has('minRoom') || urlParams.has('maxRoom') || urlParams.has('minPrice') || 
+        urlParams.has('maxPrice') || urlParams.has('minArea') || urlParams.has('maxArea')) {
+        
+        // Pre-fill form with URL parameters
+        if (urlParams.has('type') && urlParams.get('type').trim() !== '') {
+            const typeElement = document.getElementById('searchType');
+            if (typeElement) typeElement.value = urlParams.get('type');
+        }
+        
+        if (urlParams.has('province')) {
+            const provinceElement = document.getElementById('searchProvince');
+            if (provinceElement) {
+                provinceElement.value = urlParams.get('province');
+                // Load wards for the selected province
+                loadWards(urlParams.get('province'));
+            }
+        }
+        
+        if (urlParams.has('keyword')) {
+            const keywordElement = document.getElementById('searchKeyword');
+            if (keywordElement) keywordElement.value = urlParams.get('keyword');
+        }
+        
+        // Pre-fill filter values
+        if (urlParams.has('minRoom')) {
+            const minRoomElement = document.getElementById('minRoom');
+            if (minRoomElement) minRoomElement.value = urlParams.get('minRoom');
+        }
+        
+        if (urlParams.has('maxRoom')) {
+            const maxRoomElement = document.getElementById('maxRoom');
+            if (maxRoomElement) maxRoomElement.value = urlParams.get('maxRoom');
+        }
+        
+        if (urlParams.has('minPrice')) {
+            const minPriceElement = document.getElementById('minPrice');
+            if (minPriceElement) minPriceElement.value = urlParams.get('minPrice');
+        }
+        
+        if (urlParams.has('maxPrice')) {
+            const maxPriceElement = document.getElementById('maxPrice');
+            if (maxPriceElement) maxPriceElement.value = urlParams.get('maxPrice');
+        }
+        
+        if (urlParams.has('minArea')) {
+            const minAreaElement = document.getElementById('minArea');
+            if (minAreaElement) minAreaElement.value = urlParams.get('minArea');
+        }
+        
+        if (urlParams.has('maxArea')) {
+            const maxAreaElement = document.getElementById('maxArea');
+            if (maxAreaElement) maxAreaElement.value = urlParams.get('maxArea');
+        }
+        
+        // Perform initial search after a short delay
+        setTimeout(() => performSearch(), 1000);
+    } else {
+        // Check sessionStorage for search data from homepage
+        const searchFilterData = sessionStorage.getItem('searchFilterData');
+        if (searchFilterData) {
+            try {
+                const filterData = JSON.parse(searchFilterData);
+                
+                // Pre-fill form with sessionStorage data
+                if (filterData.type && filterData.type.trim() !== '') {
+                    const typeElement = document.getElementById('searchType');
+                    if (typeElement) typeElement.value = filterData.type;
+                }
+                
+                if (filterData.province) {
+                    const provinceElement = document.getElementById('searchProvince');
+                    if (provinceElement) {
+                        provinceElement.value = filterData.province;
+                        // Load wards for the selected province
+                        loadWards(filterData.province);
+                    }
+                }
+                
+                if (filterData.keyword) {
+                    const keywordElement = document.getElementById('searchKeyword');
+                    if (keywordElement) keywordElement.value = filterData.keyword;
+                }
+                
+                // Pre-fill filter values
+                if (filterData.minRoom) {
+                    const minRoomElement = document.getElementById('minRoom');
+                    if (minRoomElement) minRoomElement.value = filterData.minRoom;
+                }
+                
+                if (filterData.maxRoom) {
+                    const maxRoomElement = document.getElementById('maxRoom');
+                    if (maxRoomElement) maxRoomElement.value = filterData.maxRoom;
+                }
+                
+                if (filterData.minPrice) {
+                    const minPriceElement = document.getElementById('minPrice');
+                    if (minPriceElement) minPriceElement.value = filterData.minPrice;
+                }
+                
+                if (filterData.maxPrice) {
+                    const maxPriceElement = document.getElementById('maxPrice');
+                    if (maxPriceElement) maxPriceElement.value = filterData.maxPrice;
+            }
+                
+                if (filterData.minArea) {
+                    const minAreaElement = document.getElementById('minArea');
+                    if (minAreaElement) minAreaElement.value = filterData.minArea;
+                }
+                
+                if (filterData.maxArea) {
+                    const maxAreaElement = document.getElementById('maxArea');
+                    if (maxAreaElement) maxAreaElement.value = filterData.maxArea;
+                }
+        
+                // Perform initial search after a short delay
+                setTimeout(() => performSearch(), 1000);
+                
+                // Clear sessionStorage after using it
+                sessionStorage.removeItem('searchFilterData');
+            } catch (error) {
+                console.error('Error parsing search filter data:', error);
+            }
+        }
+    }
+});
+</script>
+} 

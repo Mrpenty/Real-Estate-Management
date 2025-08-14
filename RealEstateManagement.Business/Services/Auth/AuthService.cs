@@ -113,7 +113,7 @@ namespace RealEstateManagement.Business.Services.Auth
             user.ConfirmationCodeExpiry = DateTime.Now.AddMinutes(5); 
             await _userManager.UpdateAsync(user);
 
-            await _smsService.ZaloSmsService(user.PhoneNumber, confirmationCode);
+            await _smsService.SendOtpAsync(user.PhoneNumber, confirmationCode);
 
             return new AuthMessDTO { IsAuthSuccessful = true, ErrorMessage = "Registration successful. An OTP has been sent to your phone for verification." };
         }
@@ -280,9 +280,8 @@ namespace RealEstateManagement.Business.Services.Auth
                 user.ConfirmationCodeExpiry = expiryTime;
                 await _userManager.UpdateAsync(user);
 
-                // TODO: Send OTP via SMS service
-                // For now, we'll just return success
-                // In production, you should integrate with an SMS service
+                // Send OTP via TingTing SMS service
+                await _smsService.SendOtpAsync(phoneNumber, otp);
 
                 return new AuthMessDTO 
                 { 

@@ -54,8 +54,17 @@ namespace RealEstateManagement.API.Controllers.Landlord
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            await _rentalContractService.UpdateContractAsync(id, dto);
-            return NoContent();
+            try
+            {
+                await _rentalContractService.UpdateContractAsync(id, dto);
+                return StatusCode(201);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            
+            //return NoContent();
         }
 
         // PATCH: api/owner/rental-contracts/status

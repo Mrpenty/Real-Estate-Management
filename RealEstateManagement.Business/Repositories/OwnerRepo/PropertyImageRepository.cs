@@ -93,6 +93,65 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
             return await _context.PropertyImages.AnyAsync(x => x.PropertyId == propertyId);
         }
 
+        public async Task<bool> ClearAllImagesAsync(int propertyId)
+        {
+            try
+            {
+                _logger.LogInformation("Clearing all images for property {PropertyId}", propertyId);
+                
+                var imagesToDelete = await _context.PropertyImages
+                    .Where(img => img.PropertyId == propertyId)
+                    .ToListAsync();
+                
+                if (!imagesToDelete.Any())
+                {
+                    _logger.LogInformation("No images found for property {PropertyId}", propertyId);
+                    return true;
+                }
+                
+                _logger.LogInformation("Found {Count} images to delete for property {PropertyId}", imagesToDelete.Count, propertyId);
+                
+                _context.PropertyImages.RemoveRange(imagesToDelete);
+                await _context.SaveChangesAsync();
+                
+                _logger.LogInformation("Successfully cleared {Count} images for property {PropertyId}", imagesToDelete.Count, propertyId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error clearing images for property {PropertyId}", propertyId);
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteImageAsync(int propertyId, int imageId)
+        {
+            try
+            {
+                _logger.LogInformation("Deleting image {ImageId} for property {PropertyId}", imageId, propertyId);
+                
+                var imageToDelete = await _context.PropertyImages
+                    .FirstOrDefaultAsync(img => img.Id == imageId && img.PropertyId == propertyId);
+                
+                if (imageToDelete == null)
+                {
+                    _logger.LogWarning("Image {ImageId} not found for property {PropertyId}", imageId, propertyId);
+                    return false;
+                }
+                
+                _context.PropertyImages.Remove(imageToDelete);
+                await _context.SaveChangesAsync();
+                
+                _logger.LogInformation("Successfully deleted image {ImageId} for property {PropertyId}", imageId, propertyId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting image {ImageId} for property {PropertyId}", imageId, propertyId);
+                return false;
+            }
+        }
+
     }
 
 }

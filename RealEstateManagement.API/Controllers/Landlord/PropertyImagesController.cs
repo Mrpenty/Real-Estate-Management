@@ -86,6 +86,62 @@ namespace RealEstateManagement.API.Controllers.Landlord
             return Ok(updated);
         }
 
+        //Xóa tất cả ảnh của một property
+        [HttpDelete("clear")]
+        public async Task<IActionResult> ClearAllImages(int propertyId)
+        {
+            try
+            {
+                _logger.LogInformation("Clearing all images for property {PropertyId}", propertyId);
+                
+                var result = await _imageService.ClearAllImagesAsync(propertyId);
+                
+                if (result)
+                {
+                    _logger.LogInformation("Successfully cleared all images for property {PropertyId}", propertyId);
+                    return Ok(new { message = "All images cleared successfully" });
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to clear images for property {PropertyId}", propertyId);
+                    return BadRequest("Failed to clear images");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error clearing images for property {PropertyId}", propertyId);
+                return StatusCode(500, "An error occurred while clearing images");
+            }
+        }
+
+        //Xóa một ảnh cụ thể
+        [HttpDelete("{imageId}")]
+        public async Task<IActionResult> DeleteImage(int propertyId, int imageId)
+        {
+            try
+            {
+                _logger.LogInformation("Deleting image {ImageId} for property {PropertyId}", imageId, propertyId);
+                
+                var result = await _imageService.DeleteImageAsync(propertyId, imageId);
+                
+                if (result)
+                {
+                    _logger.LogInformation("Successfully deleted image {ImageId} for property {PropertyId}", imageId, propertyId);
+                    return Ok(new { message = "Image deleted successfully" });
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to delete image {ImageId} for property {PropertyId}", imageId, propertyId);
+                    return NotFound("Image not found or could not be deleted");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting image {ImageId} for property {PropertyId}", imageId, propertyId);
+                return StatusCode(500, "An error occurred while deleting image");
+            }
+        }
+
     }
 
 }

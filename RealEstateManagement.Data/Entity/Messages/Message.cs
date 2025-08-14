@@ -11,6 +11,8 @@ namespace RealEstateManagement.Data.Entity.Messages
         public bool IsRead { get; set; }
         public bool NotificationSent { get; set; }
         public DateTime SentAt { get; set; }
+        
+
 
         // Navigation properties
         public ApplicationUser Sender { get; set; }

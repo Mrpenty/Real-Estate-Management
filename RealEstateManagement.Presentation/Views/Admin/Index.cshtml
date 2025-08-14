@@ -344,13 +344,7 @@
         // User Detail Modal
         async function showUserDetail(userId) {
             try {
-                const res = await fetch(`${ADMIN_API_BASE_URL}/api/User/${userId}`, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' },
-                    credentials: 'include'
-                });
-                if (!res.ok) throw new Error('Không thể lấy thông tin chi tiết user');
-                const user = await res.json();
+                const user = await AdminUserService.getUserDetail(userId);
                 currentUserDetail = user;
                 
                 document.getElementById('modalUserName').textContent = user.name;
@@ -412,16 +406,16 @@
                             <div>
                                 <label class="form-label">Mặt trước</label>
                                 <div class="border rounded-lg p-4 bg-gray-50">
-                                    <img src="${user.citizenIdFrontImageUrl ? ADMIN_API_BASE_URL + user.citizenIdFrontImageUrl : '/image/no-image.png'}" 
-                                         class="max-h-48 mx-auto object-contain" alt="CCCD mặt trước" />
-                                </div>
-                            </div>
-                            <div>
-                                <label class="form-label">Mặt sau</label>
-                                <div class="border rounded-lg p-4 bg-gray-50">
-                                    <img src="${user.citizenIdBackImageUrl ? ADMIN_API_BASE_URL + user.citizenIdBackImageUrl : '/image/no-image.png'}" 
-                                         class="max-h-48 mx-auto object-contain" alt="CCCD mặt sau" />
-                                </div>
+                                                        <img src="${user.citizenIdFrontImageUrl ? config.buildApiUrl(user.citizenIdFrontImageUrl) : '/image/no-image.png'}" 
+                         class="max-h-48 mx-auto object-contain" alt="CCCD mặt trước" />
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Mặt sau</label>
+                <div class="border rounded-lg p-4 bg-gray-50">
+                    <img src="${user.citizenIdBackImageUrl ? config.buildApiUrl(user.citizenIdBackImageUrl) : '/image/no-image.png'}" 
+                         class="max-h-48 mx-auto object-contain" alt="CCCD mặt sau" />
+                </div>
                             </div>
                         </div>
                     </div>
@@ -500,12 +494,7 @@
                 ...changes
             };
             
-            const res = await fetch(`${ADMIN_API_BASE_URL}/api/User/admin-update/${currentUserDetail.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(payload)
-            });
+            const res = await AdminUserService.updateUser(currentUserDetail.id, payload);
             return res;
         }
 
@@ -619,10 +608,7 @@
 
             if (result.isConfirmed) {
                 try {
-                    const res = await fetch(`${ADMIN_API_BASE_URL}/api/User/delete/${userId}`, {
-                        method: 'DELETE',
-                        credentials: 'include'
-                    });
+                    const res = await AdminUserService.deleteUser(userId);
                     
                     if (!res.ok) throw new Error('Không thể xóa user');
                     
