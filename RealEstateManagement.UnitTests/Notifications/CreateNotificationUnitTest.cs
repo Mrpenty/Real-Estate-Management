@@ -146,7 +146,7 @@ public class CreateNotificationUnitTest
     }
 
     [TestMethod]
-    public async Task CreateNotificationAsync_RepositoryThrowsException_ThrowsException()
+    public async Task CreateNotificationAsync_mockRepositorysitoryThrowsException_ThrowsException()
     {
         var createDto = new CreateNotificationDTO
         {

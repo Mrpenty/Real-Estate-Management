@@ -90,7 +90,7 @@ public class UpdateNotificationUnitTest
     }
 
     [TestMethod]
-    public async Task UpdateNotificationAsync_RepositoryFailsOnUpdate_ThrowsException()
+    public async Task UpdateNotificationAsync_mockRepositorysitoryFailsOnUpdate_ThrowsException()
     {
         var updateDto = new UpdateNotificationDTO
         {

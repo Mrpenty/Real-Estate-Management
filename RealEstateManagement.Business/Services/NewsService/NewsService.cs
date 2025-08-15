@@ -8,20 +8,25 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using FluentValidation;
 
 namespace RealEstateManagement.Business.Services.NewsService
 {
     public class NewsService : INewsService
     {
         private readonly INewsRepository _repo;
+        private readonly IValidator<NewsCreateDto> _validator;
 
-        public NewsService(INewsRepository repo)
+        public NewsService(INewsRepository repo, IValidator<NewsCreateDto> validator)
         {
             _repo = repo;
+            _validator = validator;
         }
 
         public async Task<int> CreateAsync(NewsCreateDto dto)
         {
+            var vr = await _validator.ValidateAsync(dto);
+            if (!vr.IsValid) throw new ValidationException(vr.Errors);
             var news = new News
             {
                 Title = dto.Title,
@@ -198,19 +203,23 @@ namespace RealEstateManagement.Business.Services.NewsService
         // Hàm bỏ dấu tiếng Việt (có thể copy vào project)
         public static string RemoveDiacritics(string text)
         {
-            var normalizedString = text.Normalize(NormalizationForm.FormD);
-            var stringBuilder = new StringBuilder();
+            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
 
-            foreach (var c in normalizedString)
+            var normalized = text.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder(normalized.Length);
+
+            foreach (var ch in normalized)
             {
-                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
-                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
-                {
-                    stringBuilder.Append(c);
-                }
+                var cat = CharUnicodeInfo.GetUnicodeCategory(ch);
+                if (cat != UnicodeCategory.NonSpacingMark)
+                    sb.Append(ch);
             }
 
-            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+            var noMarks = sb.ToString().Normalize(NormalizationForm.FormC);
+
+            // Quan trọng: đ/Đ không phải NonSpacingMark => phải map thủ công
+            noMarks = noMarks.Replace('đ', 'd').Replace('Đ', 'D');
+            return noMarks;
         }
 
     }

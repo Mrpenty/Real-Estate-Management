@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using FluentValidation;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using RealEstateManagement.Business.DTO.News;
 using RealEstateManagement.Business.Repositories.NewsRepository;
@@ -19,7 +20,10 @@ public class GetPublishedNews
     public void Setup()
     {
         _mockRepo = new Mock<INewsRepository>();
-        _service = new NewsService(_mockRepo.Object);
+
+        IValidator<NewsCreateDto> validator = new InlineValidator<NewsCreateDto>();
+
+        _service = new NewsService(_mockRepo.Object, validator);
     }
 
     [TestMethod]

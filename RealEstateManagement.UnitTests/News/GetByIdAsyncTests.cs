@@ -6,18 +6,21 @@ using RealEstateManagement.Business.DTO.News;
 using RealEstateManagement.Data.Entity;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using FluentValidation;              
+using FluentValidation.Results;
 
 [TestClass]
 public class GetByIdAsyncTests
 {
     private Mock<INewsRepository> _mockNewsRepository;
     private NewsService _newsService;
-
+    private IValidator<NewsCreateDto> _validator;
     [TestInitialize]
     public void Setup()
     {
         _mockNewsRepository = new Mock<INewsRepository>();
-        _newsService = new NewsService(_mockNewsRepository.Object);
+        _newsService = new NewsService(_mockNewsRepository.Object, _validator);
+        _validator = new InlineValidator<NewsCreateDto>();
     }
 
     [TestMethod]

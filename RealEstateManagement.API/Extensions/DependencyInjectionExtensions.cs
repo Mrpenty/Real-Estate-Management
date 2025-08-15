@@ -30,6 +30,9 @@ using RealEstateManagement.Business.Services.Reviews;
 using RealEstateManagement.Business.Services.Admin;
 using RealEstateManagement.Business.Repositories.Admin;
 using RealEstateManagement.Business.Repositories.AmenityRepo;
+using FluentValidation.AspNetCore;
+using FluentValidation;
+using RealEstateManagement.Business.Validators.News;
 namespace RealEstateManagement.API.Extensions
 {
     public static class DependencyInjectionExtensions
@@ -38,7 +41,6 @@ namespace RealEstateManagement.API.Extensions
         {
             // Generic Repository
             services.AddScoped(typeof(IRepositoryAsync<>), typeof(RepositoryAsync<>));
-
             //---Repository--\\
             services.AddScoped<ITokenRepository, TokenRepository>();
             services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
@@ -49,7 +51,6 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IRentalContractRepository, RentalContractRepository>();
             services.AddScoped<IOwnerPropertyRepository, OwnerPropertyRepository>();
             services.AddScoped<IAmenityRepository, AmenityRepository>();
-
             // Some support Repository
             services.AddScoped<IAddressRepository, AddressRepository>();
             services.AddScoped<ISearchProRepo, SearchProRepo>();
@@ -60,14 +61,9 @@ namespace RealEstateManagement.API.Extensions
             //Chat Repository
             services.AddScoped<IConversationRepository, ConversationRepository>();
             services.AddScoped<IMessageRepository, MessageRepository>();
-
             //Notification Repository
             services.AddScoped<INotificationRepository, NotificationRepository>();
-
-          
-
             //----Service----\\
-
             //Property Services
             services.AddScoped<IPropertyService, PropertyService>();
             services.AddScoped<IPropertyPostService, PropertyPostService>();
@@ -75,20 +71,17 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IOwnerPropertyService, OwnerPropertyService>();
             services.AddScoped<IRentalContractService, RentalContractService>();
             services.AddScoped<ISliderService, SliderService>();
-
             //user and auth services
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IMailService, MailService>();
             services.AddScoped<ISmsService, ZaloSmsService>();
             services.AddScoped<IProfileService, ProfileService>();
-
             //some suport services
             services.AddScoped<IUploadPicService, UploadPicService>();
             services.AddScoped<ISearchProService, SearchProService>();
             services.AddScoped<IFavoriteService, FavoriteService>();
             services.AddScoped<IPromotionPackageService, PromotionPackageService>();
             services.AddScoped<IPropertyPromotionService, PropertyPromotionService>();
-
             //Chat Serivce
             services.AddScoped<IConversationService, ConversationService>();
             services.AddScoped<IMessageService, MessageService>();
@@ -97,37 +90,30 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<INewsService, NewsService>();
             services.AddScoped<INewsImageRepository, NewsImageRepository>();
             services.AddScoped<INewImageService, NewImageService>();
-
             services.AddScoped<OpenAIService>();
-
-
             //Notification Service
             services.AddScoped<INotificationService, NotificationService>();
-
             //Admin Dashboard Service
             services.AddScoped<IAdminDashboardService, AdminDashboardService>();
-
-
-            // Tenant Interaction Service
-            //services.AddScoped<IInteractionService, InteractionService>();
-            //services.AddScoped<IInteractionRepository, InteractionRepository>();
-
-
-
             //Wallet
             services.AddScoped<WalletService>();
             services.AddScoped<QRCodeService>();
-
             //Interested Property
             services.AddScoped<IInterestedPropertyRepository, InterestedPropertyRepository>();
             services.AddScoped<IInterestedPropertyService, InterestedPropertyService>();
-
-
             // logic kiểm tra và cập nhật bài hết hạn
             services.AddHostedService<ExpirePostBackgroundService>();
             //Review
             services.AddScoped<IReviewRepository, ReviewRepository>();
             services.AddScoped<IReviewService, ReviewService>();
+
+            //Validators
+            services.AddScoped<NewsCreateDtoValidator>();
+            services.AddValidatorsFromAssemblyContaining<NewsCreateDtoValidator>();
+
+            // Nếu muốn tích hợp tự động với MVC model binding
+            services.AddFluentValidationAutoValidation()
+                    .AddFluentValidationClientsideAdapters();
             return services;
         }
     }

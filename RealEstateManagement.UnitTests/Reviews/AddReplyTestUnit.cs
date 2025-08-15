@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RealEstateManagement.UnitTests
+namespace RealEstateManagement.UnitTests.Reviews
 {
-    internal class AddReviewTestUnit
+    internal class AddReplyTestUnit
     {
     }
 }

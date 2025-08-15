@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using FluentValidation;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using RealEstateManagement.Business.DTO.News;
 using RealEstateManagement.Business.Repositories.NewsRepository;
@@ -8,7 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using FluentValidation;
+using FluentValidation.Results;
 [TestClass]
 public class GetAllNewsTestUnit
 {
@@ -19,7 +21,14 @@ public class GetAllNewsTestUnit
     public void Setup()
     {
         _mockRepo = new Mock<INewsRepository>();
-        _service = new NewsService(_mockRepo.Object);
+
+        var mockValidator = new Mock<IValidator<NewsCreateDto>>();
+        // Mặc định cho pass validation
+        mockValidator
+            .Setup(v => v.Validate(It.IsAny<NewsCreateDto>()))
+            .Returns(new ValidationResult());
+
+        _service = new NewsService(_mockRepo.Object, mockValidator.Object);
     }
 
     [TestMethod]

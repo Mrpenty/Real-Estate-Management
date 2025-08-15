@@ -339,7 +339,87 @@
         </div>
     </div>
 </div>
+<script>
+    // Giả sử khi load chi tiết bất động sản, bạn set luôn landlordId:
+    // window.landlordId = data.landlordId; // làm điều này trong property-detail.js khi fetch xong
 
+    // Gắn handler cho cả 2 nút "Nhắn Zalo"
+    document.addEventListener("DOMContentLoaded", function () {
+        const zaloBtns = document.querySelectorAll(".contact-btn.zalo, .contact-btn-vertical.zalo");
+        zaloBtns.forEach(btn => {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                // Kiểm tra đăng nhập
+                const token = localStorage.getItem("authToken");
+                if (!token) {
+                    window.location.href = "/Auth/Login";
+                    return;
+                }
+                // Gọi hàm đã có sẵn để tạo/mở conversation
+                // 👉 lưu ý tham số thứ 2 là propertyId (đúng camelCase)
+                startChatWithLandlord(window.landlordId, window.currentPropertyId);
+            });
+        });
+    });
+    // Lấy conversationId từ query string nếu có
+    (function initConversationFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get("conversationId");
+        if (id) {
+            currentConversationId = parseInt(id, 10);
+        }
+    })();
+
+    // Sửa body gửi lên thành propertyId (camelCase)
+    async function startChatWithLandlord(landlordId, propertyId) {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+            window.location.href = "/Auth/Login";
+            return;
+        }
+
+        const renterId = getUserIdFromToken(token);
+        const dto = { renterId, landlordId, propertyId }; // <-- đổi propertyid -> propertyId
+
+        try {
+            const res = await fetch("https://localhost:7031/api/Chat/create-conversation", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(dto)
+            });
+
+            if (!res.ok) {
+                const err = await res.text();
+                alert("Không thể tạo hoặc mở cuộc trò chuyện: " + err);
+                return;
+            }
+
+            const data = await res.json();
+            if (data && data.id) {
+                // Điều hướng sang trang Chat + kèm conversationId để auto mở
+                window.location.href = `/Chat/Index?conversationId=${data.id}`;
+            }
+        } catch (err) {
+            console.error("Lỗi khi mở chat:", err);
+        }
+    }
+</script>
+<script>
+    function getUserIdFromToken(token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const id = payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]
+                || payload["sub"]
+                || payload["nameid"];
+            return parseInt(id);
+        } catch {
+            return null;
+        }
+    }
+</script>
 
 <script>
     // Set the current property ID from ViewBag

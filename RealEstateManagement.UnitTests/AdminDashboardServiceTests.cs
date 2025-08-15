@@ -27,14 +27,14 @@ public class AdminDashboardServiceTests
     [TestMethod]
     public async Task GenerateReportAsync_ExcelReportDaily_ReturnsByteArray()
     {
-        var request = new ReportRequestDTO { Format = "excel", ReportType = "daily", StartDate = DateTime.Now.AddDays(-7), EndDate = DateTime.Now };
+        var request = new ReportRequestDTO { ReportType = "daily", StartDate = DateTime.Now.AddDays(-7), EndDate = DateTime.Now };
         var dailyStats = new List<DailyStatsDTO>
         {
             new DailyStatsDTO { Date = DateTime.Now.AddDays(-1), NewUsers = 10, NewProperties = 5, NewPosts = 2, Revenue = 1000, Views = 200 }
         };
         _mockAdminDashboardRepository.Setup(r => r.GetDailyStatsAsync(request.StartDate, request.EndDate)).ReturnsAsync(dailyStats);
 
-        var result = await _adminDashboardService.GenerateReportAsync(request);
+        var result = await _adminDashboardService.GenerateExcelReportAsync(request);
 
         Assert.IsNotNull(result);
         Assert.IsTrue(result.Length > 0);
@@ -46,14 +46,14 @@ public class AdminDashboardServiceTests
     [TestMethod]
     public async Task GenerateReportAsync_PdfReportMonthly_ReturnsByteArray()
     {
-        var request = new ReportRequestDTO { Format = "pdf", ReportType = "monthly", StartDate = new DateTime(2023, 1, 1), EndDate = new DateTime(2023, 12, 31) };
+        var request = new ReportRequestDTO { ReportType = "monthly", StartDate = new DateTime(2023, 1, 1), EndDate = new DateTime(2023, 12, 31) };
         var monthlyStats = new List<MonthlyStatsDTO>
         {
             new MonthlyStatsDTO { Month = 1, Year = 2023, NewUsers = 50, NewProperties = 20, NewPosts = 10, Revenue = 5000, Views = 1000 }
         };
         _mockAdminDashboardRepository.Setup(r => r.GetMonthlyStatsAsync(request.StartDate.Year)).ReturnsAsync(monthlyStats);
 
-        var result = await _adminDashboardService.GenerateReportAsync(request);
+        var result = await _adminDashboardService.GenerateExcelReportAsync(request);
 
         Assert.IsNotNull(result);
         Assert.IsTrue(result.Length > 0);
@@ -66,9 +66,9 @@ public class AdminDashboardServiceTests
     [TestMethod]
     public async Task GenerateReportAsync_UnsupportedFormat_ThrowsArgumentException()
     {
-        var request = new ReportRequestDTO { Format = "unsupported", ReportType = "daily" };
+        var request = new ReportRequestDTO { ReportType = "daily" };
 
-        await Assert.ThrowsExceptionAsync<ArgumentException>(() => _adminDashboardService.GenerateReportAsync(request));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(() => _adminDashboardService.GenerateExcelReportAsync(request));
         _mockLogger.Verify(
             x => x.LogError(It.IsAny<Exception>(), "Error generating report"),
             Times.Once);
@@ -77,8 +77,8 @@ public class AdminDashboardServiceTests
     [TestMethod]
     public async Task GenerateReportAsync_UnsupportedReportType_ThrowsArgumentException()
     {
-        var request = new ReportRequestDTO { Format = "excel", ReportType = "unsupported" };
+        var request = new ReportRequestDTO { ReportType = "unsupported" };
 
-        await Assert.ThrowsExceptionAsync<ArgumentException>(() => _adminDashboardService.GenerateReportAsync(request));
+        await Assert.ThrowsExceptionAsync<ArgumentException>(() => _adminDashboardService.GenerateExcelReportAsync(request));
     }
 }
