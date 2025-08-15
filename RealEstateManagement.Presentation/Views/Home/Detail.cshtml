@@ -36,7 +36,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:15px;height:15px" viewBox="0 0 24 24">
                             <path d="M20 2H4C1.8 2 0 3.8 0 6v12c0 2.2 1.8 4 4 4h4v2.4c0 .6.4 1 1 1 .2 0 .5-.1.7-.3L14.3 22H20c2.2 0 4-1.8 4-4V6c0-2.2-1.8-4-4-4z" />
                         </svg>
-                            <span><span id="totalCommentCount">0</span> bình luận</span>
+                            <span><span id="totalComment"></span> bình luận</span>
                         </div>
                     </div>
                 </div>
@@ -111,81 +111,7 @@
                             </a>
                         </div>
                     </div>
-                </div>
-
-                <!-- Comment and Rating Section -->
-                <h2 class="section-title">Đánh giá & Bình luận</h2>
-                
-
-                
-                <!-- Add Comment Form -->
-                <div class="comment-form-section">
-                    <div class="comment-form-header">
-                        <h3 class="comment-form-title">Thêm đánh giá của bạn</h3>
-                    </div>
-                    
-                    <form id="commentForm" class="comment-form">
-                        <div class="rating-input-section">
-                            <label class="rating-label">Đánh giá của bạn:</label>
-                            <div class="star-rating-input">
-                                <input type="radio" id="star5" name="rating" value="5" class="star-input">
-                                <label for="star5" class="star-label">★</label>
-                                <input type="radio" id="star4" name="rating" value="4" class="star-input">
-                                <label for="star4" class="star-label">★</label>
-                                <input type="radio" id="star3" name="rating" value="3" class="star-input">
-                                <label for="star3" class="star-label">★</label>
-                                <input type="radio" id="star2" name="rating" value="2" class="star-input">
-                                <label for="star2" class="star-label">★</label>
-                                <input type="radio" id="star1" name="rating" value="1" class="star-input">
-                                <label for="star1" class="star-label">★</label>
-                            </div>
-                        </div>
-                        
-                        <div class="comment-input-section">
-                            <label for="commentContent" class="comment-input-label">Bình luận:</label>
-                            <textarea id="commentContent" name="content" rows="4" 
-                                      placeholder="Chia sẻ trải nghiệm của bạn về bất động sản này..."
-                                      class="comment-textarea" required></textarea>
-                        </div>
-                        
-                        <div class="comment-form-actions">
-                            <button type="submit" class="submit-comment-btn">
-                                <span>💬</span>
-                                <span>Gửi đánh giá</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Comments List -->
-                <div class="comments-section">
-                    <div class="comments-header">
-                        <h3 class="comments-title">Tất cả đánh giá (<span id="totalCommentCount">0</span>)</h3>
-                    </div>
-                    
-                    <div id="commentsList" class="comments-list">
-                        <!-- Comments will be populated by JavaScript -->
-                        <div class="comments-loading">
-                            <p class="text-gray-500 text-center py-8">Đang tải bình luận...</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Comments Pagination -->
-                    <div id="commentsPagination" class="comments-pagination hidden">
-                        <button id="prevComment" class="pagination-btn">‹ Trước</button>
-                        <span id="commentPageInfo" class="pagination-info"></span>
-                        <button id="nextComment" class="pagination-btn">Sau ›</button>
-                    </div>
-                    
-                    <!-- No Comments Message -->
-                    <div id="noComments" class="no-comments hidden">
-                        <div class="text-center py-8">
-                            <div class="text-gray-400 text-6xl mb-4">💬</div>
-                            <p class="text-gray-500 text-lg">Chưa có đánh giá nào</p>
-                            <p class="text-gray-400">Hãy là người đầu tiên đánh giá bất động sản này!</p>
-                        </div>
-                    </div>
-                </div>
+            </div>
             </div>
 
             <!-- Similar Properties -->
@@ -360,21 +286,8 @@
             console.log('Extracted ID from URL:', window.currentPropertyId);
         }
     }
-    
-
-    
-
-    
-    
-    
-
-    
-
-    
-
 </script>
-<script src="~/js/helper.js"></script>
+<script src="~/js/Home/property-detail.js"></script>
 <script src="~/js/Home/reportService.js"></script>
 <script src="~/js/propertyService.js"></script>
 <script src="~/js/Home/review.js"></script>
-<script src="~/js/Home/property-detail.js"></script>
