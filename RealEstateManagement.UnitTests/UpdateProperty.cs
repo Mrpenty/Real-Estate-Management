@@ -39,9 +39,9 @@ public class UpdateProperty
             Area = 50,
             Bedrooms = 1
         };
-        var dto = new OwnerUpdatePropertyDto
+        var dto = new PropertyCreateRequestDto
         {
-            Id = propertyId,
+           // Id = propertyId,
             Title = "New Title",
             Description = "New Description",
             Price = 2000000,
@@ -55,7 +55,7 @@ public class UpdateProperty
                               .Returns(Task.CompletedTask);
 
         // Act
-        await _ownerPropertyService.UpdatePropertyAsync(dto, landlordId);
+        await _ownerPropertyService.UpdatePropertyAsync(dto, landlordId, propertyId);
 
         // Assert
         _mockOwnerPropertyRepo.Verify(r => r.UpdateAsync(It.Is<Property>(p =>
@@ -74,9 +74,9 @@ public class UpdateProperty
         // Arrange
         var landlordId = 1;
         var propertyId = 999;
-        var dto = new OwnerUpdatePropertyDto
+        var dto = new PropertyCreateRequestDto
         {
-            Id = propertyId,
+           // Id = propertyId,
             Title = "New Title",
             Description = "New Description"
         };
@@ -86,7 +86,7 @@ public class UpdateProperty
 
         // Act & Assert
         var exception = await Assert.ThrowsExceptionAsync<Exception>(() =>
-            _ownerPropertyService.UpdatePropertyAsync(dto, landlordId));
+            _ownerPropertyService.UpdatePropertyAsync(dto, landlordId, propertyId));
         Assert.AreEqual("Property not found or not owned by landlord.", exception.Message);
         _mockOwnerPropertyRepo.Verify(r => r.UpdateAsync(It.IsAny<Property>()), Times.Never);
     }

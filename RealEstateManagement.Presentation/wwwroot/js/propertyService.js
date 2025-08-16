@@ -1,4 +1,4 @@
-﻿var API_PROPERTY_BASE_URL = 'https://localhost:7031/api/Property';
+﻿API_PROPERTY_BASE_URL = 'https://localhost:7031/api/Property';
 var API_PROPERTY_BASE_URL2 = 'https://localhost:7031/api/OwnerProperty';
 
 const propertyService = {
@@ -110,6 +110,7 @@ const propertyService = {
             throw error;
         }
     },
+
     async getOwnerProperty(id) {
         try {
             const token = localStorage.getItem('authToken');

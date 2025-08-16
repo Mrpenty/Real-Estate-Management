@@ -5,6 +5,7 @@ using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Services.Properties;
 using RealEstateManagement.Data.Entity.User;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace RealEstateManagement.API.Controllers.Home
@@ -65,17 +66,15 @@ namespace RealEstateManagement.API.Controllers.Home
         /// Tạo mới quan tâm (Add Interest)
         /// </summary>
         [HttpPost("AddInterest")]
-        public async Task<ActionResult<InterestedPropertyDTO>> AddInterest([FromQuery] int renterId, [FromQuery] int propertyId)
+        public async Task<ActionResult<InterestedPropertyDTO>> AddInterest([FromQuery] int propertyId)
         {
-            try
-            {
-                var result = await _service.AddInterestAsync(renterId, propertyId);
-                return Ok(result);
-            }
-            catch (InvalidOperationException ex) // LandlordRejected -> không cho quan tâm lại
-            {
-                return Conflict(new { message = ex.Message }); // 409
-            }
+            var userIdStr = User.FindFirst("id")?.Value
+                 ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                 ?? User.FindFirst("sub")?.Value;
+            if (!int.TryParse(userIdStr, out var renterId))
+                return Unauthorized();
+            var result = await _service.AddInterestAsync(renterId, propertyId);
+            return Ok(result);
         }
 
         /// <summary>
@@ -109,15 +108,13 @@ namespace RealEstateManagement.API.Controllers.Home
         [HttpPost("{id}/confirm")]
         public async Task<IActionResult> ConfirmInterest(int id, [FromQuery] bool isRenter, [FromQuery] bool confirmed)
         {
-            try
-            {
-                await _service.ConfirmInterestAsync(id, isRenter, confirmed);
-                return Ok(new { message = "Xác nhận thành công!" });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var userIdStr = User.FindFirst("id")?.Value
+                 ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                 ?? User.FindFirst("sub")?.Value;
+            if (!int.TryParse(userIdStr, out var currentUserId))
+                return Unauthorized();
+            await _service.ConfirmInterestAsync(id, isRenter, confirmed);
+            return Ok(new { message = "Xác nhận thành công!" });
         }
     }
 }

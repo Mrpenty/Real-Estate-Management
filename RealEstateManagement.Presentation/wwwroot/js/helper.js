@@ -370,7 +370,7 @@ async function clickInterest(id, isExist, interestedStatus, isReminderRenterConf
                 });
 
                 const data = await response.json();
-                //alert('Thành công');
+                alert('Thành công');
                 //window.location.reload();
 
                 return data;
@@ -380,9 +380,33 @@ async function clickInterest(id, isExist, interestedStatus, isReminderRenterConf
             }
         }
 
+        else if (isReminderRenterConfirmInterested == 2) {
+            if (!confirm("Bài quan tâm đã quá hạn. Bạn muốn quan tâm lại ?")) return;
+            const token = localStorage.getItem('authToken');
+            if (!token) window.location.href = '/Auth/Login';
+            let userId = 0;
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            userId = payload.id;
+            try {
+                const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/AddInterest?propertyId=${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                //console.log(data);
+                alert('Thành công');
+                window.location.reload();
+                return data;
+            } catch (error) {
+                console.error('Update error:', error);
+                throw error;
+            }
+        }
     }
-
-
 }
 
 async function addToFavourite(id) {
