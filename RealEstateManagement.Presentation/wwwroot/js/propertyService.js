@@ -110,6 +110,7 @@ const propertyService = {
             throw error;
         }
     },
+
     async getOwnerProperty(id) {
         try {
             const token = localStorage.getItem('authToken');

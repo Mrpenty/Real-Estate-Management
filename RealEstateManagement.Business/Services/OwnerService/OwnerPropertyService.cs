@@ -68,9 +68,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
             var entity = await _ownerPropertyRepo.GetByIdAsync(id, landlordId);
             if (entity == null)
                 throw new Exception("Property not found.");
-
-            var interestDtos = await _rentalDbContext.InterestedProperties.Include(c => c.Renter).Where(c => c.PropertyId == id && c.Status == Data.Entity.User.InterestedStatus.WaitingForLandlordReply).ToListAsync();
-
+            var interestDtos = await _rentalDbContext.InterestedProperties.Include(c => c.Renter).Where(c => c.PropertyId == id).ToListAsync();
             var dto = new OwnerPropertyDto
             {
                 Id = entity.Id,
@@ -93,7 +91,8 @@ namespace RealEstateManagement.Business.Services.OwnerService
                     RenterName = c.Renter.Name,
                     RenterEmail = c.Renter.Email,
                     RenterPhone = c.Renter.PhoneNumber,
-                    RenterUserName = c.Renter.UserName
+                    RenterUserName = c.Renter.UserName,
+                    Status = (int)c.Status
                 }).ToList(),
                 Images = entity.Images?.Select(img => new OwnerPropertyImageDto
                 {

@@ -3,6 +3,7 @@ using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Repositories.Chat.Messages;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Repositories.Properties;
+using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using RealEstateManagement.Data.Entity.User;
 using System;
@@ -18,11 +19,13 @@ namespace RealEstateManagement.Business.Services.Properties
         private readonly IInterestedPropertyRepository _repository;
         private readonly IPropertyPostRepository _postRepo; // Giả sử bạn đã inject IPropertyPostRepository để cập nhật trạng thái PropertyPost
         private readonly IMessageRepository _msgReadRepo;
-        public InterestedPropertyService(IInterestedPropertyRepository repository, IPropertyPostRepository postRepo, IMessageRepository msgReadRepo)
+        private readonly IRentalContractRepository _contractRepo; 
+        public InterestedPropertyService(IInterestedPropertyRepository repository, IPropertyPostRepository postRepo, IMessageRepository msgReadRepo, IRentalContractRepository contractRepo)
         {
             _repository = repository;
             _postRepo = postRepo;
             _msgReadRepo = msgReadRepo;
+            _contractRepo = contractRepo;
         }
 
         private InterestedPropertyDTO MapToDTO(InterestedProperty entity)
@@ -102,7 +105,16 @@ namespace RealEstateManagement.Business.Services.Properties
                     if (post != null)
                     {
                         post.Status = PropertyPost.PropertyPostStatus.Rented; 
-                        await _postRepo.UpdateAsync(post);                 
+                        await _postRepo.UpdateAsync(post);
+
+                        var contract = await _contractRepo.GetByPostIdAsync(post.Id);
+                        if (contract != null)
+                        {
+                            contract.Status = RentalContract.ContractStatus.Confirmed;
+                            contract.RenterId = ip.RenterId; // ip.RenterId lấy từ InterestedProperty
+                            contract.ConfirmedAt = DateTime.UtcNow;
+                            await _contractRepo.UpdateContractAsync(contract);
+                        }
                     }
                 }
 
@@ -160,8 +172,6 @@ namespace RealEstateManagement.Business.Services.Properties
                 ResetForReopen(existing);                 // CHANGED
                 await _repository.UpdateAsync(existing);  // CHANGED
             }
-
-            // Nếu Quá hạn => cho phép mở lại = WaitingForRenterReply
             if (existing.Status == InterestedStatus.WaitingForRenterReply)
             {
                 ResetForReopen(existing);                 // CHANGED

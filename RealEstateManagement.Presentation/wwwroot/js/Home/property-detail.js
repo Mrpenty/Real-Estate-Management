@@ -204,6 +204,11 @@ class PropertyDetailManager {
             } else {
                 this.updateReportButtonForGuest();
             }
+
+            // Nếu có renterId thì check quan tâm
+            if (this.currentUserId) {
+                this.checkInterestAndRender(prop.id, this.currentUserId, prop);
+            }
             
         } catch (error) {
             console.error('Error loading property:', error);
@@ -215,6 +220,8 @@ class PropertyDetailManager {
 
     updateUI(prop) {
         // Update title and rating
+        this.fullPhoneNumber = prop.landlordPhoneNumber || 'N/A';
+        this.isInterested = false;
         this.updateElement('.titleId', prop.title);
         this.renderStarsBody(prop.rating);
         this.updateElement('#avgStar', `(${prop.rating})`);
@@ -254,7 +261,6 @@ class PropertyDetailManager {
         this.updateElement('.provinceId', prop.province || 'N/A');
         this.updateElement('#propId', prop.id || 'N/A');
         this.updateElement('#createTimeId', this.formatDateTime(prop.createdAt));
-        this.updateElement('.contactPhone', prop.landlordPhoneNumber || 'N/A');
         this.updateElement('.contactName', prop.landlordName || 'Không xác định');
         
         // Handle favorite buttons
@@ -267,7 +273,6 @@ class PropertyDetailManager {
             console.warn('Image URLs is null/undefined or not an array, skipping thumbnails');
             $('#listImgs').html('<div class="text-gray-500 text-center py-4">Không có hình ảnh</div>');
         }
-        
         // Update map
         this.updateMap(prop);
         
@@ -276,6 +281,156 @@ class PropertyDetailManager {
         setTimeout(() => {
             this.loadCommentsWithRetry();
         }, 100);
+    }
+
+    // Hàm che số
+    maskPhone(phone) {
+        if (phone === 'N/A') return phone;
+        let half = Math.floor(phone.length / 2);
+        return phone.substring(0, half) + "*".repeat(phone.length - half);
+    }
+
+    // Render số bị che
+    renderMaskedPhone() {
+        let masked = this.maskPhone(this.fullPhoneNumber);
+        $('.contactPhone').text(masked);
+        $('#phoneLink').attr('href', ''); // Không cho click gọi
+        $('#zaloLink').attr('href', '#');
+    }
+
+    async checkInterestAndRender(propertyId, renterId, propertyData) {
+        try {
+            if (!renterId) {
+                alert("Bạn cần đăng nhập để sử dụng tính năng này!");
+                this.isInterested = false;
+                this.renderMaskedPhone();
+                $(".btn-add-interest").show().off("click").on("click", () => {
+                    alert("Bạn cần đăng nhập để quan tâm!");
+                });
+                $(".btn-remove-interest, .btn-view-contract, .btn-agree-rent, .waiting-landlord").hide();
+                $("#contract-section").hide();
+                return;
+            }
+
+            // Lấy danh sách quan tâm
+            let res = await fetch(`${this.urlBase}/api/Property/InterestedProperty/ByRenter/${renterId}`, { credentials: "include" });
+            if (!res.ok) throw new Error("API get interest failed");
+            let interestList = await res.json();
+
+            // Tìm bản ghi interest
+            let foundInterest = interestList.find(item => item.propertyId === propertyId);
+
+            if (foundInterest) {
+                this.isInterested = true;
+                this.showFullPhone();
+                $(".btn-add-interest").hide();
+                $(".btn-remove-interest").show();
+                $(".btn-view-contract").show();
+
+                if (foundInterest.status === 2) {
+                    $(".btn-agree-rent").show();
+                    $(".waiting-landlord").hide();
+                } else if (foundInterest.status === 3) {
+                    $(".btn-agree-rent").hide();
+                    $(".waiting-landlord").show().text("Đang chờ Landlord phản hồi...");
+                } else {
+                    $(".btn-agree-rent").hide();
+                    $(".waiting-landlord").hide();
+                }
+            } else {
+                this.isInterested = false;
+                this.renderMaskedPhone();
+                $(".btn-add-interest").show();
+                $(".btn-remove-interest, .btn-view-contract, .btn-agree-rent, .waiting-landlord").hide();
+                $("#contract-section").hide();
+            }
+
+            // Sự kiện Quan tâm (dùng propertyId)
+            $(".btn-add-interest").off("click").on("click", async () => {
+                try {
+                    let apiUrl = `${this.urlBase}/api/Property/InterestedProperty/AddInterest?propertyId=${propertyId}`;
+                    let toggleRes = await fetch(apiUrl, { method: "POST", credentials: "include" });
+                    if (!toggleRes.ok) throw new Error(`API add interest failed: ${toggleRes.status}`);
+                    location.reload();
+                } catch (err) {
+                    console.error("Error adding interest:", err);
+                    alert("Có lỗi xảy ra khi thêm quan tâm!");
+                }
+            });
+
+            // Sự kiện Hủy quan tâm (dùng interestId)
+            $(".btn-remove-interest").off("click").on("click", async () => {
+                try {
+                    if (!foundInterest) return;
+                    let apiUrl = `${this.urlBase}/api/Property/InterestedProperty/RemoveInterest?propertyId=${propertyId}`;
+                    let toggleRes = await fetch(apiUrl, { method: "DELETE", credentials: "include" });
+                    if (!toggleRes.ok) throw new Error(`API remove interest failed: ${toggleRes.status}`);
+                    location.reload();
+                } catch (err) {
+                    console.error("Error removing interest:", err);
+                    alert("Có lỗi xảy ra khi hủy quan tâm!");
+                }
+            });
+
+            // Xem hợp đồng
+            $(".btn-view-contract").off("click").on("click", () => {
+                const rc = {
+                    DepositAmount: propertyData.contractDeposit,
+                    MonthlyRent: propertyData.contractMonthlyRent,
+                    ContractDurationMonths: propertyData.contractDurationMonths,
+                    StartDate: propertyData.contractStartDate,
+                    EndDate: propertyData.contractEndDate,
+                    Status: propertyData.contractStatus,
+                    PaymentMethod: propertyData.contractPaymentMethod,
+                    ContactInfo: propertyData.contractContactInfo
+                };
+                if (!rc.DepositAmount && !rc.MonthlyRent) {
+                    alert("Không có dữ liệu hợp đồng!");
+                    return;
+                }
+                $("#ContractDeposit").text(rc.DepositAmount || "N/A");
+                $("#ContractMonthlyRent").text(rc.MonthlyRent || "N/A");
+                $("#ContractDurationMonths").text(rc.ContractDurationMonths || "N/A");
+                $("#ContractStartDate").text(rc.StartDate || "N/A");
+                $("#ContractEndDate").text(rc.EndDate || "N/A");
+                $("#ContractStatus").text(rc.Status || "N/A");
+                $("#ContractPaymentMethod").text(rc.PaymentMethod || "N/A");
+                $("#ContractContactInfo").text(rc.ContactInfo || "N/A");
+
+                $("#contract-section").slideToggle();
+            });
+
+            // Tôi muốn thuê
+            $(".btn-agree-rent").off("click").on("click", async () => {
+                if (!foundInterest) return;
+                if (!confirm("Bạn chắc chắn muốn thuê chứ?")) return;
+                try {
+                    let interestId = foundInterest.id;
+                    let apiUrl = `${this.urlBase}/api/Property/InterestedProperty/${interestId}/confirm?isRenter=true&confirmed=true`;
+                    let res = await fetch(apiUrl, { method: "POST", credentials: "include" });
+                    if (!res.ok) throw new Error(await res.text());
+                    let data = await res.json();
+                    alert(data.message || "Xác nhận thành công!");
+                    location.reload();
+                } catch (err) {
+                    console.error("Error confirming rent:", err);
+                    alert("Có lỗi xảy ra khi xác nhận thuê: " + err.message);
+                }
+            });
+
+        } catch (err) {
+            console.error("Error checking interest:", err);
+            this.isInterested = false;
+            this.renderMaskedPhone();
+            $(".btn-add-interest").show();
+            $(".btn-remove-interest, .btn-view-contract, .btn-agree-rent, .waiting-landlord").hide();
+        }
+    }
+
+    showFullPhone() {
+        $('.contactPhone').text(this.fullPhoneNumber);
+        $('#phoneLink').attr('href', 'tel:' + this.fullPhoneNumber);
+        $('#zaloLink').attr('href', 'https://zalo.me/' + this.fullPhoneNumber);
     }
 
     updateElement(selector, value) {

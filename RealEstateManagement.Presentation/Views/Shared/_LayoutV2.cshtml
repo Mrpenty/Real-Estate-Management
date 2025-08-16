@@ -368,7 +368,7 @@
                 }
 
                 // Cập nhật hiển thị nút Đăng tin dựa trên vai trò
-                if (user && user.role === 'Landlord') {
+                if (user && user.role === 'Landlord' || user && user.role === 'landlord') {
                     if (postPropertyButton) postPropertyButton.style.display = 'flex';
                 } else {
                     if (postPropertyButton) postPropertyButton.style.display = 'none';
