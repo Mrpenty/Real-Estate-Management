@@ -4,7 +4,85 @@
 }
 
 <link rel="stylesheet" href="~/css/property-detail.css" />
+<style>
 
+    .interest-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 2px dashed #ff9800;
+        border-radius: 8px;
+        background: #fff7e6;
+        text-align: center;
+        position: relative;
+    }
+
+    .interest-note-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .interest-note {
+        font-size: 15px;
+        font-weight: bold;
+        color: #d35400;
+        animation: blinkNote 1.2s infinite;
+    }
+
+    .interest-arrow {
+        width: 120px;
+        height: 60px;
+        animation: blinkArrow 1.2s infinite;
+    }
+
+    /* Blink text */
+    @@keyframes blinkNote {
+        0%, 100%
+
+    {
+        color: #d35400;
+    }
+
+    50% {
+        color: #ff5722;
+    }
+
+    }
+
+    /* Blink arrow stroke */
+    @@keyframes blinkArrow {
+        0%, 100%
+
+    {
+        opacity: 1;
+        stroke: #ff5722;
+    }
+
+    50% {
+        opacity: 0.4;
+        stroke: #ff9800;
+    }
+
+    }
+
+    /* Button */
+    .interest-btn {
+        margin-top: 10px;
+        padding: 10px 20px;
+        background: #ff5722;
+        color: white;
+        font-size: 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+        .interest-btn:hover {
+            background: #e64a19;
+        }
+
+</style>
 <div class="property-detail-container">
     <div class="property-detail-grid">
         <!-- Main Content Area -->
@@ -93,6 +171,45 @@
                             loading="lazy"></iframe>
                 </div>
 
+                <!-- Interest Section -->
+                <h2 class="section-title">Quan tâm bài đăng</h2>
+                <div class="interest-section">
+                    <p class="interest-note">
+                        <span class="arrow">➤</span>
+                        Để liên hệ với người thuê và xem chi tiết hợp đồng, hãy ấn nút <strong>Quan tâm</strong>
+                    </p>
+                    <button class="interest-btn btn-add-interest">
+                        ❤️ Quan tâm
+                    </button>
+                    <button class="interest-btn btn-remove-interest" style="display:none;">
+                        ❌ Hủy quan tâm
+                    </button>
+                    <button class="interest-btn btn-view-contract" style="display:none;">
+                        📄 Xem hợp đồng
+                    </button>
+                    <button class="interest-btn btn-success btn-agree-rent" style="display:none;">
+                        Tôi muốn thuê
+                    </button>
+                    <div class="waiting-landlord text-warning" style="display:none;"></div>
+                </div>
+
+                <!-- Khung hiển thị hợp đồng -->
+                <div id="contract-section" style="display:none; margin-top:15px; border:1px solid #ccc; padding:10px; border-radius:6px;">
+                    <h2 class="section-title">📄 Thông tin hợp đồng</h2>
+                    <table style="width:100%; border-collapse: collapse;">
+                        <tbody>
+                            <tr><td><strong>Tiền cọc:</strong></td><td id="ContractDeposit"></td></tr>
+                            <tr><td><strong>Tiền thuê hàng tháng:</strong></td><td id="ContractMonthlyRent"></td></tr>
+                            <tr><td><strong>Thời hạn hợp đồng (tháng):</strong></td><td id="ContractDurationMonths"></td></tr>
+                            <tr><td><strong>Ngày bắt đầu:</strong></td><td id="ContractStartDate"></td></tr>
+                            <tr><td><strong>Ngày kết thúc:</strong></td><td id="ContractEndDate"></td></tr>
+                            <tr><td><strong>Trạng thái:</strong></td><td id="ContractStatus"></td></tr>
+                            <tr><td><strong>Phương thức thanh toán:</strong></td><td id="ContractPaymentMethod"></td></tr>
+                            <tr><td><strong>Thông tin liên hệ:</strong></td><td id="ContractContactInfo"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
                 <h2 class="section-title">Thông tin liên hệ</h2>
                 <div class="contact-section">
                     <div class="contact-avatar" onclick="propertyDetailManager.openLandlord()">
@@ -360,17 +477,6 @@
             console.log('Extracted ID from URL:', window.currentPropertyId);
         }
     }
-    
-
-    
-
-    
-    
-    
-
-    
-
-    
 
 </script>
 <script src="~/js/helper.js"></script>
