@@ -1,4 +1,4 @@
-﻿var API_PROPERTY_BASE_URL = 'https://localhost:7031/api/Property';
+﻿API_PROPERTY_BASE_URL = 'https://localhost:7031/api/Property';
 var API_PROPERTY_BASE_URL2 = 'https://localhost:7031/api/OwnerProperty';
 
 const propertyService = {
@@ -129,7 +129,6 @@ const propertyService = {
             });
 
             const data = await response.json();
-
             if (!response.ok) {
                 throw new Error(data.message || data.errorMessage || 'Get property failed');
             }

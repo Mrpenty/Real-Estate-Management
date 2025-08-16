@@ -43,6 +43,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                     Ward = entity.Address.Ward.Name,
                     Street = entity.Address.Street.Name,
                     CreatedAt = entity.CreatedAt,
+                    InterestNo = _rentalDbContext.InterestedProperties.Count(c => c.PropertyId == entity.Id && c.Status == Data.Entity.User.InterestedStatus.WaitingForLandlordReply),
                     Posts = entity.Posts.Select(post => new OwnerPropertyPostDto
                     {
                         Id = post.Id,
@@ -68,6 +69,8 @@ namespace RealEstateManagement.Business.Services.OwnerService
             if (entity == null)
                 throw new Exception("Property not found.");
 
+            var interestDtos = await _rentalDbContext.InterestedProperties.Include(c => c.Renter).Where(c => c.PropertyId == id && c.Status == Data.Entity.User.InterestedStatus.WaitingForLandlordReply).ToListAsync();
+
             var dto = new OwnerPropertyDto
             {
                 Id = entity.Id,
@@ -80,6 +83,18 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 Bedrooms = entity.Bedrooms,
                 Area = entity.Area,
                 Type = entity.Type,
+                InterestedProperties = interestDtos.Select(c => new DTO.Properties.InterestedPropertyDTO
+                {
+                    Id = c.Id,
+                    RenterId = c.RenterId,
+                    RenterReplyAt = c.RenterReplyAt,
+                    InterestedAt = c.InterestedAt,
+                    RenterConfirmed = c.RenterConfirmed,
+                    RenterName = c.Renter.Name,
+                    RenterEmail = c.Renter.Email,
+                    RenterPhone = c.Renter.PhoneNumber,
+                    RenterUserName = c.Renter.UserName
+                }).ToList(),
                 Images = entity.Images?.Select(img => new OwnerPropertyImageDto
                 {
                     Id = img.Id,

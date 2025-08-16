@@ -161,6 +161,13 @@ namespace RealEstateManagement.Business.Services.Properties
                 await _repository.UpdateAsync(existing);  // CHANGED
             }
 
+            // Nếu Quá hạn => cho phép mở lại = WaitingForRenterReply
+            if (existing.Status == InterestedStatus.WaitingForRenterReply)
+            {
+                ResetForReopen(existing);                 // CHANGED
+                await _repository.UpdateAsync(existing);  // CHANGED
+            }
+
             // Nếu đang Waiting... hoặc DealSuccess => trả về trạng thái hiện tại
             return MapToDTO(existing);
         }
