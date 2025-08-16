@@ -172,7 +172,6 @@ namespace RealEstateManagement.Business.Services.Properties
                 ResetForReopen(existing);                 // CHANGED
                 await _repository.UpdateAsync(existing);  // CHANGED
             }
-
             if (existing.Status == InterestedStatus.WaitingForRenterReply)
             {
                 ResetForReopen(existing);                 // CHANGED

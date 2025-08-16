@@ -3,7 +3,8 @@
     ViewData["Title"] = "Cập nhật tin";
 }
 
-<div id="detailTitleId" class="bg-white px-6 pt-6 border-b flex flex-col items-center" style="position: fixed; top: 86px; left: 0; right: 0; width: 100%; z-index: 999;">
+<div id="detailTitleId" class="bg-white px-6 pt-6 border-b flex flex-col items-center" style="position: fixed; top: 86px; left: 0; right: 0; width: 100%; z-index: 1;">
+
     <h1 class="text-2xl font-semibold mb-4 text-center">Đăng tin cho thuê</h1>
 
     <div class="flex space-x-6 text-sm font-medium justify-center w-full max-w-4xl">
@@ -231,11 +232,11 @@
             Danh sách quan tâm
         </button>
     </div>
-   @*  <div class="ml-20 mr-20 mb-4">
-        <button type="button" onclick="viewHopDongBtn()" id="viewHopDong" class="d-none w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-full transition">
-            Hợp đồng bài đăng
+        <div class="ml-20 mr-20 mb-4">
+        <button type="button" onclick="viewDSQuanTam()" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-full transition">
+            Danh sách quan tâm
         </button>
-    </div> *@
+    </div>
 
     <div id="contractActionContainer" class="ml-20 mr-20 mb-6">
 
@@ -300,6 +301,7 @@
         itemPropertyBody.interestedProperties.forEach(item => {
 
             htmlNew += `<div class="flex gap-2 items-start" style="border-bottom:1px solid gray;margin-bottom:1rem;padding-bottom:1rem;justify-content:space-between">
+
                             <div>
                                 <div class="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
                                     ${item.renterName}
@@ -322,9 +324,11 @@
                             </div>
                         </div>`
               });
+
         $('#listQT').html(htmlNew);
          //console.log(itemPropertyBody.interestedProperties);
      }
+
 
      function getStatusText(status) {
         switch (status) {
@@ -341,6 +345,7 @@
          $('#interest-popup').css('display','none');
          $('#detailTitleId').css('z-index','1');
      }
+
 
      function landlordConfirm(interestId, confirmed) {
         if (!confirm(confirmed ? "Bạn có chắc muốn đồng ý thuê?" : "Bạn có chắc muốn từ chối?")) return;
@@ -396,6 +401,10 @@
      //     //create renter contract
      //     //`/PostProperty/DetailRenterProperty?propertyId=${@ViewBag.Id}`;
      // }
+
+     function updateStatusInterest(){
+
+     }
 
      getAmenities();
      getOwnerProperty();

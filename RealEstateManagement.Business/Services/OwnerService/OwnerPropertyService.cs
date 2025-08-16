@@ -68,7 +68,6 @@ namespace RealEstateManagement.Business.Services.OwnerService
             var entity = await _ownerPropertyRepo.GetByIdAsync(id, landlordId);
             if (entity == null)
                 throw new Exception("Property not found.");
-
             var interestDtos = await _rentalDbContext.InterestedProperties.Include(c => c.Renter).Where(c => c.PropertyId == id).ToListAsync();
             var dto = new OwnerPropertyDto
             {

@@ -31,7 +31,6 @@ namespace RealEstateManagement.Business.DTO.PropertyOwnerDTO
         public DateTime CreatedAt { get; set; }
         public bool IsExistRenterContract { get; set; }
         public int? RenterContractId { get; set; }
-
         public int? InterestNo { get; set; }
         public List<InterestedPropertyDTO> InterestedProperties { get; set; }
     }
