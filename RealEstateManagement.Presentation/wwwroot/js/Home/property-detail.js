@@ -97,7 +97,22 @@ class PropertyDetailManager {
             }
         }
     }
-    
+    getLandlordIdFromProp(prop) {
+        const cands = [
+            prop?.landlordId,
+            prop?.landlordID,
+            prop?.landlord?.id,
+            prop?.ownerId,
+            prop?.owner?.id,
+            prop?.landlordUserId,
+            prop?.hostId
+        ];
+        for (const v of cands) {
+            const n = Number(v);
+            if (Number.isFinite(n) && n > 0) return n;
+        }
+        return 0; // không tìm thấy
+    }
     hideReportButtonForOwner() {
         const reportBtn = document.getElementById('reportBtn');
         if (!reportBtn) {
@@ -179,9 +194,12 @@ class PropertyDetailManager {
             console.log('Landlord ID set to:', this.landlordId);
             
             this.updateUI(prop);
+            this.landlordId = this.getLandlordIdFromProp(prop) || prop.landlordId || 0;
+            window.landlordId = this.landlordId;
+            this.bindZaloButtons();
             await this.loadSidebarNews();
             this.loadSimilarProperties();
-            
+            this.toggleZaloForOwner(); 
             // Check owner status
             const token = localStorage.getItem('authToken');
             if (token) {
@@ -975,6 +993,82 @@ class PropertyDetailManager {
     openLandlord() {
         window.location.href = `/Home/Landlord/${this.landlordId}`;
     }
+    bindZaloButtons() {
+        // Chỉ bind 1 lần
+        if (this._zaloBound) return;
+        this._zaloBound = true;
+
+        const handler = (e) => {
+            e.preventDefault();
+            this.openChat(); // gọi method bên dưới
+        };
+
+        document.querySelectorAll('.contact-btn.zalo, .contact-btn-vertical.zalo')
+            .forEach(btn => btn.addEventListener('click', handler));
+    }
+    //bindZaloButtons() {
+    //    if (this._zaloBound) return;
+    //    this._zaloBound = true;
+    //    const handler = (e) => { e.preventDefault(); this.openChat(); };
+    //    document.querySelectorAll('.contact-btn.zalo, .contact-btn-vertical.zalo')
+    //        .forEach(btn => btn.addEventListener('click', handler));
+    //}
+
+    toggleZaloForOwner() {
+        const isOwner = Number(this.currentUserId) === Number(this.landlordId) && this.landlordId > 0;
+        document.querySelectorAll('.contact-btn.zalo, .contact-btn-vertical.zalo')
+            .forEach(btn => btn.classList.toggle('d-none', isOwner));
+    }
+    openChat = async () => {
+        // Bảo đảm đã có landlordId
+        const landlordId = Number(this.landlordId);
+        if (!Number.isFinite(landlordId) || landlordId <= 0) {
+            alert("Không tìm thấy landlordId.");
+            return;
+        }
+
+        // Kiểm tra đăng nhập
+        const token = localStorage.getItem("authToken");
+        if (!token) { window.location.href = "/Auth/Login"; return; }
+
+        // Lấy renterId từ token (tận dụng hàm bạn đã có)
+        const renterId = Number(this.getCurrentUserIdFromToken());
+        if (!Number.isFinite(renterId) || renterId <= 0) {
+            alert("Token không hợp lệ, vui lòng đăng nhập lại.");
+            return;
+        }
+
+        // Build DTO
+        const dto = { renterId, landlordId, propertyId: Number(this.currentId) };
+
+        try {
+            const res = await fetch(`${this.urlBase}/api/Chat/Create-Conversation`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(dto)
+                // Nếu server báo "dto field is required", đổi thành:
+                // body: JSON.stringify({ dto })
+            });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                alert("Không thể mở cuộc trò chuyện: " + errText);
+                return;
+            }
+
+            const data = await res.json(); // { id: ... }
+            if (data && data.id) {
+                window.location.href = `/Chat/Index?conversationId=${data.id}`;
+            }
+        } catch (err) {
+            console.error("Lỗi khi mở chat:", err);
+            alert("Lỗi khi mở chat: " + err);
+        }
+    };
+
 }
 
 // Initialize when DOM is ready
