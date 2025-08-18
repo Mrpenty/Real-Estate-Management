@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.DTO.Location;
+using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Services;
 using System;
 using System.Threading.Tasks;
@@ -19,13 +20,39 @@ namespace RealEstateManagement.API.Controllers
         }
 
         /// <summary>
+        /// Lấy danh sách bất động sản được AI recommend dựa trên tiêu chí người dùng nhập
+        /// </summary>
+        /// <param name="request">Thông tin tiêu chí tìm kiếm</param>
+        /// <returns>Danh sách bất động sản được recommend</returns>
+        [HttpPost("search-by-criteria")]
+        [AllowAnonymous]
+        public async Task<ActionResult<LocationRecommendationResponse>> GetRecommendationsByCriteria(
+            [FromBody] PropertySearchCriteriaRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var recommendations = await _aiRecommendationService.GetRecommendationsByCriteriaAsync(request);
+                return Ok(recommendations);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
         /// Lấy danh sách bất động sản được AI recommend dựa trên vị trí thiết bị
         /// </summary>
         /// <param name="request">Thông tin vị trí và tiêu chí tìm kiếm</param>
         /// <returns>Danh sách bất động sản được recommend</returns>
         [HttpPost("location-based")]
         [AllowAnonymous]
-        public async Task<ActionResult<LocationRecommendationResponse>> GetLocationBasedRecommendations(
+        public async Task<ActionResult<Business.DTO.Properties.LocationRecommendationResponse>> GetLocationBasedRecommendations(
             [FromBody] LocationRecommendationRequest request)
         {
             try

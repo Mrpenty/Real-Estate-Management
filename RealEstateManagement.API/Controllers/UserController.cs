@@ -181,9 +181,15 @@ namespace RealEstateManagement.API.Controllers
             if (user == null)
                 return NotFound("User not found");
 
+            bool roleChanged = false;
+            if (!string.IsNullOrEmpty(dto.Role) && dto.Role != user.Role)
+            {
+                user.Role = dto.Role;
+                roleChanged = true;
+            }
+
             if (dto.IsVerified.HasValue) user.IsVerified = dto.IsVerified.Value;
             if (dto.IsActive.HasValue) user.IsActive = dto.IsActive.Value;
-            if (!string.IsNullOrEmpty(dto.Role)) user.Role = dto.Role;
             if (!string.IsNullOrEmpty(dto.Name)) user.Name = dto.Name;
             if (!string.IsNullOrEmpty(dto.Email)) user.Email = dto.Email;
             if (!string.IsNullOrEmpty(dto.PhoneNumber)) user.PhoneNumber = dto.PhoneNumber;
@@ -197,7 +203,31 @@ namespace RealEstateManagement.API.Controllers
 
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
+            {
+                // If role changed, update ASP.NET Core Identity roles and invalidate tokens
+                if (roleChanged)
+                {
+                    // Update ASP.NET Core Identity roles
+                    var currentRoles = await _userManager.GetRolesAsync(user);
+                    if (currentRoles.Any())
+                    {
+                        await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                    }
+                    await _userManager.AddToRoleAsync(user, dto.Role);
+
+                    // Invalidate existing refresh tokens for this user
+                    user.RefreshToken = null;
+                    user.RefreshTokenExpiryTime = null;
+                    await _userManager.UpdateAsync(user);
+
+                    return Ok(new { 
+                        message = "User updated successfully",
+                        note = "Role changed - user will need to login again to get new token with updated role"
+                    });
+                }
+
                 return Ok(new { message = "User updated successfully" });
+            }
             return BadRequest(result.Errors);
         }
 

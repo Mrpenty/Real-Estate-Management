@@ -22,9 +22,9 @@ namespace RealEstateManagement.Business.Services
         private readonly string _apiKey;
         private readonly string _baseUrl = "https://maps.googleapis.com/maps/api";
 
-        public GoogleMapsService(IConfiguration configuration)
+        public GoogleMapsService(HttpClient httpClient, IConfiguration configuration)
         {
-            _httpClient = new HttpClient();
+            _httpClient = httpClient;
             _apiKey = configuration["GoogleMaps:ApiKey"];
         }
 

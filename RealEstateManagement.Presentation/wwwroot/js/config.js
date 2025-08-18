@@ -110,6 +110,16 @@ window.config = {
         register: '/Auth/Register'
     },
     
+    // AI Recommendation endpoints
+    ai: {
+        searchByCriteria: '/api/AIRecommendation/search-by-criteria',
+        locationBased: '/api/AIRecommendation/location-based',
+        nearby: '/api/AIRecommendation/nearby',
+        nearbyAmenities: '/api/AIRecommendation/nearby-amenities',
+        transportationInfo: '/api/AIRecommendation/transportation-info',
+        calculateDistance: '/api/AIRecommendation/calculate-distance'
+    },
+    
     // Helper function to build full API URL
     buildApiUrl: function(endpoint) {
         return this.apiBaseUrl + endpoint;

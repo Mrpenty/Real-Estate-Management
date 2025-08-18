@@ -523,7 +523,14 @@
                     
                     if (!res.ok) throw new Error('Không thể thay đổi vai trò user');
                     
+                    // Check if response contains note about role change
+                    const responseData = await res.json();
+                    if (responseData.note && responseData.note.includes('Role changed')) {
+                        showSuccess(`Đã ${action} thành công! ${responseData.note}`);
+                    } else {
                     showSuccess(`Đã ${action} thành công!`);
+                    }
+                    
                     closeUserDetailModal();
                     loadUsers(currentPage);
                 } catch (err) {

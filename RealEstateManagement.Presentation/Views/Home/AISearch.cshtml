@@ -1,0 +1,825 @@
+@{
+    ViewData["Title"] = "Tìm kiếm AI";
+    Layout = "~/Views/Shared/_LayoutV2.cshtml";
+}
+
+        <link rel="stylesheet" href="~/css/AISreach.css" />
+   
+
+<div class="ai-search-container">
+    <!-- Search Form Column -->
+    <div class="search-form-column">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">🤖 Tìm kiếm AI</h2>
+        
+        <!-- AI Recommendation -->
+        <div class="ai-recommendation" id="aiRecommendation">
+            <h3>💡 Gợi ý từ AI</h3>
+            <p>Nhập tiêu chí tìm kiếm để nhận gợi ý thông minh từ AI</p>
+        </div>
+
+        <!-- Search Form -->
+        <form id="aiSearchForm">
+            <div class="search-form-group">
+                <label for="searchLocation">📍 Khu vực tìm kiếm</label>
+                <input type="text" id="searchLocation" placeholder="VD: Quận 1, TP.HCM" required>
+            </div>
+
+            <div class="search-form-group">
+                <label for="propertyType">🏠 Loại bất động sản</label>
+                <select id="propertyType">
+                    <option value="">Tất cả loại</option>
+                    <option value="apartment">Căn hộ</option>
+                    <option value="house">Nhà nguyên căn</option>
+                    <option value="room">Phòng trọ</option>
+                    <option value="villa">Biệt thự</option>
+                </select>
+            </div>
+
+            <!-- Sở thích đã được bỏ -->
+
+            <div class="search-form-group">
+                <label>💰 Mức giá (triệu/tháng)</label>
+                <div class="range-slider-container">
+                    <input type="range" id="minPrice" class="range-slider" min="0" max="100" value="0">
+                    <input type="range" id="maxPrice" class="range-slider" min="0" max="100" value="100">
+                    <div class="range-labels">
+                        <span id="minPriceLabel">0 triệu</span>
+                        <span id="maxPriceLabel">100 triệu</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-form-group">
+                <label>🛏️ Số phòng ngủ</label>
+                <div class="range-slider-container">
+                    <input type="range" id="minBedrooms" class="range-slider" min="0" max="10" value="0">
+                    <input type="range" id="maxBedrooms" class="range-slider" min="0" max="10" value="10">
+                    <div class="range-labels">
+                        <span id="minBedroomsLabel">0 phòng</span>
+                        <span id="maxBedroomsLabel">10 phòng</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-form-group">
+                <label>📐 Diện tích (m²)</label>
+                <div class="range-slider-container">
+                    <input type="range" id="minArea" class="range-slider" min="0" max="500" value="0">
+                    <input type="range" id="maxArea" class="range-slider" min="0" max="500" value="500">
+                    <div class="range-labels">
+                        <span id="minAreaLabel">0 m²</span>
+                        <span id="maxAreaLabel">500 m²</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bán kính tìm kiếm đã được bỏ (sử dụng cố định 10km) -->
+
+            <div class="search-form-group">
+                <label>⭐ Tiện ích cần thiết</label>
+                <div class="flex flex-wrap gap-2">
+                    <label class="flex items-center">
+                        <input type="checkbox" value="school" class="mr-2"> Trường học
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" value="hospital" class="mr-2"> Bệnh viện
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" value="supermarket" class="mr-2"> Siêu thị
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" value="restaurant" class="mr-2"> Nhà hàng
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" value="bank" class="mr-2"> Ngân hàng
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" value="park" class="mr-2"> Công viên
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="search-button" id="searchButton">
+                <span class="loading-spinner" id="loadingSpinner" style="display: none;"></span>
+                🔍 Tìm kiếm với AI
+            </button>
+            
+
+        </form>
+
+    </div>
+
+    <!-- Results Column -->
+    <div class="results-column">
+        <!-- AI Recommendation Display -->
+        <div class="ai-recommendation-display" id="aiRecommendationDisplay" style="display: none;">
+            <h3>💡 Gợi ý từ AI</h3>
+            <div id="aiRecommendationContent"></div>
+        </div>
+
+        <!-- Property List -->
+        <div class="property-list" id="propertyList" style="display: none;">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800">🏠 Bất động sản phù hợp</h3>
+            <div id="propertyItems"></div>
+        </div>
+
+        <!-- Bỏ phần tiện ích và giao thông tổng quan -->
+    </div>
+</div>
+
+            <script src="~/js/config.js"></script>
+    <script src="~/js/aiSearchService.js"></script>
+    <!-- Leaflet scripts removed - no longer needed -->
+<script>
+    // Map variables removed - no longer needed
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Đợi config load xong
+        setTimeout(() => {
+            
+            
+            initializeForm();
+            loadStoredData();
+            setupRangeSliders();
+        }, 100);
+    });
+
+    function initializeForm() {
+        const form = document.getElementById('aiSearchForm');
+        const searchButton = document.getElementById('searchButton');
+        
+        // Đảm bảo loadingSpinner tồn tại
+        ensureLoadingSpinnerExists();
+        
+        // Gắn event listener cho form submit
+        form.addEventListener('submit', handleSearch);
+        
+        // Gắn thêm event listener cho button click để đảm bảo hoạt động
+        searchButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            handleSearch(e);
+        });
+        
+
+    }
+    
+    function ensureLoadingSpinnerExists() {
+        let loadingSpinner = document.getElementById('loadingSpinner');
+        
+        if (!loadingSpinner) {
+            loadingSpinner = document.createElement('span');
+            loadingSpinner.className = 'loading-spinner';
+            loadingSpinner.id = 'loadingSpinner';
+            loadingSpinner.style.display = 'none';
+            loadingSpinner.style.marginRight = '5px';
+            
+            // Thêm vào searchButton nếu có
+            const searchButton = document.getElementById('searchButton');
+            if (searchButton) {
+                searchButton.appendChild(loadingSpinner);
+            }
+        }
+    }
+    
+
+
+    function loadStoredData() {
+        const aiSearchData = sessionStorage.getItem('aiSearchData');
+        if (aiSearchData) {
+            const data = JSON.parse(aiSearchData);
+            
+            if (data.keyword) {
+                document.getElementById('searchLocation').value = data.keyword;
+            }
+            if (data.type) {
+                document.getElementById('propertyType').value = data.type;
+            }
+            if (data.minPrice) {
+                document.getElementById('minPrice').value = data.minPrice;
+            }
+            if (data.maxPrice) {
+                document.getElementById('maxPrice').value = data.maxPrice;
+            }
+            if (data.minRoom) {
+                document.getElementById('minBedrooms').value = data.minRoom;
+            }
+            if (data.maxRoom) {
+                document.getElementById('maxBedrooms').value = data.maxRoom;
+            }
+            if (data.minArea) {
+                document.getElementById('minArea').value = data.minArea;
+            }
+            if (data.maxArea) {
+                document.getElementById('maxArea').value = data.maxArea;
+            }
+            
+            updateRangeLabels();
+        }
+    }
+
+    function setupRangeSliders() {
+        // Price range
+        const minPrice = document.getElementById('minPrice');
+        const maxPrice = document.getElementById('maxPrice');
+        
+        minPrice.addEventListener('input', function() {
+            if (parseInt(this.value) > parseInt(maxPrice.value)) {
+                this.value = maxPrice.value;
+            }
+            updateRangeLabels();
+        });
+        
+        maxPrice.addEventListener('input', function() {
+            if (parseInt(this.value) < parseInt(minPrice.value)) {
+                this.value = minPrice.value;
+            }
+            updateRangeLabels();
+        });
+
+        // Bedrooms range
+        const minBedrooms = document.getElementById('minBedrooms');
+        const maxBedrooms = document.getElementById('maxBedrooms');
+        
+        minBedrooms.addEventListener('input', function() {
+            if (parseInt(this.value) > parseInt(maxBedrooms.value)) {
+                this.value = maxBedrooms.value;
+            }
+            updateRangeLabels();
+        });
+        
+        maxBedrooms.addEventListener('input', function() {
+            if (parseInt(this.value) < parseInt(minBedrooms.value)) {
+                this.value = minBedrooms.value;
+            }
+            updateRangeLabels();
+        });
+
+        // Area range
+        const minArea = document.getElementById('minArea');
+        const maxArea = document.getElementById('maxArea');
+        
+        minArea.addEventListener('input', function() {
+            if (parseInt(this.value) > parseInt(maxArea.value)) {
+                this.value = maxArea.value;
+            }
+            updateRangeLabels();
+        });
+        
+        maxArea.addEventListener('input', function() {
+            if (parseInt(this.value) < parseInt(minArea.value)) {
+                this.value = minArea.value;
+            }
+            updateRangeLabels();
+        });
+
+        // Search radius đã được bỏ
+
+        updateRangeLabels();
+    }
+
+    function updateRangeLabels() {
+        document.getElementById('minPriceLabel').textContent = document.getElementById('minPrice').value + ' triệu';
+        document.getElementById('maxPriceLabel').textContent = document.getElementById('maxPrice').value + ' triệu';
+        document.getElementById('minBedroomsLabel').textContent = document.getElementById('minBedrooms').value + ' phòng';
+        document.getElementById('maxBedroomsLabel').textContent = document.getElementById('maxBedrooms').value + ' phòng';
+        document.getElementById('minAreaLabel').textContent = document.getElementById('minArea').value + ' m²';
+        document.getElementById('maxAreaLabel').textContent = document.getElementById('maxArea').value + ' m²';
+    }
+
+    async function handleSearch(e) {
+        e.preventDefault();
+        
+
+        
+        const searchButton = document.getElementById('searchButton');
+        let loadingSpinner = document.getElementById('loadingSpinner');
+        
+        // Kiểm tra elements có tồn tại không
+        if (!searchButton) {
+            console.error('Search button not found!');
+            return;
+        }
+        
+        // Tạo loadingSpinner động nếu không tồn tại
+        if (!loadingSpinner) {
+            console.warn('Loading spinner not found, creating dynamic one...');
+            loadingSpinner = document.createElement('span');
+            loadingSpinner.className = 'loading-spinner';
+            loadingSpinner.id = 'loadingSpinner';
+            loadingSpinner.style.display = 'inline-block';
+            loadingSpinner.style.marginRight = '5px';
+        }
+        
+        // Show loading
+        searchButton.disabled = true;
+        loadingSpinner.style.display = 'inline-block';
+        searchButton.innerHTML = '';
+        searchButton.appendChild(loadingSpinner);
+        searchButton.appendChild(document.createTextNode('Đang tìm kiếm...'));
+
+        try {
+            const searchData = {
+                searchLocation: document.getElementById('searchLocation').value,
+                propertyType: document.getElementById('propertyType').value,
+                minPrice: parseInt(document.getElementById('minPrice').value),
+                maxPrice: parseInt(document.getElementById('maxPrice').value),
+                minBedrooms: parseInt(document.getElementById('minBedrooms').value),
+                maxBedrooms: parseInt(document.getElementById('maxBedrooms').value),
+                minArea: parseInt(document.getElementById('minArea').value),
+                maxArea: parseInt(document.getElementById('maxArea').value),
+                requiredAmenities: getSelectedAmenities()
+            };
+            
+
+
+            // Call AI Recommendation API - Sử dụng config
+            const response = await fetch(config.buildApiUrl(config.ai.searchByCriteria), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(searchData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Không thể tìm kiếm');
+            }
+
+            const result = await response.json();
+            
+            // Debug: Log kết quả từ API
+            console.log('=== API RESPONSE DEBUG ===');
+            console.log('Total properties:', result.properties?.length);
+            console.log('Properties:', result.properties);
+            console.log('========================');
+            
+            // Update AI recommendation
+            updateAIRecommendation(result.recommendationReason);
+            
+            // Display properties with full result data
+            displayProperties(result.properties, result);
+            
+            // Display properties (no map needed)
+            
+        } catch (error) {
+            console.error('Lỗi tìm kiếm:', error);
+            alert('Có lỗi xảy ra khi tìm kiếm: ' + error.message);
+        } finally {
+            // Hide loading - kiểm tra elements trước khi sử dụng
+            if (searchButton) {
+                searchButton.disabled = false;
+                searchButton.innerHTML = '🔍 Tìm kiếm với AI';
+            }
+            
+
+        }
+    }
+
+    function getSelectedAmenities() {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+    
+
+
+    function updateAIRecommendation(reason) {
+        const aiRecommendationDisplay = document.getElementById('aiRecommendationDisplay');
+        const aiRecommendationContent = document.getElementById('aiRecommendationContent');
+        
+        aiRecommendationContent.innerHTML = `<p>${reason}</p>`;
+        aiRecommendationDisplay.style.display = 'block';
+    }
+
+    function displayProperties(properties, result) {
+        const propertyList = document.getElementById('propertyList');
+        const propertyItems = document.getElementById('propertyItems');
+        
+
+        
+        // Xóa dữ liệu cũ trước khi hiển thị mới
+        propertyItems.innerHTML = '';
+        
+        if (!properties || properties.length === 0) {
+            propertyItems.innerHTML = '<p class="text-gray-500">Không tìm thấy bất động sản phù hợp</p>';
+        } else {
+            let html = '';
+            properties.forEach(property => {
+                // Tính điểm phù hợp theo màu sắc
+                const scoreColor = getScoreColor(property.matchScore);
+                const scoreText = property.matchScore ? `${property.matchScore.toFixed(1)}/100` : 'N/A';
+                
+                html += `
+                    <div class="property-item">
+                        <div class="property-header">
+                            <div class="property-title">
+                                <a href="/Home/PropertyDetail/${property.id}" class="property-title-link" target="_blank">
+                                    ${property.title}
+                                </a>
+                            </div>
+                            <div class="property-score" style="background-color: ${scoreColor}">
+                                ${scoreText}
+                            </div>
+                        </div>
+                        <div class="property-details">
+                            <span class="property-type">${property.type}</span>
+                            <span class="property-bedrooms">${property.bedrooms} phòng ngủ</span>
+                            <span class="property-area">${property.area}m²</span>
+                        </div>
+                        <div class="property-price">${formatPrice(property.price)}/tháng</div>
+                        <div class="property-location">
+                            <span class="property-address">${property.province} • ${property.ward}</span>
+                            <span class="property-distance">Cách ${property.distanceKm.toFixed(1)}km</span>
+                        </div>
+                        ${property.matchReason ? `<div class="property-reason">${property.matchReason}</div>` : ''}
+                        ${property.amenities && property.amenities.length > 0 ? 
+                            `<div class="property-amenities">
+                                <span class="amenities-label">Tiện ích:</span>
+                                ${property.amenities.slice(0, 3).join(', ')}
+                                ${property.amenities.length > 3 ? ` +${property.amenities.length - 3} khác` : ''}
+                            </div>` : ''
+                        }
+                        
+                        <!-- Tiện ích xung quanh BDS này -->
+                        <div class="property-nearby-amenities">
+                            <h5>📍 Tiện ích xung quanh BDS này:</h5>
+                            <div class="amenities-grid" id="amenities-${property.id}">
+                                ${property.nearbyAmenities && property.nearbyAmenities.length > 0 ? 
+                                    property.nearbyAmenities.map(amenity => 
+                                        `<div class="amenity-item-compact">
+                                            <span class="amenity-name">${amenity.name}</span>
+                                            <span class="amenity-type">${amenity.type}</span>
+                                            <span class="amenity-distance">${amenity.distanceKm.toFixed(1)}km</span>
+                                        </div>`
+                                    ).join('') : 
+                                    '<div class="no-amenities">Không có tiện ích xung quanh</div>'
+                                }
+                            </div>
+                        </div>
+                        
+                        <!-- Thông tin giao thông xung quanh BDS này -->
+                        <div class="property-transportation">
+                            <h5>🚌 Giao thông xung quanh BDS này:</h5>
+                            <div class="transportation-grid" id="transportation-${property.id}">
+                                ${property.transportationInfo && property.transportationInfo.length > 0 ? 
+                                    property.transportationInfo.map(transport => 
+                                        `<div class="transportation-item-compact">
+                                            <span class="transportation-name">${transport}</span>
+                                        </div>`
+                                    ).join('') : 
+                                    '<div class="no-transportation">Không có thông tin giao thông</div>'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+
+            
+            propertyItems.innerHTML = html;
+            
+            // Hiển thị tiện ích và giao thông tổng quan từ API chính
+            // Bỏ hiển thị tiện ích và giao thông tổng quan
+        }
+        
+        propertyList.style.display = 'block';
+    }
+
+    function displayAmenities(amenities) {
+        const amenitiesList = document.getElementById('amenitiesList');
+        const amenitiesItems = document.getElementById('amenitiesItems');
+        
+        if (!amenities || amenities.length === 0) {
+            amenitiesItems.innerHTML = '<p class="text-gray-500">Không có thông tin tiện ích</p>';
+        } else {
+            let html = '';
+            amenities.forEach(amenity => {
+                // Dữ liệu từ API có format: "📍 Tên (Loại) - cách X.Xkm"
+                const match = amenity.match(/📍 (.+?) \((.+?)\) - cách (.+?)km/);
+                if (match) {
+                    const name = match[1];
+                    const type = match[2];
+                    const distance = match[3];
+                    
+                    html += `
+                        <div class="amenity-item">
+                            <div class="amenity-header">
+                                <span class="amenity-name">${name}</span>
+                                <span class="amenity-type">${type}</span>
+                            </div>
+                            <span class="amenity-distance">${distance}km</span>
+                        </div>
+                    `;
+                } else {
+                    // Fallback nếu format không đúng
+                    html += `
+                        <div class="amenity-item">
+                            <span class="amenity-name">${amenity}</span>
+                        </div>
+                    `;
+                }
+            });
+            amenitiesItems.innerHTML = html;
+        }
+        
+        amenitiesList.style.display = 'block';
+    }
+
+    // Map functions removed - no longer needed
+
+    function displayAmenityStats(shortStats, detailedStats) {
+        const amenityStats = document.getElementById('amenityStats');
+        const amenityStatsContent = document.getElementById('amenityStatsContent');
+        
+        if (!shortStats && !detailedStats) {
+            amenityStatsContent.innerHTML = '<p class="text-gray-500">Không có thông tin thống kê</p>';
+        } else {
+            let html = '';
+            
+            if (shortStats) {
+                html += `<div class="stats-summary">${shortStats}</div>`;
+            }
+            
+            if (detailedStats) {
+                html += `<div class="stats-detailed">${detailedStats.replace(/\n/g, '<br>')}</div>`;
+            }
+            
+            amenityStatsContent.innerHTML = html;
+        }
+        
+        amenityStats.style.display = 'block';
+    }
+
+    function displayTransportationInfo(transportationInfo) {
+        const transportationDiv = document.getElementById('transportationInfo');
+        const transportationItems = document.getElementById('transportationItems');
+        
+        if (!transportationInfo || transportationInfo.length === 0) {
+            transportationItems.innerHTML = '<p class="text-gray-500">Không có thông tin giao thông</p>';
+        } else {
+            let html = '';
+            transportationInfo.forEach(item => {
+                // Dữ liệu từ API có format: "[BDS X] Tên - cách X.Xkm"
+                const match = item.match(/\[BDS (\d+)\] (.+?) - cách (.+?)km/);
+                if (match) {
+                    const propertyId = match[1];
+                    const name = match[2];
+                    const distance = match[3];
+                    
+                    html += `
+                        <div class="transportation-item">
+                            <div class="transportation-header">
+                                <span class="transportation-name">${name}</span>
+                                <span class="property-id">BDS ${propertyId}</span>
+                            </div>
+                            <span class="transportation-distance">${distance}km</span>
+                        </div>
+                    `;
+                } else {
+                    // Fallback nếu format không đúng
+                    html += `
+                        <div class="transportation-item">
+                            <span class="transportation-detail">${item}</span>
+                        </div>
+                    `;
+                }
+            });
+            transportationItems.innerHTML = html;
+        }
+        
+        transportationDiv.style.display = 'block';
+    }
+
+        async function loadAmenitiesForProperty(property) {
+        try {
+            const amenitiesContainer = document.getElementById(`amenities-${property.id}`);
+            if (!amenitiesContainer) return;
+
+            // Debug: Kiểm tra config
+            console.log('Config object:', config);
+            console.log('Config.ai:', config.ai);
+            console.log('Config.ai.nearbyAmenities:', config.ai.nearbyAmenities);
+            
+            const endpoint = config.ai.nearbyAmenities;
+            if (!endpoint) {
+                console.error('Config không load đúng, sử dụng fallback URL');
+                const fallbackUrl = `https://localhost:7031/api/AIRecommendation/nearby-amenities?latitude=${property.latitude}&longitude=${property.longitude}&radiusKm=2`;
+                console.log('Using fallback URL:', fallbackUrl);
+                const response = await fetch(fallbackUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const amenities = await response.json();
+                    displayPropertyAmenities(property.id, amenities);
+                } else {
+                    amenitiesContainer.innerHTML = '<div class="no-amenities">Không thể tải tiện ích</div>';
+                }
+                return;
+            }
+
+            const url = `${config.buildApiUrl(endpoint)}?latitude=${property.latitude}&longitude=${property.longitude}&radiusKm=2`;
+            console.log('Calling URL:', url);
+
+            // Gọi API để lấy tiện ích xung quanh BDS này
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const amenities = await response.json();
+                displayPropertyAmenities(property.id, amenities);
+            } else {
+                amenitiesContainer.innerHTML = '<div class="no-amenities">Không thể tải tiện ích</div>';
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải tiện ích cho BDS:', error);
+            const amenitiesContainer = document.getElementById(`amenities-${property.id}`);
+            if (amenitiesContainer) {
+                amenitiesContainer.innerHTML = '<div class="no-amenities">Lỗi khi tải tiện ích</div>';
+            }
+        }
+    }
+
+    function displayPropertyAmenities(propertyId, amenities) {
+        const amenitiesContainer = document.getElementById(`amenities-${propertyId}`);
+        if (!amenitiesContainer) return;
+
+        // Kiểm tra cấu trúc dữ liệu từ API
+        console.log('Amenities data for property', propertyId, ':', amenities);
+        
+        // API trả về { amenities: [...], searchRadius: ..., userLocation: {...} }
+        let amenitiesList = amenities;
+        if (amenities && amenities.amenities) {
+            amenitiesList = amenities.amenities;
+        }
+
+        if (!amenitiesList || amenitiesList.length === 0) {
+            amenitiesContainer.innerHTML = '<div class="no-amenities">Không có tiện ích xung quanh</div>';
+            return;
+        }
+
+        // Nhóm tiện ích theo loại
+        const groupedAmenities = {};
+        amenitiesList.forEach(amenity => {
+            const type = amenity.type || 'Khác';
+            if (!groupedAmenities[type]) {
+                groupedAmenities[type] = [];
+            }
+            groupedAmenities[type].push(amenity);
+        });
+
+        let html = '';
+        Object.keys(groupedAmenities).forEach(type => {
+            const typeAmenities = groupedAmenities[type];
+            const count = typeAmenities.length;
+            
+            html += `
+                <div class="amenity-category">
+                    <div class="category-header">
+                        <span class="category-name">${type}</span>
+                        <span class="category-count">${count}</span>
+                    </div>
+                    <div class="category-items">
+            `;
+            
+            // Hiển thị 3 tiện ích đầu tiên
+            typeAmenities.slice(0, 3).forEach(amenity => {
+                html += `
+                    <div class="amenity-item-compact">
+                        <span class="amenity-name">${amenity.name}</span>
+                        <span class="amenity-distance">${amenity.distanceKm.toFixed(1)}km</span>
+                    </div>
+                `;
+            });
+            
+            // Hiển thị "Xem thêm" nếu có nhiều hơn 3
+            if (count > 3) {
+                html += `
+                    <div class="more-amenities">
+                        +${count - 3} khác
+                    </div>
+                `;
+            }
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+
+        amenitiesContainer.innerHTML = html;
+    }
+
+    async function loadTransportationForProperty(property) {
+        try {
+            const transportationContainer = document.getElementById(`transportation-${property.id}`);
+            if (!transportationContainer) return;
+
+            // Debug: Kiểm tra config
+            console.log('Transportation endpoint:', config.ai.transportationInfo);
+            
+            const endpoint = config.ai.transportationInfo;
+            if (!endpoint) {
+                console.error('Config không load đúng, sử dụng fallback URL');
+                const fallbackUrl = `https://localhost:7031/api/AIRecommendation/transportation-info?latitude=${property.latitude}&longitude=${property.longitude}`;
+                console.log('Using fallback URL:', fallbackUrl);
+                const response = await fetch(fallbackUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const transportationInfo = await response.json();
+                    displayPropertyTransportation(property.id, transportationInfo);
+                } else {
+                    transportationContainer.innerHTML = '<div class="no-transportation">Không thể tải thông tin giao thông</div>';
+                }
+                return;
+            }
+
+            const url = `${config.buildApiUrl(endpoint)}?latitude=${property.latitude}&longitude=${property.longitude}`;
+            console.log('Calling transportation URL:', url);
+
+            // Gọi API để lấy thông tin giao thông xung quanh BDS này
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const transportationInfo = await response.json();
+                displayPropertyTransportation(property.id, transportationInfo);
+            } else {
+                transportationContainer.innerHTML = '<div class="no-transportation">Không thể tải thông tin giao thông</div>';
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải thông tin giao thông cho BDS:', error);
+            const transportationContainer = document.getElementById(`transportation-${property.id}`);
+            if (transportationContainer) {
+                transportationContainer.innerHTML = '<div class="no-transportation">Lỗi khi tải thông tin giao thông</div>';
+            }
+        }
+    }
+
+    function displayPropertyTransportation(propertyId, transportationInfo) {
+        const transportationContainer = document.getElementById(`transportation-${propertyId}`);
+        if (!transportationContainer) return;
+
+        // Kiểm tra cấu trúc dữ liệu từ API
+        console.log('Transportation data for property', propertyId, ':', transportationInfo);
+        
+        // API trả về { transportationInfo: [...], userLocation: {...} }
+        let transportationList = transportationInfo;
+        if (transportationInfo && transportationInfo.transportationInfo) {
+            transportationList = transportationInfo.transportationInfo;
+        }
+
+        if (!transportationList || transportationList.length === 0) {
+            transportationContainer.innerHTML = '<div class="no-transportation">Không có thông tin giao thông xung quanh</div>';
+            return;
+        }
+
+        let html = '';
+        transportationList.forEach(item => {
+            html += `
+                <div class="transportation-item-compact">
+                    <span class="transportation-name">${item}</span>
+                </div>
+            `;
+        });
+
+        transportationContainer.innerHTML = html;
+    }
+
+    function getScoreColor(score) {
+        if (!score) return '#6b7280'; // Gray for N/A
+        
+        if (score >= 90) return '#059669'; // Green for excellent
+        if (score >= 80) return '#0d9488'; // Teal for very good
+        if (score >= 70) return '#0891b2'; // Blue for good
+        if (score >= 60) return '#f59e0b'; // Yellow for fair
+        return '#dc2626'; // Red for poor
+    }
+
+    function formatPrice(price) {
+        // Giá từ API là VND, chuyển về triệu VND
+        if (price >= 1000000) {
+            return (price / 1000000).toFixed(1) + ' triệu';
+        } else if (price >= 1000) {
+            return (price / 1000).toFixed(1) + ' nghìn';
+        }
+        return price + ' VND';
+    }
+</script> 

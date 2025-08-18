@@ -30,6 +30,7 @@ using RealEstateManagement.Business.Services.Reviews;
 using RealEstateManagement.Business.Services.Admin;
 using RealEstateManagement.Business.Repositories.Admin;
 using RealEstateManagement.Business.Repositories.AmenityRepo;
+
 namespace RealEstateManagement.API.Extensions
 {
     public static class DependencyInjectionExtensions
@@ -79,7 +80,7 @@ namespace RealEstateManagement.API.Extensions
             //user and auth services
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IMailService, MailService>();
-            services.AddScoped<ISmsService, ZaloSmsService>();
+            services.AddScoped<ISmsService, TwilioSmsService>();
             services.AddScoped<IProfileService, ProfileService>();
 
             //some suport services
@@ -128,6 +129,16 @@ namespace RealEstateManagement.API.Extensions
             //Review
             services.AddScoped<IReviewRepository, ReviewRepository>();
             services.AddScoped<IReviewService, ReviewService>();
+
+            // AI Recommendation Services
+            services.AddScoped<IAIRecommendationService, AIRecommendationService>();
+            
+            // Use OpenStreetMapService instead of Google Maps (free, no API key required)
+            services.AddScoped<IOpenStreetMapService, OpenStreetMapService>();
+           // services.AddScoped<IGoogleMapsService, OpenStreetMapService>(); // Alias for compatibility
+            
+            services.AddScoped<IDeviceLocationService, DeviceLocationService>();
+
             return services;
         }
     }

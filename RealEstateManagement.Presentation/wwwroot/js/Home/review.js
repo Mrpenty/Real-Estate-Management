@@ -61,7 +61,7 @@ class ReviewManager {
     resetStarHighlight() {
         const starLabels = document.querySelectorAll('.star-label');
         const selectedRating = document.querySelector('input[name="rating"]:checked');
-        
+
         if (selectedRating) {
             this.highlightStars(parseInt(selectedRating.value));
         } else {
@@ -81,15 +81,15 @@ class ReviewManager {
 
     async handleCommentSubmit(e) {
         e.preventDefault();
-        
+
         const rating = document.querySelector('input[name="rating"]:checked');
         const content = document.getElementById('commentContent').value.trim();
-        
+
         if (!rating) {
             alert('Vui lòng chọn đánh giá sao!');
             return;
         }
-        
+
         if (!content) {
             alert('Vui lòng nhập nội dung bình luận!');
             return;
@@ -103,15 +103,15 @@ class ReviewManager {
             };
 
             const result = await addComment(commentData);
-            
+
             if (result) {
                 // Reset form
                 document.getElementById('commentForm').reset();
                 this.resetStarHighlight();
-                
+
                 // Reload comments
                 this.loadComments();
-                
+
                 // Show success message
                 this.showMessage('Đánh giá của bạn đã được gửi thành công!', 'success');
             }
@@ -124,7 +124,7 @@ class ReviewManager {
     async loadComments() {
         try {
             const commentsData = await getComment(window.currentPropertyId);
-            
+
             // Handle different response formats
             let rawComments = [];
             if (commentsData && commentsData.data) {
@@ -134,12 +134,12 @@ class ReviewManager {
             } else if (commentsData && commentsData.items) {
                 rawComments = Array.isArray(commentsData.items) ? commentsData.items : [];
             }
-            
+
             // Transform API data to expected format
             this.comments = rawComments.map(comment => this.transformCommentData(comment));
-            
+
             this.totalComments = this.comments.length;
-            
+
             this.displayComments();
             this.updateCommentCount();
         } catch (error) {
@@ -147,12 +147,12 @@ class ReviewManager {
             this.showNoComments();
         }
     }
-    
+
     // Transform API comment data to expected format
     transformCommentData(apiComment) {
         // Transform replies if they exist
         let transformedReplies = [];
-        
+
         // Check for single reply object (API format: reply: {...})
         if (apiComment.reply && typeof apiComment.reply === 'object') {
             transformedReplies = [{
@@ -171,7 +171,7 @@ class ReviewManager {
                 createdAt: reply.createdAt
             }));
         }
-        
+
         const transformedComment = {
             id: apiComment.reviewId || apiComment.id,
             rating: apiComment.rating || 0,
@@ -180,7 +180,7 @@ class ReviewManager {
             createdAt: apiComment.createdAt,
             replies: transformedReplies
         };
-        
+
         return transformedComment;
     }
 
@@ -188,7 +188,7 @@ class ReviewManager {
         const commentsList = document.getElementById('commentsList');
         const noComments = document.getElementById('noComments');
         const commentsLoading = document.querySelector('.comments-loading');
-        
+
         if (!commentsList) return;
 
         // Hide loading
@@ -222,13 +222,13 @@ class ReviewManager {
         if (!comment || typeof comment !== 'object') {
             return '';
         }
-        
+
         // Safe data extraction with fallbacks
         const rating = comment.rating || 0;
         const content = comment.content || 'Không có nội dung';
         const userName = comment.userName || comment.userName || 'Người dùng';
         const commentId = comment.id || 'unknown';
-        
+
         // Safe date handling
         let dateStr = 'Không xác định';
         try {
@@ -241,9 +241,9 @@ class ReviewManager {
         } catch (error) {
             console.warn('Error parsing comment date:', error);
         }
-        
+
         const stars = this.renderStars(rating);
-        
+
         return `
             <div class="comment-item" data-comment-id="${commentId}">
                 <div class="comment-header">
@@ -294,16 +294,16 @@ class ReviewManager {
         if (!Array.isArray(replies) || replies.length === 0) {
             return '';
         }
-        
+
         const repliesHTML = replies.map(reply => {
             if (!reply || typeof reply !== 'object') {
                 return '';
             }
-            
+
             // Safe data extraction with multiple field names
             const userName = reply.userName || reply.renterName || reply.ownerName || 'Người dùng';
             const content = reply.content || reply.replyText || reply.replyContent || 'Không có nội dung';
-            
+
             // Safe date handling
             let dateStr = 'Không xác định';
             try {
@@ -316,7 +316,7 @@ class ReviewManager {
             } catch (error) {
                 // Silent error handling
             }
-            
+
             return `
                 <div class="comment-reply">
                     <div class="comment-reply-header">
@@ -327,7 +327,7 @@ class ReviewManager {
                 </div>
             `;
         }).join('');
-        
+
         return repliesHTML;
     }
 
@@ -335,7 +335,7 @@ class ReviewManager {
         const commentsList = document.getElementById('commentsList');
         const noComments = document.getElementById('noComments');
         const commentsLoading = document.querySelector('.comments-loading');
-        
+
         if (commentsList) commentsList.innerHTML = '';
         if (commentsLoading) commentsLoading.style.display = 'none';
         if (noComments) noComments.classList.remove('hidden');
@@ -346,7 +346,7 @@ class ReviewManager {
         if (totalCommentCount) {
             totalCommentCount.textContent = this.totalComments;
         }
-        
+
         // Also update the header comment count if it exists
         const headerCommentCount = document.querySelector('.comment-count span span');
         if (headerCommentCount) {
@@ -382,7 +382,7 @@ class ReviewManager {
 
     goToPage(page) {
         if (page < 1 || page > Math.ceil(this.totalComments / this.pageSize)) return;
-        
+
         this.currentPage = page;
         this.displayComments();
     }
@@ -401,7 +401,7 @@ class ReviewManager {
         // Simple message display
         alert(message);
     }
-    
+
     // Public method to force reload comments
     forceLoadComments() {
         this.loadComments();
@@ -427,7 +427,7 @@ async function addComment(dto) {
             window.location.href = '/Auth/Login';
             return;
         }
-        
+
         const response = await fetch(`https://localhost:7031/api/Review/add`, {
             method: 'POST',
             headers: {
@@ -452,16 +452,16 @@ async function addComment(dto) {
 
 async function listInterest() {
     const token = localStorage.getItem('authToken');
-    try { 
+    try {
         if (!token) {
             window.location.href = '/Auth/Login';
             return;
         }
-        
+
         let userId = 0;
         const payload = JSON.parse(atob(token.split('.')[1]));
         userId = payload.id;
-        
+
         const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/ByRenter/${userId}`, {
             method: 'GET',
             headers: {
@@ -489,7 +489,7 @@ async function editReplyComment(dto) {
             window.location.href = '/Auth/Login';
             return;
         }
-        
+
         const response = await fetch(`https://localhost:7031/api/Review/reply/edit`, {
             method: 'PUT',
             headers: {

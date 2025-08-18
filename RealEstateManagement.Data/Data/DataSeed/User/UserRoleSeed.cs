@@ -11,7 +11,8 @@ namespace RealEstateManagement.Data.Data.DataSeed.User
                 new IdentityUserRole<int> { UserId = 1, RoleId = 1 }, // Admin
                 new IdentityUserRole<int> { UserId = 2, RoleId = 2 }, // Landlord
                 new IdentityUserRole<int> { UserId = 3, RoleId = 3 }, // Renter
-                new IdentityUserRole<int> { UserId = 4, RoleId = 3 }  // Renter 2
+                new IdentityUserRole<int> { UserId = 4, RoleId = 2 },  // Renter 2
+                new IdentityUserRole<int> { UserId = 5, RoleId = 2 }
             );
         }
     }

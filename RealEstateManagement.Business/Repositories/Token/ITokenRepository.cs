@@ -15,6 +15,7 @@ namespace RealEstateManagement.Business.Repositories.Token
         void DeleteTokenCookie(HttpContext context);
 
         Task<GoogleJsonWebSignature.Payload> ValidateGoogleIdTokenAsync(string idToken);
+        Task<ApplicationUser> GetUserFromRefreshTokenAsync(string refreshToken);
         string GenerateConfirmationCode();
 
     }
