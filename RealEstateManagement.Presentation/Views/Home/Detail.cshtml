@@ -1,10 +1,81 @@
-
 ﻿@{
-    Layout = "~/Views/Shared/_LayoutV2.cshtml";
+Layout = "~/Views/Shared/_LayoutV2.cshtml";
 }
 
 <link rel="stylesheet" href="~/css/property-detail.css" />
+<style>
 
+    .interest-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 2px dashed #ff9800;
+        border-radius: 8px;
+        background: #fff7e6;
+        text-align: center;
+        position: relative;
+    }
+
+    .interest-note-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .interest-note {
+        font-size: 15px;
+        font-weight: bold;
+        color: #d35400;
+        animation: blinkNote 1.2s infinite;
+    }
+
+    .interest-arrow {
+        width: 120px;
+        height: 60px;
+        animation: blinkArrow 1.2s infinite;
+    }
+
+    /* Blink text */
+    @@keyframes blinkNote {
+        0%, 100% {
+            color: #d35400;
+        }
+
+        50% {
+            color: #ff5722;
+        }
+    }
+
+    /* Blink arrow stroke */
+    @@keyframes blinkArrow {
+        0%, 100% {
+            opacity: 1;
+            stroke: #ff5722;
+        }
+
+        50% {
+            opacity: 0.4;
+            stroke: #ff9800;
+        }
+    }
+
+    /* Button */
+    .interest-btn {
+        margin-top: 10px;
+        padding: 10px 20px;
+        background: #ff5722;
+        color: white;
+        font-size: 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+        .interest-btn:hover {
+            background: #e64a19;
+        }
+
+</style>
 <div class="property-detail-container">
     <div class="property-detail-grid">
         <!-- Main Content Area -->
@@ -12,7 +83,7 @@
             <!-- Image Gallery -->
             <div class="image-gallery">
                 <div class="primary-image-container">
-                    <img src="" id="imgPrimaryUrl" onerror="propertyDetailManager.handleImageError(this)" alt="preview" class="primary-image"/>
+                    <img src="" id="imgPrimaryUrl" onerror="propertyDetailManager.handleImageError(this)" alt="preview" class="primary-image" />
                 </div>
                 <div id="listImgs" class="image-thumbnails">
                     <!-- Thumbnails will be populated by JavaScript -->
@@ -31,12 +102,12 @@
                         </div>
                         <div class="rating-text">
                             <span id="avgStar"></span>
-                    </div>
+                        </div>
                         <div class="comment-count">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:15px;height:15px" viewBox="0 0 24 24">
-                            <path d="M20 2H4C1.8 2 0 3.8 0 6v12c0 2.2 1.8 4 4 4h4v2.4c0 .6.4 1 1 1 .2 0 .5-.1.7-.3L14.3 22H20c2.2 0 4-1.8 4-4V6c0-2.2-1.8-4-4-4z" />
-                        </svg>
-                            <span><span id="totalComment"></span> bình luận</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:15px;height:15px" viewBox="0 0 24 24">
+                                <path d="M20 2H4C1.8 2 0 3.8 0 6v12c0 2.2 1.8 4 4 4h4v2.4c0 .6.4 1 1 1 .2 0 .5-.1.7-.3L14.3 22H20c2.2 0 4-1.8 4-4V6c0-2.2-1.8-4-4-4z" />
+                            </svg>
+                            <span><span id="totalCommentCount">0</span> bình luận</span>
                         </div>
                     </div>
                 </div>
@@ -93,10 +164,49 @@
                             loading="lazy"></iframe>
                 </div>
 
+                <!-- Interest Section -->
+                <h2 class="section-title">Quan tâm bài đăng</h2>
+                <div class="interest-section">
+                    <p class="interest-note">
+                        <span class="arrow">➤</span>
+                        Để liên hệ với người thuê và xem chi tiết hợp đồng, hãy ấn nút <strong>Quan tâm</strong>
+                    </p>
+                    <button class="interest-btn btn-add-interest">
+                        ❤️ Quan tâm
+                    </button>
+                    <button class="interest-btn btn-remove-interest" style="display:none;">
+                        ❌ Hủy quan tâm
+                    </button>
+                    <button class="interest-btn btn-view-contract" style="display:none;">
+                        📄 Xem hợp đồng
+                    </button>
+                    <button class="interest-btn btn-success btn-agree-rent" style="display:none;">
+                        Tôi muốn thuê
+                    </button>
+                    <div class="waiting-landlord text-warning" style="display:none;"></div>
+                </div>
+
+                <!-- Khung hiển thị hợp đồng -->
+                <div id="contract-section" style="display:none; margin-top:15px; border:1px solid #ccc; padding:10px; border-radius:6px;">
+                    <h2 class="section-title">📄 Thông tin hợp đồng</h2>
+                    <table style="width:100%; border-collapse: collapse;">
+                        <tbody>
+                            <tr><td><strong>Tiền cọc:</strong></td><td id="ContractDeposit"></td></tr>
+                            <tr><td><strong>Tiền thuê hàng tháng:</strong></td><td id="ContractMonthlyRent"></td></tr>
+                            <tr><td><strong>Thời hạn hợp đồng (tháng):</strong></td><td id="ContractDurationMonths"></td></tr>
+                            <tr><td><strong>Ngày bắt đầu:</strong></td><td id="ContractStartDate"></td></tr>
+                            <tr><td><strong>Ngày kết thúc:</strong></td><td id="ContractEndDate"></td></tr>
+                            <tr><td><strong>Trạng thái:</strong></td><td id="ContractStatus"></td></tr>
+                            <tr><td><strong>Phương thức thanh toán:</strong></td><td id="ContractPaymentMethod"></td></tr>
+                            <tr><td><strong>Thông tin liên hệ:</strong></td><td id="ContractContactInfo"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
                 <h2 class="section-title">Thông tin liên hệ</h2>
                 <div class="contact-section">
                     <div class="contact-avatar" onclick="propertyDetailManager.openLandlord()">
-                         <img class="landlordUrl" style="border-radius:5rem;height:100%;width:100%"/>
+                        <img class="landlordUrl" style="border-radius:5rem;height:100%;width:100%" />
                     </div>
                     <div class="contact-info">
                         <div class="contact-name" onclick="propertyDetailManager.openLandlord()">
@@ -111,24 +221,98 @@
                             </a>
                         </div>
                     </div>
-            </div>
+                </div>
+
+                <!-- Comment and Rating Section -->
+                <h2 class="section-title">Đánh giá & Bình luận</h2>
+
+
+
+                <!-- Add Comment Form -->
+                <div class="comment-form-section">
+                    <div class="comment-form-header">
+                        <h3 class="comment-form-title">Thêm đánh giá của bạn</h3>
+                    </div>
+
+                    <form id="commentForm" class="comment-form">
+                        <div class="rating-input-section">
+                            <label class="rating-label">Đánh giá của bạn:</label>
+                            <div class="star-rating-input">
+                                <input type="radio" id="star5" name="rating" value="5" class="star-input">
+                                <label for="star5" class="star-label">★</label>
+                                <input type="radio" id="star4" name="rating" value="4" class="star-input">
+                                <label for="star4" class="star-label">★</label>
+                                <input type="radio" id="star3" name="rating" value="3" class="star-input">
+                                <label for="star3" class="star-label">★</label>
+                                <input type="radio" id="star2" name="rating" value="2" class="star-input">
+                                <label for="star2" class="star-label">★</label>
+                                <input type="radio" id="star1" name="rating" value="1" class="star-input">
+                                <label for="star1" class="star-label">★</label>
+                            </div>
+                        </div>
+
+                        <div class="comment-input-section">
+                            <label for="commentContent" class="comment-input-label">Bình luận:</label>
+                            <textarea id="commentContent" name="content" rows="4"
+                                      placeholder="Chia sẻ trải nghiệm của bạn về bất động sản này..."
+                                      class="comment-textarea" required></textarea>
+                        </div>
+
+                        <div class="comment-form-actions">
+                            <button type="submit" class="submit-comment-btn">
+                                <span>💬</span>
+                                <span>Gửi đánh giá</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Comments List -->
+                <div class="comments-section">
+                    <div class="comments-header">
+                        <h3 class="comments-title">Tất cả đánh giá (<span id="totalCommentCount">0</span>)</h3>
+                    </div>
+
+                    <div id="commentsList" class="comments-list">
+                        <!-- Comments will be populated by JavaScript -->
+                        <div class="comments-loading">
+                            <p class="text-gray-500 text-center py-8">Đang tải bình luận...</p>
+                        </div>
+                    </div>
+
+                    <!-- Comments Pagination -->
+                    <div id="commentsPagination" class="comments-pagination hidden">
+                        <button id="prevComment" class="pagination-btn">‹ Trước</button>
+                        <span id="commentPageInfo" class="pagination-info"></span>
+                        <button id="nextComment" class="pagination-btn">Sau ›</button>
+                    </div>
+
+                    <!-- No Comments Message -->
+                    <div id="noComments" class="no-comments hidden">
+                        <div class="text-center py-8">
+                            <div class="text-gray-400 text-6xl mb-4">💬</div>
+                            <p class="text-gray-500 text-lg">Chưa có đánh giá nào</p>
+                            <p class="text-gray-400">Hãy là người đầu tiên đánh giá bất động sản này!</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Similar Properties -->
             <div class="similar-section">
                 <div class="similar-header">
                     <h3 class="similar-title">Bất động sản tương tự</h3>
-                        <a id="seeMoreSimilar"
-                           href="#"
+                    <a id="seeMoreSimilar"
+                       href="#"
                        class="see-more-btn"
-                           aria-label="Xem thêm bất động sản tương tự">
-                            <span class="sr-only">Xem thêm</span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                 class="w-5 h-5 transition-transform transform group-hover:translate-x-0.5">
-                                <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </a>
-                    </div>
+                       aria-label="Xem thêm bất động sản tương tự">
+                        <span class="sr-only">Xem thêm</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             class="w-5 h-5 transition-transform transform group-hover:translate-x-0.5">
+                            <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </a>
+                </div>
 
                 <div id="similarList" class="similar-grid"></div>
                 <div id="similarPager" class="similar-pager hidden">
@@ -137,7 +321,7 @@
                     <button id="simNext" class="pager-btn">Sau ›</button>
                 </div>
                 <div id="similarEmpty" class="similar-empty hidden">Chưa có gợi ý tương tự phù hợp.</div>
-                            </div>
+            </div>
         </div>
 
         <!-- Sidebar -->
@@ -145,7 +329,7 @@
             <!-- Contact Card -->
             <div class="sidebar-card contact-card">
                 <div class="contact-avatar-large" onclick="propertyDetailManager.openLandlord()">
-                    <img class="landlordUrl" style="border-radius:5rem;height:100%;width:100%"/>
+                    <img class="landlordUrl" style="border-radius:5rem;height:100%;width:100%" />
                 </div>
 
                 <div class="contact-name-large" onclick="propertyDetailManager.openLandlord()">
@@ -186,7 +370,7 @@
                 <h3 class="font-semibold text-gray-800 mb-2">Tin mới đăng</h3>
                 <div class="news-list" id="listNew">
                     <!-- News items will be populated by JavaScript -->
-        </div>
+                </div>
             </div>
         </div>
     </div>
@@ -204,7 +388,7 @@
                     </svg>
                 </button>
             </div>
-            
+
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Lý do báo cáo *</label>
                 <select id="reportReason" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
@@ -218,19 +402,19 @@
                     <option value="Khác">Khác</option>
                 </select>
             </div>
-            
+
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Mô tả chi tiết</label>
-                <textarea id="reportDescription" rows="3" placeholder="Mô tả chi tiết về vấn đề..." 
+                <textarea id="reportDescription" rows="3" placeholder="Mô tả chi tiết về vấn đề..."
                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
             </div>
-            
+
             <div class="flex justify-end space-x-3">
-                <button onclick="propertyDetailManager.closeReportModal()" 
+                <button onclick="propertyDetailManager.closeReportModal()"
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
                     Hủy
                 </button>
-                <button id="submitReportBtn" onclick="propertyDetailManager.submitReport()" 
+                <button id="submitReportBtn" onclick="propertyDetailManager.submitReport()"
                         class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
                     Gửi báo cáo
                 </button>
@@ -251,13 +435,13 @@
                     </svg>
                 </button>
             </div>
-            
+
             <div id="reportStatusContent" class="mb-4">
                 <!-- Content will be populated by JavaScript -->
             </div>
-            
+
             <div class="flex justify-end">
-                <button onclick="propertyDetailManager.closeReportStatusModal()" 
+                <button onclick="propertyDetailManager.closeReportStatusModal()"
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
                     Đóng
                 </button>
@@ -270,11 +454,11 @@
 <script>
     // Set the current property ID from ViewBag
     window.currentPropertyId = @ViewBag.Id;
-    
+
     // Debug logging
     console.log('ViewBag.Id:', @ViewBag.Id);
     console.log('window.currentPropertyId:', window.currentPropertyId);
-    
+
     // Ensure the ID is valid
     if (!window.currentPropertyId || window.currentPropertyId === 0) {
         console.error('Invalid property ID:', window.currentPropertyId);
@@ -286,8 +470,10 @@
             console.log('Extracted ID from URL:', window.currentPropertyId);
         }
     }
+
 </script>
-<script src="~/js/Home/property-detail.js"></script>
+<script src="~/js/helper.js"></script>
 <script src="~/js/Home/reportService.js"></script>
 <script src="~/js/propertyService.js"></script>
 <script src="~/js/Home/review.js"></script>
+<script src="~/js/Home/property-detail.js"></script>

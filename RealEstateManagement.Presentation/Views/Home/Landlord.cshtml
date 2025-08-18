@@ -23,7 +23,6 @@
 
     <div class="md:col-span-2">
         <div id="listFavoriteId" class="grid gap-6">
-
         </div>
     </div>
 
@@ -66,17 +65,17 @@
 </div>
 
 <!-- Report User Modal -->
-<div id="reportModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+<div id="reportModal" class="report-modal-overlay" style="display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important;">
+    <div class="report-modal-content">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold text-gray-900">Báo cáo người dùng</h3>
             <button onclick="closeReportModal()" class="text-gray-400 hover:text-gray-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    <path stroke-linecap="round" stroke-linejoin-round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
         </div>
-        
+
         <form id="reportForm">
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Lý do báo cáo</label>
@@ -90,12 +89,12 @@
                     <option value="Khác">Khác</option>
                 </select>
             </div>
-            
+
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Mô tả chi tiết</label>
                 <textarea id="reportDescription" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="Mô tả chi tiết lý do báo cáo..."></textarea>
             </div>
-            
+
             <div class="flex justify-end space-x-3">
                 <button type="button" onclick="closeReportModal()" class="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300">
                     Hủy
@@ -108,26 +107,95 @@
     </div>
 </div>
 
+<style>
+    /* Custom CSS for report modal to override Bootstrap */
+    .report-modal-overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        z-index: 9999 !important;
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transition: all 0.3s ease !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+        .report-modal-overlay.show {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+
+    .report-modal-content {
+        background: white !important;
+        border-radius: 0.5rem !important;
+        padding: 1.5rem !important;
+        width: 100% !important;
+        max-width: 28rem !important;
+        margin: auto !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    /* Ensure modal is hidden by default */
+    #reportModal {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+        #reportModal.show {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="~/js/propertyService.js"></script>
 <script>
     let urlBase = "https://localhost:7031";
+
+    // Hide report modal by default when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        hideReportModal();
+
+        // Force hide modal with multiple methods
+        const modal = document.getElementById('reportModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.style.visibility = 'hidden';
+            modal.style.opacity = '0';
+            modal.style.pointerEvents = 'none';
+            modal.classList.remove('show');
+        }
+    });
+
     getList();
     let landlordId = @ViewBag.LandlordId;
-    
+
     // Check report status when page loads
     checkReportStatus();
-    
+
     // Check if user has already reported this landlord
     async function checkReportStatus() {
         try {
             const token = localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token');
             if (!token) {
-                // User not logged in, show default button state
+                // User not logged in, show default button state and hide modal
                 updateReportButtonForGuest();
+                hideReportModal();
                 return;
             }
-            
+
             let userId;
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
@@ -135,14 +203,16 @@
             } catch (e) {
                 console.error('Error decoding token:', e);
                 updateReportButtonForGuest();
+                hideReportModal();
                 return;
             }
-            
+
             if (!userId) {
                 updateReportButtonForGuest();
+                hideReportModal();
                 return;
             }
-            
+
             // Check if user has reported this landlord using the correct endpoint
             const response = await fetch(`${urlBase}/api/Report/check-status/${landlordId}/User/${userId}`, {
                 method: 'GET',
@@ -150,24 +220,25 @@
                     'Authorization': `Bearer ${token}`
                 }
             });
-            
+
             console.log('API Response status:', response.status);
             console.log('API Response ok:', response.ok);
-            
+
             if (!response.ok) {
                 console.error('Error checking report status:', response.status);
                 updateReportButtonForGuest();
+                hideReportModal();
                 return;
             }
-            
+
             const data = await response.json();
             console.log('Report status data:', data);
             console.log('hasReported:', data.hasReported);
             console.log('canReport:', data.canReport);
             console.log('status:', data.status);
-            
+
             const reportButton = document.getElementById('reportButton');
-            
+
             if (data.hasReported && !data.canReport) {
                 // User has already reported and it's pending - allow cancel
                 reportButton.innerHTML = '✅ Hủy báo cáo';
@@ -187,9 +258,10 @@
         } catch (error) {
             console.error('Error checking report status:', error);
             updateReportButtonForGuest();
+            hideReportModal();
         }
     }
-    
+
     // Update report button for guest users (not logged in)
     function updateReportButtonForGuest() {
         const reportButton = document.getElementById('reportButton');
@@ -209,21 +281,30 @@
                 }
             });
         };
+
+        // Hide the report modal for guest users
+        hideReportModal();
     }
-    
+
     // Report User Functions
     function openReportModal() {
         // Check if user is logged in
         if (!checkUserLogin()) {
             return;
         }
-        document.getElementById('reportModal').classList.remove('hidden');
+
+        // Show the modal
+        const modal = document.getElementById('reportModal');
+        modal.classList.add('show'); // Add show class to show the modal
     }
-    
+
     // Check if user is logged in
     function checkUserLogin() {
         const token = localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token');
         if (!token) {
+            // Hide the report modal
+            hideReportModal();
+
             Swal.fire({
                 icon: 'warning',
                 title: 'Vui lòng đăng nhập',
@@ -241,19 +322,45 @@
         }
         return true;
     }
-    
+
     function closeReportModal() {
-        document.getElementById('reportModal').classList.add('hidden');
+        const modal = document.getElementById('reportModal');
+        modal.classList.remove('show'); // Remove show class to hide the modal
         document.getElementById('reportForm').reset();
     }
-    
+
+    // Hide report modal
+    function hideReportModal() {
+        const modal = document.getElementById('reportModal');
+        modal.classList.remove('show'); // Remove show class to hide the modal
+    }
+
+    // Add event listeners for modal
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('reportModal');
+
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeReportModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeReportModal();
+            }
+        });
+    });
+
     // Handle report form submission
     document.getElementById('reportForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        
+
         const reason = document.getElementById('reportReason').value;
         const description = document.getElementById('reportDescription').value;
-        
+
         if (!reason) {
             Swal.fire({
                 icon: 'error',
@@ -263,7 +370,7 @@
             });
             return;
         }
-        
+
         if (!description.trim()) {
             Swal.fire({
                 icon: 'error',
@@ -273,7 +380,7 @@
             });
             return;
         }
-        
+
         try {
             // Get current user ID from token
             let token = localStorage.getItem('authToken');
@@ -283,10 +390,10 @@
             if (!token) {
                 token = localStorage.getItem('token');
             }
-            
+
             console.log('Available localStorage keys:', Object.keys(localStorage));
             console.log('Token found:', !!token);
-            
+
             if (!token) {
                 Swal.fire({
                     icon: 'error',
@@ -296,7 +403,7 @@
                 });
                 return;
             }
-            
+
             // Decode token to get user ID
             let userId;
             try {
@@ -314,7 +421,7 @@
                 });
                 return;
             }
-            
+
             if (!userId) {
                 Swal.fire({
                     icon: 'error',
@@ -324,16 +431,16 @@
                 });
                 return;
             }
-            
+
             const reportData = {
                 targetId: landlordId,
                 reason: reason,
                 description: description
             };
-            
+
             console.log('Sending report data:', reportData);
             console.log('Request URL:', `${urlBase}/api/Report/user/${userId}`);
-            
+
             // Show loading state
             Swal.fire({
                 title: 'Đang gửi báo cáo...',
@@ -342,7 +449,7 @@
                     Swal.showLoading();
                 }
             });
-            
+
             const response = await fetch(`${urlBase}/api/Report/user/${userId}`, {
                 method: 'POST',
                 headers: {
@@ -351,10 +458,10 @@
                 },
                 body: JSON.stringify(reportData)
             });
-            
+
             // Close loading dialog
             Swal.close();
-            
+
             if (!response.ok) {
                 let errorMessage = 'Gửi báo cáo thất bại';
                 try {
@@ -367,7 +474,7 @@
                 }
                 throw new Error(errorMessage);
             }
-            
+
             let result;
             try {
                 result = await response.json();
@@ -376,22 +483,22 @@
                 const responseText = await response.text();
                 result = { message: responseText };
             }
-            
+
             Swal.fire({
                 icon: 'success',
                 title: 'Thành công!',
                 text: result.message || 'Đã gửi báo cáo thành công',
                 confirmButtonText: 'OK'
             });
-            
+
             closeReportModal();
-            
+
             // Update button status
             refreshReportButton();
-            
+
         } catch (error) {
             console.error('Report error:', error);
-            
+
             // Check if it's a duplicate report error
             if (error.message.includes('đã report') || error.message.includes('đã báo cáo')) {
                 Swal.fire({
@@ -419,13 +526,13 @@
             }
         }
     });
-    
+
     // Function to refresh report button state
     function refreshReportButton() {
         console.log('Refreshing report button state...');
         checkReportStatus();
     }
-    
+
     // Function to cancel report
     async function cancelReport(targetId, userId) {
         try {
@@ -440,11 +547,11 @@
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6'
             });
-            
+
             if (!result.isConfirmed) {
                 return;
             }
-            
+
             // Show loading state
             Swal.fire({
                 title: 'Đang xử lý...',
@@ -453,9 +560,9 @@
                     Swal.showLoading();
                 }
             });
-            
+
             const token = localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token');
-            
+
             const response = await fetch(`${urlBase}/api/Report/user/${targetId}/${userId}`, {
                 method: 'DELETE',
                 headers: {
@@ -492,7 +599,7 @@
                 text: cancelResult.message || 'Đã hủy báo cáo thành công',
                 confirmButtonText: 'OK'
             });
-            
+
             // Update button status
             refreshReportButton();
 
@@ -506,7 +613,7 @@
             });
         }
     }
-    
+
     async function getList(){
         let prop = await propertyService.getLandlord(@ViewBag.LandlordId);
         $('.contactPhone').html(prop.phoneNumber);
@@ -574,10 +681,10 @@
         //console.log(listNewPost);
         let htmlNew = '';
         listNewPost.forEach(item => {
-            const imageUrl = item.images && item.images.length > 0 && item.images[0] && item.images[0].imageUrl 
+            const imageUrl = item.images && item.images.length > 0 && item.images[0] && item.images[0].imageUrl
                 ? (item.images[0].imageUrl.includes('http') ? item.images[0].imageUrl : urlBase + item.images[0].imageUrl)
                 : '/image/default-news.jpg'; // Default image path
-            
+
             htmlNew += `<div style="cursor:pointer" onclick="window.location.href='/Home/NewDetail/${item.id}'" class="flex gap-2 items-start">
                     <img src="${imageUrl}" onerror="handleImageError(this)" alt="tin" class="w-14 h-14 rounded object-cover" />
                     <div>

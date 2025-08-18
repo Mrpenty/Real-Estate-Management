@@ -8,16 +8,16 @@ class PropertyDetailManager {
         this.isOwner = false;
         this.propertyService = window.propertyService;
         this.reportService = null; // Will be initialized when needed
-        
+
         // Check if required services are available
         if (!this.propertyService) {
             console.error('PropertyService not available');
         }
-        
+
         if (!window.ReportService) {
             console.error('ReportService class not available');
         }
-        
+
         this.init();
     }
 
@@ -41,11 +41,11 @@ class PropertyDetailManager {
             if (!token) {
                 token = localStorage.getItem('token');
             }
-            
+
             if (!token) {
                 return 0;
             }
-            
+
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 const userId = payload.id || payload.userId || payload.sub;
@@ -59,37 +59,37 @@ class PropertyDetailManager {
             return 0;
         }
     }
-    
+
     initializeCurrentUserId() {
         this.currentUserId = this.getCurrentUserIdFromToken();
         console.log('Initialized currentUserId:', this.currentUserId);
-        
+
         this.hideReportButtonForOwner();
-        
+
         if (this.currentUserId > 0) {
             this.checkReportStatus();
         } else {
             this.updateReportButtonForGuest();
         }
-        
+
         // Listen for token changes
         window.addEventListener('storage', (e) => {
             if (e.key === 'authToken' || e.key === 'accessToken' || e.key === 'token') {
                 this.refreshCurrentUserId();
             }
         });
-        
+
         window.addEventListener('userLogin', () => this.refreshCurrentUserId());
         window.addEventListener('userLogout', () => this.refreshCurrentUserId());
     }
-    
+
     refreshCurrentUserId() {
         const previousUserId = this.currentUserId;
         this.currentUserId = this.getCurrentUserIdFromToken();
-        
+
         if (this.currentUserId !== previousUserId) {
             this.hideReportButtonForOwner();
-            
+
             if (this.currentUserId > 0) {
                 this.checkReportStatus();
             } else {
@@ -97,19 +97,19 @@ class PropertyDetailManager {
             }
         }
     }
-    
+
     hideReportButtonForOwner() {
         const reportBtn = document.getElementById('reportBtn');
         if (!reportBtn) {
             console.error('Report button not found');
             return;
         }
-        
+
         const currentUserIdNum = Number(this.currentUserId);
         const landlordIdNum = Number(this.landlordId);
-        
+
         console.log('Checking owner status:', { currentUserId: currentUserIdNum, landlordId: landlordIdNum });
-        
+
         if (currentUserIdNum > 0 && currentUserIdNum === landlordIdNum) {
             console.log('Hiding report button for owner');
             reportBtn.style.display = 'none';
@@ -118,21 +118,21 @@ class PropertyDetailManager {
             reportBtn.style.display = 'flex';
         }
     }
-    
+
     updateReportButtonForGuest() {
         const reportBtn = document.getElementById('reportBtn');
         const reportBtnText = document.getElementById('reportBtnText');
-        
+
         if (!reportBtn || !reportBtnText) {
             console.error('Report button elements not found');
             return;
         }
-        
+
         console.log('Updating report button for guest');
-        
+
         // Always show the report button for guests
         reportBtn.style.display = 'flex';
-        
+
         reportBtnText.textContent = 'Báo xấu';
         reportBtn.onclick = () => {
             Swal.fire({
@@ -148,11 +148,11 @@ class PropertyDetailManager {
                 }
             });
         };
-        
+
         // Remove all color classes and let CSS handle styling
         reportBtn.className = 'action-btn report';
     }
-    
+
     checkUserLogin() {
         if (this.currentUserId <= 0) {
             Swal.fire({
@@ -171,17 +171,17 @@ class PropertyDetailManager {
     async loadProperty() {
         try {
             this.showLoadingState();
-            
+
             const prop = await this.propertyService.getProperty(this.currentId);
             console.log('Property loaded:', prop);
-            
+
             this.landlordId = prop.landlordId;
             console.log('Landlord ID set to:', this.landlordId);
-            
+
             this.updateUI(prop);
             await this.loadSidebarNews();
             this.loadSimilarProperties();
-            
+
             // Check owner status
             const token = localStorage.getItem('authToken');
             if (token) {
@@ -194,17 +194,22 @@ class PropertyDetailManager {
                     console.error('Error parsing token:', e);
                 }
             }
-            
+
             // Update report button after everything is loaded
             this.hideReportButtonForOwner();
-            
+
             // Check report status if user is logged in
             if (this.currentUserId > 0) {
                 await this.checkReportStatus();
             } else {
                 this.updateReportButtonForGuest();
             }
-            
+
+            // Nếu có renterId thì check quan tâm
+            if (this.currentUserId) {
+                this.checkInterestAndRender(prop.id, this.currentUserId, prop);
+            }
+
         } catch (error) {
             console.error('Error loading property:', error);
             this.showErrorMessage('Có lỗi xảy ra khi tải thông tin bất động sản');
@@ -215,15 +220,17 @@ class PropertyDetailManager {
 
     updateUI(prop) {
         // Update title and rating
+        this.fullPhoneNumber = prop.landlordPhoneNumber || 'N/A';
+        this.isInterested = false;
         this.updateElement('.titleId', prop.title);
         this.renderStarsBody(prop.rating);
         this.updateElement('#avgStar', `(${prop.rating})`);
-        this.updateElement('#totalComment', prop.commentNo);
-        
+        this.updateElement('#totalCommentCount', prop.commentNo || 0);
+
         // Update landlord info with null check
         if (prop.landlordProfilePictureUrl) {
-            const landlordImageUrl = prop.landlordProfilePictureUrl.includes('http') 
-                ? prop.landlordProfilePictureUrl 
+            const landlordImageUrl = prop.landlordProfilePictureUrl.includes('http')
+                ? prop.landlordProfilePictureUrl
                 : this.urlBase + prop.landlordProfilePictureUrl;
             $('.landlordUrl').prop('src', landlordImageUrl);
         } else {
@@ -231,11 +238,11 @@ class PropertyDetailManager {
             $('.landlordUrl').prop('src', '/image/default-avatar.jpg');
             console.warn('Landlord profile picture URL is null/undefined, using default avatar');
         }
-        
+
         // Update primary image with null check
         if (prop.primaryImageUrl) {
-            const primaryImageUrl = prop.primaryImageUrl.includes("http") 
-                ? prop.primaryImageUrl 
+            const primaryImageUrl = prop.primaryImageUrl.includes("http")
+                ? prop.primaryImageUrl
                 : this.urlBase + prop.primaryImageUrl;
             $('#imgPrimaryUrl').prop('src', primaryImageUrl);
         } else {
@@ -243,7 +250,7 @@ class PropertyDetailManager {
             $('#imgPrimaryUrl').prop('src', '/image/default-property.jpg');
             console.warn('Primary image URL is null/undefined, using default image');
         }
-        
+
         // Update property details with null checks
         this.updateElement('.areaId', prop.area || 'N/A');
         this.updateElement('.addressId', this.buildAddressString(prop));
@@ -254,12 +261,11 @@ class PropertyDetailManager {
         this.updateElement('.provinceId', prop.province || 'N/A');
         this.updateElement('#propId', prop.id || 'N/A');
         this.updateElement('#createTimeId', this.formatDateTime(prop.createdAt));
-        this.updateElement('.contactPhone', prop.landlordPhoneNumber || 'N/A');
         this.updateElement('.contactName', prop.landlordName || 'Không xác định');
-        
+
         // Handle favorite buttons
         this.handleFavoriteButtons(prop.isFavorite);
-        
+
         // Populate image thumbnails with null check
         if (prop.imageUrls && Array.isArray(prop.imageUrls)) {
             this.populateImageThumbnails(prop.imageUrls);
@@ -267,12 +273,164 @@ class PropertyDetailManager {
             console.warn('Image URLs is null/undefined or not an array, skipping thumbnails');
             $('#listImgs').html('<div class="text-gray-500 text-center py-4">Không có hình ảnh</div>');
         }
-        
         // Update map
         this.updateMap(prop);
-        
-        // Load comments
-        this.loadComments();
+
+        // Load comments - handled by ReviewManager
+        // Wait for ReviewManager to be initialized
+        setTimeout(() => {
+            this.loadCommentsWithRetry();
+        }, 100);
+    }
+
+    // Hàm che số
+    maskPhone(phone) {
+        if (phone === 'N/A') return phone;
+        let half = Math.floor(phone.length / 2);
+        return phone.substring(0, half) + "*".repeat(phone.length - half);
+    }
+
+    // Render số bị che
+    renderMaskedPhone() {
+        let masked = this.maskPhone(this.fullPhoneNumber);
+        $('.contactPhone').text(masked);
+        $('#phoneLink').attr('href', ''); // Không cho click gọi
+        $('#zaloLink').attr('href', '#');
+    }
+
+    async checkInterestAndRender(propertyId, renterId, propertyData) {
+        try {
+            if (!renterId) {
+                alert("Bạn cần đăng nhập để sử dụng tính năng này!");
+                this.isInterested = false;
+                this.renderMaskedPhone();
+                $(".btn-add-interest").show().off("click").on("click", () => {
+                    alert("Bạn cần đăng nhập để quan tâm!");
+                });
+                $(".btn-remove-interest, .btn-view-contract, .btn-agree-rent, .waiting-landlord").hide();
+                $("#contract-section").hide();
+                return;
+            }
+
+            // Lấy danh sách quan tâm
+            let res = await fetch(`${this.urlBase}/api/Property/InterestedProperty/ByRenter/${renterId}`, { credentials: "include" });
+            if (!res.ok) throw new Error("API get interest failed");
+            let interestList = await res.json();
+
+            // Tìm bản ghi interest
+            let foundInterest = interestList.find(item => item.propertyId === propertyId);
+
+            if (foundInterest) {
+                this.isInterested = true;
+                this.showFullPhone();
+                $(".btn-add-interest").hide();
+                $(".btn-remove-interest").show();
+                $(".btn-view-contract").show();
+
+                if (foundInterest.status === 2) {
+                    $(".btn-agree-rent").show();
+                    $(".waiting-landlord").hide();
+                } else if (foundInterest.status === 3) {
+                    $(".btn-agree-rent").hide();
+                    $(".waiting-landlord").show().text("Đang chờ Landlord phản hồi...");
+                } else {
+                    $(".btn-agree-rent").hide();
+                    $(".waiting-landlord").hide();
+                }
+            } else {
+                this.isInterested = false;
+                this.renderMaskedPhone();
+                $(".btn-add-interest").show();
+                $(".btn-remove-interest, .btn-view-contract, .btn-agree-rent, .waiting-landlord").hide();
+                $("#contract-section").hide();
+            }
+
+            // Sự kiện Quan tâm (dùng propertyId)
+            $(".btn-add-interest").off("click").on("click", async () => {
+                try {
+                    let apiUrl = `${this.urlBase}/api/Property/InterestedProperty/AddInterest?propertyId=${propertyId}`;
+                    let toggleRes = await fetch(apiUrl, { method: "POST", credentials: "include" });
+                    if (!toggleRes.ok) throw new Error(`API add interest failed: ${toggleRes.status}`);
+                    location.reload();
+                } catch (err) {
+                    console.error("Error adding interest:", err);
+                    alert("Có lỗi xảy ra khi thêm quan tâm!");
+                }
+            });
+
+            // Sự kiện Hủy quan tâm (dùng interestId)
+            $(".btn-remove-interest").off("click").on("click", async () => {
+                try {
+                    if (!foundInterest) return;
+                    let apiUrl = `${this.urlBase}/api/Property/InterestedProperty/RemoveInterest?propertyId=${propertyId}`;
+                    let toggleRes = await fetch(apiUrl, { method: "DELETE", credentials: "include" });
+                    if (!toggleRes.ok) throw new Error(`API remove interest failed: ${toggleRes.status}`);
+                    location.reload();
+                } catch (err) {
+                    console.error("Error removing interest:", err);
+                    alert("Có lỗi xảy ra khi hủy quan tâm!");
+                }
+            });
+
+            // Xem hợp đồng
+            $(".btn-view-contract").off("click").on("click", () => {
+                const rc = {
+                    DepositAmount: propertyData.contractDeposit,
+                    MonthlyRent: propertyData.contractMonthlyRent,
+                    ContractDurationMonths: propertyData.contractDurationMonths,
+                    StartDate: propertyData.contractStartDate,
+                    EndDate: propertyData.contractEndDate,
+                    Status: propertyData.contractStatus,
+                    PaymentMethod: propertyData.contractPaymentMethod,
+                    ContactInfo: propertyData.contractContactInfo
+                };
+                if (!rc.DepositAmount && !rc.MonthlyRent) {
+                    alert("Không có dữ liệu hợp đồng!");
+                    return;
+                }
+                $("#ContractDeposit").text(rc.DepositAmount || "N/A");
+                $("#ContractMonthlyRent").text(rc.MonthlyRent || "N/A");
+                $("#ContractDurationMonths").text(rc.ContractDurationMonths || "N/A");
+                $("#ContractStartDate").text(rc.StartDate || "N/A");
+                $("#ContractEndDate").text(rc.EndDate || "N/A");
+                $("#ContractStatus").text(rc.Status || "N/A");
+                $("#ContractPaymentMethod").text(rc.PaymentMethod || "N/A");
+                $("#ContractContactInfo").text(rc.ContactInfo || "N/A");
+
+                $("#contract-section").slideToggle();
+            });
+
+            // Tôi muốn thuê
+            $(".btn-agree-rent").off("click").on("click", async () => {
+                if (!foundInterest) return;
+                if (!confirm("Bạn chắc chắn muốn thuê chứ?")) return;
+                try {
+                    let interestId = foundInterest.id;
+                    let apiUrl = `${this.urlBase}/api/Property/InterestedProperty/${interestId}/confirm?isRenter=true&confirmed=true`;
+                    let res = await fetch(apiUrl, { method: "POST", credentials: "include" });
+                    if (!res.ok) throw new Error(await res.text());
+                    let data = await res.json();
+                    alert(data.message || "Xác nhận thành công!");
+                    location.reload();
+                } catch (err) {
+                    console.error("Error confirming rent:", err);
+                    alert("Có lỗi xảy ra khi xác nhận thuê: " + err.message);
+                }
+            });
+
+        } catch (err) {
+            console.error("Error checking interest:", err);
+            this.isInterested = false;
+            this.renderMaskedPhone();
+            $(".btn-add-interest").show();
+            $(".btn-remove-interest, .btn-view-contract, .btn-agree-rent, .waiting-landlord").hide();
+        }
+    }
+
+    showFullPhone() {
+        $('.contactPhone').text(this.fullPhoneNumber);
+        $('#phoneLink').attr('href', 'tel:' + this.fullPhoneNumber);
+        $('#zaloLink').attr('href', 'https://zalo.me/' + this.fullPhoneNumber);
     }
 
     updateElement(selector, value) {
@@ -289,11 +447,11 @@ class PropertyDetailManager {
             prop.ward || '',
             prop.province || ''
         ].filter(part => part && part.trim() !== '');
-        
+
         if (parts.length === 0) {
             return 'Địa chỉ không xác định';
         }
-        
+
         return parts.join(', ');
     }
 
@@ -301,7 +459,7 @@ class PropertyDetailManager {
         if (!price || isNaN(price)) {
             return 'Liên hệ';
         }
-        
+
         if (typeof formatVietnameseNumber === 'function') {
             return formatVietnameseNumber(price) + " đ";
         }
@@ -317,11 +475,11 @@ class PropertyDetailManager {
 
     handleFavoriteButtons(isFavorite) {
         console.log('Handling favorite buttons, isFavorite:', isFavorite);
-        
+
         // Hide both buttons first
         $('#addFavoriteDetail').addClass('d-none');
         $('#removeFavoriteDetail').addClass('d-none');
-        
+
         // Show the appropriate button based on favorite status
         if (isFavorite) {
             console.log('Property is favorited, showing remove button');
@@ -336,14 +494,14 @@ class PropertyDetailManager {
     async addToFavorites() {
         try {
             console.log('Adding property to favorites:', this.currentId);
-            
+
             // Call the global function
             if (typeof addToFavourite === 'function') {
                 await addToFavourite(this.currentId);
-                
+
                 // Update UI to show remove button
                 this.handleFavoriteButtons(true);
-                
+
                 // Show success message
                 Swal.fire({
                     icon: 'success',
@@ -369,14 +527,14 @@ class PropertyDetailManager {
     async removeFromFavorites() {
         try {
             console.log('Removing property from favorites:', this.currentId);
-            
+
             // Call the global function
             if (typeof removeToFavorite === 'function') {
                 await removeToFavorite(this.currentId);
-                
+
                 // Update UI to show add button
                 this.handleFavoriteButtons(false);
-                
+
                 // Show success message
                 Swal.fire({
                     icon: 'success',
@@ -401,19 +559,19 @@ class PropertyDetailManager {
     populateImageThumbnails(imageUrls) {
         const container = $('#listImgs');
         container.empty();
-        
+
         if (imageUrls && imageUrls.length > 0) {
             let html = '';
-            
+
             imageUrls.forEach((url, index) => {
                 const src = url.includes("http") ? url : this.urlBase + url;
                 const isActive = index === 0 ? 'active' : '';
-                
+
                 html += `<div onclick="propertyDetailManager.selectImage(this)" class="thumbnail-item ${isActive}">
                             <img src="${src}" onerror="propertyDetailManager.handleImageError(this)" class="thumbnail-image" alt="Thumbnail ${index + 1}" />
                         </div>`;
             });
-            
+
             container.html(html);
         } else {
             container.html('<div class="text-gray-500 text-center py-4">Không có hình ảnh</div>');
@@ -423,7 +581,7 @@ class PropertyDetailManager {
     updateMap(prop) {
         const mapFrame = document.getElementById('mapFrame');
         if (!mapFrame) return;
-        
+
         if (prop.location) {
             const coordinates = prop.location.split(',');
             const lat = coordinates[0];
@@ -449,12 +607,12 @@ class PropertyDetailManager {
     populateSidebarNews(newsList) {
         const container = $('#listNew');
         let html = '';
-        
+
         newsList.forEach(item => {
-            const imageUrl = item.images && item.images.length > 0 && item.images[0] && item.images[0].imageUrl 
+            const imageUrl = item.images && item.images.length > 0 && item.images[0] && item.images[0].imageUrl
                 ? (item.images[0].imageUrl.includes('http') ? item.images[0].imageUrl : this.urlBase + item.images[0].imageUrl)
                 : '/image/default-news.jpg';
-            
+
             html += `<div class="news-item" onclick="window.location.href='/Home/NewDetail/${item.id}'">
                         <img src="${imageUrl}" onerror="propertyDetailManager.handleImageError(this)" alt="tin" class="news-item-image" />
                         <div class="news-item-content">
@@ -465,7 +623,7 @@ class PropertyDetailManager {
                         </div>
                     </div>`;
         });
-        
+
         container.html(html);
     }
 
@@ -482,10 +640,10 @@ class PropertyDetailManager {
         document.querySelectorAll('.thumbnail-item').forEach(el => {
             el.classList.remove('active');
         });
-        
+
         // Add active class to clicked thumbnail
         element.classList.add('active');
-        
+
         // Update primary image
         const img = element.querySelector('img');
         document.getElementById('imgPrimaryUrl').src = img.src;
@@ -507,7 +665,7 @@ class PropertyDetailManager {
 
     showErrorMessage(message) {
         console.error(message);
-        
+
         $('.main-content').html(`
             <div class="content-section">
                 <div class="text-center py-8">
@@ -524,17 +682,17 @@ class PropertyDetailManager {
     // Utility function for time formatting
     timeAgo(dateString) {
         if (!dateString) return '';
-        
+
         const date = new Date(dateString);
         const now = new Date();
         const diffInSeconds = Math.floor((now - date) / 1000);
-        
+
         if (diffInSeconds < 60) return 'Vừa xong';
         if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
         if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
         if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} ngày trước`;
         if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} tháng trước`;
-        
+
         return `${Math.floor(diffInSeconds / 31536000)} năm trước`;
     }
 
@@ -544,12 +702,12 @@ class PropertyDetailManager {
             const res = await fetch(`${this.urlBase}/api/Property/${this.currentId}/similar?page=${page}&pageSize=3`, {
                 headers: { 'Accept': 'application/json' }
             });
-            
+
             if (!res.ok) throw new Error('Similar API failed');
 
             const data = await res.json();
             const items = data.items || [];
-            
+
             const wrap = document.getElementById('similarList');
             const empty = document.getElementById('similarEmpty');
             const pager = document.getElementById('similarPager');
@@ -573,7 +731,7 @@ class PropertyDetailManager {
             // Update pager info
             const totalItems = data.totalItems || 0;
             const totalPages = Math.max(1, Math.ceil(totalItems / 3));
-            
+
             document.getElementById('simInfo').textContent = `Trang ${page}/${totalPages} • ${totalItems} tin`;
 
             const prev = document.getElementById('simPrev');
@@ -631,24 +789,92 @@ class PropertyDetailManager {
         }
     }
 
-    loadComments() {
-        if (typeof getComment === 'function') {
-            getComment(this.currentId).then(listReview => {
-                let commentHTMLBody = "";
-                listReview.items.forEach(item => {
-                    if (typeof createCommentHTML === 'function') {
-                        var commentHTML = createCommentHTML(item, this.isOwner);
-                        commentHTMLBody += commentHTML.innerHTML;
-                    }
-                });
-                
-                const list = document.getElementById('commentList');
-                if (list) {
-                    list.innerHTML = commentHTMLBody;
+    // Comments are now handled by ReviewManager
+    // loadComments() method removed - use window.reviewManager.loadComments() instead
+
+    // Fallback method to load comments if ReviewManager is not available
+    async loadCommentsFallback() {
+        try {
+            if (typeof getComment === 'function') {
+                const commentsData = await getComment(this.currentId);
+
+                // Update comment count in UI
+                let commentCount = 0;
+                if (commentsData && commentsData.data) {
+                    commentCount = Array.isArray(commentsData.data) ? commentsData.data.length : 0;
+                } else if (commentsData && Array.isArray(commentsData)) {
+                    commentCount = commentsData.length;
+                } else if (commentsData && commentsData.items) {
+                    commentCount = Array.isArray(commentsData.items) ? commentsData.items.length : 0;
                 }
-            });
+
+                // Update both comment count displays
+                this.updateElement('#totalCommentCount', commentCount);
+                this.updateElement('.comment-count span span', commentCount);
+
+                // Try to display comments if ReviewManager becomes available
+                if (window.reviewManager && commentsData && commentsData.items) {
+                    const transformedComments = commentsData.items.map(comment => {
+                        // Transform replies if they exist
+                        let transformedReplies = [];
+
+                        // Check for single reply object (API format: reply: {...})
+                        if (comment.reply && typeof comment.reply === 'object') {
+                            transformedReplies = [{
+                                id: comment.reply.id || 'unknown',
+                                userName: 'Chủ nhà', // Since it's landlordId, we'll use a default name
+                                content: comment.reply.replyContent || 'Không có nội dung',
+                                createdAt: comment.reply.createdAt
+                            }];
+                        }
+                        // Check for replies array (fallback format)
+                        else if (comment.replies && Array.isArray(comment.replies)) {
+                            transformedReplies = comment.replies.map(reply => ({
+                                id: reply.replyId || reply.id,
+                                userName: reply.userName || reply.renterName || reply.ownerName || 'Người dùng',
+                                content: reply.content || reply.replyText || reply.replyContent || 'Không có nội dung',
+                                createdAt: reply.createdAt
+                            }));
+                        }
+
+                        return {
+                            id: comment.reviewId || comment.id,
+                            rating: comment.rating || 0,
+                            content: comment.reviewText || comment.content || 'Không có nội dung',
+                            userName: comment.renterName || comment.userName || 'Người dùng',
+                            createdAt: comment.createdAt,
+                            replies: transformedReplies
+                        };
+                    });
+
+                    window.reviewManager.comments = transformedComments;
+                    window.reviewManager.totalComments = transformedComments.length;
+                    window.reviewManager.displayComments();
+                }
+            }
+        } catch (error) {
+            console.error('Error in fallback comment loading:', error);
         }
     }
+
+    // Method to load comments with retry logic
+    loadCommentsWithRetry() {
+        if (window.reviewManager) {
+            window.reviewManager.loadComments();
+        } else {
+            // Retry after a short delay
+            setTimeout(() => {
+                if (window.reviewManager) {
+                    window.reviewManager.loadComments();
+                } else {
+                    // Try to load comments directly as fallback
+                    this.loadCommentsFallback();
+                }
+            }, 500);
+        }
+    }
+
+
 
     // Report functions
     openReportModal() {
@@ -705,33 +931,33 @@ class PropertyDetailManager {
     updateReportButton(data) {
         const reportBtn = document.getElementById('reportBtn');
         const reportBtnText = document.getElementById('reportBtnText');
-        
+
         if (!reportBtn || !reportBtnText) {
             console.error('Report button elements not found in updateReportButton');
             return;
         }
-        
+
         console.log('Updating report button with data:', data);
-        
+
         // Remove all color classes and let CSS handle styling
         reportBtn.className = 'action-btn report';
-        
+
         // Always show the report button unless user is owner
         if (this.currentUserId > 0 && this.currentUserId === this.landlordId) {
             console.log('User is owner, hiding report button');
             reportBtn.style.display = 'none';
             return;
         }
-        
+
         // Show the report button
         reportBtn.style.display = 'flex';
-        
+
         if (this.currentUserId <= 0) {
             console.log('User not logged in, updating for guest');
             this.updateReportButtonForGuest();
             return;
         }
-        
+
         if (data.hasReported && !data.canReport) {
             console.log('User has reported, cannot report again');
             reportBtnText.textContent = 'Hủy báo cáo';
@@ -798,7 +1024,7 @@ class PropertyDetailManager {
 
             console.log('Submitting report with data:', requestBody);
             const result = await this.reportService.reportPropertyPost(this.currentUserId, requestBody);
-            
+
             Swal.close();
             Swal.fire({
                 icon: 'success',
@@ -806,20 +1032,20 @@ class PropertyDetailManager {
                 text: result.message || 'Báo cáo đã được gửi thành công',
                 confirmButtonText: 'Đồng ý'
             });
-            
+
             this.closeReportModal();
             this.checkReportStatus();
         } catch (error) {
             console.error('Error submitting report:', error);
             Swal.close();
-            
+
             let errorMessage = 'Có lỗi xảy ra khi gửi báo cáo';
             if (error.message) {
                 errorMessage = error.message;
             } else if (error.response) {
                 errorMessage = error.response.data?.message || errorMessage;
             }
-            
+
             Swal.fire({
                 icon: 'error',
                 title: 'Lỗi!',
@@ -870,7 +1096,7 @@ class PropertyDetailManager {
             try {
                 console.log('Canceling report for:', { targetId: this.currentId, userId: this.currentUserId });
                 const response = await this.reportService.cancelPropertyPostReport(this.currentId, this.currentUserId);
-                
+
                 Swal.close();
                 Swal.fire({
                     icon: 'success',
@@ -878,19 +1104,19 @@ class PropertyDetailManager {
                     text: response.message || 'Đã hủy báo cáo thành công',
                     confirmButtonText: 'Đồng ý'
                 });
-                
+
                 this.checkReportStatus();
             } catch (error) {
                 console.error('Error canceling report:', error);
                 Swal.close();
-                
+
                 let errorMessage = 'Có lỗi xảy ra khi hủy báo cáo';
                 if (error.message) {
                     errorMessage = error.message;
                 } else if (error.response) {
                     errorMessage = error.response.data?.message || errorMessage;
                 }
-                
+
                 Swal.fire({
                     icon: 'error',
                     title: 'Lỗi!',
@@ -907,7 +1133,7 @@ class PropertyDetailManager {
 }
 
 // Initialize when DOM is ready
-$(document).ready(function() {
+$(document).ready(function () {
     // Initialize the manager
     window.propertyDetailManager = new PropertyDetailManager();
 }); 
