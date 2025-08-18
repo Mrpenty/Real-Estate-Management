@@ -104,7 +104,7 @@
         </div>
     </div>
 
-     <div id="featuresId" class="bg-white p-6 rounded ml-20 mr-20 mt-8 border mb-8">
+    <div id="featuresId" class="bg-white p-6 rounded ml-20 mr-20 mt-8 border mb-8">
         <h2 class="text-lg font-semibold mb-4">Đặc điểm nổi bật</h2>
 
         <div id="amenities-container" class="flex mb-3">
@@ -177,7 +177,7 @@
         <button type="button" id="ai-suggest-button" class="mb-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center gap-1">
             <span>Gợi ý mô tả bởi AI</span>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L18.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM10.5 7.5L12 12m-2.25-4.5L12 12m0 0 4.5 4.5M12 12l-1.5 4.5M12 12l3.75-3.75M12 12l-3.75 3.75M13.5 12h-3" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L18.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0-2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM10.5 7.5L12 12m-2.25-4.5L12 12m0 0 4.5 4.5M12 12l-1.5 4.5M12 12l3.75-3.75M12 12l-3.75 3.75M13.5 12h-3" />
             </svg>
         </button>
         <textarea required id="description" name="description" rows="10" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
@@ -225,25 +225,25 @@
                 <input type="text" id="phoneNumberIdC" disabled class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
         </div>
+        <div id="renterInfoContainer" class="mt-4"></div>
     </div>
 
-    <div class="ml-20 mr-20 mb-4">
+    <div class="ml-20 mr-20 mb-4" id="interestListBtnContainer">
         <button type="button" onclick="viewDSQuanTam()" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-full transition">
             Danh sách quan tâm
         </button>
     </div>
-        <div class="ml-20 mr-20 mb-4">
-        <button type="button" onclick="viewDSQuanTam()" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-full transition">
-            Danh sách quan tâm
+
+@*     <div class="ml-20 mr-20 mb-4">
+        <button type="button" onclick="viewHopDongBtn()" id="viewHopDong" class="d-none w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-full transition">
+            Hợp đồng bài đăng
         </button>
-    </div>
+    </div> *@
 
     <div id="contractActionContainer" class="ml-20 mr-20 mb-6">
-
     </div>
 
     <div id="submitContainer" class="ml-20 mr-20 mb-20">
-
     </div>
 
 </form>
@@ -265,13 +265,15 @@
 
         <div class="compare-popup-body">
             <div id="listQT" class="overflow-x-auto">
-@*                 <table class="compare-table" id="compare-table">
+                @*                 <table class="compare-table" id="compare-table">
                     <!-- Table content will be populated by JavaScript -->
                 </table> *@
             </div>
         </div>
     </div>
 </div>
+
+
 
 <script>
      let clickUpdateMap = false;
@@ -414,52 +416,84 @@
         console.log('Image URLs from API:', itemPropertyBody.imageUrls);
 
         // ✅ Kiểm tra status ngay sau khi lấy dữ liệu
-            // Giả sử postDetail là object nhận từ API
         const submitContainer = document.getElementById("submitContainer");
         const contractActionContainer = document.getElementById("contractActionContainer");
+        const interestListBtnContainer = document.getElementById("interestListBtnContainer");
+        const renterInfoContainer = document.getElementById("renterInfoContainer");
 
         // Kiểm tra trạng thái bài đăng
-        if (itemPropertyBody.posts[0].status.toLowerCase() === "draft") {
+        const postStatus = itemPropertyBody.posts[0].status.toLowerCase();
 
+        if (postStatus === "draft") {
             submitContainer.innerHTML = `
                 <a href="/PostProperty/CreateContract?propertyPostId=${itemPropertyBody.posts[0].id}"
                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-full mb-6 transition inline-block text-center">
                    Tiếp tục
                 </a>`;
-        }else if (itemPropertyBody.posts[0].status.toLowerCase() === "expired") {
-
+        } else if (postStatus === "expired") {
             submitContainer.innerHTML = `
                 <button type="submit"
                         class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-full mb-6 transition">
                     Gia hạn thêm 30 ngày và cập nhật
                 </button>`;
-        } else if (itemPropertyBody.posts[0].status.toLowerCase() === "rented") {
-
+        } else if (postStatus === "rented") {
             submitContainer.innerHTML = `
-                <h3>Bài đăng đã được thuê</h3>`
+                <h3>Bài đăng đã được thuê</h3>`;
+            // Ẩn nút danh sách quan tâm
+            if (interestListBtnContainer) {
+                interestListBtnContainer.style.display = "none";
+            }
+            // Hiện thông tin người thuê
+            let renterName = "";
+            let renterPhone = "";
+            // Tìm thông tin người thuê từ rentalContract hoặc interestedProperties
+            if (itemPropertyBody.posts[0].rentalContract && itemPropertyBody.posts[0].rentalContract.renter) {
+                renterName = itemPropertyBody.posts[0].rentalContract.renter.name || "";
+                renterPhone = itemPropertyBody.posts[0].rentalContract.renter.phone || "";
+            } else if (Array.isArray(itemPropertyBody.interestedProperties)) {
+                // Tìm người đã được đồng ý thuê
+                const agreed = itemPropertyBody.interestedProperties.find(x => x.status === 5);
+                if (agreed) {
+                    renterName = agreed.renterName || "";
+                    renterPhone = agreed.renterPhone || "";
+                }
+            }
+            if (renterName || renterPhone) {
+                renterInfoContainer.innerHTML = `
+                    <div class="bg-blue-50 border border-blue-300 rounded p-4 flex flex-col md:flex-row items-start md:items-center gap-2">
+                        <span class="font-semibold text-blue-700">Người đang thuê:</span>
+                        <span class="text-gray-800">${renterName}</span>
+                        <span class="text-gray-600">SĐT: ${renterPhone}</span>
+                    </div>
+                `;
+            }
         } else {
             submitContainer.innerHTML = `
                 <button type="submit"
                         class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-full mb-6 transition">
                     Cập nhật
                 </button>`;
+            // Hiện lại nút danh sách quan tâm nếu bị ẩn
+            if (interestListBtnContainer) {
+                interestListBtnContainer.style.display = "";
+            }
+            if (renterInfoContainer) {
+                renterInfoContainer.innerHTML = "";
+            }
         }
-        
+
         if (itemPropertyBody.posts[0].rentalContract == null) {
-                // Nếu null thì hiển thị nút tạo hợp đồng
-                contractActionContainer.innerHTML = `
-                    <a href="/PostProperty/CreateContract?propertyPostId=${itemPropertyBody.posts[0].id}"
-                       class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-full mb-6 transition inline-block text-center">
-                       Tạo hợp đồng
-                    </a>`;
+            contractActionContainer.innerHTML = `
+                <a href="/PostProperty/CreateContract?propertyPostId=${itemPropertyBody.posts[0].id}"
+                   class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-full mb-6 transition inline-block text-center">
+                   Tạo hợp đồng
+                </a>`;
         } else {
-                // Nếu có hợp đồng thì hiển thị nút xem hợp đồng
-                contractActionContainer.innerHTML = `
+            contractActionContainer.innerHTML = `
             <a href="/PostProperty/ViewContract?id=${itemPropertyBody.posts[0].id}"
                class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-full mb-6 transition inline-block text-center">
                Xem hợp đồng
             </a>`;
-
         }
 
         // ✅ Phần còn lại giữ nguyên
@@ -496,11 +530,10 @@
             });
         }
 
-
         // Debug: Log dữ liệu ảnh để kiểm tra
         console.log('itemPropertyBody:', itemPropertyBody);
         console.log('imageUrls:', itemPropertyBody.imageUrls);
-        
+
         // Hiển thị ảnh cũ từ database
         if (itemPropertyBody.imageUrls && itemPropertyBody.imageUrls.length > 0) {
             itemPropertyBody.imageUrls.forEach((url, index) => {
@@ -513,96 +546,56 @@
                 wrapper.setAttribute('data-old-url', url);
 
                 const img = document.createElement('img');
-                
-                                 // Xử lý URL ảnh để đảm bảo đúng format
-                 let imageUrl = url;
-                 
-                 // Debug: Kiểm tra URL ảnh
-                 console.log('Processing image URL:', {
-                     original: url,
-                     type: typeof url,
-                     length: url ? url.length : 0,
-                     startsWithHttp: url ? url.startsWith('http') : false,
-                     startsWithSlash: url ? url.startsWith('/') : false
-                 });
-                 
-                 if (url && !url.startsWith('http') && !url.startsWith('//')) {
-                     // Nếu URL không có protocol, thêm base URL của backend
-                     if (url.startsWith('/')) {
-                         imageUrl = backendBaseUrl + url;
-                     } else {
-                         imageUrl = backendBaseUrl + '/' + url;
-                     }
-                 }
-                 
-                 console.log('Original URL:', url);
-                 console.log('Processed URL:', imageUrl);
-                
+                let imageUrl = url;
+                if (url && !url.startsWith('http') && !url.startsWith('//')) {
+                    if (url.startsWith('/')) {
+                        imageUrl = backendBaseUrl + url;
+                    } else {
+                        imageUrl = backendBaseUrl + '/' + url;
+                    }
+                }
                 img.src = imageUrl;
                 img.className = "w-full h-32 object-cover rounded-md shadow";
-                
-                // Xử lý lỗi khi ảnh không load được
                 img.onerror = function() {
-                    console.error('Failed to load image:', imageUrl);
-                    this.src = '/image/upload-image.png'; // Ảnh placeholder khi lỗi
+                    this.src = '/image/upload-image.png';
                     this.style.opacity = '0.5';
                 };
-                
-                // Xử lý khi ảnh load thành công
-                img.onload = function() {
-                    console.log('Image loaded successfully:', imageUrl);
-                };
+                img.onload = function() {};
 
-                // Icon ảnh đại diện
                 const primaryIcon = document.createElement('div');
                 primaryIcon.className = "absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full z-10";
                 primaryIcon.innerHTML = index === 0 ? 'Ảnh đại diện' : '';
                 primaryIcon.style.display = index === 0 ? 'block' : 'none';
 
-                // Click chọn làm ảnh đại diện
                 wrapper.onclick = function() {
                     const clickedIndex = parseInt(this.getAttribute('data-file-index'));
                     primaryImageIndex = clickedIndex;
-                    
-                    // Update border và icon cho tất cả
                     Array.from(previewContainer.children).forEach((child) => {
                         child.classList.remove('border-blue-500');
                         child.classList.add('border-transparent');
                         const icon = child.querySelector('div');
                         if (icon) icon.style.display = 'none';
                     });
-                    
                     this.classList.remove('border-transparent');
                     this.classList.add('border-blue-500');
                     primaryIcon.style.display = 'block';
-                    
-                    // Cập nhật lại primaryImageIndex
                     updatePrimaryImageIndex();
                 };
 
-                // Nút xóa ảnh
                 const deleteBtn = document.createElement('button');
                 deleteBtn.innerHTML = "<span>&times;</span>";
                 deleteBtn.type = "button";
                 deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600 z-20";
                 deleteBtn.onclick = (e) => {
                     e.stopPropagation();
-                    
-                    // Xóa ảnh cũ khỏi danh sách
                     const oldUrl = wrapper.getAttribute('data-old-url');
                     if (oldUrl) {
-                        console.log('Đã xóa ảnh cũ:', oldUrl);
-                        
-                        // Cập nhật lại itemPropertyBody.imageUrls để phản ánh trạng thái hiện tại
                         const currentIndex = itemPropertyBody.imageUrls.indexOf(oldUrl);
                         if (currentIndex > -1) {
                             itemPropertyBody.imageUrls.splice(currentIndex, 1);
                         }
                     }
-                    
                     wrapper.remove();
-                    
-                    // Cập nhật lại primary image sau khi xóa
                     updatePrimaryImageIndex();
                 };
 

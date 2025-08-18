@@ -14,14 +14,20 @@ public class UpdateProperty
     private Mock<IOwnerPropertyRepository> _mockOwnerPropertyRepo;
     private Mock<RentalDbContext> _mockRentalDbContext;
     private OwnerPropertyService _ownerPropertyService;
+    private Mock<IRentalContractRepository> _mockRentalContractRepo; // Add this field
 
-    [TestInitialize]
-    public void Setup()
-    {
-        _mockOwnerPropertyRepo = new Mock<IOwnerPropertyRepository>();
-        _mockRentalDbContext = new Mock<RentalDbContext>();
-        _ownerPropertyService = new OwnerPropertyService(_mockOwnerPropertyRepo.Object, _mockRentalDbContext.Object);
-    }
+[TestInitialize]
+public void Setup()
+{
+    _mockOwnerPropertyRepo = new Mock<IOwnerPropertyRepository>();
+    _mockRentalDbContext = new Mock<RentalDbContext>();
+    _mockRentalContractRepo = new Mock<IRentalContractRepository>(); // Initialize mock
+    _ownerPropertyService = new OwnerPropertyService(
+        _mockOwnerPropertyRepo.Object,
+        _mockRentalDbContext.Object,
+        _mockRentalContractRepo.Object // Pass required argument
+    );
+}
 
     [TestMethod]
     public async Task UpdatePropertyAsync_WithValidData_UpdatesPropertySuccessfully()

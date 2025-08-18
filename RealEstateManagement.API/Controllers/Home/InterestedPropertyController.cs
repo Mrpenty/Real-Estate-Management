@@ -81,8 +81,13 @@ namespace RealEstateManagement.API.Controllers.Home
         /// Bỏ quan tâm (Remove Interest)
         /// </summary>
         [HttpDelete("RemoveInterest")]
-        public async Task<IActionResult> RemoveInterest([FromQuery] int renterId, [FromQuery] int propertyId)
+        public async Task<IActionResult> RemoveInterest([FromQuery] int propertyId)
         {
+            var userIdStr = User.FindFirst("id")?.Value
+                 ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                 ?? User.FindFirst("sub")?.Value;
+            if (!int.TryParse(userIdStr, out var renterId))
+                return Unauthorized();
             var result = await _service.RemoveInterestAsync(renterId, propertyId);
             if (!result)
                 return NotFound();

@@ -15,6 +15,15 @@ namespace RealEstateManagement.Business.Services.OwnerService
         Task UpdateStatusAsync(RentalContractStatusDto statusDto);
         Task UpdateContractAsync(int contractId, RentalContractUpdateDto dto);
         Task DeleteAsync(int id);
+
+        Task<RentalPaymentResultDto> PayAsync(int contractId);
+
+        Task ProposeRenewalAsync(int contractId, RentalContractRenewalDto dto);
+
+        Task RespondRenewalAsync(int contractId, bool approve);
+
+        Task<RentalContractRenewalDto?> GetRenewalProposalAsync(int contractId);
+
     }
 
 }

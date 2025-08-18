@@ -21,6 +21,8 @@ namespace RealEstateManagement.Data.Entity
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate => StartDate?.AddMonths(ContractDurationMonths);
 
+        public DateTime? LastPaymentDate { get; set; }
+
         public string PaymentMethod { get; set; } // Phương thức thanh toán
         public string ContactInfo { get; set; } // Phương thức liên lạc
 
@@ -32,12 +34,22 @@ namespace RealEstateManagement.Data.Entity
         public ApplicationUser Landlord { get; set; }
         public ApplicationUser Renter { get; set; }
 
+        public decimal? ProposedMonthlyRent { get; set; }
+        public int? ProposedContractDurationMonths { get; set; }
+        public PaymentCycleType? ProposedPaymentCycle { get; set; }
+        public int? ProposedPaymentDayOfMonth { get; set; }
+        public DateTime? ProposedEndDate { get; set; }
+
+        public DateTime? ProposedAt { get; set; } // Ngày landlord đề xuất
+        public bool? RenterApproved { get; set; } // null = chưa phản hồi, true = đồng ý, false = từ chối
+
         public enum ContractStatus
         {
-            Pending = 0,
-            Confirmed = 1,
-            Rejected = 2,
-            Cancelled = 3
+            Pending = 0, //Tạo hợp đồng lần đầu, chờ renter xác nhận khi thuê
+            Confirmed = 1, //Hợp đồng đang cho thuê
+            Rejected = 2, //Hợp đồng bị chấm dứt
+            Expired = 3, //Hợp đồng hết hạn
+            RenewalPending = 4 // landlord đề xuất gia hạn, chờ renter duyệt
         }
 
         public enum PaymentCycleType

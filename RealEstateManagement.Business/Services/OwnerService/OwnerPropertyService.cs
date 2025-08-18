@@ -18,12 +18,14 @@ namespace RealEstateManagement.Business.Services.OwnerService
     public class OwnerPropertyService : IOwnerPropertyService
     {
         private readonly IOwnerPropertyRepository _ownerPropertyRepo;
+        private readonly IRentalContractRepository _rentalContractRepo;
         private readonly RentalDbContext _rentalDbContext;
 
-        public OwnerPropertyService(IOwnerPropertyRepository ownerPropertyRepo, RentalDbContext rentalDbContext)
+        public OwnerPropertyService(IOwnerPropertyRepository ownerPropertyRepo, RentalDbContext rentalDbContext, IRentalContractRepository rentalContractRepo)
         {
             _ownerPropertyRepo = ownerPropertyRepo;
             _rentalDbContext = rentalDbContext;
+            _rentalContractRepo = rentalContractRepo;
         }
         public IQueryable<OwnerPropertyDto> GetPropertiesByLandlordQueryable(int landlordId)
         {
@@ -217,5 +219,53 @@ namespace RealEstateManagement.Business.Services.OwnerService
             return (true, $"Post extended to {post.ArchiveDate?.ToString("dd/MM/yyyy")}");
         }
 
+        //Lấy danh sách các bài đăng bất động sản đã cho thuê
+        public async Task<List<OwnerPropertyDto>> GetRentedPropertiesByLandlordIdAsync(int landlordId)
+        {
+            var properties = await _ownerPropertyRepo.GetRentedPropertiesByLandlordIdAsync(landlordId);
+
+            return properties.Select(entity => new OwnerPropertyDto
+            {
+                Id = entity.Id,
+                Title = entity.Title,
+                Description = entity.Description,
+                Price = entity.Price,
+                IsPromoted = entity.IsPromoted,
+                IsVerified = entity.IsVerified,
+                Location = entity.Location,
+                Bedrooms = entity.Bedrooms,
+                Area = entity.Area,
+                CreatedAt = entity.CreatedAt,
+                Posts = entity.Posts
+                    .Where(post => post.Status == PropertyPost.PropertyPostStatus.Rented)
+                    .Select(post => new OwnerPropertyPostDto
+                    {
+                        Id = post.Id,
+                        Status = post.Status.ToString(),
+                        CreatedAt = post.CreatedAt,
+                        RentalContract = post.RentalContract == null ? null : new RentalContractViewDto
+                        {
+                            Id = post.RentalContract.Id,
+                            PropertyPostId = post.RentalContract.PropertyPostId,
+                            Status = post.RentalContract.Status,
+                            RenterId = post.RentalContract.RenterId,
+                            DepositAmount = post.RentalContract.DepositAmount,
+                            MonthlyRent = post.RentalContract.MonthlyRent,
+                            ContractDurationMonths = post.RentalContract.ContractDurationMonths,
+                            PaymentCycle = post.RentalContract.PaymentCycle,
+                            PaymentDayOfMonth = post.RentalContract.PaymentDayOfMonth,
+                            StartDate = post.RentalContract.StartDate,
+                            EndDate = post.RentalContract.EndDate,
+                            PaymentMethod = post.RentalContract.PaymentMethod,
+                            ContactInfo = post.RentalContract.ContactInfo,
+                            CreatedAt = post.RentalContract.CreatedAt,
+                            ConfirmedAt = post.RentalContract.ConfirmedAt,
+                            LastPaymentDate = post.RentalContract.LastPaymentDate
+                        }
+                    }).ToList(),
+                IsExistRenterContract = entity.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Rented && post.RentalContract != null),
+                Type = entity.Type,
+            }).ToList();
+        }
     }
 }

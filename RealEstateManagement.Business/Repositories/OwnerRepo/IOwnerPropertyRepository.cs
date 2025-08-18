@@ -17,5 +17,7 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         Task UpdateAddressAsync(int propertyId, int provinceId, int wardId, int streetId, string detailedAddress);
 
         Task UpdateAmenitiesAsync(int propertyId, List<int> amenityIds);
+
+        Task<List<Property>> GetRentedPropertiesByLandlordIdAsync(int landlordId);
     }
 }

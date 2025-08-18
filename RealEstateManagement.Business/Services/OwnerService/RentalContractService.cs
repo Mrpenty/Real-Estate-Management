@@ -156,5 +156,141 @@ namespace RealEstateManagement.Business.Services.OwnerService
         {
             await _repository.DeleteAsync(id);
         }
+
+        public async Task<RentalPaymentResultDto> PayAsync(int contractId)
+        {
+            var contract = await _repository.GetByRentalContractIdAsync(contractId);
+            if (contract == null) throw new ArgumentException("Contract not found");
+
+            if (contract.StartDate == null) throw new ArgumentException("Contract chưa có ngày bắt đầu");
+
+            // Tính ngày đến hạn hiện tại
+            var now = DateTime.Now;
+            DateTime due = CalculateNextPaymentDate(contract);
+
+            if (now < due)
+            {
+                throw new ArgumentException("Chưa đến hạn thanh toán");
+            }
+
+            int lateDays = 0;
+            if (now > due)
+            {
+                lateDays = (now - due).Days;
+            }
+
+            // cập nhật LastPaymentDate
+            contract.LastPaymentDate = now;
+            await _repository.UpdateContractAsync(contract);
+
+            // Trả về kết quả
+            return new RentalPaymentResultDto
+            {
+                ContractId = contract.Id,
+                LastPaymentDate = now,
+                NextPaymentDate = GetNextCycleDate(due, contract.PaymentCycle, contract.PaymentDayOfMonth),
+                LateDays = lateDays
+            };
+        }
+
+        private DateTime CalculateNextPaymentDate(RentalContract contract)
+        {
+            var start = contract.StartDate.Value;
+            var due = new DateTime(start.Year, start.Month, contract.PaymentDayOfMonth);
+
+            while (due <= DateTime.Now)
+            {
+                due = GetNextCycleDate(due, contract.PaymentCycle, contract.PaymentDayOfMonth);
+            }
+            return due;
+        }
+
+        private DateTime GetNextCycleDate(DateTime date, RentalContract.PaymentCycleType cycle, int paymentDay)
+        {
+            DateTime next = date;
+            if (cycle == RentalContract.PaymentCycleType.Monthly)
+                next = date.AddMonths(1);
+            else if (cycle == RentalContract.PaymentCycleType.Quarterly)
+                next = date.AddMonths(3);
+            else if (cycle == RentalContract.PaymentCycleType.Yearly)
+                next = date.AddYears(1);
+
+            return new DateTime(next.Year, next.Month, paymentDay);
+        }
+
+        // ✅ Landlord đề xuất gia hạn
+        public async Task ProposeRenewalAsync(int contractId, RentalContractRenewalDto dto)
+        {
+            var contract = await _repository.GetByRentalContractIdAsync(contractId);
+            if (contract == null) throw new ArgumentException("Không tìm thấy hợp đồng");
+
+            contract.ProposedMonthlyRent = dto.ProposedMonthlyRent;
+            contract.ProposedContractDurationMonths = dto.ProposedContractDurationMonths;
+            contract.ProposedPaymentCycle = dto.ProposedPaymentCycle;
+            contract.ProposedPaymentDayOfMonth = dto.ProposedPaymentDayOfMonth;
+            contract.ProposedEndDate = dto.ProposedEndDate;
+            contract.ProposedAt = DateTime.Now;
+            contract.Status = RentalContract.ContractStatus.RenewalPending;
+            contract.RenterApproved = null;
+
+            await _repository.UpdateContractAsync(contract);
+        }
+
+        // ✅ Renter phản hồi
+        public async Task RespondRenewalAsync(int contractId, bool approve)
+        {
+            var contract = await _repository.GetByRentalContractIdAsync(contractId);
+            if (contract == null) throw new ArgumentException("Không tìm thấy hợp đồng");
+
+            contract.RenterApproved = approve;
+
+            if (approve)
+            {
+                contract.MonthlyRent = contract.ProposedMonthlyRent ?? contract.MonthlyRent;
+                contract.ContractDurationMonths = contract.ProposedContractDurationMonths ?? contract.ContractDurationMonths;
+                contract.PaymentCycle = contract.ProposedPaymentCycle ?? contract.PaymentCycle;
+                contract.PaymentDayOfMonth = contract.ProposedPaymentDayOfMonth ?? contract.PaymentDayOfMonth;
+                contract.Status = RentalContract.ContractStatus.Confirmed;
+                if (contract.ProposedEndDate.HasValue)
+                    contract.StartDate = contract.StartDate ?? DateTime.UtcNow;
+                contract.RenterApproved = true;
+            }
+            else
+            {
+                if (contract.Status == RentalContract.ContractStatus.RenewalPending)
+                {
+                    // kiểm tra status trước đó
+                    if (contract.EndDate.HasValue && contract.EndDate.Value < DateTime.Now)
+                    {
+                        contract.Status = RentalContract.ContractStatus.Expired;
+                    }
+                    else
+                    {
+                        contract.Status = RentalContract.ContractStatus.Confirmed;
+                    }
+                }
+            }
+
+            await _repository.UpdateContractAsync(contract);
+        }
+
+        public async Task<RentalContractRenewalDto?> GetRenewalProposalAsync(int contractId)
+        {
+            var contract = await _repository.GetByRentalContractIdAsync(contractId);
+            if (contract == null || contract.Status != RentalContract.ContractStatus.RenewalPending)
+                return null;
+
+            return new RentalContractRenewalDto
+            {
+                ProposedMonthlyRent = contract.ProposedMonthlyRent ?? contract.MonthlyRent,
+                ProposedContractDurationMonths = contract.ProposedContractDurationMonths ?? contract.ContractDurationMonths,
+                ProposedPaymentCycle = contract.ProposedPaymentCycle ?? contract.PaymentCycle,
+                ProposedPaymentDayOfMonth = contract.ProposedPaymentDayOfMonth ?? contract.PaymentDayOfMonth,
+                ProposedEndDate = contract.ProposedEndDate ?? contract.EndDate,
+                ProposedAt = contract.ProposedAt,
+                RenterApproved = contract.RenterApproved
+            };
+        }
+
     }
 }
