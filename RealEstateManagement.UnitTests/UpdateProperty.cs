@@ -14,14 +14,20 @@ public class UpdateProperty
     private Mock<IOwnerPropertyRepository> _mockOwnerPropertyRepo;
     private Mock<RentalDbContext> _mockRentalDbContext;
     private OwnerPropertyService _ownerPropertyService;
+    private Mock<IRentalContractRepository> _mockRentalContractRepo; // Add this field
 
-    [TestInitialize]
-    public void Setup()
-    {
-        _mockOwnerPropertyRepo = new Mock<IOwnerPropertyRepository>();
-        _mockRentalDbContext = new Mock<RentalDbContext>();
-        _ownerPropertyService = new OwnerPropertyService(_mockOwnerPropertyRepo.Object, _mockRentalDbContext.Object);
-    }
+[TestInitialize]
+public void Setup()
+{
+    _mockOwnerPropertyRepo = new Mock<IOwnerPropertyRepository>();
+    _mockRentalDbContext = new Mock<RentalDbContext>();
+    _mockRentalContractRepo = new Mock<IRentalContractRepository>(); // Initialize mock
+    _ownerPropertyService = new OwnerPropertyService(
+        _mockOwnerPropertyRepo.Object,
+        _mockRentalDbContext.Object,
+        _mockRentalContractRepo.Object // Pass required argument
+    );
+}
 
     [TestMethod]
     public async Task UpdatePropertyAsync_WithValidData_UpdatesPropertySuccessfully()
@@ -39,9 +45,9 @@ public class UpdateProperty
             Area = 50,
             Bedrooms = 1
         };
-        var dto = new OwnerUpdatePropertyDto
+        var dto = new PropertyCreateRequestDto
         {
-            Id = propertyId,
+           // Id = propertyId,
             Title = "New Title",
             Description = "New Description",
             Price = 2000000,
@@ -55,7 +61,7 @@ public class UpdateProperty
                               .Returns(Task.CompletedTask);
 
         // Act
-        await _ownerPropertyService.UpdatePropertyAsync(dto, landlordId);
+        await _ownerPropertyService.UpdatePropertyAsync(dto, landlordId, propertyId);
 
         // Assert
         _mockOwnerPropertyRepo.Verify(r => r.UpdateAsync(It.Is<Property>(p =>
@@ -74,9 +80,9 @@ public class UpdateProperty
         // Arrange
         var landlordId = 1;
         var propertyId = 999;
-        var dto = new OwnerUpdatePropertyDto
+        var dto = new PropertyCreateRequestDto
         {
-            Id = propertyId,
+           // Id = propertyId,
             Title = "New Title",
             Description = "New Description"
         };
@@ -86,7 +92,7 @@ public class UpdateProperty
 
         // Act & Assert
         var exception = await Assert.ThrowsExceptionAsync<Exception>(() =>
-            _ownerPropertyService.UpdatePropertyAsync(dto, landlordId));
+            _ownerPropertyService.UpdatePropertyAsync(dto, landlordId, propertyId));
         Assert.AreEqual("Property not found or not owned by landlord.", exception.Message);
         _mockOwnerPropertyRepo.Verify(r => r.UpdateAsync(It.IsAny<Property>()), Times.Never);
     }

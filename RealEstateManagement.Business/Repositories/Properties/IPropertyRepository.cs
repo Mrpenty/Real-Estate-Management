@@ -38,6 +38,8 @@ namespace RealEstateManagement.Business.Repositories.Properties
         Task<Property?> GetPropertyForSimilarityByIdAsync(int id);
 
         Task<List<WeeklyBestRatedPropertyDTO>> GetWeeklyBestRatedPropertiesAsync(DateTime fromUtc, DateTime toUtc, int topN);
+
+        Task<List<Property>> GetPropertiesRentedByUserAsync(int userId);
     }
 
 }

@@ -11,6 +11,7 @@ namespace RealEstateManagement.Business.DTO.PropertyOwnerDTO
     {
         public int Id { get; set; }
         public int PropertyPostId { get; set; }
+        public int? RenterId { get; set; }
         public decimal DepositAmount { get; set; }
         public decimal MonthlyRent { get; set; }
         public int ContractDurationMonths { get; set; }
@@ -20,6 +21,8 @@ namespace RealEstateManagement.Business.DTO.PropertyOwnerDTO
         public DateTime? EndDate { get; set; }
         public string PaymentMethod { get; set; }
         public string ContactInfo { get; set; }
+
+        public DateTime? LastPaymentDate { get; set; }
         public RentalContract.ContractStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? ConfirmedAt { get; set; }

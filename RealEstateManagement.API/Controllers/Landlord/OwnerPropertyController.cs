@@ -83,5 +83,13 @@ namespace RealEstateManagement.API.Controllers.Landlord
             return Ok(result.Message);
         }
 
+        [HttpGet("GetMyRentedProperties")]
+        public async Task<IActionResult> GetMyRentedProperties()
+        {
+            var landlordId = GetCurrentLandlordId();
+            var properties = await _ownerPropertyService.GetRentedPropertiesByLandlordIdAsync(landlordId);
+            return Ok(properties);
+        }
+
     }
 }

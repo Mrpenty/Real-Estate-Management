@@ -15,5 +15,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
         Task UpdatePropertyAsync(PropertyCreateRequestDto dto, int landlordId, int propertyId);
         Task DeletePropertyAsync(int id, int landlordId);
         Task<(bool IsSuccess, string Message)> ExtendPostAsync(int postId, int days, int landlordId);
+
+        Task<List<OwnerPropertyDto>> GetRentedPropertiesByLandlordIdAsync(int landlordId);
     }
 }

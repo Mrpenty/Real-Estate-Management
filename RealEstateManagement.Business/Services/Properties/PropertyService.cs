@@ -13,6 +13,7 @@ using RealEstateManagement.Data.Entity.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management;
 using System.Text;
 using System.Threading.Tasks;
 using Twilio.Rest.Api.V2010.Account;
@@ -830,6 +831,54 @@ namespace RealEstateManagement.Business.Services.Properties
             };
         }
 
+        public async Task<List<PropertyDetailDTO>> GetRentedPropertiesByUserAsync(int userId)
+        {
+            var properties = await _repository.GetPropertiesRentedByUserAsync(userId);
+            var result = properties.Select(p =>
+            {
+                // Lấy RentalContract từ PropertyPost đầu tiên có RentalContract
+                var rentalContract = p.Posts?.FirstOrDefault(post => post.RentalContract != null)?.RentalContract;
 
+                return new PropertyDetailDTO
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Description = p.Description,
+                    Type = p.Type,
+                    AddressID = p.AddressId,
+                    StreetId = p.Address?.StreetId,
+                    Street = p.Address?.Street?.Name,
+                    ProvinceId = p.Address?.ProvinceId,
+                    Province = p.Address?.Province?.Name,
+                    WardId = p.Address?.WardId,
+                    Ward = p.Address?.Ward?.Name,
+                    DetailedAddress = p.Address?.DetailedAddress,
+                    Area = p.Area,
+                    Bedrooms = p.Bedrooms,
+                    Price = p.Price,
+                    Status = p.Status,
+                    Location = p.Location,
+                    CreatedAt = p.CreatedAt,
+                    ViewsCount = p.ViewsCount,
+                    PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
+                    LandlordId = p.Landlord?.Id ?? 0,
+                    LandlordName = p.Landlord?.Name,
+                    LandlordPhoneNumber = p.Landlord?.PhoneNumber,
+                    LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
+                    Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                    // Thông tin hợp đồng thuê (RentalContract)
+                    ContractDeposit = rentalContract?.DepositAmount,
+                    ContractMonthlyRent = rentalContract?.MonthlyRent,
+                    ContractDurationMonths = rentalContract?.ContractDurationMonths,
+                    ContractStartDate = rentalContract?.StartDate,
+                    ContractEndDate = rentalContract?.EndDate,
+                    ContractStatus = rentalContract?.Status.ToString(),
+                    ContractPaymentMethod = rentalContract?.PaymentMethod,
+                    ContractContactInfo = rentalContract?.ContactInfo
+                };
+            }).ToList();
+
+            return result;
+        }
     }
 }

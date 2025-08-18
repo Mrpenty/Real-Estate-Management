@@ -354,5 +354,24 @@ namespace RealEstateManagement.API.Controllers
             return 0;
         }
 
+        //Lấy tên, số diện thoại và email của người dùng
+        [HttpGet("basic-info")]
+        public async Task<IActionResult> GetBasicUserInfo(int userId)
+        {
+            try
+            {
+                var user = await _profileService.GetUserBasicInfoAsync(userId);
+                if (user == null)
+                {
+                    return NotFound("User not found");
+                }
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting basic user info");
+                return StatusCode(500, "An error occurred while retrieving the basic user info");
+            }
+        }
     }
 }

@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace RealEstateManagement.API.Controllers.Wallet
 {
-    [Authorize(Roles = "Renter,Landlord,Admin")]
+   // [Authorize(Roles = "Renter,Landlord")]
     [ApiController]
     [Route("api/[controller]")]
     public class WalletController : ControllerBase

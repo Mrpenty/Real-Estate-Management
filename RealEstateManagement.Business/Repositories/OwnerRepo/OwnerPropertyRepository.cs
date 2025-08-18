@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RealEstateManagement.Data.Entity;
 
 namespace RealEstateManagement.Business.Repositories.OwnerRepo
 {
@@ -95,6 +96,20 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
 
             await _context.PropertyAmenities.AddRangeAsync(newAmenities);
             await _context.SaveChangesAsync();
+        }
+
+        //Lấy tất cả các bất động sản đã được cho thuê và có RentalContract.Status = Confirmed
+        public async Task<List<Property>> GetRentedPropertiesByLandlordIdAsync(int landlordId)
+        {
+            return await _context.Properties
+                .Include(p => p.Posts)
+                    .ThenInclude(post => post.RentalContract)
+                .Where(p => p.LandlordId == landlordId
+                    && p.Posts.Any(post =>
+                        post.Status == PropertyPost.PropertyPostStatus.Rented
+                        && post.RentalContract != null
+                        && post.RentalContract.Status == RentalContract.ContractStatus.Confirmed))
+                .ToListAsync();
         }
     }
 

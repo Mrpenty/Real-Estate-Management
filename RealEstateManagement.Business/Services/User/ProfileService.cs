@@ -240,5 +240,22 @@ namespace RealEstateManagement.Business.Services.User
             var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
             return result;
         }
+
+        //Lấy tên, số điện thoại , email của user
+        public async Task<UserBasicInfoDto> GetUserBasicInfoAsync(int userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+            return new UserBasicInfoDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email ?? string.Empty,
+                PhoneNumber = user.PhoneNumber ?? string.Empty
+            };
+        }
     }
 }
