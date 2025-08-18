@@ -55,6 +55,20 @@ const AdminUserService = {
     },
 
     /**
+     * Force refresh user token (Admin only)
+     * @param {number} userId 
+     * @returns {Promise}
+     */
+    async forceRefreshUserToken(userId) {
+        const res = await fetch(config.buildApiUrl(`/api/AdminDashboard/force-refresh-user-token/${userId}`), {
+            method: 'POST',
+            headers: { 'Accept': 'application/json' },
+            credentials: 'include'
+        });
+        return res;
+    },
+
+    /**
      * Xóa user
      * @param {number} userId 
      * @returns {Promise}

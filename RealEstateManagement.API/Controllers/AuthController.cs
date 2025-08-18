@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RealEstateManagement.Business.DTO.AuthDTO;
 using RealEstateManagement.Business.Repositories;
+using RealEstateManagement.Business.Repositories.Token;
 using RealEstateManagement.Business.Services.Auth;
 using RealEstateManagement.Data.Entity.User;
 
@@ -22,6 +23,7 @@ namespace RealEstateManagement.API.Controllers
         private readonly IAuthService _authService;
         private readonly ILogger<AuthController> _logger;
         private readonly IConfiguration _configuration;
+        private readonly ITokenRepository _tokenRepository;
 
         public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IAuthService authService, ILogger<AuthController> logger, IConfiguration configuration)
         {
@@ -201,6 +203,35 @@ namespace RealEstateManagement.API.Controllers
             {
                 _logger.LogError(ex, "Error in Google OAuth callback.");
                 return Redirect($"https://localhost:7160/Auth/Login?error={Uri.EscapeDataString("Google login failed: " + ex.Message)}");
+            }
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            try
+            {
+                var refreshToken = Request.Cookies["refreshToken"];
+                if (string.IsNullOrEmpty(refreshToken))
+                {
+                    return BadRequest("Refresh token is required");
+                }
+
+                var user = await _tokenRepository.GetUserFromRefreshTokenAsync(refreshToken);
+                if (user == null)
+                {
+                    return BadRequest("Invalid refresh token");
+                }
+
+                var tokenDto = await _tokenRepository.CreateJWTTokenAsync(user, true);
+                _tokenRepository.SetTokenCookie(tokenDto, HttpContext);
+
+                return Ok(new { message = "Token refreshed successfully", token = tokenDto.AccessToken });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while refreshing token");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while refreshing token");
             }
         }
     }

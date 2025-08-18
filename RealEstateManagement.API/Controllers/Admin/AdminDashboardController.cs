@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateManagement.Business.DTO.AdminDTO;
 using RealEstateManagement.Business.Services.Admin;
+using RealEstateManagement.Data.Entity.User;
 
 namespace RealEstateManagement.API.Controllers.Admin
 {
@@ -12,6 +13,7 @@ namespace RealEstateManagement.API.Controllers.Admin
     {
         private readonly IAdminDashboardService _adminDashboardService;
         private readonly ILogger<AdminDashboardController> _logger;
+        private readonly Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager;
 
         public AdminDashboardController(IAdminDashboardService adminDashboardService, ILogger<AdminDashboardController> logger)
         {
@@ -211,6 +213,90 @@ namespace RealEstateManagement.API.Controllers.Admin
             {
                 _logger.LogError(ex, "Error getting system overview");
                 return StatusCode(500, new { success = false, message = "Internal server error" });
+            }
+        }
+
+        [HttpPut("update-user-role")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateUserRole([FromBody] UpdateUserRoleRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var user = await _userManager.FindByIdAsync(request.UserId.ToString());
+                if (user == null)
+                {
+                    return NotFound("User not found");
+                }
+
+                // Update custom Role field
+                user.Role = request.NewRole;
+                await _userManager.UpdateAsync(user);
+
+                // Update ASP.NET Core Identity roles
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                if (currentRoles.Any())
+                {
+                    await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                }
+
+                // Add new role
+                var roleResult = await _userManager.AddToRoleAsync(user, request.NewRole);
+                if (!roleResult.Succeeded)
+                {
+                    return BadRequest($"Failed to update role: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+                }
+
+                // Invalidate existing refresh tokens for this user to force re-authentication
+                user.RefreshToken = null;
+                user.RefreshTokenExpiryTime = null;
+                await _userManager.UpdateAsync(user);
+
+                return Ok(new { 
+                    message = $"User role updated to {request.NewRole} successfully",
+                    note = "User will need to login again to get new token with updated role"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user role");
+                return StatusCode(500, "An error occurred while updating user role");
+            }
+        }
+
+        /// <summary>
+        /// Force refresh user token after role change (Admin only)
+        /// </summary>
+        [HttpPost("force-refresh-user-token/{userId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ForceRefreshUserToken(int userId)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId.ToString());
+                if (user == null)
+                {
+                    return NotFound("User not found");
+                }
+
+                // Generate new refresh token
+                user.RefreshToken = Guid.NewGuid().ToString();
+                user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+                await _userManager.UpdateAsync(user);
+
+                return Ok(new { 
+                    message = "User token refreshed successfully",
+                    note = "User should use new refresh token to get access token with updated role"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error refreshing user token");
+                return StatusCode(500, "An error occurred while refreshing user token");
             }
         }
     }

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using RealEstateManagement.Business.DTO.Properties;
 
 namespace RealEstateManagement.Business.DTO.Location
 {
@@ -50,22 +51,22 @@ namespace RealEstateManagement.Business.DTO.Location
         public string? UserPreference { get; set; } // "budget_friendly", "luxury", "family_friendly", etc.
     }
 
-    public class LocationRecommendationResponse
-    {
-        public List<PropertyRecommendationDTO> Properties { get; set; } = new();
+    //public class LocationRecommendationResponse
+    //{
+    //    public List<PropertyRecommendationDTO> Properties { get; set; } = new();
         
-        public LocationDTO UserLocation { get; set; }
+    //    public LocationDTO UserLocation { get; set; }
         
-        public double SearchRadiusKm { get; set; }
+    //    public double SearchRadiusKm { get; set; }
         
-        public int TotalResults { get; set; }
+    //    public int TotalResults { get; set; }
         
-        public string RecommendationReason { get; set; }
+    //    public string RecommendationReason { get; set; }
         
-        public List<string> NearbyAmenities { get; set; } = new();
+    //    public List<string> NearbyAmenities { get; set; } = new();
         
-        public List<string> TransportationInfo { get; set; } = new();
-    }
+    //    public List<string> TransportationInfo { get; set; } = new();
+    //}
 
     public class PropertyRecommendationDTO
     {
@@ -84,6 +85,8 @@ namespace RealEstateManagement.Business.DTO.Location
         public string DetailedAddress { get; set; }
         
         // Location specific fields
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
         public double DistanceKm { get; set; }
         public int WalkingTimeMinutes { get; set; }
         public int DrivingTimeMinutes { get; set; }
@@ -91,5 +94,9 @@ namespace RealEstateManagement.Business.DTO.Location
         public string MatchReason { get; set; }
         public List<string> Amenities { get; set; } = new();
         public List<string> NearbyPoints { get; set; } = new(); // Schools, hospitals, malls, etc.
+        
+        // Tiện ích và giao thông riêng cho từng BDS
+        public List<DetailedAmenityDTO> NearbyAmenities { get; set; } = new();
+        public List<string> TransportationInfo { get; set; } = new();
     }
 } 

@@ -72,50 +72,66 @@ namespace RealEstateManagement.Business.Services.Auth
 
         public async Task<AuthMessDTO> RegisterAsync(RegisterDTO registerDTO)
         {
-            
-            var existingUser = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == registerDTO.PhoneNumber);
-            if (existingUser != null)
+            try
             {
-                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Phone number already registered." };
+                var existingUser = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == registerDTO.PhoneNumber);
+                if (existingUser != null)
+                {
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Phone number already registered." };
+                }
+
+                var user = new ApplicationUser
+                {
+                    Name = registerDTO.Name,
+                    UserName = registerDTO.Name,
+                    PhoneNumber = registerDTO.PhoneNumber,
+                    NormalizedUserName = _userManager.NormalizeName(registerDTO.PhoneNumber),
+                    NormalizedEmail = null, 
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    IsVerified = false 
+                };
+
+                var createdUser = await _userManager.CreateAsync(user, registerDTO.Password);
+
+                if (!createdUser.Succeeded)
+                {
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = string.Join(", ", createdUser.Errors.Select(e => e.Description)) };
+                }
+
+                var roleResult = await _userManager.AddToRoleAsync(user, "Renter");
+
+                if (!roleResult.Succeeded)
+                {
+                    await _userManager.DeleteAsync(user);
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = string.Join(", ", roleResult.Errors.Select(e => e.Description)) };
+                }
+
+                // Tạo ví cho user mới
+                await _walletService.CreateWalletAsync(user.Id);
+
+                var confirmationCode = _tokenRepository.GenerateConfirmationCode();
+                user.ConfirmationCode = confirmationCode;
+                user.ConfirmationCodeExpiry = DateTime.Now.AddMinutes(5); 
+                await _userManager.UpdateAsync(user);
+
+                // Wrap SMS sending in try-catch to prevent registration failure
+                try
+                {
+                    await _smsService.SendOtpAsync(user.PhoneNumber, confirmationCode);
+                }
+                catch (Exception smsEx)
+                {
+                    _logger.LogWarning(smsEx, "Failed to send OTP via SMS for user {UserId}, but registration continues", user.Id);
+                    // Continue with registration even if SMS fails
+                }
+
+                return new AuthMessDTO { IsAuthSuccessful = true, ErrorMessage = "Registration successful. An OTP has been sent to your phone for verification." };
             }
-
-            var user = new ApplicationUser
+            catch (Exception ex)
             {
-                Name = registerDTO.Name,
-                UserName = registerDTO.Name,
-                PhoneNumber = registerDTO.PhoneNumber,
-                NormalizedUserName = _userManager.NormalizeName(registerDTO.PhoneNumber),
-                NormalizedEmail = null, 
-                SecurityStamp = Guid.NewGuid().ToString(),
-                IsVerified = false 
-            };
-
-            var createdUser = await _userManager.CreateAsync(user, registerDTO.Password);
-
-            if (!createdUser.Succeeded)
-            {
-                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = string.Join(", ", createdUser.Errors.Select(e => e.Description)) };
+                _logger.LogError(ex, "Registration failed for phone number: {PhoneNumber}", registerDTO.PhoneNumber);
+                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Registration failed due to a server error. Please try again." };
             }
-
-            var roleResult = await _userManager.AddToRoleAsync(user, "Renter");
-
-            if (!roleResult.Succeeded)
-            {
-                await _userManager.DeleteAsync(user);
-                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = string.Join(", ", roleResult.Errors.Select(e => e.Description)) };
-            }
-
-            // Tạo ví cho user mới
-            await _walletService.CreateWalletAsync(user.Id);
-
-            var confirmationCode = _tokenRepository.GenerateConfirmationCode();
-            user.ConfirmationCode = confirmationCode;
-            user.ConfirmationCodeExpiry = DateTime.Now.AddMinutes(5); 
-            await _userManager.UpdateAsync(user);
-
-            await _smsService.SendOtpAsync(user.PhoneNumber, confirmationCode);
-
-            return new AuthMessDTO { IsAuthSuccessful = true, ErrorMessage = "Registration successful. An OTP has been sent to your phone for verification." };
         }
 
         public async Task LogoutAsync()

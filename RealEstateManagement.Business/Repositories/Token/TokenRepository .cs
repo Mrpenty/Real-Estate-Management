@@ -3,6 +3,7 @@ using Google.Apis.Auth;
 using Microsoft.AspNetCore.Http;
 
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -126,28 +127,34 @@ namespace RealEstateManagement.Business.Repositories.Token
 
         private async Task<List<Claim>> GetClaims(ApplicationUser user)
         {
-
-
             var claims = new List<Claim>
-
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email ?? ""),
-            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-            new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
-            new(JwtRegisteredClaimNames.Prn, user.PhoneNumber ?? string.Empty),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new("id", user.Id.ToString())
-        };
-
-
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email ?? ""),
+                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+                new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
+                new(JwtRegisteredClaimNames.Prn, user.PhoneNumber ?? string.Empty),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new("id", user.Id.ToString())
+            };
 
             _logger.LogInformation("GetClaims: Basic claims added for user {UserId}", user.Id);
 
-            var roles = await _userManager.GetRolesAsync(user);
+            // Try to get roles from ASP.NET Core Identity first
+            var identityRoles = await _userManager.GetRolesAsync(user);
+            
+            // If no Identity roles found, use the custom Role field as fallback
+            if (!identityRoles.Any())
+            {
+                _logger.LogWarning("No Identity roles found for user {UserId}, using custom Role field: {CustomRole}", user.Id, user.Role);
+                if (!string.IsNullOrEmpty(user.Role))
+                {
+                    identityRoles = new List<string> { user.Role };
+                }
+            }
 
-            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+            claims.AddRange(identityRoles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             return claims;
         }
@@ -218,6 +225,24 @@ namespace RealEstateManagement.Business.Repositories.Token
             catch (Exception ex)
             {
                 throw new SecurityTokenException("Invalid Google ID token", ex);
+            }
+        }
+
+        public async Task<ApplicationUser> GetUserFromRefreshTokenAsync(string refreshToken)
+        {
+            try
+            {
+                var user = await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+                if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+                {
+                    return null;
+                }
+                return user;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting user from refresh token");
+                return null;
             }
         }
 

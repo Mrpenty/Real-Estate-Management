@@ -96,6 +96,26 @@
             box-shadow: 0 8px 25px rgba(255, 108, 53, 0.3);
         }
 
+        /* AI Search Button */
+        .ai-search-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+            white-space: nowrap;
+            font-size: 14px;
+        }
+
+        .ai-search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
 </style>
 <!-- Search Bar chồng lên Slider -->
 <div class="slider">
@@ -152,6 +172,11 @@
                     <!-- Search Button -->
                     <button class="search-button" onclick="performSearch()">
                         🔍 Tìm kiếm
+                    </button>
+                    
+                    <!-- AI Search Button -->
+                    <button class="ai-search-button" onclick="performAISearch()">
+                        🤖 Tìm kiếm AI
                     </button>
                 </div>
                 <div>
@@ -862,6 +887,38 @@
         
         const searchUrl = `/Home/Search?${searchParams.toString()}`;
         window.location.href = searchUrl;
+    }
+
+    // AI Search function
+    function performAISearch() {
+        const provinceSelected = document.getElementById('provinceSelected').dataset.id;
+        const provinceName = document.getElementById('provinceSelected').dataset.value;
+        const searchText = document.getElementById('searchInput').value;
+        const activeTab = document.querySelector('.tab-item.active');
+        const propertyType = activeTab ? activeTab.dataset.type : null;
+        
+        const aiSearchData = {
+            type: propertyType,
+            province: provinceSelected,
+            provinceName: provinceName,
+            keyword: searchText,
+            minRoom: $('#minInput').val(),
+            maxRoom: $('#maxInput').val(),
+            minPrice: $('#minInputPrice').val(),
+            maxPrice: $('#maxInputPrice').val(),
+            minArea: $('#minInputArea').val(),
+            maxArea: $('#maxInputArea').val(),
+            selectedLocations: selectedLocationLists
+        };
+        
+        // Store data in sessionStorage
+        sessionStorage.setItem('aiSearchData', JSON.stringify(aiSearchData));
+        sessionStorage.setItem('selectedLocationLists', JSON.stringify(selectedLocationLists));
+        sessionStorage.setItem('provinceId', provinceSelected);
+        sessionStorage.setItem('provinceName', provinceName);
+        
+        // Redirect to AI search page
+        window.location.href = '/Home/AISearch';
     }
 
     // Enter key search

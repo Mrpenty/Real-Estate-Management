@@ -63,6 +63,11 @@ namespace RealEstateManagement.Presentation.Controllers
             return View();
         }
 
+        public IActionResult AISearch()
+        {
+            return View();
+        }
+
         public IActionResult MyReports()
         {
             return View();

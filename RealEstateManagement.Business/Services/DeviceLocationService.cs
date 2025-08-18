@@ -22,14 +22,14 @@ namespace RealEstateManagement.Business.Services
     {
         private readonly IMemoryCache _cache;
         private readonly IConfiguration _configuration;
-        private readonly IGoogleMapsService _googleMapsService;
+        private readonly IOpenStreetMapService _openStreetMapService;
         private readonly TimeSpan _locationCacheExpiration = TimeSpan.FromMinutes(30);
 
-        public DeviceLocationService(IMemoryCache cache, IConfiguration configuration, IGoogleMapsService googleMapsService)
+        public DeviceLocationService(IMemoryCache cache, IConfiguration configuration, IOpenStreetMapService openStreetMapService)
         {
             _cache = cache;
             _configuration = configuration;
-            _googleMapsService = googleMapsService;
+            _openStreetMapService = openStreetMapService;
         }
 
         public async Task<LocationDTO> GetDeviceLocationAsync(string deviceId, string ipAddress = null)
@@ -201,14 +201,9 @@ namespace RealEstateManagement.Business.Services
         {
             try
             {
-                // Create a reverse geocoding request
-                var address = $"{latitude},{longitude}";
-                var geocodeResponse = await _googleMapsService.GeocodeAddressAsync(address);
-                
-                if (geocodeResponse?.Results != null && geocodeResponse.Results.Any())
-                {
-                    return geocodeResponse.Results[0].FormattedAddress;
-                }
+                // Use OpenStreetMap reverse geocoding
+                var address = await _openStreetMapService.ReverseGeocodeAsync(latitude, longitude);
+                return address;
             }
             catch (Exception ex)
             {
