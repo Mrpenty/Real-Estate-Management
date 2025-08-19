@@ -21,6 +21,11 @@ namespace RealEstateManagement.Business.Services.Chat.Conversations
         }
         public async Task<Conversation> CreateConversationAsync(CreateConversationDTO dto)
         {
+            if (dto == null) throw new ArgumentNullException(nameof(dto));
+
+            // Không cho phép tự chat với chính mình
+            if (dto.RenterId == dto.LandlordId)
+                throw new ArgumentException("Renter and Landlord cannot be the same user.", nameof(dto));
             var existing = await _repository.GetByUsersAsync(dto.RenterId, dto.LandlordId, dto.PropertyId);
             if (existing != null)
             {
@@ -42,8 +47,10 @@ namespace RealEstateManagement.Business.Services.Chat.Conversations
         //}
         public async Task<IEnumerable<ConversationDTO>> GetAllByUserIdAsync(int userId)
         {
-            var conversations =  await _repository.GetAllByUserIdAsync(userId);
-            return conversations.Select(c => new ConversationDTO
+            var convs = await _repository.GetAllByUserIdAsync(userId)
+            ?? Enumerable.Empty<Conversation>(); // <- chống null
+            //var conversations =  await _repository.GetAllByUserIdAsync(userId);
+            return convs.Select(c => new ConversationDTO
             {
                 Id = c.Id,
                 RenterId = c.RenterId,

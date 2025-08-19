@@ -32,6 +32,8 @@ namespace RealEstateManagement.Business.Services.OwnerService
         public async Task<int> CreatePropertyPostAsync(PropertyCreateRequestDto dto, int landlordId)
         {
             // 1. Validate data
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
             if (string.IsNullOrWhiteSpace(dto.Title))
                 throw new ArgumentException("Tiêu đề không được để trống.");
             if (dto.Area <= 0 || dto.Price <= 0)
@@ -95,26 +97,9 @@ namespace RealEstateManagement.Business.Services.OwnerService
             return await _postRepository.GetByIdAsync(postId);
         }
 
-        public async Task<object> GetPostDetailForAdminAsync(int postId)
+        public async Task<object?> GetPostDetailForAdminAsync(int postId)
         {
-            var post = await _postRepository.GetAll()
-                .Include(p => p.Property)
-                    .ThenInclude(prop => prop.Address)
-                        .ThenInclude(addr => addr.Province)
-                .Include(p => p.Property)
-                    .ThenInclude(prop => prop.Address)
-                        .ThenInclude(addr => addr.Ward)
-                .Include(p => p.Property)
-                    .ThenInclude(prop => prop.Address)
-                        .ThenInclude(addr => addr.Street)
-                .Include(p => p.Property)
-                    .ThenInclude(prop => prop.Images)
-                .Include(p => p.Property)
-                    .ThenInclude(prop => prop.PropertyAmenities)
-                        .ThenInclude(pa => pa.Amenity)
-                .Include(p => p.Landlord) // Include landlord information
-                .FirstOrDefaultAsync(p => p.Id == postId);
-
+            var post = await _postRepository.GetPostDetailForAdminAsync(postId);
             if (post == null) return null;
 
             return new
@@ -188,47 +173,45 @@ namespace RealEstateManagement.Business.Services.OwnerService
 
         public async Task<object> GetPostsByStatusAsync(string status, int page, int pageSize)
         {
-            IQueryable<RealEstateManagement.Data.Entity.PropertyEntity.PropertyPost> query = _postRepository.GetAll()
-                .Include(p => p.Property)
-                .Include(p => p.Landlord);
+            // 1. Xử lý input status
+            PropertyPost.PropertyPostStatus? statusEnum = null;
             if (!string.IsNullOrEmpty(status))
+                statusEnum = Enum.Parse<PropertyPost.PropertyPostStatus>(status, true);
+
+            // 2. Gọi repo để lấy dữ liệu
+            int total = await _postRepository.CountByStatusAsync(statusEnum);
+            var posts = await _postRepository.GetPostsByStatusAsync(statusEnum, page, pageSize);
+
+            // 3. Mapping kết quả trả ra
+            var mappedPosts = posts.Select(p => new
             {
-                var statusEnum = Enum.Parse<PropertyPost.PropertyPostStatus>(status, true);
-                query = query.Where(p => p.Status == statusEnum);
-            }
-            int total = await query.CountAsync();
-            var posts = await query
-                .OrderByDescending(p => p.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(p => new
+                p.Id,
+                p.Status,
+                p.CreatedAt,
+                LandlordName = p.Landlord?.Name,
+                Property = p.Property == null ? null : new
                 {
-                    p.Id,
-                    p.Status,
-                    p.CreatedAt,
-                    p.Landlord.Name,
-                    Property = p.Property == null ? null : new
-                    {
-                        p.Property.Id,
-                        p.Property.Title,
-                        p.Property.Address,
-                        p.Property.Area,
-                        p.Property.Price,
-                        p.Property.Description,
-                    }
-                })
-                .ToListAsync();
+                    p.Property.Id,
+                    p.Property.Title,
+                    p.Property.Address,
+                    p.Property.Area,
+                    p.Property.Price,
+                    p.Property.Description,
+                }
+            }).ToList();
 
             int totalPages = (int)Math.Ceiling((double)total / pageSize);
+
             return new
             {
                 total,
                 page,
                 pageSize,
                 totalPages,
-                posts
+                posts = mappedPosts
             };
         }
+
 
         public async Task<bool> UpdatePostStatusAsync(int id, string status)
         {
@@ -337,16 +320,11 @@ namespace RealEstateManagement.Business.Services.OwnerService
         //Admin Ban và UnBan PropertyPost
         public async Task<bool> BanPropertyPost(int propertyId, string action, int adminId, string? adminNote)
         {
-            var post = await _context.PropertyPosts
-           .Include(p => p.Property)
-           .FirstOrDefaultAsync(p => p.Id == propertyId);
-
+            var post = await _postRepository.GetPostWithPropertyAsync(propertyId);
             if (post == null || post.Property == null)
                 return false;
 
-            var reports = await _context.Reports
-          .Where(r => r.TargetType == "PropertyPost" && r.TargetId == propertyId)
-          .ToListAsync();
+            var reports = await _postRepository.GetReportsForPostAsync(propertyId);
 
             if (action.ToLower() == "ban")
             {
@@ -378,8 +356,10 @@ namespace RealEstateManagement.Business.Services.OwnerService
             {
                 throw new ArgumentException("Hành động không hợp lệ. Chỉ hỗ trợ 'ban' và 'unban'.");
             }
-            await _context.SaveChangesAsync();
+
+            await _postRepository.SaveChangesAsync();
             return true;
         }
+
     }
 }

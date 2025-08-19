@@ -147,7 +147,8 @@ namespace RealEstateManagement.Business.Services.OwnerService
 
             if (dto.ProvinceId != null || dto.WardId != null || dto.StreetId != null || !string.IsNullOrEmpty(dto.DetailedAddress))
             {
-                await _ownerPropertyRepo.UpdateAddressAsync(propertyId, dto.ProvinceId, dto.WardId, dto.StreetId, dto.DetailedAddress);
+                await _ownerPropertyRepo.UpdateAddressAsync(propertyId, dto.ProvinceId ?? 0, dto.WardId ?? 0, dto.StreetId ?? 0, dto.DetailedAddress);
+                //await _ownerPropertyRepo.UpdateAddressAsync(propertyId, dto.ProvinceId, dto.WardId, dto.StreetId, dto.DetailedAddress);
             }
 
             // Xử lý cập nhật Amenities nếu cần
@@ -176,7 +177,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
         //Gia hạn các property hết hạn
         public async Task<(bool IsSuccess, string Message)> ExtendPostAsync(int postId, int days, int landlordId)
         {
-            var post = await _rentalDbContext.PropertyPosts
+            var post = await _rentalDbContext.Set<PropertyPost>()
                 .FirstOrDefaultAsync(p => p.Id == postId && p.LandlordId == landlordId);
 
             if (post == null)

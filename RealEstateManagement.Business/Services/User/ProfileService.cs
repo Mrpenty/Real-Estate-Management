@@ -62,65 +62,51 @@ namespace RealEstateManagement.Business.Services.User
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
-            {
                 throw new Exception("User not found");
-            }
 
-            if (!string.IsNullOrEmpty(model.Email))
+            // Check email duplicate
+            if (!string.IsNullOrWhiteSpace(model.Email))
             {
-                var existingUser = await _userManager.FindByEmailAsync(model.Email);
-                if (existingUser != null && existingUser.Id != userId)
-                {
+                var existingUserByEmail = await _userManager.FindByEmailAsync(model.Email);
+                if (existingUserByEmail != null && existingUserByEmail.Id != userId)
                     return IdentityResult.Failed(new IdentityError { Description = "Email is already taken by another user" });
-                }
             }
 
-            if (!string.IsNullOrEmpty(model.PhoneNumber))
+            // Check phone duplicate (SYNC để tránh IAsyncQueryProvider trong unit tests)
+            if (!string.IsNullOrWhiteSpace(model.PhoneNumber))
             {
-                var existingUser = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == model.PhoneNumber && u.Id != userId);
-                if (existingUser != null)
-                {
+                var phoneTaken = _userManager.Users.Any(u => u.PhoneNumber == model.PhoneNumber && u.Id != userId);
+                if (phoneTaken)
                     return IdentityResult.Failed(new IdentityError { Description = "Phone number is already taken by another user" });
-                }
             }
 
+            // TÍNH cờ thay đổi TRƯỚC khi gán
+            var emailChanged = !string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase);
+            var phoneChanged = !string.Equals(user.PhoneNumber, model.PhoneNumber, StringComparison.OrdinalIgnoreCase);
+
+            // Gán giá trị
             user.Name = model.Name;
             user.Email = model.Email;
-            user.UserName = model.Email; 
+            user.UserName = model.Email;
             user.PhoneNumber = model.PhoneNumber;
 
-            if (!string.IsNullOrEmpty(model.ProfilePictureUrl))
-            {
+            if (!string.IsNullOrWhiteSpace(model.ProfilePictureUrl))
                 user.ProfilePictureUrl = model.ProfilePictureUrl;
-            }
 
-            if (!string.IsNullOrEmpty(model.CitizenIdNumber))
-            {
+            if (!string.IsNullOrWhiteSpace(model.CitizenIdNumber))
                 user.CitizenIdNumber = model.CitizenIdNumber;
-            }
             if (model.CitizenIdIssuedDate.HasValue)
-            {
                 user.CitizenIdIssuedDate = model.CitizenIdIssuedDate;
-            }
             if (model.CitizenIdExpiryDate.HasValue)
-            {
                 user.CitizenIdExpiryDate = model.CitizenIdExpiryDate;
-            }
 
-            var emailChanged = !string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase);
-            if (emailChanged)
-            {
-                user.EmailConfirmed = false;
-            }
-
-            var phoneChanged = !string.Equals(user.PhoneNumber, model.PhoneNumber, StringComparison.OrdinalIgnoreCase);
-            if (phoneChanged)
-            {
-                user.PhoneNumberConfirmed = false;
-            }
+            // Đặt lại xác nhận nếu thay đổi
+            if (emailChanged) user.EmailConfirmed = false;
+            if (phoneChanged) user.PhoneNumberConfirmed = false;
 
             return await _userManager.UpdateAsync(user);
         }
+
 
         public async Task<IdentityResult> RequestVerificationAsync(int userId)
         {
