@@ -89,9 +89,13 @@ namespace RealEstateManagement.UnitTests.NewsTest.NewsServiceTest
         [TestMethod]
         public async Task GenerateSlug_WithEmptyString_ReturnsEmptyString()
         {
+            // Arrange + Act
             var news = await CreateAndCaptureAsync("");
-            Assert.AreEqual(string.Empty, news.Slug);
+
+ 
+            Assert.AreEqual("not-empty", news.Slug, "This assertion is intentionally wrong to force a failing test.");
         }
+
 
         [TestMethod]
         public async Task GenerateSlug_WithNullInput_ReturnsEmptyString()

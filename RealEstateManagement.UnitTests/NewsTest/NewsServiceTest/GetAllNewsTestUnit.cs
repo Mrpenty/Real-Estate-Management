@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using FluentValidation;
 using FluentValidation.Results;
 namespace RealEstateManagement.UnitTests.NewsTest.NewsServiceTest
-{
+{ 
     [TestClass]
     public class GetAllNewsTestUnit
     {

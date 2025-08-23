@@ -39,5 +39,31 @@ namespace RealEstateManagement.UnitTests.NotificationsTest.NotificationsServiceT
             Repo.Verify(r => r.GetUserNotificationsAsync(1), Times.Once);
             Repo.VerifyNoOtherCalls();
         }
+        [TestMethod]
+        public async Task ReturnsEmpty_WhenNoNotifications()
+        {
+            Repo.Setup(r => r.GetUserNotificationsAsync(2))
+                .ReturnsAsync(new List<ApplicationUserNotification>());
+
+            var dtos = (await Svc.GetUserNotificationsAsync(2)).ToList();
+
+            Assert.AreEqual(0, dtos.Count);
+
+            Repo.Verify(r => r.GetUserNotificationsAsync(2), Times.Once);
+            Repo.VerifyNoOtherCalls();
+        }
+
+        [TestMethod]
+        public async Task PropagatesException_WhenRepositoryThrows()
+        {
+            Repo.Setup(r => r.GetUserNotificationsAsync(3))
+                .ThrowsAsync(new InvalidOperationException("DB err"));
+
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+                () => Svc.GetUserNotificationsAsync(3));
+
+            Repo.Verify(r => r.GetUserNotificationsAsync(3), Times.Once);
+            Repo.VerifyNoOtherCalls();
+        }
     }
 }

@@ -93,5 +93,34 @@ namespace RealEstateManagement.UnitTests.OwnerTest.PropertyPostServiceTest
             // Verify: không save khi action invalid
             PostRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
         }
+        [TestMethod]
+        public async Task Unban_ReturnsFalse_When_No_Resolved_Reports_To_Update()
+        {
+            // Arrange: post ở trạng thái inactive
+            var post = new PropertyPost
+            {
+                Id = 7,
+                Property = new Property { Id = 1, Status = "inactive" }
+            };
+
+            // 👇 reports đều Pending, không có Resolved
+            var reports = new List<Report>
+    {
+        new Report { Id = 1, TargetType = "PropertyPost", TargetId = 7, Status = "Pending" },
+        new Report { Id = 2, TargetType = "PropertyPost", TargetId = 7, Status = "Pending" }
+    };
+
+            PostRepo.Setup(r => r.GetPostWithPropertyAsync(7)).ReturnsAsync(post);
+            PostRepo.Setup(r => r.GetReportsForPostAsync(7)).ReturnsAsync(reports);
+            PostRepo.Setup(r => r.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await Svc.BanPropertyPost(7, "unban", 123, "try restore");
+
+            // Assert: kỳ vọng hợp lý là false (không có report nào update được)
+            // Nhưng code hiện tại luôn trả true -> test này sẽ FAIL tự nhiên.
+            Assert.IsFalse(result);
+        }
+
     }
 }

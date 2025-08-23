@@ -63,5 +63,33 @@ namespace RealEstateManagement.UnitTests.Admin.AdminDashBoardTest
 
             VerifyErrorLogged(Logger, "Error getting daily stats", Times.Once()); // ✅ Có log lỗi
         }
+        [TestMethod]
+        public async Task GetRevenueStatsAsync_LogsErrorAndThrows_WhenRepositoryReturnsNull()
+        {
+            // Arrange
+            var start = new DateTime(2025, 1, 1);
+            var end = new DateTime(2025, 1, 31);
+            Repo.Setup(r => r.GetRevenueStatsAsync(start, end))
+                .ReturnsAsync((List<RevenueStatsDTO>)null);
+
+            // Act & Assert
+            await Assert.ThrowsExceptionAsync<Exception>(() => Svc.GetRevenueStatsAsync(start, end));
+            VerifyErrorLogged(Logger, "Error getting revenue stats", Times.Once());
+            Repo.Verify(r => r.GetRevenueStatsAsync(start, end), Times.Once());
+        }
+
+        [TestMethod]
+        public async Task GetRevenueStatsAsync_LogsErrorAndThrows_WhenStartDateAfterEndDate()
+        {
+            // Arrange
+            var start = new DateTime(2025, 2, 1);
+            var end = new DateTime(2025, 1, 31);
+
+            // Act & Assert
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => Svc.GetRevenueStatsAsync(start, end));
+            VerifyErrorLogged(Logger, "Error getting revenue stats", Times.Once());
+            Repo.Verify(r => r.GetRevenueStatsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Never());
+        }
+
     }
 }

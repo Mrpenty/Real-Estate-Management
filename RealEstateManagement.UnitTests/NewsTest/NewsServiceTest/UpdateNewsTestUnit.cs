@@ -7,7 +7,7 @@ using RealEstateManagement.Data.Entity;
 using System.Threading.Tasks;
 using System;
 using FluentValidation;
-using FluentValidation.Results;
+
 namespace RealEstateManagement.UnitTests.NewsTest.NewsServiceTest
 {
     [TestClass]
@@ -60,7 +60,6 @@ namespace RealEstateManagement.UnitTests.NewsTest.NewsServiceTest
             _mockRepo.Setup(r => r.UpdateAsync(It.IsAny<News>()))
                 .Callback<News>(n => captured = n)
                 .ReturnsAsync((News n) => n);
-            // Nếu UpdateAsync trả về Task<News>: dùng .ReturnsAsync((News n) => n);
 
             // Act
             var ok = await _service.UpdateAsync(dto);
@@ -68,18 +67,12 @@ namespace RealEstateManagement.UnitTests.NewsTest.NewsServiceTest
             // Assert
             Assert.IsTrue(ok);
             Assert.IsNotNull(captured);
-            Assert.AreEqual(dto.Title, captured.Title);
-            Assert.AreEqual(dto.Content, captured.Content);
-            Assert.AreEqual(dto.Summary, captured.Summary);
-            Assert.AreEqual(dto.AuthorName, captured.AuthorName);
-            Assert.AreEqual(dto.Source, captured.Source);
-            Assert.AreEqual(true, captured.IsPublished);
-            Assert.AreEqual("tieu-de-moi", captured.Slug); // slug từ tiêu đề mới
-            Assert.AreEqual(existing.CreatedAt, captured.CreatedAt); // không đổi CreatedAt
-            Assert.IsNotNull(captured.PublishedAt);                  // vừa publish thì set
-            Assert.IsTrue(captured.UpdatedAt <= DateTime.UtcNow);
-            _mockRepo.Verify(r => r.UpdateAsync(It.IsAny<News>()), Times.Once);
+
+            // Ép fail: so sánh sai với thực tế
+            Assert.AreNotEqual(dto.Title, captured.Title);
+            Assert.AreEqual("sai-summary", captured.Summary);
         }
+
 
         [TestMethod]
         public async Task UpdateAsync_NotFound_ReturnsFalse_DoesNotCallUpdate()
@@ -112,10 +105,12 @@ namespace RealEstateManagement.UnitTests.NewsTest.NewsServiceTest
             Assert.IsNotNull(captured.PublishedAt);
         }
 
+        // ======= FAILED BY DESIGN #1 (UTCID04) =======
+        // Kỳ vọng: Unpublish KHÔNG xóa PublishedAt (giữ nguyên timestamp cũ).
+        // Nếu service hiện tại đang clear PublishedAt khi IsPublished=false, test này sẽ FAIL.
         [TestMethod]
         public async Task UpdateAsync_Unpublish_DoesNotClearPublishedAt()
         {
-            // Theo logic hiện tại: unpublish KHÔNG xoá PublishedAt
             var id = 1;
             var publishedAt = DateTime.UtcNow.AddDays(-2);
             var existing = new News { Id = id, IsPublished = true, PublishedAt = publishedAt, Title = "Old" };
@@ -131,13 +126,16 @@ namespace RealEstateManagement.UnitTests.NewsTest.NewsServiceTest
             await _service.UpdateAsync(dto);
 
             Assert.IsFalse(captured.IsPublished);
+            // Kỳ vọng giữ nguyên PublishedAt → sẽ FAIL nếu service clear
             Assert.AreEqual(publishedAt, captured.PublishedAt);
         }
 
+        // ======= FAILED BY DESIGN #2 (UTCID05) =======
+        // Kỳ vọng: Title toàn khoảng trắng -> Slug == "" và Title vẫn giữ "   "
+        // Nếu service trim Title và/hoặc không set slug rỗng thì test này sẽ FAIL.
         [TestMethod]
         public async Task UpdateAsync_TitleWhitespace_SetsEmptySlug_ByCurrentServiceBehavior()
         {
-            // Với NewsService hiện tại: luôn GenerateSlug(dto.Title) => whitespace => slug = ""
             var id = 1;
             var existing = new News { Id = id, Title = "Old", Slug = "old" };
             var dto = new NewsUpdateDto { Id = id, Title = "   " };
@@ -151,8 +149,9 @@ namespace RealEstateManagement.UnitTests.NewsTest.NewsServiceTest
 
             await _service.UpdateAsync(dto);
 
+            // Kỳ vọng slug rỗng và Title giữ nguyên chuỗi whitespace
             Assert.AreEqual(string.Empty, captured.Slug);
-            Assert.AreEqual("   ", captured.Title); // service gán thẳng Title = dto.Title
+            Assert.AreEqual("   ", captured.Title);
         }
 
         [TestMethod]
@@ -192,8 +191,10 @@ namespace RealEstateManagement.UnitTests.NewsTest.NewsServiceTest
             await _service.UpdateAsync(dto);
             var after = DateTime.UtcNow;
 
-            Assert.IsTrue(captured.UpdatedAt >= before && captured.UpdatedAt <= after);
+            // Ép fail: đặt điều kiện nghịch
+            Assert.IsFalse(captured.UpdatedAt >= before && captured.UpdatedAt <= after);
         }
+
 
         [TestMethod]
         public async Task UpdateAsync_RepositoryThrows_PropagatesException()

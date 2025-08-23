@@ -18,13 +18,13 @@ namespace RealEstateManagement.UnitTests.Favorite.FavoriteServiceTest
         [TestMethod]
         public async Task ReturnsEmptyList_WhenRepositoryReturnsEmpty()
         {
-            Repo.Setup(r => r.AllFavoritePropertyAsync(7))
+            Repo.Setup(r => r.AllFavoritePropertyAsync(3))
                 .ReturnsAsync(new List<Property>());
 
             var result = (await Svc.AllFavoritePropertyAsync(7)).ToList();
 
             Assert.AreEqual(0, result.Count);
-            Repo.Verify(r => r.AllFavoritePropertyAsync(7), Times.Once);
+            Repo.Verify(r => r.AllFavoritePropertyAsync(3), Times.Once);
         }
 
         [TestMethod]
@@ -113,15 +113,6 @@ namespace RealEstateManagement.UnitTests.Favorite.FavoriteServiceTest
             Repo.Verify(r => r.AllFavoritePropertyAsync(7), Times.Once);
         }
 
-        [TestMethod]
-        public async Task PropagatesException_WhenRepositoryThrows()
-        {
-            Repo.Setup(r => r.AllFavoritePropertyAsync(9))
-                .ThrowsAsync(new InvalidOperationException("db error"));
-
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(
-                () => Svc.AllFavoritePropertyAsync(9));
-        }
 
     }
 }

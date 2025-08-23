@@ -69,5 +69,21 @@ namespace RealEstateManagement.UnitTests.Reviews.ReviewServiceTest
             Assert.AreEqual("Cập nhật trả lời thành công", msg);
             Assert.AreEqual("Updated", reply.ReplyContent);
         }
+        [TestMethod]
+        public async Task Fail_When_NewContent_Is_EmptyOrWhitespace()
+        {
+            // Arrange: reply hợp lệ, trong 5 phút, đúng chủ sở hữu
+            var reply = new ReviewReply { Id = 5, LandlordId = 10, CreatedAt = DateTime.Now };
+            _repoMock.Setup(r => r.GetReplyByReviewIdAsync(5)).ReturnsAsync(reply);
+
+            // Act
+            var (ok, msg) = await _service.EditReplyAsync(5, 10, "   ");
+
+            // Assert
+            Assert.IsFalse(ok);
+            Assert.AreEqual("Nội dung trả lời không được để trống.", msg); // Chỉnh theo message thật của bạn nếu khác
+        }
+ 
+
     }
 }

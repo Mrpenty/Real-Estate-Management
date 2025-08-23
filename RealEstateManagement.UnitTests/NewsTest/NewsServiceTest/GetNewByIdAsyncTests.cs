@@ -11,7 +11,7 @@ using FluentValidation.Results;
 namespace RealEstateManagement.UnitTests.NewsTest.NewsServiceTest
 {
     [TestClass]
-    public class GetByIdAsyncTests
+    public class GetNewByIdAsyncTests
     {
         private Mock<INewsRepository> _mockNewsRepository;
         private NewsService _newsService;

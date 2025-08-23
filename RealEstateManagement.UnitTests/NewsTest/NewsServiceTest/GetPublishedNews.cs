@@ -77,5 +77,44 @@ namespace RealEstateManagement.UnitTests.NewsTest.NewsServiceTest
             Assert.IsNotNull(result);
             Assert.IsFalse(result.Any());
         }
+        [TestMethod]
+        public async Task GetPublishedAsync_WhenRepoOutOfOrder_SortsByPublishedAtDesc()
+        {
+            var now = DateTime.UtcNow;
+            var list = new List<News>
+    {
+        new News { Id = 1, Title = "Older", IsPublished = true, Slug = "older", PublishedAt = now.AddHours(-1) },
+        new News { Id = 2, Title = "Newer", IsPublished = true, Slug = "newer", PublishedAt = now }
+    };
+            _mockRepo.Setup(r => r.GetPublishedAsync()).ReturnsAsync(list);
+
+            var result = await _service.GetPublishedAsync();
+            var arr = result.ToList();
+
+            Assert.IsNotNull(arr);
+            Assert.AreEqual(2, arr.Count);
+
+            // Kỳ vọng: sắp xếp giảm dần theo PublishedAt
+            // => Nếu service chưa sắp xếp, test này sẽ FAIL như bảng.
+            Assert.IsTrue(arr[0].PublishedAt >= arr[1].PublishedAt);
+        }
+
+        [TestMethod]
+        public async Task GetPublishedAsync_PublishedWithNullImages_MapsToEmptyList()
+        {
+            var list = new List<News>
+    {
+        new News { Id = 3, Title = "No Images", IsPublished = true, Slug = "no-images", PublishedAt = DateTime.UtcNow, Images = null }
+    };
+            _mockRepo.Setup(r => r.GetPublishedAsync()).ReturnsAsync(list);
+
+            var result = await _service.GetPublishedAsync();
+            var item = result.Single();
+
+            Assert.IsNotNull(item);
+            Assert.IsNotNull(item.Images);
+            Assert.AreEqual(0, item.Images.Count);
+        }
+
     }
 }

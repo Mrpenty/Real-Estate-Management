@@ -361,5 +361,6 @@ namespace RealEstateManagement.Business.Services.OwnerService
             return true;
         }
 
+
     }
 }

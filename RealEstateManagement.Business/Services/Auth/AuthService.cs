@@ -55,6 +55,10 @@ namespace RealEstateManagement.Business.Services.Auth
             {
                 return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Phone number not verified. Please verify your phone number first." };
             }
+            if (!user.IsActive)
+            {
+                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "This account has been ban." };
+            }
 
             var result = await _signInManager.PasswordSignInAsync(user, loginDTO.Password, false, false);
             if (result.Succeeded)
@@ -77,6 +81,11 @@ namespace RealEstateManagement.Business.Services.Auth
             if (existingUser != null)
             {
                 return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Phone number already registered." };
+            }
+            var existingEmail = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == registerDTO.Email);
+            if (existingEmail != null)
+            {
+                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Email already registered." };
             }
 
             var user = new ApplicationUser

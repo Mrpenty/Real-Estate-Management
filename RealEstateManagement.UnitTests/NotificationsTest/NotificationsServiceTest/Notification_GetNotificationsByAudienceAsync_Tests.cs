@@ -29,5 +29,48 @@ namespace RealEstateManagement.UnitTests.NotificationsTest.NotificationsServiceT
             Repo.Verify(r => r.GetNotificationsByAudienceAsync("renters"), Times.Once);
             Repo.VerifyNoOtherCalls();
         }
+        [TestMethod]
+        public async Task ReturnsEmpty_WhenNoNotificationsFound()
+        {
+            // Params
+            var audience = "landlords";
+
+            // Arrange
+            Repo.Setup(r => r.GetNotificationsByAudienceAsync(audience))
+                .ReturnsAsync(new List<Notification>());
+
+            // Act
+            var dtos = (await Svc.GetNotificationsByAudienceAsync(audience)).ToList();
+
+            // Return
+            Assert.IsNotNull(dtos);
+            Assert.AreEqual(0, dtos.Count);
+
+            // Verify
+            Repo.Verify(r => r.GetNotificationsByAudienceAsync(audience), Times.Once);
+            Repo.VerifyNoOtherCalls();
+        }
+
+        [TestMethod]
+        public async Task PropagatesException_WhenRepositoryThrows()
+        {
+            // Params
+            var audience = "admins";
+
+            // Arrange
+            Repo.Setup(r => r.GetNotificationsByAudienceAsync(audience))
+                .ThrowsAsync(new InvalidOperationException("DB error")); // LogMessage / Exception message
+
+            // Act + Assert (Exception + LogMessage)
+            var ex = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+                () => Svc.GetNotificationsByAudienceAsync(audience));
+
+            Assert.AreEqual("DB error", ex.Message);
+
+            // Verify
+            Repo.Verify(r => r.GetNotificationsByAudienceAsync(audience), Times.Once);
+            Repo.VerifyNoOtherCalls();
+        }
+
     }
 }

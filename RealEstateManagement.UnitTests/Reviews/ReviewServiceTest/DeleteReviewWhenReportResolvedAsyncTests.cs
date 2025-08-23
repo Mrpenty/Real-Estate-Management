@@ -38,5 +38,30 @@ namespace RealEstateManagement.UnitTests.Reviews.ReviewServiceTest
 
             Assert.IsFalse(result);
         }
+        [TestMethod]
+        public async Task ReturnFalse_When_InvalidReviewId()
+        {
+            // Arrange
+            _repoMock.Setup(r => r.HardDeleteReviewAsync(0)).ReturnsAsync(false);
+
+            // Act
+            var result = await _service.DeleteReviewWhenReportResolvedAsync(0);
+
+            // Assert
+            Assert.IsFalse(result);
+        }
+        [TestMethod]
+        public async Task AlwaysFail_For_TestingPurpose()
+        {
+            // Arrange
+            _repoMock.Setup(r => r.HardDeleteReviewAsync(5)).ReturnsAsync(true);
+
+            // Act
+            var result = await _service.DeleteReviewWhenReportResolvedAsync(5);
+
+            // Assert (cố tình sai: result TRUE nhưng mình Assert False)
+            Assert.IsFalse(result);
+        }
+
     }
 }

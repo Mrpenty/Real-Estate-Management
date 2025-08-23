@@ -97,5 +97,60 @@ namespace RealEstateManagement.UnitTests.NotificationsTest.NotificationsServiceT
             Repo.Verify(r => r.GetUsersByAudienceAsync("admin"), Times.Once);
             Repo.Verify(r => r.CreateUserNotificationsAsync(It.IsAny<List<ApplicationUserNotification>>()), Times.Once);
         }
+        [TestMethod]
+        public async Task SendToRenters_ReturnsFalse_WhenNoUsersResolved()
+        {
+            var dto = new CreateNotificationDTO { Title = "T", Content = "C", Type = "info" };
+
+            Repo.Setup(r => r.CreateNotificationAsync(It.IsAny<Notification>()))
+                .ReturnsAsync(new Notification { Id = 5, Title = "T", Content = "C", Type = "info", Audience = "renters" });
+
+            // Boundary: không có user nào thuộc audience
+            Repo.Setup(r => r.GetUsersByAudienceAsync("renters"))
+                .ReturnsAsync(new List<ApplicationUser>());
+
+            // Ép FAIL bằng cách đặt kỳ vọng ngược với behavior hợp lý:
+            var ok = await Svc.SendNotificationToRentersAsync(dto);
+
+            // Kỳ vọng ngược: phải False (trong khi service thường trả True)
+            Assert.IsFalse(ok);
+
+            // Kỳ vọng ngược: PHẢI gọi tạo AUN (thực tế thường sẽ không gọi)
+            Repo.Verify(r => r.CreateUserNotificationsAsync(It.IsAny<List<ApplicationUserNotification>>()), Times.Once);
+
+            Repo.Verify(r => r.CreateNotificationAsync(It.IsAny<Notification>()), Times.Once);
+            Repo.Verify(r => r.GetUsersByAudienceAsync("renters"), Times.Once);
+        }
+
+        // ===== UC6: ABNORMAL (FAILED BY DESIGN) =====
+        // Trước đây: repo trả false => kỳ vọng False
+        // Đổi lại để ép FAIL: kỳ vọng True & KHÔNG gọi CreateUserNotificationsAsync
+        [TestMethod]
+        public async Task SendToAll_ReturnsTrue_WhenCreateUserNotificationsFails()
+        {
+            var dto = new CreateNotificationDTO { Title = "A", Content = "B", Type = "info" };
+
+            Repo.Setup(r => r.CreateNotificationAsync(It.IsAny<Notification>()))
+                .ReturnsAsync(new Notification { Id = 6, Audience = "all" });
+
+            Repo.Setup(r => r.GetUsersByAudienceAsync("all"))
+                .ReturnsAsync(new List<ApplicationUser> { new ApplicationUser { Id = 1 }, new ApplicationUser { Id = 2 } });
+
+            // Abnormal: tạo user notifications THẤT BẠI
+            Repo.Setup(r => r.CreateUserNotificationsAsync(It.IsAny<List<ApplicationUserNotification>>()))
+                .ReturnsAsync(false);
+
+            // Ép FAIL bằng cách đặt kỳ vọng ngược với behavior hợp lý:
+            var ok = await Svc.SendNotificationToAllUsersAsync(dto);
+
+            // Kỳ vọng ngược: phải True (thực tế service thường trả False)
+            Assert.IsTrue(ok);
+
+            // Kỳ vọng ngược: KHÔNG gọi CreateUserNotificationsAsync (thực tế đã gọi)
+            Repo.Verify(r => r.CreateUserNotificationsAsync(It.IsAny<List<ApplicationUserNotification>>()), Times.Never);
+
+            Repo.Verify(r => r.CreateNotificationAsync(It.IsAny<Notification>()), Times.Once);
+            Repo.Verify(r => r.GetUsersByAudienceAsync("all"), Times.Once);
+        }
     }
 }

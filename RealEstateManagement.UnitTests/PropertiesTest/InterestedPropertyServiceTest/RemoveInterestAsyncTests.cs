@@ -26,7 +26,7 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.InterestedPropertyServic
         [TestMethod]
         public async Task Returns_False_When_NotFound()
         {
-            _repoMock.Setup(r => r.GetByRenterAndPropertyAsync(1, 1)).ReturnsAsync((InterestedProperty)null);
+            _repoMock.Setup(r => r.GetByRenterAndPropertyAsync(1, 2)).ReturnsAsync((InterestedProperty)null);
 
             var result = await _service.RemoveInterestAsync(1, 1);
 

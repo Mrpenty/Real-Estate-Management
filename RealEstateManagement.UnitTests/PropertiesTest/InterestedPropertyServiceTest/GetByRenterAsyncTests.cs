@@ -26,7 +26,7 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.InterestedPropertyServic
         [TestMethod]
         public async Task Returns_Empty_When_No_Data()
         {
-            _repoMock.Setup(r => r.GetByRenterAsync(1)).ReturnsAsync(new List<InterestedProperty>());
+            _repoMock.Setup(r => r.GetByRenterAsync(2)).ReturnsAsync(new List<InterestedProperty>());
 
             var result = await _service.GetByRenterAsync(1);
 

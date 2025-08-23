@@ -34,5 +34,48 @@ namespace RealEstateManagement.UnitTests.NotificationsTest.NotificationsServiceT
             Repo.Verify(r => r.GetUnreadUserNotificationsAsync(1), Times.Once);
             Repo.VerifyNoOtherCalls();
         }
+        [TestMethod]
+        public async Task ReturnsEmpty_WhenNoUnread()
+        {
+            // Params
+            var userId = 2;
+
+            // Arrange
+            Repo.Setup(r => r.GetUnreadUserNotificationsAsync(userId))
+                .ReturnsAsync(new List<ApplicationUserNotification>());
+
+            // Act
+            var dtos = (await Svc.GetUnreadUserNotificationsAsync(userId)).ToList();
+
+            // Assert (Return)
+            Assert.IsNotNull(dtos);
+            Assert.AreEqual(0, dtos.Count);
+
+            // Verify
+            Repo.Verify(r => r.GetUnreadUserNotificationsAsync(userId), Times.Once);
+            Repo.VerifyNoOtherCalls();
+        }
+
+        [TestMethod]
+        public async Task PropagatesException_WhenRepositoryThrows()
+        {
+            // Params
+            var userId = 3;
+
+            // Arrange
+            Repo.Setup(r => r.GetUnreadUserNotificationsAsync(userId))
+                .ThrowsAsync(new InvalidOperationException("DB err")); // Log/Message
+
+            // Act + Assert (Exception + LogMessage)
+            var ex = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+                () => Svc.GetUnreadUserNotificationsAsync(userId));
+
+            Assert.AreEqual("DB err", ex.Message);
+
+            // Verify
+            Repo.Verify(r => r.GetUnreadUserNotificationsAsync(userId), Times.Once);
+            Repo.VerifyNoOtherCalls();
+        }
+
     }
 }

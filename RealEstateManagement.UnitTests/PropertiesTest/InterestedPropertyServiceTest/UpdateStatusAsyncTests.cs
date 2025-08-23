@@ -27,7 +27,7 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.InterestedPropertyServic
         [ExpectedException(typeof(Exception))]
         public async Task Throws_When_NotFound()
         {
-            _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((InterestedProperty)null);
+            _repoMock.Setup(r => r.GetByIdAsync(2)).ReturnsAsync((InterestedProperty)null);
 
             await _service.UpdateStatusAsync(1, InterestedStatus.WaitingForRenterReply);
         }
