@@ -109,6 +109,9 @@
                 <dt class="font-semibold">Ngày tạo hợp đồng:</dt><dd>${new Date(contract.createdAt).toLocaleString()}</dd>
                 <dt class="font-semibold">Ngày xác nhận:</dt><dd>${contract.confirmedAt ? new Date(contract.confirmedAt).toLocaleString() : 'Chưa xác nhận'}</dd>
             `;
+            if (contract.status === 1) {
+            document.getElementById('btnEditContract').classList.add('hidden');
+            }
         } catch (error) {
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('error').classList.remove('hidden');
@@ -177,6 +180,7 @@
             btnEditContract.classList.remove('hidden');
 
             await loadContract(); // tải lại dữ liệu mới
+
         } catch (error) {
             alert(error.message);
             console.error(error);

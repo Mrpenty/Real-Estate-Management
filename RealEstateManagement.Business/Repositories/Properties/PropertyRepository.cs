@@ -441,5 +441,23 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .ToListAsync();
         }
 
+        // Thêm phương thức lấy danh sách bất động sản mà người dùng đang thuê
+        public async Task<List<Property>> GetPropertiesRentedByUserAsync(int userId)
+        {
+            return await _context.Properties
+                .Include(p => p.Images)
+                .Include(p => p.Landlord)
+                .Include(p => p.Address).ThenInclude(a => a.Province)
+                .Include(p => p.Address).ThenInclude(a => a.Ward)
+                .Include(p => p.Address).ThenInclude(a => a.Street)
+                .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
+                .Include(p => p.Posts).ThenInclude(post => post.RentalContract)
+                .Where(p => p.Posts.Any(post =>
+                    post.Status == PropertyPost.PropertyPostStatus.Rented &&
+                    post.RentalContract != null &&
+                    post.RentalContract.RenterId == userId))
+                .AsNoTracking()
+                .ToListAsync();
+        }
     }
 }

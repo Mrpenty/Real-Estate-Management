@@ -210,6 +210,7 @@ class PropertyDetailManager {
                 this.checkInterestAndRender(prop.id, this.currentUserId, prop);
             }
 
+            
         } catch (error) {
             console.error('Error loading property:', error);
             this.showErrorMessage('Có lỗi xảy ra khi tải thông tin bất động sản');

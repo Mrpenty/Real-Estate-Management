@@ -5,57 +5,6 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
 <link rel="stylesheet" href="~/css/property-detail.css" />
 <style>
 
-    .interest-section {
-        margin: 20px 0;
-        padding: 15px;
-        border: 2px dashed #ff9800;
-        border-radius: 8px;
-        background: #fff7e6;
-        text-align: center;
-        position: relative;
-    }
-
-    .interest-note-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .interest-note {
-        font-size: 15px;
-        font-weight: bold;
-        color: #d35400;
-        animation: blinkNote 1.2s infinite;
-    }
-
-    .interest-arrow {
-        width: 120px;
-        height: 60px;
-        animation: blinkArrow 1.2s infinite;
-    }
-
-    /* Blink text */
-    @@keyframes blinkNote {
-        0%, 100% {
-            color: #d35400;
-        }
-
-        50% {
-            color: #ff5722;
-        }
-    }
-
-    /* Blink arrow stroke */
-    @@keyframes blinkArrow {
-        0%, 100% {
-            opacity: 1;
-            stroke: #ff5722;
-        }
-
-        50% {
-            opacity: 0.4;
-            stroke: #ff9800;
-        }
     }
 
     /* Button */
@@ -203,6 +152,7 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
                     </table>
                 </div>
 
+                
                 <h2 class="section-title">Thông tin liên hệ</h2>
                 <div class="contact-section">
                     <div class="contact-avatar" onclick="propertyDetailManager.openLandlord()">

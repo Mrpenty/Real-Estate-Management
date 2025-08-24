@@ -64,5 +64,7 @@ namespace RealEstateManagement.Business.Services.Properties
             DateTime? fromUtc = null,
             DateTime? toUtc = null,
             int? currentUserId = 0);
+
+        Task<List<PropertyDetailDTO>> GetRentedPropertiesByUserAsync(int userId);
     }
 }

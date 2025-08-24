@@ -157,5 +157,11 @@ namespace RealEstateManagement.Presentation.Controllers
             ViewBag.PropertyId = propertyId;
             return View();
         }
+
+        [HttpGet]
+        public IActionResult RentedManage()
+        {
+            return View();
+        }
     }
 } 

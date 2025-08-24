@@ -372,8 +372,6 @@
             #listProperty th, #listProperty td {
                 padding: 0.5rem;
             }
-
-        }
     </style>
 </head>
 <body>
@@ -413,6 +411,10 @@
                 <i class="fas fa-plus"></i>
                 Tạo tin mới
             </a>
+            <a href="/PostProperty/RentedManage" class="btn-edit">
+                <i class="fas fa-plus"></i>
+                Quản lý các hợp đồng đang cho thuê
+            </a>
         </div>
 
         <!-- Table Container -->
@@ -436,6 +438,7 @@
                             <th style="width: 100px;">Danh mục</th>
                             <th style="width: 200px;">Địa chỉ</th>
                             <th style="width: 120px;">Ngày tạo</th>
+                            <th style="width: 120px;">Lượt quan tâm</th>
                             <th style="width: 140px;">Trạng thái</th>
                             <th style="width: 120px;">Hành động</th>
                         </tr>
@@ -465,7 +468,7 @@
 
     <script>
 
-        const API_PROPERTY_BASE_URL_V2 = 'https://localhost:7031/api/OwnerProperty';
+        var API_PROPERTY_BASE_URL_V2 = 'https://localhost:7031/api/OwnerProperty';
 
         // Hàm tiện ích
         function timeAgo(dateString) {
@@ -626,6 +629,9 @@
                     <td class="text-center" style="color: #666; font-size: 0.875rem;">
                         ${timeAgo(item.createdAt)}
                     </td>
+                    <td class="text-center" style="color: #666; font-size: 0.875rem;">
+                        ${item.interestNo}
+                    </td>
                     <td class="text-center">
                         ${getStatusBadge(postStatus)}
                     </td>
@@ -639,13 +645,6 @@
                                     class="btn-action btn-delete" title="Xóa">
                                 <i class="fas fa-trash"></i> Xóa
                             </button>
-                            ${item.isExistRenterContract ? `
-                                <button onclick="window.location.href='/PostProperty/DetailRenterProperty?propertyId=${item.id}&id=${item.renterContractId}'"
-                                        class="btn-action btn-create" title="Hợp đồng">
-                                    Hợp đồng
-                                </button>
-                            ` : ''}
-
                         </div>
                     </td>
                 </tr>

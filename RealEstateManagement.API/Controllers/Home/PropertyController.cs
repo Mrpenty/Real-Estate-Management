@@ -361,5 +361,27 @@ namespace RealEstateManagement.API.Controllers.Home
             }
         }
 
+        [HttpGet("MyRentedProperties")]
+        [Authorize(Roles = "Renter")]
+        public async Task<IActionResult> GetMyRentedProperties()
+        {
+            var userIdStr = User.FindFirst("id")?.Value
+                 ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                 ?? User.FindFirst("sub")?.Value;
+            if (!int.TryParse(userIdStr, out var renterId))
+                return Unauthorized();
+
+            try 
+            {
+                var properties = await _propertyService.GetRentedPropertiesByUserAsync(renterId);
+                if (properties == null || !properties.Any())
+                    return NotFound("Bạn chưa thuê bất động sản nào.");
+                return Ok(properties);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }
