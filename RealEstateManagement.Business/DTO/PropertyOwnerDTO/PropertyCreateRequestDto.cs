@@ -6,15 +6,18 @@ using System.Threading.Tasks;
 
 namespace RealEstateManagement.Business.DTO.PropertyOwnerDTO
 {
-    public class PropertyCreateRequestDto
+    public class    PropertyCreateRequestDto
     {
         public string? Title { get; set; }
         public string Description { get; set; }
-        public string Type { get; set; } // Loại phòng cho thuê
-        public decimal Area { get; set; } // Bao nhiêu m2
-        public int Bedrooms { get; set; } //Số phòng ngủ
+        public int PropertyTypeId { get; set; } 
+        public decimal Area { get; set; } 
+        public int Bedrooms { get; set; } 
+        public int Bathrooms { get; set; }
+
+        public int Floors { get; set; }
         public decimal Price { get; set; }
-        public string Location { get; set; } // Tọa độ
+        public string Location { get; set; } 
         public List<int> AmenityIds { get; set; }
 
         // Address fields

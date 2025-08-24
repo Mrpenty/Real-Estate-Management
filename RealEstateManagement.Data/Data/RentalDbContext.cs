@@ -34,6 +34,8 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
     public DbSet<PropertyImage> PropertyImages { get; set; }
     public DbSet<PropertyPost> PropertyPosts { get; set; }
 
+    public DbSet<PropertyType> PropertyTypes { get; set; }
+
 
     // DbSets for Functionality
     public DbSet<Wallet> Wallets { get; set; }

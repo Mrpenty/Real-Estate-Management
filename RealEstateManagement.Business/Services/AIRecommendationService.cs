@@ -224,7 +224,7 @@ namespace RealEstateManagement.Business.Services
                         Id = property.Id,
                         Title = property.Title,
                         Description = property.Description,
-                        Type = property.Type,
+                        Type = property.PropertyType.Name,
                         Area = property.Area,
                         Bedrooms = property.Bedrooms,
                         Price = property.Price,

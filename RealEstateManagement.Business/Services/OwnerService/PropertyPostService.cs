@@ -56,9 +56,11 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 Title = dto.Title,
                 Description = dto.Description,
                 AddressId = address.Id, // Use the newly created address Id
-                Type = dto.Type,
+                PropertyTypeId = dto.PropertyTypeId,
                 Area = dto.Area,
                 Bedrooms = dto.Bedrooms,
+                Bathrooms = dto.Bathrooms,
+                Floors = dto.Floors,
                 Price = dto.Price,
                 LandlordId = landlordId,
                 Status = "active",
@@ -139,7 +141,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                     post.Property.Description,
                     post.Property.Area,
                     post.Property.Price,
-                    post.Property.Type,
+                    post.Property.PropertyType.Name,
                     post.Property.Bedrooms,
                     post.Property.Location,
                     post.Property.Status,
@@ -273,7 +275,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
             // Update Property
             property.Title = dto.Title;
             property.Description = dto.Description;
-            property.Type = dto.Type;
+            property.PropertyTypeId = dto.PropertyTypeId;
             property.Area = dto.Area;
             property.Bedrooms = dto.Bedrooms;
             property.Price = dto.Price;

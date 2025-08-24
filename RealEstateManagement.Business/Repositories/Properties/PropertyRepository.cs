@@ -154,7 +154,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
 
             if (!string.IsNullOrWhiteSpace(filter.Type))
             {
-                query = query.Where(p => p.Type == filter.Type);
+                query = query.Where(p => p.PropertyType.Name == filter.Type);
             }
 
             if (filter.MinPrice.HasValue)
@@ -305,7 +305,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .AsQueryable();
             if (!string.IsNullOrWhiteSpace(type))
             {
-                query = query.Where(p => p.Type == type);
+                query = query.Where(p => p.PropertyType.Name == type);
             }
             return await query
                 .Select(p => new
@@ -394,7 +394,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
                     {
                         PropertyId = p.Id,
                         Title = p.Title,
-                        Type = p.Type,
+                        Type = p.PropertyType.Name,
                         Price = p.Price,
                         Area = p.Area,
                         Bedrooms = p.Bedrooms,
