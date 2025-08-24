@@ -1,0 +1,17 @@
+﻿# Thư mục build tạm
+**/bin/
+**/obj/
+
+# VS / Rider / IDE
+**/.vs/
+**/.idea/
+**/*.user
+**/*.suo
+
+# Git
+.git
+.gitignore
+
+# Secret / env
+.env
+appsettings.Development.json
