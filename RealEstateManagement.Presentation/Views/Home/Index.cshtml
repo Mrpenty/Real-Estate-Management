@@ -163,9 +163,9 @@
     <div class="search-container">
         <!-- Tab Navigation -->
         <div class="tab-navigation">
-            <button class="tab-item" data-tab="buy" onclick="window.location.href='/?type=room'" id="room" data-type="room">Phòng trọ</button>
-            <button class="tab-item" data-tab="rent" onclick="window.location.href='/?type=house'" id="house" data-type="house">Nhà nguyên căn</button>
-            <button class="tab-item" data-tab="project" onclick="window.location.href='/?type=apartment'" id="apartment" value="apartment">Căn hộ</button>
+            <button class="tab-item" data-tab="buy" >Bất động sản cho thuê</button>
+           @*  <button class="tab-item" data-tab="rent" onclick="window.location.href='/?type=house'" id="house" data-type="house">Nhà nguyên căn</button>
+            <button class="tab-item" data-tab="project" onclick="window.location.href='/?type=apartment'" id="apartment" value="apartment">Căn hộ</button> *@
         </div>
 
         <!-- Search Form -->
@@ -233,35 +233,13 @@
                     <div class="input-group">
                         <div class="custom-dropdown">
                             <button class="dropdown-button" id="propertyTypeBtn">
-                                <span>Số lượng phòng</span>
+                                <span id="propertyTypeDisplay">Loại bất động sản</span>
                                 <span class="dropdown-arrow">▼</span>
                             </button>
-                            <div class="dropdown-menu" id="propertyTypeMenu" style="overflow:hidden">
+                            <div class="dropdown-menu" id="propertyTypeMenu">
                                 <div class="dropdown-content">
-                                    <div class="flex justify-between items-center mb-2 text-sm">
-                                        <div>
-                                            Từ: <span class="font-semibold text-cyan-700" id="minLabel"></span>
-                                        </div>
-                                        <div>
-                                            Đến: <span class="font-semibold text-cyan-700" id="maxLabel"></span>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-center gap-2 mb-2">
-                                        <input id="minInput" type="number" class="w-full border rounded px-2 py-1 text-center" value="0" min="0" />
-                                        <span>→</span>
-                                        <input id="maxInput" type="number" class="w-full border rounded px-2 py-1 text-center" value="15" max="15" />
-                                    </div>
-
-                                    <div class="relative h-4">
-                                        <div class="absolute inset-0 bg-gray-200 rounded-full"></div>
-
-                                        <div id="rangeTrack" class="absolute bgRange h-full bg-cyan-600 rounded-full"></div>
-
-                                        <input id="rangeMin" type="range" min="0" max="15" value="0"
-                                               class="absolute rangeCls w-full h-4 appearance-none bg-transparent pointer-events-none thumb-min" />
-                                        <input id="rangeMax" type="range" min="0" max="15" value="15"
-                                               class="absolute rangeCls w-full h-4 appearance-none bg-transparent pointer-events-none thumb-max" />
+                                    <div class="location-dropdown" id="propertyTypeList">
+                                        <!-- Property types will be populated dynamically via JavaScript -->
                                     </div>
                                 </div>
                             </div>
@@ -383,7 +361,9 @@
     const locationList = document.getElementById("location-list");
     let selectedLocationLists = [];
     const selectedLocationsEl = document.getElementById("location-selected-list");
-    
+    let propertyTypes = []; // Store property types from API
+    let selectedPropertyType = null; // Store the selected property type
+
     // Only add active class if type is specified in URL
     if (type1 && type1 !== null && type1 !== undefined) {
         let el = document.getElementById(type1);
@@ -392,9 +372,9 @@
         }
     }
 
+    // Load session data
     let listLocationSelected = sessionStorage.getItem('selectedLocationLists');
     let provinceId = sessionStorage.getItem('provinceId');
-    //$('#simInfoIndex1').html(pageNo);
     let provinceName = sessionStorage.getItem('provinceName');
     let searchInput = document.getElementById('provinceSelected');
     if (listLocationSelected != null && listLocationSelected != undefined && listLocationSelected != '') {
@@ -405,22 +385,22 @@
             listLocationSelected.forEach(item => {
                 html += `<div class="bg-blue-100 text-blue-700 px-3 py-1 dropdown2-item rounded-full text-sm flex items-center gap-2"><span>${item.locationName}</span><button onclick="removeItem('${item.locationName}')" class="text-blue-600 hover:text-red-500 font-bold">×</button></div>`;
             });
-        } 
+        }
         $('#location-selected-list').html(html);
     }
 
-    function prevIndex(){
-        if(Number(pageNo) <= 1) sessionStorage.setItem('pageNo',1);
-        else sessionStorage.setItem('pageNo',Number(pageNo) - 1);
+    function prevIndex() {
+        if (Number(pageNo) <= 1) sessionStorage.setItem('pageNo', 1);
+        else sessionStorage.setItem('pageNo', Number(pageNo) - 1);
         window.location.reload();
     }
 
-    function nextIndex(){
-        sessionStorage.setItem('pageNo',Number(pageNo) + 1);
+    function nextIndex() {
+        sessionStorage.setItem('pageNo', Number(pageNo) + 1);
         window.location.reload();
     }
 
-    function removeItem(locationName){
+    function removeItem(locationName) {
         selectedLocationLists = selectedLocationLists.filter(l => l.locationName !== locationName);
         renderSelectedLocations();
     }
@@ -429,17 +409,17 @@
     let slides = [];
     let locations = [];
 
-    getAllData();
-
     async function getAllData() {
         try {
-            const [properties, sliders,location1s] = await Promise.all([
+            const [properties, sliders, location1s, propertyTypesData] = await Promise.all([
                 propertyService.getAllproperty(),
-
                 fetch(`${urlBase}/api/slider`).then(res => res.json()),
-                getAllLocation()
+                getAllLocation(),
+                fetch(`${urlBase}/api/PropertyType/GetAllPropertyTypes`).then(res => res.json()) // Fetch property types
             ]);
-            if(location1s){
+
+            // Populate locations
+            if (location1s) {
                 locations = location1s;
                 let html = '';
                 $('#locationProvinder').html('');
@@ -449,30 +429,34 @@
                 $('#locationProvinder').html(html);
             }
 
+            // Populate property types
+            if (propertyTypesData && propertyTypesData.length > 0) {
+                propertyTypes = propertyTypesData;
+                let html = '<div class="location-item" onclick="selectPropertyType(null)">Tất cả</div>'; // Add "All" option
+                propertyTypes.forEach(item => {
+                    html += `<div class="location-item" onclick="selectPropertyType('${item.name}')">${item.name}</div>`;
+                });
+                $('#propertyTypeList').html(html);
+            } else {
+                $('#propertyTypeList').html('<div class="location-item">Không có loại bất động sản</div>');
+            }
+
             if (sliders && sliders.length > 0) {
-                // Cập nhật slider với dữ liệu từ API slider
                 updateSlider(sliders);
             } else {
                 document.getElementById('sliderContainer').innerHTML = '<p>Không có slider để hiển thị.</p>';
             }
 
             if (properties && properties.length > 0) {
-
-                // Phân chia danh sách - hiển thị tất cả bất động sản
                 const featuredProperties = properties.filter(item => item.promotionPackageName != null);
-                // const recommendedProperties = properties.filter(item => item.promotionPackageName == null)
-                //     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
                 const recommendedProperties = properties.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-                // Hiển thị Bất động sản nổi bật
                 let featuredHtml = '';
                 featuredProperties.forEach(item => {
                     featuredHtml += createPropertyCard(item);
                 });
                 document.getElementById('featuredProperties').innerHTML = featuredHtml || '<p>Không có bất động sản nổi bật.</p>';
 
-                // Hiển thị Bất động sản dành cho bạn (tất cả loại)
                 let recommendedHtml = '';
                 recommendedProperties.forEach(item => {
                     recommendedHtml += createPropertyCard(item);
@@ -486,10 +470,9 @@
             listNewPost = await propertyService.getNewPost();
             let htmlNew = '';
             listNewPost.forEach(item => {
-                const imageUrl = item.images && item.images.length > 0 && item.images[0] && item.images[0].imageUrl 
+                const imageUrl = item.images && item.images.length > 0 && item.images[0] && item.images[0].imageUrl
                     ? (item.images[0].imageUrl.includes('http') ? item.images[0].imageUrl : urlBase + item.images[0].imageUrl)
-                    : '/image/default-news.jpg'; // Default image path
-                
+                    : '/image/default-news.jpg';
                 htmlNew += `<div style="cursor:pointer" onclick="window.location.href='/Home/NewDetail/${item.id}'" class="p-3 flex gap-2 items-start bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300">
                         <img src="${imageUrl}" onerror="handleImageError(this)" alt="tin" class="w-14 h-14 rounded object-cover" />
                         <div>
@@ -498,19 +481,15 @@
                             </div>
                             <div class="text-xs text-gray-500">${timeAgo(item.publishedAt)}</div>
                         </div>
-                    </div>`
+                    </div>`;
             });
             $('#listNew').html(htmlNew);
-            let provinceId = sessionStorage.getItem('provinceId');
-            if(provinceId){
-                let provinceName = sessionStorage.getItem('provinceName');
+
+            if (provinceId) {
                 $('#provinceSelected').attr('data-id', provinceId);
                 $('#provinceSelected').attr('data-value', provinceName);
                 $('#provinceSelected').text(provinceName);
             }
-
-
-
         } catch (error) {
             console.error('Lỗi khi lấy dữ liệu:', error);
             document.getElementById('featuredProperties').innerHTML = '<p>Lỗi khi tải dữ liệu.</p>';
@@ -519,6 +498,15 @@
         }
     }
 
+    // Function to select a property type
+    function selectPropertyType(typeName) {
+        selectedPropertyType = typeName;
+        document.querySelector('#propertyTypeBtn span:first-child').textContent = typeName || 'Loại bất động sản';
+        document.getElementById('propertyTypeBtn').classList.remove('active');
+        document.getElementById('propertyTypeMenu').classList.remove('active');
+    }
+
+    // Location input handling
     let listLocationName = [];
     let listLocationBackup = [];
     locationInput.addEventListener("input", () => {
@@ -526,12 +514,12 @@
         renderLocations(searchInput.dataset.id);
     });
 
-     locationInput.addEventListener("focus", () => {
-         dropdown2.classList.remove("hidden");
-         renderLocations(searchInput.dataset.id);
-     });
+    locationInput.addEventListener("focus", () => {
+        dropdown2.classList.remove("hidden");
+        renderLocations(searchInput.dataset.id);
+    });
 
-     document.addEventListener("click", (e) => {
+    document.addEventListener("click", (e) => {
         if (!e.target.classList.contains("dropdown2")) {
             dropdown2.classList.add("hidden");
         }
@@ -539,18 +527,17 @@
 
     function renderSelectedLocations() {
         selectedLocationsEl.innerHTML = "";
-        selectedLocationLists
-        .forEach(loc => {
-        const tag = document.createElement("div");
-        tag.className = "bg-blue-100 text-blue-700 px-3 py-1 dropdown2-item rounded-full text-sm flex items-center gap-2";
-        tag.innerHTML = `<span>${loc.locationName}</span>
+        selectedLocationLists.forEach(loc => {
+            const tag = document.createElement("div");
+            tag.className = "bg-blue-100 text-blue-700 px-3 py-1 dropdown2-item rounded-full text-sm flex items-center gap-2";
+            tag.innerHTML = `<span>${loc.locationName}</span>
                             <button class="text-blue-600 hover:text-red-500 font-bold">×</button>`;
-        tag.querySelector("button").addEventListener("click", () => {
-            selectedLocationLists = selectedLocationLists.filter(l => l.locationName !== loc.locationName);
-            dropdown2.style.height = 25.3 + 2.1 * selectedLocationLists.length + 'rem';
-            renderSelectedLocations();
-        });
-        selectedLocationsEl.appendChild(tag);
+            tag.querySelector("button").addEventListener("click", () => {
+                selectedLocationLists = selectedLocationLists.filter(l => l.locationName !== loc.locationName);
+                dropdown2.style.height = 25.3 + 2.1 * selectedLocationLists.length + 'rem';
+                renderSelectedLocations();
+            });
+            selectedLocationsEl.appendChild(tag);
         });
     }
 
@@ -563,24 +550,23 @@
         renderLocations(id);
     }
 
-
     function renderLocations(id = -1) {
         locationList.innerHTML = "";
-        if(listLocationBackup.length == 0){
+        if (listLocationBackup.length == 0) {
             const provinceItem = locations.filter(l => l.id == id)[0];
             provinceItem.wards.forEach(ward => {
-                    ward.streets.forEach(street => {
-                        if(ward.id != 0 && street.id != 0){
-                            let itemValue = { province:{id: provinceItem.id,
-                                name: provinceItem.name},
-                                ward : {id:ward.id,name: ward.name },
-                                street: {id: street.id,name:street.name },
-                                locationName : `${street.name}, ${ward.name}, ${provinceItem.name}`
-                            };
-                            listLocationBackup.push(itemValue);
-                        }
-                    })
-            })
+                ward.streets.forEach(street => {
+                    if (ward.id != 0 && street.id != 0) {
+                        let itemValue = {
+                            province: { id: provinceItem.id, name: provinceItem.name },
+                            ward: { id: ward.id, name: ward.name },
+                            street: { id: street.id, name: street.name },
+                            locationName: `${street.name}, ${ward.name}, ${provinceItem.name}`
+                        };
+                        listLocationBackup.push(itemValue);
+                    }
+                });
+            });
         }
 
         listLocationName = listLocationBackup;
@@ -594,16 +580,15 @@
         });
     }
 
-
     function selectLocation(loc) {
         let findIndex = selectedLocationLists.findIndex(p => p.province.id == loc.province.id
             && p.ward.id == loc.ward.id
             && p.street.id == loc.street.id);
-        if(findIndex != -1){
+        if (findIndex != -1) {
             alert('Địa điểm đã được chọn trước đó');
             return;
         }
-        if (selectedLocationLists.length >= 5){
+        if (selectedLocationLists.length >= 5) {
             alert('Đã tối đa 5 địa điểm');
             return;
         }
@@ -611,15 +596,11 @@
         renderSelectedLocations();
         locationInput.value = "";
         renderLocations(searchInput.dataset.id);
-        // locationDropdown.classList.add("hidden");
     }
-
 
     function updateSlider(sliders) {
         const sliderContainer = document.getElementById('sliderContainer');
         const sliderDots = document.getElementById('sliderDots');
-
-      
         slides = sliders.map(item => `
             <div class="slider-item-wrapper" style="width: 100%;height: 100%;flex-shrink: 0;display: flex;justify-content: center;align-items: center;overflow: hidden;">
                 <img src="${item.imageUrl?.includes('http') ? item.imageUrl : urlBase + item.imageUrl}" alt="${item.title}" class="slider-item">
@@ -630,7 +611,7 @@
         showSlides(slideIndex);
     }
 
-    function handleProvince(el){
+    function handleProvince(el) {
         let val = $(el).data('value');
         let id = $(el).data('id');
         $('#provinceSelected').attr('data-id', id);
@@ -662,122 +643,112 @@
     }
 
     function createPropertyCard(item) {
-            // Determine if the current user is the owner of the property
-            const token = localStorage.getItem("authToken");
-            let isOwner = false;
-            if (token) {
-                const userId = getUserIdFromToken(token);
-                if (userId && item.landlordId && userId === item.landlordId) {
-                    isOwner = true;
-                }
+        const token = localStorage.getItem("authToken");
+        let isOwner = false;
+        if (token) {
+            const userId = getUserIdFromToken(token);
+            if (userId && item.landlordId && userId === item.landlordId) {
+                isOwner = true;
             }
+        }
+        const detailUrl = isOwner
+            ? `/PostProperty/DetailProperty/${item.id}`
+            : `/Home/Detail/${item.id}`;
 
-            // Card click handler
-            const detailUrl = isOwner
-                ? `/PostProperty/DetailProperty/${item.id}`
-                : `/Home/Detail/${item.id}`;
-
-            return `
-                <div id="card-property-${item.id}" class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300" data-id="${item.id}">
-                    <!-- Image and Buttons -->
-                    <div class="relative group">
-                        <img
-                            onerror="handleImageError(this)"
-                            src="${item.primaryImageUrl?.includes('http') ? item.primaryImageUrl : urlBase + item.primaryImageUrl}"
-                            alt="${item.type}"
-                            class="w-full h-48 object-cover transition-opacity duration-300 group-hover:opacity-90"
+        return `
+            <div id="card-property-${item.id}" class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300" data-id="${item.id}">
+                <div class="relative group">
+                    <img
+                        onerror="handleImageError(this)"
+                        src="${item.primaryImageUrl?.includes('http') ? item.primaryImageUrl : urlBase + item.primaryImageUrl}"
+                        alt="${item.type}"
+                        class="w-full h-48 object-cover transition-opacity duration-300 group-hover:opacity-90"
+                    >
+                    <div class="absolute top-2 right-2 flex flex-col gap-2">
+                        <button
+                            id="btnFavourite"
+                            onclick="updateFavorite(${item.id}, ${item.isFavorite})"
+                            class="p-2 bg-white rounded-full shadow hover:bg-red-100 transition-all duration-200"
                         >
-                        <div class="absolute top-2 right-2 flex flex-col gap-2">
-                            <button
-                                id="btnFavourite"
-                                onclick="updateFavorite(${item.id}, ${item.isFavorite})"
-                                class="p-2 bg-white rounded-full shadow hover:bg-red-100 transition-all duration-200"
+                            ${item.isFavorite
+                                ? `<svg id="heart-icon-${item.id}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-red-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
+                                   </svg>`
+                                : `<svg id="heart-icon-${item.id}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-500 hover:text-red-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
+                                   </svg>`
+                            }
+                        </button>
+                        <button
+                            id="btn-compare-${item.id}"
+                            onclick="addToCompare(${item.id})"
+                            class="p-2 bg-white rounded-full shadow hover:bg-blue-100 transition-all duration-200"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-blue-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
+                            </svg>
+                        </button>
+                        <button
+                            id="interest-${item.id}"
+                            onclick="clickInterest(${item.id},${item.isInterested},${item.interestedStatus},${item.isReminderRenterConfirmInterested},${item.interestedId})"
+                            class="p-2 bg-white rounded-full shadow hover:bg-blue-100 transition-all duration-200"
+                        >
+                            ${item.isInterested && item.interestedStatus != 1 ? '<i class="fa-solid fa-square-plus" style="color:red"></i>' : '<i class="fa-solid fa-square-plus"></i>'}
+                        </button>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3
+                        onclick="window.location.href='${detailUrl}'"
+                        style="cursor:pointer"
+                        class="text-lg font-semibold text-orange-600 hover:text-orange-700 transition-colors duration-200 uppercase line-clamp-2"
+                    >
+                        ${item.title}
+                    </h3>
+                    ${StatusInterest(item)}
+                    <div class="text-xl font-bold text-green-600 mt-2">
+                        ${formatVietnameseNumber(item.price)} / tháng
+                    </div>
+                    <div class="text-sm text-gray-500 mt-1">
+                        ${item.area} m² · ${item.detailedAddress}, ${item.street}, ${item.ward}, ${item.province}
+                    </div>
+                    <p class="text-sm text-gray-600 mt-2 line-clamp-3">
+                        ${item.description}
+                    </p>
+                </div>
+                <div class="flex items-center justify-between px-4 py-3 bg-gray-50">
+                    <div class="flex items-center gap-3">
+                        <div style="cursor:pointer" onclick="window.location.href='/Home/Landlord/${item.landlordId}'" class="w-10 h-10 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
+                            <img
+                                onerror="handleImageError(this)"
+                                src="${item.landlordProfilePictureUrl?.includes('http') ? item.landlordProfilePictureUrl : urlBase + item.landlordProfilePictureUrl}"
+                                alt="landlordProfilePictureUrl"
+                                class="w-full h-full object-cover"
                             >
-                                ${item.isFavorite
-                                    ? `<svg id="heart-icon-${item.id}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-red-500">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
-                                       </svg>`
-                                    : `<svg id="heart-icon-${item.id}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-500 hover:text-red-500">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
-                                       </svg>`
-                                }
-                            </button>
-                            <button
-                                id="btn-compare-${item.id}"
-                                onclick="addToCompare(${item.id})"
-                                class="p-2 bg-white rounded-full shadow hover:bg-blue-100 transition-all duration-200"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-blue-500">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
-                                </svg>
-                            </button>
-                            <button
-                                id="interest-${item.id}"
-                                onclick="clickInterest(${item.id},${item.isInterested},${item.interestedStatus},${item.isReminderRenterConfirmInterested},${item.interestedId})"
-                                class="p-2 bg-white rounded-full shadow hover:bg-blue-100 transition-all duration-200"
-                            >
-                                ${item.isInterested && item.interestedStatus != 1 ? '<i class="fa-solid fa-square-plus" style="color:red"></i>' : '<i class="fa-solid fa-square-plus"></i>'}
-
-                            </button>
+                        </div>
+                        <div class="text-sm text-gray-700">
+                            <span style="cursor:pointer" onclick="window.location.href='/Home/Landlord/${item.landlordId}'">${item.landlordName}</span> <span class="text-gray-400 text-xs">(${timeAgo(item.createdAt)})</span>
                         </div>
                     </div>
-
-                    <!-- Content -->
-                    <div class="p-4">
-                        <h3
-                            onclick="window.location.href='${detailUrl}'"
-                            style="cursor:pointer"
-                            class="text-lg font-semibold text-orange-600 hover:text-orange-700 transition-colors duration-200 uppercase line-clamp-2"
-                        >
-                            ${item.title}
-                        </h3>
-                        ${StatusInterest(item)}
-                        <div class="text-xl font-bold text-green-600 mt-2">
-                            ${formatVietnameseNumber(item.price)} / tháng
+                    <div class="flex flex-col gap-2 items-end">
+                        <div class="flex items-center text-yellow-500 ml-2">
+                            <span class="mr-1 font-semibold text-gray-800" id="avgStar">${item.rating == 0 ? 'Chưa có đánh giá' : item.rating}</span>
+                            ${item.rating != 0 ? `
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:15px;height:15px" viewBox="0 0 24 24">
+                                <path d="M12 .587l3.668 7.568L24 9.423l-6 5.854L19.335 24 12 20.202 4.665 24 6 15.277 0 9.423l8.332-1.268z" />
+                            </svg>` : ''}
                         </div>
-                        <div class="text-sm text-gray-500 mt-1">
-                            ${item.area} m² · ${item.detailedAddress}, ${item.street}, ${item.ward}, ${item.province}
-                        </div>
-                        <p class="text-sm text-gray-600 mt-2 line-clamp-3">
-                            ${item.description}
-                        </p>
-                    </div>
-
-                    <!-- Footer -->
-                    <div class="flex items-center justify-between px-4 py-3 bg-gray-50">
-                        <div class="flex items-center gap-3">
-                            <div style="cursor:pointer" onclick="window.location.href='/Home/Landlord/${item.landlordId}'" class="w-10 h-10 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
-                                <img
-                                    onerror="handleImageError(this)"
-                                    src="${item.landlordProfilePictureUrl?.includes('http') ? item.landlordProfilePictureUrl : urlBase + item.landlordProfilePictureUrl}"
-                                    alt="landlordProfilePictureUrl"
-                                    class="w-full h-full object-cover"
-                                >
-                            </div>
-                            <div class="text-sm text-gray-700">
-                                <span style="cursor:pointer" onclick="window.location.href='/Home/Landlord/${item.landlordId}'">${item.landlordName}</span> <span class="text-gray-400 text-xs">(${timeAgo(item.createdAt)})</span>
-                            </div>
-                        </div>
-                        <div class=" flex flex-col gap-2 items-end">
-                            <div class="flex items-center text-yellow-500 ml-2">
-                                <span class="mr-1 font-semibold text-gray-800" id="avgStar">${item.rating == 0 ? 'Chưa có đánh giá' : item.rating}</span>
-                                ${item.rating != 0 ? `
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:15px;height:15px" viewBox="0 0 24 24">
-                                    <path d="M12 .587l3.668 7.568L24 9.423l-6 5.854L19.335 24 12 20.202 4.665 24 6 15.277 0 9.423l8.332-1.268z" />
-                                </svg>` : ''}
-                            </div>
-
-                            <div class="flex items-center text-gray-600 ml-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:15px;height:15px" viewBox="0 0 24 24">
-                                    <path d="M20 2H4C1.8 2 0 3.8 0 6v12c0 2.2 1.8 4 4 4h4v2.4c0 .6.4 1 1 1 .2 0 .5-.1.7-.3L14.3 22H20c2.2 0 4-1.8 4-4V6c0-2.2-1.8-4-4-4z" />
-                                </svg>
-                                <span class="ml-1"><span id ="totalComment">${item.ratingNo}</span><span> bình luận</span></span>
-                            </div>
+                        <div class="flex items-center text-gray-600 ml-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:15px;height:15px" viewBox="0 0 24 24">
+                                <path d="M20 2H4C1.8 2 0 3.8 0 6v12c0 2.2 1.8 4 4 4h4v2.4c0 .6.4 1 1 1 .2 0 .5-.1.7-.3L14.3 22H20c2.2 0 4-1.8 4-4V6c0-2.2-1.8-4-4-4z" />
+                            </svg>
+                            <span class="ml-1"><span id ="totalComment">${item.ratingNo}</span><span> bình luận</span></span>
                         </div>
                     </div>
                 </div>
-            `;
-        }
+            </div>
+        `;
+    }
 
     // Tab switching
     document.querySelectorAll('.tab-item').forEach(tab => {
@@ -787,15 +758,13 @@
         });
     });
 
-    // Dropdown toggles (áp dụng giống Layout)
+    // Dropdown toggles
     function setupDropdown(buttonId, menuId) {
         const button = document.getElementById(buttonId);
         const menu = document.getElementById(menuId);
 
         button.addEventListener('click', function (e) {
-            //console.log('Clicked:', buttonId);
             e.stopPropagation();
-            // Đóng các dropdown khác
             document.querySelectorAll('.dropdown-menu.active').forEach(m => {
                 if (m !== menu) {
                     m.classList.remove('active');
@@ -805,7 +774,6 @@
             button.classList.toggle('active');
             menu.classList.toggle('active');
             dropdown2.classList.add('hidden');
-            //console.log('Dropdown menu', menuId, 'active:', menu.classList.contains('active'));
         });
 
         menu.addEventListener('click', function (e) {
@@ -813,7 +781,6 @@
         });
     }
 
-    // Chỉ add 1 lần event click cho document để đóng dropdown
     if (!window._dropdownDocClick) {
         document.addEventListener('click', function () {
             document.querySelectorAll('.dropdown-button').forEach(b => b.classList.remove('active'));
@@ -827,146 +794,42 @@
     setupDropdown('propertyTypeBtn', 'propertyTypeMenu');
     setupDropdown('areaBtn', 'areaMenu');
 
-    // Location selection
-    document.querySelectorAll('#locationMenu .location-item').forEach(item => {
-        item.addEventListener('click', function() {
-            const text = this.textContent;
-            document.querySelector('#locationBtn span:first-child').textContent = `📍 ${text}`;
-            document.getElementById('locationBtn').classList.remove('active');
-            document.getElementById('locationMenu').classList.remove('active');
-        });
-    });
-
-    // Property Type selection
-    document.querySelectorAll('#propertyTypeMenu .location-item').forEach(item => {
-        item.addEventListener('click', function() {
-            const text = this.textContent;
-            document.querySelector('#propertyTypeBtn span:first-child').textContent = text;
-            document.getElementById('propertyTypeBtn').classList.remove('active');
-            document.getElementById('propertyTypeMenu').classList.remove('active');
-        });
-    });
-
-    // Area selection
-    document.querySelectorAll('#areaMenu .location-item').forEach(item => {
-        item.addEventListener('click', function() {
-            const text = this.textContent;
-            document.querySelector('#areaBtn span:first-child').textContent = text;
-            document.getElementById('areaBtn').classList.remove('active');
-            document.getElementById('areaMenu').classList.remove('active');
-        });
-    });
-
-    // Price range functionality
-    let minPrice = 0;
-    let maxPrice = 60000;
-
-    function updatePriceDisplay() {
-        document.getElementById('minPriceDisplay').textContent = `${minPrice} ${minPrice < 1000 ? 'triệu' : 'tỷ'}`;
-        document.getElementById('maxPriceDisplay').textContent = `${maxPrice < 1000 ? maxPrice + ' triệu' : (maxPrice/1000) + ' tỷ'}`;
-
-        if (minPrice === 0 && maxPrice === 60000) {
-            document.getElementById('priceDisplay').textContent = 'Mức giá';
-        } else {
-            document.getElementById('priceDisplay').textContent = `${minPrice} - ${maxPrice < 1000 ? maxPrice + ' triệu' : (maxPrice/1000) + ' tỷ'}`;
-        }
-    }
-
-    // Quick price options
-    document.querySelectorAll('.quick-option').forEach(option => {
-        option.addEventListener('click', function() {
-            document.querySelectorAll('.quick-option').forEach(o => o.classList.remove('active'));
-            this.classList.add('active');
-
-            const range = this.dataset.range;
-            switch(range) {
-                case 'all':
-                    minPrice = 0;
-                    maxPrice = 60000;
-                    break;
-                case 'under500':
-                    minPrice = 0;
-                    maxPrice = 500;
-                    break;
-                case '500-800':
-                    minPrice = 500;
-                    maxPrice = 800;
-                    break;
-                case '800-1000':
-                    minPrice = 800;
-                    maxPrice = 1000;
-                    break;
-                case '1-2':
-                    minPrice = 1000;
-                    maxPrice = 2000;
-                    break;
-                case 'custom':
-                    minPrice = 0;
-                    maxPrice = 60000;
-                    break;
-            }
-            updatePriceDisplay();
-        });
-    });
-
-    // Price input handling
-    // document.getElementById('minPriceInput').addEventListener('input', function() {
-    //     minPrice = parseInt(this.value) || 0;
-    //     updatePriceDisplay();
-    // });
-
-    // document.getElementById('maxPriceInput').addEventListener('input', function() {
-    //     maxPrice = parseInt(this.value) || 60000;
-    //     updatePriceDisplay();
-    // });
-
-    // // Initialize
-    // updatePriceDisplay();
-
     // Search function
     function performSearch() {
         const provinceSelected = document.getElementById('provinceSelected').dataset.id;
         const provinceName = document.getElementById('provinceSelected').dataset.value;
         const searchText = document.getElementById('searchInput').value;
         const activeTab = document.querySelector('.tab-item.active');
-        // Type is completely optional - only include if a tab is actually selected
-        const propertyType = activeTab ? activeTab.dataset.type : null;
-        
+        const propertyType = selectedPropertyType || (activeTab ? activeTab.dataset.type : null);
+
         const filterData = {
-            type: propertyType, // This can be null if no tab is selected
+            type: propertyType,
             province: provinceSelected,
             provinceName: provinceName,
             keyword: searchText,
-            minRoom: $('#minInput').val(),
-            maxRoom: $('#maxInput').val(),
             minPrice: $('#minInputPrice').val(),
             maxPrice: $('#maxInputPrice').val(),
             minArea: $('#minInputArea').val(),
             maxArea: $('#maxInputArea').val(),
             selectedLocations: selectedLocationLists
         };
-        
-        // Store data in sessionStorage
+
         sessionStorage.setItem('selectedLocationLists', JSON.stringify(selectedLocationLists));
         sessionStorage.setItem('provinceId', provinceSelected);
         sessionStorage.setItem('provinceName', provinceName);
         sessionStorage.setItem('searchFilterData', JSON.stringify(filterData));
-        
-        // Redirect to search page with parameters
+
         const searchParams = new URLSearchParams();
-        // Only add type if it's actually selected
         if (propertyType && propertyType.trim() !== '') {
             searchParams.append('type', propertyType);
         }
         if (provinceSelected) searchParams.append('province', provinceSelected);
         if (searchText) searchParams.append('keyword', searchText);
-        if (filterData.minRoom) searchParams.append('minRoom', filterData.minRoom);
-        if (filterData.maxRoom) searchParams.append('maxRoom', filterData.maxRoom);
         if (filterData.minPrice) searchParams.append('minPrice', filterData.minPrice);
         if (filterData.maxPrice) searchParams.append('maxPrice', filterData.maxPrice);
         if (filterData.minArea) searchParams.append('minArea', filterData.minArea);
         if (filterData.maxArea) searchParams.append('maxArea', filterData.maxArea);
-        
+
         const searchUrl = `/Home/Search?${searchParams.toString()}`;
         window.location.href = searchUrl;
     }
@@ -977,29 +840,25 @@
         const provinceName = document.getElementById('provinceSelected').dataset.value;
         const searchText = document.getElementById('searchInput').value;
         const activeTab = document.querySelector('.tab-item.active');
-        const propertyType = activeTab ? activeTab.dataset.type : null;
-        
+        const propertyType = selectedPropertyType || (activeTab ? activeTab.dataset.type : null);
+
         const aiSearchData = {
             type: propertyType,
             province: provinceSelected,
             provinceName: provinceName,
             keyword: searchText,
-            minRoom: $('#minInput').val(),
-            maxRoom: $('#maxInput').val(),
             minPrice: $('#minInputPrice').val(),
             maxPrice: $('#maxInputPrice').val(),
             minArea: $('#minInputArea').val(),
             maxArea: $('#maxInputArea').val(),
             selectedLocations: selectedLocationLists
         };
-        
-        // Store data in sessionStorage
+
         sessionStorage.setItem('aiSearchData', JSON.stringify(aiSearchData));
         sessionStorage.setItem('selectedLocationLists', JSON.stringify(selectedLocationLists));
         sessionStorage.setItem('provinceId', provinceSelected);
         sessionStorage.setItem('provinceName', provinceName);
-        
-        // Redirect to AI search page
+
         window.location.href = '/Home/AISearch';
     }
 
@@ -1010,157 +869,49 @@
         }
     });
 
-    function applyFilters() {
-        const province = document.getElementById('provinceFilter').value;
-        const minPrice = document.getElementById('minPrice').value || 0;
-        const maxPrice = document.getElementById('maxPrice').value || 100;
-        const minArea = document.getElementById('minArea').value || 0;
-        const maxArea = document.getElementById('maxArea').value || 100;
-        const type = document.getElementById('typeFilter').value || 'room';
-
-        const filterData = {
-            minPrice,
-            maxPrice,
-            minArea,
-            maxArea,
-            type
-        };
-        if (province) filterData.provinces = [province];
-
-        sessionStorage.setItem('filterData', JSON.stringify(filterData));
-        window.location.reload();
-    }
-
-    function filterPrice(event, minPrice, maxPrice) {
-        event.preventDefault();
-        let body = {
-            minPrice, maxPrice
-        };
-        sessionStorage.setItem('filterData', JSON.stringify(body));
-        window.location.reload();
-    }
-
-    function filterArea(event, minArea, maxArea) {
-        event.preventDefault();
-        let body = {
-            minArea, maxArea
-        };
-        sessionStorage.setItem('filterData', JSON.stringify(body));
-        window.location.reload();
-    }
-
-    async function updateFavorite(id, isFavorite) {
-        const isAuthenticated = authService.isAuthenticated();
-        if (!isAuthenticated) window.location.href = '/Auth/Login';
-        else {
-            if (!isFavorite) addToFavourite(id);
-            else removeToFavorite(id);
-        }
-    }
-
-    async function startChatWithLandlord(landlordId) {
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-            window.location.href = "/Auth/Login";
-            return;
-        }
-
-        const renterId = parseInt(getUserIdFromToken(token));
-        const dto = {
-            renterId: parseInt(renterId),
-            landlordId: parseInt(landlordId),
-            propertyId: null
-        };
-
-        try {
-            const res = await fetch("https://localhost:7031/api/Chat/Create-Conversation", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(dto)
-            });
-
-            if (!res.ok) {
-                const err = await res.text();
-                alert("Không thể mở cuộc trò chuyện: " + err);
-                return;
-            }
-
-            const conversation = await res.json();
-            if (conversation && conversation.id) {
-                window.location.href = `/Chat/Index?conversationId=${conversation.id}`;
-            }
-        } catch (error) {
-            console.error("Lỗi khi tạo/mở cuộc trò chuyện:", error);
-        }
-    }
-
-    let defaultMin = 0;
-    let defaultMax = 100;
+    // Initialize range sliders for Price and Area
     let defaultMinPrice = 0;
     let defaultMaxPrice = 100;
-    let defaultMinRoom = 0;
-    let defaultMaxRoom = 15;
+    let defaultMinArea = 0;
+    let defaultMaxArea = 100;
     let body = sessionStorage.getItem('filterData');
     if (body != null && body != undefined && body != '') {
         body = JSON.parse(body);
-        defaultMin = body.minArea;
-        defaultMax = body.maxArea;
-        defaultMinRoom = body.minRoom;
-        defaultMaxRoom = body.maxRoom;
-        defaultMinPrice = body.minPrice;
-        defaultMaxPrice = body.maxPrice;
-    } else {
+        defaultMinPrice = body.minPrice || 0;
+        defaultMaxPrice = body.maxPrice || 100;
+        defaultMinArea = body.minArea || 0;
+        defaultMaxArea = body.maxArea || 100;
     }
 
-        setupDoubleRangeSlider({
-            rangeMinId: "rangeMinArea",
-            rangeMaxId: "rangeMaxArea",
-            inputMinId: "minInputArea",
-            inputMaxId: "maxInputArea",
-            labelMinId: "minLabelArea",
-            labelMaxId: "maxLabelArea",
-            trackId: "rangeTrackArea",
-            maxValue: 100,
-            labelInfo: 'm<sup>2</sup>',
-            defaultMin: defaultMin,
-            defaultMax: defaultMax
-        });
+    setupDoubleRangeSlider({
+        rangeMinId: "rangeMinPrice",
+        rangeMaxId: "rangeMaxPrice",
+        inputMinId: "minInputPrice",
+        inputMaxId: "maxInputPrice",
+        labelMinId: "minLabelPrice",
+        labelMaxId: "maxLabelPrice",
+        trackId: "rangeTrackPrice",
+        maxValue: 100,
+        labelInfo: 'triệu',
+        defaultMin: defaultMinPrice,
+        defaultMax: defaultMaxPrice
+    });
 
-        setupDoubleRangeSlider({
-            rangeMinId: "rangeMinPrice",
-            rangeMaxId: "rangeMaxPrice",
-            inputMinId: "minInputPrice",
-            inputMaxId: "maxInputPrice",
-            labelMinId: "minLabelPrice",
-            labelMaxId: "maxLabelPrice",
-            trackId: "rangeTrackPrice",
-            maxValue: 100,
-            labelInfo: 'triệu',
-            defaultMin: defaultMinPrice,
-            defaultMax: defaultMaxPrice
-        });
+    setupDoubleRangeSlider({
+        rangeMinId: "rangeMinArea",
+        rangeMaxId: "rangeMaxArea",
+        inputMinId: "minInputArea",
+        inputMaxId: "maxInputArea",
+        labelMinId: "minLabelArea",
+        labelMaxId: "maxLabelArea",
+        trackId: "rangeTrackArea",
+        maxValue: 100,
+        labelInfo: 'm<sup>2</sup>',
+        defaultMin: defaultMinArea,
+        defaultMax: defaultMaxArea
+    });
 
-
-        setupDoubleRangeSlider({
-            rangeMinId: "rangeMin",
-            rangeMaxId: "rangeMax",
-            inputMinId: "minInput",
-            inputMaxId: "maxInput",
-            labelMinId: "minLabel",
-            labelMaxId: "maxLabel",
-            trackId: "rangeTrack",
-            maxValue: 15,
-            defaultMin: defaultMinRoom,
-            defaultMax: defaultMaxRoom
-        });
-
-
-    function setupDoubleRangeSlider({rangeMinId,rangeMaxId,inputMinId,inputMaxId,
-        labelMinId,labelMaxId,trackId,maxValue = 15,labelInfo = '',defaultMin = 0,defaultMax = maxValue
-    }) {
+    function setupDoubleRangeSlider({rangeMinId, rangeMaxId, inputMinId, inputMaxId, labelMinId, labelMaxId, trackId, maxValue = 100, labelInfo = '', defaultMin = 0, defaultMax = maxValue}) {
         const rangeMin = document.getElementById(rangeMinId);
         const rangeMax = document.getElementById(rangeMaxId);
         const minInput = document.getElementById(inputMinId);
@@ -1248,16 +999,20 @@
             return null;
         }
     }
-    function StatusInterest(item){
-        if(!item.isInterested) return "";
-        if(item.interestedStatus == 2){
-            if(item.isReminderRenterConfirmInterested == 2) return `<span style="color:red">Quá hạn xác nhận quan tâm</span>`;
-            if(item.isReminderRenterConfirmInterested == 1) return `<span style="color:green">Xác nhận quan tâm lại</span>`;
-            if(item.isReminderRenterConfirmInterested == 0) return `<span style="color:blue">Chờ phản hồi hệ thống</span>`;
+
+    function StatusInterest(item) {
+        if (!item.isInterested) return "";
+        if (item.interestedStatus == 2) {
+            if (item.isReminderRenterConfirmInterested == 2) return `<span style="color:red">Quá hạn xác nhận quan tâm</span>`;
+            if (item.isReminderRenterConfirmInterested == 1) return `<span style="color:green">Xác nhận quan tâm lại</span>`;
+            if (item.isReminderRenterConfirmInterested == 0) return `<span style="color:blue">Chờ phản hồi hệ thống</span>`;
         }
-        if(item.interestedStatus == 0) return "";
-        if(item.interestedStatus == 3){
-            if(item.isReminderRenterConfirmInterested == 0) return `<span style="color:blue">Chờ xác nhận từ người cho thuê</span>`;
+        if (item.interestedStatus == 0) return "";
+        if (item.interestedStatus == 3) {
+            if (item.isReminderRenterConfirmInterested == 0) return `<span style="color:blue">Chờ xác nhận từ người cho thuê</span>`;
         }
     }
+
+    // Initialize data fetching
+    getAllData();
 </script>

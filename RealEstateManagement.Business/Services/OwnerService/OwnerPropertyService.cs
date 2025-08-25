@@ -82,7 +82,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 Location = entity.Location,
                 Bedrooms = entity.Bedrooms,
                 Area = entity.Area,
-                Type = entity.Type,
+                Type = entity.PropertyType.Name,
                 InterestedProperties = interestDtos.Select(c => new DTO.Properties.InterestedPropertyDTO
                 {
                     Id = c.Id,
@@ -264,7 +264,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                         }
                     }).ToList(),
                 IsExistRenterContract = entity.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Rented && post.RentalContract != null),
-                Type = entity.Type,
+                Type = entity.PropertyType.Name,
             }).ToList();
         }
     }

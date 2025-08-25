@@ -30,6 +30,8 @@ using RealEstateManagement.Business.Services.Reviews;
 using RealEstateManagement.Business.Services.Admin;
 using RealEstateManagement.Business.Repositories.Admin;
 using RealEstateManagement.Business.Repositories.AmenityRepo;
+using RealEstateManagement.Business.Repositories.PropertyTypeRepository;
+using RealEstateManagement.Business.Services.PropertyTypeService;
 
 namespace RealEstateManagement.API.Extensions
 {
@@ -50,6 +52,7 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IRentalContractRepository, RentalContractRepository>();
             services.AddScoped<IOwnerPropertyRepository, OwnerPropertyRepository>();
             services.AddScoped<IAmenityRepository, AmenityRepository>();
+            services.AddScoped<IPropertyTypeRepository, PropertyTypeRepository>();
 
             // Some support Repository
             services.AddScoped<IAddressRepository, AddressRepository>();
@@ -76,6 +79,7 @@ namespace RealEstateManagement.API.Extensions
             services.AddScoped<IOwnerPropertyService, OwnerPropertyService>();
             services.AddScoped<IRentalContractService, RentalContractService>();
             services.AddScoped<ISliderService, SliderService>();
+            services.AddScoped<IPropertyTypeService, PropertyTypeService>();
 
             //user and auth services
             services.AddScoped<IAuthService, AuthService>();

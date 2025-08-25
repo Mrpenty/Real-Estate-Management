@@ -84,6 +84,7 @@ public class RentalDbContext : IdentityDbContext<ApplicationUser, IdentityRole<i
         modelBuilder.ApplyConfiguration(new PropertyImageConfiguration());
         modelBuilder.ApplyConfiguration(new PropertyPostConfiguration());
         modelBuilder.ApplyConfiguration(new AddressConfiguration());
+        modelBuilder.ApplyConfiguration(new PropertyTypeConfiguration());
 
         // Configure function entities
         modelBuilder.ApplyConfiguration(new WalletConfiguration());

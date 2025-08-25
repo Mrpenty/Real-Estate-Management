@@ -844,7 +844,7 @@ namespace RealEstateManagement.Business.Services.Properties
                     Id = p.Id,
                     Title = p.Title,
                     Description = p.Description,
-                    Type = p.Type,
+                    Type = p.PropertyType.Name,
                     AddressID = p.AddressId,
                     StreetId = p.Address?.StreetId,
                     Street = p.Address?.Street?.Name,

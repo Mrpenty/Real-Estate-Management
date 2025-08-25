@@ -52,7 +52,7 @@ namespace RealEstateManagement.Data.Data.DataSeed.PropertySeed
             {
                 Id = 6,
                 Name = "Phòng trọ ",
-                Description = "Một ngôi nhà lớn và sang trọng, thường nằm ở khu vực ngoại ô hoặc nông thôn.",
+                Description = "Một phòng nhỏ ",
                 CreatedAt = DateTime.Now
             }
         );

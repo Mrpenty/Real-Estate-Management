@@ -33,9 +33,12 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.Address).ThenInclude(a => a.Street)
                 .Include(p => p.Posts)
                 .Include(p => p.Reviews)
-                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
+                .Include(p => p.PropertyType)
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
+                .Where(p => p.Landlord.IsActive)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
+                
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -52,6 +55,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
         {
             return await _context.Properties
                 .Include(p => p.Images)
+                .Include(p => p.PropertyType)
                 .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities)
                     .ThenInclude(pa => pa.Amenity)
@@ -75,11 +79,13 @@ namespace RealEstateManagement.Business.Repositories.Properties
         {
             var query = _context.Properties
                 .Include(p => p.Images)
+                .Include(p => p.PropertyType)
                 .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
                 .Include(p => p.Posts)
-                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
+                .Where(p => p.Landlord.IsActive)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .AsQueryable();
 
             if (minPrice.HasValue)
@@ -106,11 +112,13 @@ namespace RealEstateManagement.Business.Repositories.Properties
         {
             var query = _context.Properties
                 .Include(p => p.Images)
+                .Include(p => p.PropertyType)
                 .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
                 .Include(p => p.Posts)
-                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
+                .Where(p => p.Landlord.IsActive)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .AsQueryable();
 
             if (minArea.HasValue)
@@ -138,6 +146,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
         {
             var query = _context.Properties
                 .Include(p=>p.Landlord)
+                .Include(p => p.PropertyType)
                 .Include(p => p.Address)
                     .ThenInclude(pa => pa.Province)
                 .Include(p => p.Address)
@@ -148,8 +157,9 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
                 .Include(p => p.Posts)
-                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
+                .Where(p => p.Landlord.IsActive)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(filter.Type))
@@ -236,9 +246,11 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Where(p => ids.Contains(p.Id))
                 .Include(p => p.Images)
                 .Include(p => p.Landlord)
+                .Include(p => p.PropertyType)
                 .Include(p => p.PropertyAmenities)
                     .ThenInclude(pa => pa.Amenity)
                 .Include(p => p.Posts)
+                .Where(p => p.Landlord.IsActive)
                 .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .ToListAsync();
         }
@@ -250,6 +262,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Where(p => ids.Contains(p.Id))
                 .Include(p => p.Images)
                 .Include(p => p.Landlord)
+                .Include(p => p.PropertyType)
                 .Include(p => p.Reviews)
                 .Include(p => p.PropertyAmenities)
                     .ThenInclude(pa => pa.Amenity)
@@ -297,11 +310,13 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Include(p => p.Address)
                     .ThenInclude(pa => pa.Street)
                 .Include(p => p.Images)
+                .Include(p => p.PropertyType)
                 .Include(p => p.Landlord)
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
                 .Include(p => p.Posts)
-                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
+                .Where(p => p.Landlord.IsActive)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .AsQueryable();
             if (!string.IsNullOrWhiteSpace(type))
             {
@@ -334,13 +349,15 @@ namespace RealEstateManagement.Business.Repositories.Properties
             return await _context.Properties
                 .Where(p => p.LandlordId == landlordId)
                 .Include(p => p.Images)
+                .Include(p => p.PropertyType)
                 .Include(p => p.Address).ThenInclude(a => a.Province)
                 .Include(p => p.Address).ThenInclude(a => a.Ward)
                 .Include(p => p.Address).ThenInclude(a => a.Street)
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
                 .Include(p => p.Posts)
-                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .Include(p => p.PropertyPromotions).ThenInclude(pp => pp.PromotionPackage)
+                .Where(p => p.Landlord.IsActive)
+                .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .OrderByDescending(p => p.PropertyPromotions.Any()
                     ? p.PropertyPromotions.Max(pp => pp.PromotionPackage.Level)
                     : 0)
@@ -355,11 +372,13 @@ namespace RealEstateManagement.Business.Repositories.Properties
             return _context.Properties
                 .Include(p => p.Images)
                 .Include(p => p.Landlord)
+                .Include(p => p.PropertyType)
                 .Include(p => p.Address).ThenInclude(a => a.Province)
                 .Include(p => p.Address).ThenInclude(a => a.Ward)
                 .Include(p => p.Address).ThenInclude(a => a.Street)
                 .Include(p => p.PropertyAmenities).ThenInclude(pa => pa.Amenity)
                 .Include(p => p.Posts)
+                .Where(p =>   p.Landlord.IsActive)
                 .Where(p => p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved))
                 .AsNoTracking();
         }
@@ -384,6 +403,8 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Join(
                     _context.Properties
                         .Include(p => p.Images)
+                        .Include(p => p.PropertyType)
+
                         .Include(p => p.Address).ThenInclude(a => a.Province)
                         .Include(p => p.Address).ThenInclude(a => a.Ward)
                         .Include(p => p.Address).ThenInclude(a => a.Street)
@@ -447,6 +468,8 @@ namespace RealEstateManagement.Business.Repositories.Properties
             return await _context.Properties
                 .Include(p => p.Images)
                 .Include(p => p.Landlord)
+                .Include(p => p.PropertyType)
+
                 .Include(p => p.Address).ThenInclude(a => a.Province)
                 .Include(p => p.Address).ThenInclude(a => a.Ward)
                 .Include(p => p.Address).ThenInclude(a => a.Street)
@@ -455,7 +478,8 @@ namespace RealEstateManagement.Business.Repositories.Properties
                 .Where(p => p.Posts.Any(post =>
                     post.Status == PropertyPost.PropertyPostStatus.Rented &&
                     post.RentalContract != null &&
-                    post.RentalContract.RenterId == userId))
+                    post.RentalContract.RenterId == userId &&
+                    post.Landlord.IsActive))
                 .AsNoTracking()
                 .ToListAsync();
         }
