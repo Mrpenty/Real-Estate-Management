@@ -10,6 +10,7 @@ namespace RealEstateManagement.Data.Data.DataSeed.AddressSeed
             modelBuilder.Entity<Province>().HasData(
                 new Province { Id = 1, Name = "Ho Chi Minh City" },
                 new Province { Id = 2, Name = "Hanoi" }
+
             );
         }
     }

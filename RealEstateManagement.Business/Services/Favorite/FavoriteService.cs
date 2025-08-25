@@ -37,7 +37,7 @@ namespace RealEstateManagement.Business.Services.Favorite
                 Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
-                Type = p.Type,
+                Type = p.PropertyType.Name,
                 AddressID = p.AddressId,
                 Area = p.Area,
                 Bedrooms = p.Bedrooms,

@@ -50,7 +50,7 @@ namespace RealEstateManagement.Business.Services.Properties
                         Id = p.Id,
                         Title = p.Title,
                         Description = p.Description,
-                        Type = p.Type,
+                        Type = p.PropertyType.Name,
                         AddressID = p.AddressId,
                         StreetId = p.Address?.StreetId,
                         Street = p.Address?.Street?.Name,
@@ -123,8 +123,7 @@ namespace RealEstateManagement.Business.Services.Properties
             // Apply filters
             if (!string.IsNullOrWhiteSpace(type))
             {
-                properties = properties.Where(p => p.Type != null &&
-                                                   p.Type.ToLower() == type.ToLower());
+                properties = properties.Where(p => p.PropertyType.Name.ToLower() == type.ToLower());
             }
 
             if (!string.IsNullOrEmpty(provinces))
@@ -178,7 +177,7 @@ namespace RealEstateManagement.Business.Services.Properties
                         Id = p.Id,
                         Title = p.Title,
                         Description = p.Description,
-                        Type = p.Type,
+                        Type = p.PropertyType.Name,
                         AddressID = p.AddressId,
                         StreetId = p.Address?.StreetId,
                         Street = p.Address?.Street?.Name,
@@ -262,7 +261,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
-                Type = p.Type,
+                Type = p.PropertyType.Name,  
                 AddressID = p.AddressId,
                 Area = p.Area,
                 Bedrooms = p.Bedrooms,
@@ -319,7 +318,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
-                Type = p.Type,
+                Type = p.PropertyType.Name,
                 AddressID = p.AddressId,
                 Area = p.Area,
                 Bedrooms = p.Bedrooms,
@@ -348,7 +347,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
-                Type = p.Type,
+                Type = p.PropertyType.Name,
                 AddressID = p.AddressId,
                 Area = p.Area,
                 Bedrooms = p.Bedrooms,
@@ -377,7 +376,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
-                Type = p.Type,
+                Type = p.PropertyType.Name,
                 AddressID = p.AddressId,
                 Area = p.Area,
                 Bedrooms = p.Bedrooms,
@@ -406,7 +405,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
-                Type = p.Type,
+                Type = p.PropertyType.Name,
                 AddressID = p.AddressId,
                 Area = p.Area,
                 Bedrooms = p.Bedrooms,
@@ -469,7 +468,7 @@ namespace RealEstateManagement.Business.Services.Properties
             {
                 Id = p.Id,
                 Title = p.Title,
-                Type = p.Type,
+                Type = p.PropertyType.Name,
                 Status = p.Status,
                 CreatedAt = p.CreatedAt,
                 ViewsCount = p.ViewsCount,
@@ -545,7 +544,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
-                Type = p.Type,
+                Type = p.PropertyType.Name,
                 AddressID = p.AddressId,
                 Area = p.Area,
                 Bedrooms = p.Bedrooms,
@@ -579,7 +578,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
-                Type = p.Type,
+                Type = p.PropertyType.Name,
                 AddressID = p.AddressId,
                 StreetId = p.Address.StreetId,
                 Street = p.Address.Street.Name,
@@ -621,7 +620,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
-                Type = p.Type,
+                Type = p.PropertyType.Name,
                 AddressID = p.AddressId,
                 Area = p.Area,
                 Bedrooms = p.Bedrooms,
@@ -674,7 +673,7 @@ namespace RealEstateManagement.Business.Services.Properties
 
             // 1) Ứng viên sơ bộ (giữ nguyên như code cũ)
             var q = _repository.QueryApprovedForSimilarity()
-                .Where(p => p.Id != pivot.Id && p.Type == pivot.Type);
+                .Where(p => p.Id != pivot.Id && p.PropertyType.Name == pivot.PropertyType.Name);
 
             if (pivot.Address?.WardId is int wardId && wardId != 0)
                 q = q.Where(p => p.Address.WardId == wardId || p.Address.ProvinceId == pivot.Address.ProvinceId);
@@ -704,7 +703,7 @@ namespace RealEstateManagement.Business.Services.Properties
 
             double Score(Property c)
             {
-                double sType = string.Equals(c.Type, pivot.Type, StringComparison.OrdinalIgnoreCase) ? 1.0 : 0.0;
+                double sType = string.Equals(c.PropertyType.Name, pivot.PropertyType.Name, StringComparison.OrdinalIgnoreCase) ? 1.0 : 0.0;
 
                 double sLoc = 0.0;
                 if (pivot.Address?.WardId != null && c.Address?.WardId == pivot.Address.WardId) sLoc = 1.0;
@@ -769,7 +768,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
-                Type = p.Type,
+                Type = p.PropertyType.Name,
                 AddressID = p.AddressId,
                 StreetId = p.Address?.StreetId,
                 Street = p.Address?.Street?.Name,
@@ -879,7 +878,7 @@ namespace RealEstateManagement.Business.Services.Properties
                     Id = p.Id,
                     Title = p.Title,
                     Description = p.Description,
-                    Type = p.Type,
+                    Type = p.PropertyType.Name,
                     AddressID = p.AddressId,
                     StreetId = p.Address?.StreetId,
                     Street = p.Address?.Street?.Name,

@@ -1,3 +1,4 @@
+
 @{
     Layout = "~/Views/Shared/_LayoutV2.cshtml";
     ViewData["Title"] = "Đăng tin mới";
@@ -31,13 +32,9 @@
                     Danh mục <span class="text-red-600 font-bold">(∗)</span>
                 </label>
                 <select required id="type" name="type" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>-- Chọn danh mục --</option>
-                    <option selected value="room">Phòng trọ</option>
-                    <option value="house">Nhà nguyên căn</option>
-                    <option value="apartment">Căn hộ</option>
+                    <option value="">-- Chọn danh mục --</option>
                 </select>
             </div>
-
         </div>
     </div>
 
@@ -99,7 +96,6 @@
                         src="https://www.google.com/maps?q=HoChiMinh,+Vietnam&output=embed">
                 </iframe>
             </div>
-
         </div>
     </div>
 
@@ -148,7 +144,7 @@
 
                 <div class="col-4">
                     <label class="block mb-1 font-medium">
-                        Số phòng <span class="text-red-600 font-bold">(∗)</span>
+                        Số phòng ngủ <span class="text-red-600 font-bold">(∗)</span>
                     </label>
                     <div class="w-full" style="width:100%">
                         <div class="mt-1 flex rounded-md">
@@ -157,8 +153,31 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
+                <div class="col-4">
+                    <label class="block mb-1 font-medium">
+                        Số phòng tắm <span class="text-red-600 font-bold">(∗)</span>
+                    </label>
+                    <div class="w-full" style="width:100%">
+                        <div class="mt-1 flex rounded-md">
+                            <input type="number" id="bathrooms" name="bathrooms" required
+                                   class="flex-1 block w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-4">
+                    <label class="block mb-1 font-medium">
+                        Số tầng <span class="text-red-600 font-bold">(∗)</span>
+                    </label>
+                    <div class="w-full" style="width:100%">
+                        <div class="mt-1 flex rounded-md">
+                            <input type="number" id="floors" name="floors" required
+                                   class="flex-1 block w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm" />
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -167,7 +186,6 @@
 
         <div id="amenities-container" class="flex mb-3">
         </div>
-
     </div>
 
     <div class="bg-white p-6 rounded ml-20 mr-20 mt-8 border mb-8">
@@ -206,7 +224,6 @@
         </div>
     </div>
 
-
     <div id="ContactId" class="section bg-white p-6 rounded ml-20 mr-20 mt-8 border mb-8">
         <h2 class="text-lg font-semibold mb-4">Thông tin liên hệ</h2>
 
@@ -235,130 +252,128 @@
 </form>
 
 <script>
-     let isAuthen = authService.isAuthenticated();
-     if(!isAuthen){
-         window.location.href = '/Auth/Login';
-     }
+    let isAuthen = authService.isAuthenticated();
+    if (!isAuthen) {
+        window.location.href = '/Auth/Login';
+    }
 
-     const apiBaseUrl = 'https://localhost:7031/api';
-     const provinceSelect = $('#province-select');
-     const wardSelect = $('#ward-select');
-     const streetSelect = $('#street-select');
-     const addressInfo = $('#addressInfoId');
-     const fullAddressInput = $('#open-address-modal');
-     $.get(`${apiBaseUrl}/Property/provinces`,async function (data) {
-            provinceSelect.empty().append('<option value="">Chọn Tỉnh/Thành</option>');
-            data.forEach(p => provinceSelect.append(`<option value="${p.id}">${p.name}</option>`));
-     });
+    const apiBaseUrl = 'https://localhost:7031/api';
+    const provinceSelect = $('#province-select');
+    const wardSelect = $('#ward-select');
+    const streetSelect = $('#street-select');
+    const addressInfo = $('#addressInfoId');
+    const fullAddressInput = $('#open-address-modal');
+    const typeSelect = $('#type');
 
+    $.get(`${apiBaseUrl}/Property/provinces`, async function (data) {
+        provinceSelect.empty().append('<option value="">Chọn Tỉnh/Thành</option>');
+        data.forEach(p => provinceSelect.append(`<option value="${p.id}">${p.name}</option>`));
+    });
 
-     let createdPropertyId = null;
-     let imageFiles = [];
-     let primaryImageIndex = 0;
+    // Load property types dynamically
+    $.get(`${apiBaseUrl}/PropertyType/GetAllPropertyTypes`, async function (data) {
+        typeSelect.empty().append('<option value="">-- Chọn danh mục --</option>');
+        data.forEach(type => {
+            typeSelect.append(`<option value="${type.id}">${type.name}</option>`);
+        });
+    });
 
-     const propertyForm = document.getElementById('property-form');
-     propertyForm.onsubmit = async function(e) {
-         e.preventDefault();
-         // Thu thập dữ liệu property từ form
-         const formData = new FormData(propertyForm);
-         //console.log(Object.fromEntries(formData.entries()));
-         // Build object đúng chuẩn DTO backend
-         const amenityIds = Array.from(document.querySelectorAll('input[name="AmenityIds"]:checked')).map(cb => parseInt(cb.value));
-         const provinceId = parseInt(formData.get('province-select'));
-         const wardId = parseInt(formData.get('WardId'));
-         const streetId = parseInt(formData.get('StreetId'));
-         const detailedAddress = formData.get('AddressInfo') || '';
-         const propertyData = {
-             title: formData.get('title'),
-             description: formData.get('description'),
-             type: formData.get('type'),
-             area: parseFloat(formData.get('area')),
-             bedrooms: parseInt(formData.get('bedrooms')),
-             price: parseFloat(formData.get('price')),
-             location: '',
-             amenityIds: amenityIds,
-             provinceId: provinceId,
-             wardId: wardId,
-             streetId: streetId,
-             detailedAddress: detailedAddress,
-         };
+    let createdPropertyId = null;
+    let imageFiles = [];
+    let primaryImageIndex = 0;
 
+    const propertyForm = document.getElementById('property-form');
+    propertyForm.onsubmit = async function(e) {
+        e.preventDefault();
+        // Thu thập dữ liệu property từ form
+        const formData = new FormData(propertyForm);
+        // Build object đúng chuẩn DTO backend
+        const amenityIds = Array.from(document.querySelectorAll('input[name="AmenityIds"]:checked')).map(cb => parseInt(cb.value));
+        const provinceId = parseInt(formData.get('province-select'));
+        const wardId = parseInt(formData.get('WardId'));
+        const streetId = parseInt(formData.get('StreetId'));
+        const detailedAddress = formData.get('AddressInfo') || '';
+        const propertyData = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            propertyTypeId: parseInt(formData.get('type')), // Changed from 'type' to 'propertyTypeId'
+            area: parseFloat(formData.get('area')),
+            bedrooms: parseInt(formData.get('bedrooms')),
+            bathrooms: parseInt(formData.get('bathrooms')),
+            floors: parseInt(formData.get('floors')),
+            price: parseFloat(formData.get('price')),
+            location: '',
+            amenityIds: amenityIds,
+            provinceId: provinceId,
+            wardId: wardId,
+            streetId: streetId,
+            detailedAddress: detailedAddress,
+        };
 
-         updateMap();
-         if(imageFiles.length == 0){
-             alert('Cần cập nhật ảnh');
-             return;
-         }
-         // Kiểm tra dữ liệu trước khi gửi
-         // for (const key in propertyData) {
-         //     if (propertyData[key] === undefined || propertyData[key] === null || propertyData[key] === '' || (Array.isArray(propertyData[key]) && propertyData[key].length === 0)) {
-         //         alert('Vui lòng nhập đầy đủ thông tin: ' + key);
-         //         return;
-         //     }
-         // }
-         // Gửi API tạo property
-
-         propertyData['location'] = await fetchLocationAndSetPropertyData();
-         const token = localStorage.getItem('authToken');
-         const res = await fetch('https://localhost:7031/api/PropertyPosts/Create', {
-             method: 'POST',
-             headers: {
-                 'Content-Type': 'application/json',
-                 ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-             },
-             credentials: 'include',
-             body: JSON.stringify(propertyData)
-         });
-         if (!res.ok) {
-             const err = await res.json().catch(() => ({}));
-             alert('Tạo property thất bại! ' + (err.message || ''));
-             return;
-         }
-         const data = await res.json();
-         createdPropertyId = data.propertyId; // Sử dụng propertyId từ response
-         if (createdPropertyId) {
-             await uploadImages(createdPropertyId); // Đợi upload xong ảnh
-             alert('Tạo bài và upload ảnh thành công!');
-              window.location.href = `/PostProperty/CreateContract?propertyPostId=${createdPropertyId}`;
-             return;
-         }
-     };
+        updateMap();
+        if (imageFiles.length == 0) {
+            alert('Cần cập nhật ảnh');
+            return;
+        }
+        propertyData['location'] = await fetchLocationAndSetPropertyData();
+        const token = localStorage.getItem('authToken');
+        const res = await fetch('https://localhost:7031/api/PropertyPosts/Create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            credentials: 'include',
+            body: JSON.stringify(propertyData)
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            alert('Tạo property thất bại! ' + (err.message || ''));
+            return;
+        }
+        const data = await res.json();
+        createdPropertyId = data.propertyId;
+        if (createdPropertyId) {
+            await uploadImages(createdPropertyId);
+            alert('Tạo bài và upload ảnh thành công!');
+            window.location.href = `/PostProperty/CreateContract?propertyPostId=${createdPropertyId}`;
+            return;
+        }
+    };
 
     async function fetchLocationAndSetPropertyData() {
-       const location = `${addressInfo.val()} ${streetSelect.find("option:selected").text()} ${wardSelect.find("option:selected").text()} ${provinceSelect.find("option:selected").text()}`;
-       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`;
-       let latlon = '';
+        const location = `${addressInfo.val()} ${streetSelect.find("option:selected").text()} ${wardSelect.find("option:selected").text()} ${provinceSelect.find("option:selected").text()}`;
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`;
+        let latlon = '';
 
-       try {
-         const response = await fetch(url);
-         const data = await response.json();
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
 
-         if (data.length > 0) {
-           const lat = data[0].lat;
-           const lon = data[0].lon;
-           latlon = `${lat},${lon}`;
-         } else {
-           console.log("Không tìm thấy địa chỉ.");
-           latlon = location.trim();
-         }
-       } catch (error) {
-         console.error("Lỗi khi gọi API vị trí:", error);
-         latlon = location.trim();
-       }
+            if (data.length > 0) {
+                const lat = data[0].lat;
+                const lon = data[0].lon;
+                latlon = `${lat},${lon}`;
+            } else {
+                console.log("Không tìm thấy địa chỉ.");
+                latlon = location.trim();
+            }
+        } catch (error) {
+            console.error("Lỗi khi gọi API vị trí:", error);
+            latlon = location.trim();
+        }
 
-       return latlon ;
-     }
+        return latlon;
+    }
 
     async function uploadImages(propertyId) {
         const token = localStorage.getItem('authToken');
         for (let idx = 0; idx < imageFiles.length; idx++) {
             const file = imageFiles[idx];
 
-            // Tạo FormData mới cho từng file
             const formData = new FormData();
             formData.append('file', file);
 
-            // Upload file lên server
             const uploadResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/upload`, {
                 method: 'POST',
                 headers: {
@@ -376,7 +391,6 @@
             const uploadResult = await uploadResponse.json();
             const imageUrl = uploadResult.imageUrl;
 
-            // Lưu thông tin ảnh vào database
             const dto = {
                 url: imageUrl,
                 isPrimary: idx === primaryImageIndex,
@@ -400,244 +414,221 @@
         }
     }
 
+    let isFormActive = true;
 
-     // Thêm biến kiểm soát trạng thái form
-     let isFormActive = true;
+    provinceSelect.on('change', async function () {
+        if (!isFormActive) return;
+        const provinceId = $(this).val();
+        if (!provinceId || provinceId.startsWith('--')) return;
+        wardSelect.empty().append('<option value="">Chọn Phường/Xã</option>');
+        streetSelect.empty().append('<option value="">Chọn Đường</option>');
 
-     provinceSelect.on('change', async function () {
-         if (!isFormActive) return;
-         const provinceId = $(this).val();
-         if (!provinceId || provinceId.startsWith('--')) return;
-         wardSelect.empty().append('<option value="">Chọn Phường/Xã</option>');
-         streetSelect.empty().append('<option value="">Chọn Đường</option>');
+        if (provinceId) {
+            $.get(`${apiBaseUrl}/Property/wards/${provinceId}`, async function (data) {
+                data.forEach(w => wardSelect.append(`<option value="${w.id}">${w.name}</option>`));
+            });
+        }
+    });
 
-         if (provinceId) {
-               $.get(`${apiBaseUrl}/Property/wards/${provinceId}`,async function (data) {
-                   data.forEach(w => wardSelect.append(`<option value="${w.id}">${w.name}</option>`));
-              });
-         }
-     });
+    wardSelect.on('change', async function () {
+        if (!isFormActive) return;
+        const wardId = $(this).val();
+        if (!wardId || wardId.startsWith('--')) return;
+        streetSelect.empty().append('<option value="">Chọn Đường</option>');
+        if (wardId) {
+            $.get(`${apiBaseUrl}/Property/streets/${wardId}`, async function (data) {
+                data.forEach(s => streetSelect.append(`<option value="${s.id}">${s.name}</option>`));
+            });
+        }
+    });
 
-     wardSelect.on('change', async function () {
-         if (!isFormActive) return;
-         const wardId = $(this).val();
-         if (!wardId || wardId.startsWith('--')) return;
-         streetSelect.empty().append('<option value="">Chọn Đường</option>');
-         if (wardId) {
-             $.get(`${apiBaseUrl}/Property/streets/${wardId}`,async function (data) {
-                 data.forEach(s => streetSelect.append(`<option value="${s.id}">${s.name}</option>`));
-             });
-         }
-     });
+    streetSelect.on('change', async function () {
+        if (!isFormActive) return;
+        const streetId = $(this).val();
+        if (!streetId || streetId.startsWith('--')) return;
+    });
 
-     streetSelect.on('change', async function () {
-         if (!isFormActive) return;
-         const streetId = $(this).val();
-         if (!streetId || streetId.startsWith('--')) return;
-         // ... code cũ ...
-     });
-
-     function updateMap() {
-       if(provinceSelect.val() == ''){
-           alert('Chọn tỉnh/thành phố');
-           return;
-       }
-       if(wardSelect.val() == ''){
+    function updateMap() {
+        if (provinceSelect.val() == '') {
+            alert('Chọn tỉnh/thành phố');
+            return;
+        }
+        if (wardSelect.val() == '') {
             alert('Chọn phường/xã');
-           return;
-       }
+            return;
+        }
+        if (streetSelect.val() == '') {
+            alert('Chọn đường phố');
+            return;
+        }
 
-       if(streetSelect.val() == ''){
-             alert('Chọn đường phố');
-             return;
-       }
+        const location = `${addressInfo.val()} ${streetSelect.find("option:selected").text()} ${wardSelect.find("option:selected").text()} ${provinceSelect.find("option:selected").text()}`;
+        const iframe = document.getElementById("mapFrame");
 
+        if (location.trim() !== "") {
+            const encodedLocation = encodeURIComponent(location.trim());
+            iframe.src = `https://www.google.com/maps?q=${encodedLocation}&output=embed`;
+        }
+    }
 
-       const location = `${addressInfo.val()} ${streetSelect.find("option:selected").text()} ${wardSelect.find("option:selected").text()} ${provinceSelect.find("option:selected").text()}`;
-       //console.log(location);
-       const iframe = document.getElementById("mapFrame");
+    getAmenities();
+    async function getAmenities() {
+        let listData = await getAllAmenities();
+        const amenitiesContainer = $('#amenities-container');
+        listData.forEach(amenity => {
+            amenitiesContainer.append(`
+                <div class="flex items-center mr-4">
+                    <input type="checkbox" name="AmenityIds" value="${amenity.id}" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label class="ml-2 block text-sm text-gray-900">${amenity.name}</label>
+                </div>
+            `);
+        });
+    }
 
-       if (location.trim() !== "") {
-         const encodedLocation = encodeURIComponent(location.trim());
-         iframe.src = `https://www.google.com/maps?q=${encodedLocation}&output=embed`;
-       }
-     }
+    let isScrollingByClick = false;
 
-     getAmenities();
-     async function getAmenities(){
-             let listData = await getAllAmenities();
-             const amenitiesContainer = $('#amenities-container');
-             listData.forEach(amenity => {
-                    amenitiesContainer.append(`
-                                 <div class="flex items-center mr-4">
-                                     <input type="checkbox" name="AmenityIds" value="${amenity.id}" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                                     <label class="ml-2 block text-sm text-gray-900">${amenity.name}</label>
-                                 </div>
-                             `);
-             });
-     }
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('text-orange-600', 'border-b-2', 'border-orange-600');
+                b.classList.add('text-gray-600', 'font-semibold');
+            });
 
+            this.classList.remove('text-gray-600', 'font-semibold');
+            this.classList.add('text-orange-600', 'border-b-2', 'border-orange-600');
 
+            const sectionId = this.getAttribute('data-scroll');
+            const sectionEl = document.getElementById(sectionId);
+            if (sectionEl) {
+                isScrollingByClick = true;
+                const offset = 190;
+                const y = sectionEl.getBoundingClientRect().top + window.pageYOffset - offset;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
 
-     //font-bold text-blue-800
-    // document.getElementById('CreatePostId').classList.add('font-bold', 'text-blue-800');
+            setTimeout(() => {
+                isScrollingByClick = false;
+            }, 600);
+        });
+    });
 
-     let isScrollingByClick = false;
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const sections = document.querySelectorAll('.section');
 
-     document.querySelectorAll('.tab-btn').forEach(btn => {
-       btn.addEventListener('click', function () {
-         document.querySelectorAll('.tab-btn').forEach(b => {
-           b.classList.remove('text-orange-600', 'border-b-2', 'border-orange-600');
-           b.classList.add('text-gray-600', 'font-semibold');
-         });
+    const sectionMap = {};
+    tabButtons.forEach(btn => {
+        const id = btn.getAttribute('data-scroll');
+        sectionMap[id] = btn;
+    });
 
-         this.classList.remove('text-gray-600', 'font-semibold');
-         this.classList.add('text-orange-600', 'border-b-2', 'border-orange-600');
+    const observer = new IntersectionObserver(
+        (entries) => {
+            if (isScrollingByClick) return;
 
-         const sectionId = this.getAttribute('data-scroll');
-         const sectionEl = document.getElementById(sectionId);
-         if (sectionEl) {
-           isScrollingByClick = true;
-           const offset = 190;
-           const y = sectionEl.getBoundingClientRect().top + window.pageYOffset - offset;
-           window.scrollTo({ top: y, behavior: 'smooth' });
-         }
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('text-orange-600', 'border-b-2', 'border-orange-600');
+                        btn.classList.add('text-gray-600', 'font-semibold');
+                    });
 
-         setTimeout(() => {
-             isScrollingByClick = false;
-         }, 600);
-       });
-     });
+                    const id = entry.target.getAttribute('id');
+                    const activeBtn = sectionMap[id];
+                    if (activeBtn) {
+                        activeBtn.classList.remove('text-gray-600', 'font-semibold');
+                        activeBtn.classList.add('text-orange-600', 'border-b-2', 'border-orange-600');
+                    }
+                }
+            });
+        },
+        {
+            rootMargin: '-30% 0px -40% 0px',
+            threshold: 0.1
+        }
+    );
 
+    sections.forEach(section => observer.observe(section));
 
-     const tabButtons = document.querySelectorAll('.tab-btn');
-     const sections = document.querySelectorAll('.section');
+    const imageUpload = document.getElementById('imageUpload');
+    const previewContainer = document.getElementById('previewContainer');
 
+    imageUpload.addEventListener('change', () => {
+        try {
+            imageFiles = [];
+            primaryImageIndex = 0;
+            previewContainer.innerHTML = "";
+            const fileAlls = Array.from(imageUpload.files);
+            if (fileAlls.length > 8) {
+                alert("Chỉ được tải tối đa 8 ảnh!");
+                imageUpload.value = "";
+                return;
+            }
+            const files = fileAlls.slice(0, 8);
+            imageFiles = files;
+            for (const file of files) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(`Ảnh "${file.name}" vượt quá 5MB. Vui lòng chọn ảnh nhẹ hơn.`);
+                    imageUpload.value = "";
+                    return;
+                }
+            }
+            files.forEach((file, index) => {
+                if (!file.type.startsWith("image/")) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = "relative group border-2 rounded-md" + (index === 0 ? ' border-blue-500' : ' border-transparent');
+                    wrapper.style.cursor = 'pointer';
+                    wrapper.setAttribute('data-index', index);
+                    const img = document.createElement('img');
+                    img.src = reader.result;
+                    img.className = "w-full h-32 object-cover rounded-md shadow";
+                    const primaryIcon = document.createElement('div');
+                    primaryIcon.className = "absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full z-10";
+                    primaryIcon.innerHTML = index === 0 ? 'Ảnh đại diện' : '';
+                    primaryIcon.style.display = index === 0 ? 'block' : 'none';
+                    wrapper.onclick = function() {
+                        primaryImageIndex = index;
+                        Array.from(previewContainer.children).forEach((child, idx) => {
+                            child.classList.remove('border-blue-500');
+                            child.classList.add('border-transparent');
+                            child.querySelector('div').style.display = 'none';
+                        });
+                        wrapper.classList.remove('border-transparent');
+                        wrapper.classList.add('border-blue-500');
+                        primaryIcon.style.display = 'block';
+                    };
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = "<span>&times;</span>";
+                    deleteBtn.type = "button";
+                    deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600 z-20";
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        files.splice(index, 1);
+                        imageFiles = files;
+                        if (primaryImageIndex === index) primaryImageIndex = 0;
+                        imageUpload.value = "";
+                        const dt = new DataTransfer();
+                        files.forEach(f => dt.items.add(f));
+                        imageUpload.files = dt.files;
+                        imageUpload.dispatchEvent(new Event('change'));
+                    };
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(primaryIcon);
+                    wrapper.appendChild(deleteBtn);
+                    previewContainer.appendChild(wrapper);
+                };
+                reader.readAsDataURL(file);
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    });
 
-     const sectionMap = {};
-     tabButtons.forEach(btn => {
-       const id = btn.getAttribute('data-scroll');
-       sectionMap[id] = btn;
-     });
-
-     const observer = new IntersectionObserver(
-       (entries) => {
-         if (isScrollingByClick) return;
-
-         entries.forEach(entry => {
-           if (entry.isIntersecting) {
-
-             tabButtons.forEach(btn => {
-               btn.classList.remove('text-orange-600', 'border-b-2', 'border-orange-600');
-               btn.classList.add('text-gray-600', 'font-semibold');
-             });
-
-             const id = entry.target.getAttribute('id');
-             const activeBtn = sectionMap[id];
-             if (activeBtn) {
-               activeBtn.classList.remove('text-gray-600', 'font-semibold');
-               activeBtn.classList.add('text-orange-600', 'border-b-2', 'border-orange-600');
-             }
-           }
-         });
-       },
-       {
-         rootMargin: '-30% 0px -40% 0px',
-         threshold: 0.1
-       }
-     );
-
-     sections.forEach(section => observer.observe(section));
-
-
-     const imageUpload = document.getElementById('imageUpload');
-     const previewContainer = document.getElementById('previewContainer');
-
-     imageUpload.addEventListener('change', () => {
-         try {
-                 imageFiles = [];
-                 primaryImageIndex = 0;
-                 previewContainer.innerHTML = "";
-                 const fileAlls = Array.from(imageUpload.files);
-                 if (fileAlls.length > 8) {
-                     alert("Chỉ được tải tối đa 8 ảnh!");
-                     imageUpload.value = "";
-                     return;
-                 }
-                 const files = fileAlls.slice(0, 8);
-                 imageFiles = files;
-                 for (const file of files) {
-                     if (file.size > 5 * 1024 * 1024) {
-                         alert(`Ảnh "${file.name}" vượt quá 5MB. Vui lòng chọn ảnh nhẹ hơn.`);
-                         imageUpload.value = "";
-                         return;
-                     }
-                 }
-                 files.forEach((file, index) => {
-                     if (!file.type.startsWith("image/")) return;
-                     const reader = new FileReader();
-                     reader.onload = () => {
-                         const wrapper = document.createElement('div');
-                         wrapper.className = "relative group border-2 rounded-md" + (index === 0 ? ' border-blue-500' : ' border-transparent');
-                         wrapper.style.cursor = 'pointer';
-                         wrapper.setAttribute('data-index', index);
-                         const img = document.createElement('img');
-                         img.src = reader.result;
-                         img.className = "w-full h-32 object-cover rounded-md shadow";
-                         // Icon isPrimary
-                         const primaryIcon = document.createElement('div');
-                         primaryIcon.className = "absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded-full z-10";
-                         primaryIcon.innerHTML = index === 0 ? 'Ảnh đại diện' : '';
-                         primaryIcon.style.display = index === 0 ? 'block' : 'none';
-                         // Click chọn làm isPrimary
-                         wrapper.onclick = function() {
-                             primaryImageIndex = index;
-                             // Update border and icon for all
-                             Array.from(previewContainer.children).forEach((child, idx) => {
-                                 child.classList.remove('border-blue-500');
-                                 child.classList.add('border-transparent');
-                                 child.querySelector('div').style.display = 'none';
-                             });
-                             wrapper.classList.remove('border-transparent');
-                             wrapper.classList.add('border-blue-500');
-                             primaryIcon.style.display = 'block';
-                         };
-                         // Nút xóa ảnh
-                         const deleteBtn = document.createElement('button');
-                         deleteBtn.innerHTML = "<span>&times;</span>";
-                         deleteBtn.type = "button";
-                         deleteBtn.className = "absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center shadow hover:bg-red-600 z-20";
-                         deleteBtn.onclick = (e) => {
-                             e.stopPropagation();
-                             files.splice(index, 1);
-                             imageFiles = files;
-                             // Nếu xóa ảnh đại diện thì reset về 0
-                             if (primaryImageIndex === index) primaryImageIndex = 0;
-                             imageUpload.value = "";
-                             // Gọi lại event để render lại preview
-                             const dt = new DataTransfer();
-                             files.forEach(f => dt.items.add(f));
-                             imageUpload.files = dt.files;
-                             imageUpload.dispatchEvent(new Event('change'));
-                         };
-                         wrapper.appendChild(img);
-                         wrapper.appendChild(primaryIcon);
-                         wrapper.appendChild(deleteBtn);
-                         previewContainer.appendChild(wrapper);
-                     };
-                     reader.readAsDataURL(file);
-                 });
-         } catch (error) {
-             console.log(error);
-         }
-     });
-
-     // Thêm hàm để lấy dữ liệu từ form và gọi API AI Suggestion
     document.getElementById('ai-suggest-button').addEventListener('click', async function() {
         const formData = new FormData(propertyForm);
         const amenityIds = Array.from(document.querySelectorAll('input[name="AmenityIds"]:checked')).map(cb => parseInt(cb.value));
 
-        // Lấy đầy đủ địa chỉ hiển thị để gửi lên API AI
         const provinceName = provinceSelect.find("option:selected").text();
         const wardName = wardSelect.find("option:selected").text();
         const streetName = streetSelect.find("option:selected").text();
@@ -645,10 +636,12 @@
 
         const propertyDataForAI = {
             title: formData.get('title') || '',
-            address: fullAddressDisplay, // Sử dụng địa chỉ đầy đủ đã lấy
-            type: formData.get('type') || '',
+            address: fullAddressDisplay,
+            propertyTypeId: parseInt(formData.get('type')) || 0,
             area: parseFloat(formData.get('area')) || 0,
             bedrooms: parseInt(formData.get('bedrooms')) || 0,
+            bathrooms: parseInt(formData.get('bathrooms')) || 0,
+            floors: parseInt(formData.get('floors')) || 0,
             price: parseFloat(formData.get('price')) || 0,
             amenityIds: amenityIds,
             provinceId: parseInt(formData.get('province-select')) || 0,
@@ -657,24 +650,20 @@
             detailedAddress: formData.get('AddressInfo') || ''
         };
 
-        // Loại bỏ các trường có giá trị 0 hoặc chuỗi rỗng nếu không cần thiết cho API AI
         for (const key in propertyDataForAI) {
             if (propertyDataForAI[key] === 0 || propertyDataForAI[key] === '' || (Array.isArray(propertyDataForAI[key]) && propertyDataForAI[key].length === 0)) {
                 delete propertyDataForAI[key];
             }
         }
 
-           // Bước 1: Hỏi người dùng xác nhận
         const confirmation = confirm("Bạn có chắc chắn muốn sử dụng tính năng gợi ý AI? Thao tác này sẽ trừ 100 VNĐ từ ví của bạn.");
 
         if (!confirmation) {
-            // Nếu người dùng hủy, không làm gì cả
-            this.textContent = 'Gợi ý mô tả bởi AI'; // Khôi phục trạng thái nút
+            this.textContent = 'Gợi ý mô tả bởi AI';
             this.disabled = false;
             return;
         }
 
-        // Nếu người dùng đồng ý, tiếp tục logic gọi API
         console.log("Dữ liệu gửi lên AI:", propertyDataForAI);
 
         try {
@@ -697,25 +686,20 @@
                 body: JSON.stringify(propertyDataForAI)
             });
 
-            // Xử lý các mã trạng thái phản hồi
             if (!response.ok) {
-                const errorResponse = await response.json(); // Cố gắng đọc JSON lỗi
+                const errorResponse = await response.json();
                 let errorMessage = errorResponse.message || errorResponse.title || 'Lỗi không xác định từ server.';
-
-                // Kiểm tra lỗi thiếu tiền cụ thể từ backend
-                if (response.status === 400 && errorResponse.code === "INSUFFICIENT_BALANCE") { // Giả định backend trả về code "INSUFFICIENT_BALANCE"
+                if (response.status === 400 && errorResponse.code === "INSUFFICIENT_BALANCE") {
                     errorMessage = "Số dư trong ví của bạn không đủ để sử dụng tính năng này. Vui lòng nạp thêm tiền.";
                 } else if (response.status === 401 || response.status === 403) {
-                     errorMessage = "Bạn không có quyền truy cập hoặc phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+                    errorMessage = "Bạn không có quyền truy cập hoặc phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
                 }
-
                 throw new Error(`API Error: ${response.status} - ${errorMessage}`);
             }
 
             const result = await response.text();
             document.getElementById('description').value = result.suggestedDescription || result.description || JSON.stringify(result);
-            alert("Gợi ý mô tả đã được tạo thành công! Ví của bạn đã bị trừ 100 VNĐ."); // Thông báo thành công
-
+            alert("Gợi ý mô tả đã được tạo thành công! Ví của bạn đã bị trừ 100 VNĐ.");
         } catch (error) {
             console.error("Lỗi khi gọi API gợi ý mô tả AI:", error);
             alert(`Đã xảy ra lỗi khi tạo mô tả. Vui lòng thử lại! Chi tiết: ${error.message}`);
@@ -729,5 +713,3 @@
         }
     });
 </script>
-
-

@@ -54,7 +54,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                     }).ToList(),
                     IsExistRenterContract = entity.Posts.Any(post => post.RentalContract != null),
                     RenterContractId = entity.Posts.Any(post => post.RentalContract != null) ? entity.Posts.FirstOrDefault().RentalContract.Id : 0,
-                    Type = entity.Type,
+                    Type = entity.PropertyType.Name,
                     DetailedAddress = entity.Address.DetailedAddress,
                     Images = entity.Images.Select(img => new OwnerPropertyImageDto
                     {
@@ -82,7 +82,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 Location = entity.Location,
                 Bedrooms = entity.Bedrooms,
                 Area = entity.Area,
-                Type = entity.Type,
+                Type = entity.PropertyType.Name,
                 InterestedProperties = interestDtos.Select(c => new DTO.Properties.InterestedPropertyDTO
                 {
                     Id = c.Id,
@@ -158,7 +158,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
             property.Price = dto.Price;
             property.Area = dto.Area;
             property.Bedrooms = dto.Bedrooms;
-            property.Type = dto.Type;
+            property.PropertyTypeId = dto.PropertyTypeId;
             property.Location = dto.Location;
 
             if (dto.ProvinceId != null || dto.WardId != null || dto.StreetId != null || !string.IsNullOrEmpty(dto.DetailedAddress))
@@ -265,7 +265,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                         }
                     }).ToList(),
                 IsExistRenterContract = entity.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Rented && post.RentalContract != null),
-                Type = entity.Type,
+                Type = entity.PropertyType.Name,
             }).ToList();
         }
     }

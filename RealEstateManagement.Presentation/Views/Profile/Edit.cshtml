@@ -17,10 +17,10 @@
             <!-- Profile Picture -->
             <div class="flex flex-col items-center">
                 <img id="avatar-preview" src="/image/default-avatar.png" alt="Ảnh đại diện" class="w-32 h-32 rounded-full object-cover border-4 border-gray-200 shadow-md mb-4">
-                <input type="file" id="profilePicture" name="profilePicture" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+                <input type="file" id="profilePicture" name="profilePicture" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
                 <p class="text-xs text-gray-500 mt-1">Chọn ảnh mới (PNG, JPG, GIF)</p>
             </div>
-            
+
             <!-- Name -->
             <div>
                 <label for="name" class="block text-sm font-medium text-gray-700">Tên hiển thị</label>
@@ -98,322 +98,343 @@
 </div>
 
 @section Scripts {
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const apiBaseUrl = 'https://localhost:7031';
-    const form = document.getElementById('edit-profile-form');
-    const loadingState = document.getElementById('loading-state');
-    const avatarPreview = document.getElementById('avatar-preview');
-    const profilePictureInput = document.getElementById('profilePicture');
-    const cccdFrontInput = document.getElementById('cccdFront');
-    const cccdBackInput = document.getElementById('cccdBack');
-    const cccdFrontPreview = document.getElementById('cccdFrontPreview');
-    const cccdBackPreview = document.getElementById('cccdBackPreview');
-    const rejectionReasonContainer = document.getElementById('rejectionReasonContainer');
-    const rejectionReasonText = document.getElementById('rejectionReasonText');
-    const requestVerificationButton = document.getElementById('request-verification-button');
-    
-    let currentProfile = null;
-    
-    function getCookie(name) {
-        let value = '; ' + document.cookie;
-        let parts = value.split('; ' + name + '=');
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
-    }
-    const token = getCookie('accessToken');
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const apiBaseUrl = 'https://localhost:7031';
+            const form = document.getElementById('edit-profile-form');
+            const loadingState = document.getElementById('loading-state');
+            const avatarPreview = document.getElementById('avatar-preview');
+            const profilePictureInput = document.getElementById('profilePicture');
+            const cccdFrontInput = document.getElementById('cccdFront');
+            const cccdBackInput = document.getElementById('cccdBack');
+            const cccdFrontPreview = document.getElementById('cccdFrontPreview');
+            const cccdBackPreview = document.getElementById('cccdBackPreview');
+            const rejectionReasonContainer = document.getElementById('rejectionReasonContainer');
+            const rejectionReasonText = document.getElementById('rejectionReasonText');
+            const requestVerificationButton = document.getElementById('request-verification-button');
+            const phoneNumberInput = document.getElementById('phoneNumber');
+            const citizenIdNumberInput = document.getElementById('citizenIdNumber');
+            const citizenIdIssuedDateInput = document.getElementById('citizenIdIssuedDate');
+            const citizenIdExpiryDateInput = document.getElementById('citizenIdExpiryDate');
 
-    // Kiểm tra xem có đủ thông tin để yêu cầu duyệt không
-    function checkVerificationEligibility() {
-        if (currentProfile.role !== 'renter') {
-            requestVerificationButton.classList.add('hidden');
-            return;
-        }
+            let currentProfile = null;
 
-        // Lấy giá trị hiện tại từ form
-        const citizenIdNumber = document.getElementById('citizenIdNumber').value;
-        const citizenIdIssuedDate = document.getElementById('citizenIdIssuedDate').value;
-        const citizenIdExpiryDate = document.getElementById('citizenIdExpiryDate').value;
-        const hasFrontImage = cccdFrontInput.files[0] || currentProfile.citizenIdFrontImageUrl;
-        const hasBackImage = cccdBackInput.files[0] || currentProfile.citizenIdBackImageUrl;
-
-        console.log('Kiểm tra điều kiện duyệt:', {
-            citizenIdNumber: !!citizenIdNumber,
-            citizenIdIssuedDate: !!citizenIdIssuedDate,
-            citizenIdExpiryDate: !!citizenIdExpiryDate,
-            hasFrontImage: !!hasFrontImage,
-            hasBackImage: !!hasBackImage,
-            verificationStatus: currentProfile.verificationStatus
-        });
-
-        const hasAllRequiredFields = citizenIdNumber && 
-                                   citizenIdIssuedDate && 
-                                   citizenIdExpiryDate && 
-                                   hasFrontImage && 
-                                   hasBackImage;
-
-        if (hasAllRequiredFields && (currentProfile.verificationStatus === 'none' || currentProfile.verificationStatus === 'rejected')) {
-            requestVerificationButton.classList.remove('hidden');
-            console.log('Hiển thị nút yêu cầu duyệt');
-        } else {
-            requestVerificationButton.classList.add('hidden');
-            console.log('Ẩn nút yêu cầu duyệt');
-        }
-    }
-
-    // 1. Fetch current profile data and populate the form
-    fetch(`${apiBaseUrl}/api/User/Get-Profile`, {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
-    })
-    .then(res => {
-        if (!res.ok) throw new Error('Không thể tải dữ liệu.');
-        return res.json();
-    })
-    .then(profile => {
-        currentProfile = profile;
-        document.getElementById('name').value = profile.name || '';
-        document.getElementById('email').value = profile.email || '';
-        document.getElementById('phoneNumber').value = profile.phoneNumber || '';
-        avatarPreview.src = profile.profilePictureUrl ? `${apiBaseUrl}/${profile.profilePictureUrl}` : '/image/default-avatar.png';
-        // Populate CCCD fields
-        document.getElementById('citizenIdNumber').value = profile.citizenIdNumber || '';
-        document.getElementById('citizenIdIssuedDate').value = profile.citizenIdIssuedDate ? profile.citizenIdIssuedDate.substring(0,10) : '';
-        document.getElementById('citizenIdExpiryDate').value = profile.citizenIdExpiryDate ? profile.citizenIdExpiryDate.substring(0,10) : '';
-        cccdFrontPreview.src = profile.citizenIdFrontImageUrl ? `${apiBaseUrl}/${profile.citizenIdFrontImageUrl}` : '';
-        cccdBackPreview.src = profile.citizenIdBackImageUrl ? `${apiBaseUrl}/${profile.citizenIdBackImageUrl}` : '';
-        
-        // Hiển thị lý do từ chối nếu có
-        if (profile.verificationRejectReason && profile.verificationRejectReason.trim() !== '') {
-            rejectionReasonText.textContent = profile.verificationRejectReason;
-            rejectionReasonContainer.classList.remove('hidden');
-        }
-
-        // Kiểm tra và hiển thị nút yêu cầu duyệt
-        checkVerificationEligibility();
-
-        loadingState.classList.add('hidden');
-        form.classList.remove('hidden');
-    })
-    .catch(error => {
-        loadingState.innerHTML = `<p class="text-red-600">${error.message}</p>`;
-    });
-    
-    // 2. Preview selected image
-    profilePictureInput.addEventListener('change', function(event) {
-        if (event.target.files && event.target.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                avatarPreview.src = e.target.result;
+            function getCookie(name) {
+                let value = '; ' + document.cookie;
+                let parts = value.split('; ' + name + '=');
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
             }
-            reader.readAsDataURL(event.target.files[0]);
-        }
-    });
-    cccdFrontInput.addEventListener('change', function(event) {
-        if (event.target.files && event.target.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                cccdFrontPreview.src = e.target.result;
-            }
-            reader.readAsDataURL(event.target.files[0]);
-        }
-        // Kiểm tra điều kiện duyệt sau khi thay đổi ảnh
-        setTimeout(checkVerificationEligibility, 100);
-    });
-    cccdBackInput.addEventListener('change', function(event) {
-        if (event.target.files && event.target.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                cccdBackPreview.src = e.target.result;
-            }
-            reader.readAsDataURL(event.target.files[0]);
-        }
-        // Kiểm tra điều kiện duyệt sau khi thay đổi ảnh
-        setTimeout(checkVerificationEligibility, 100);
-    });
+            const token = getCookie('accessToken');
 
-    // Thêm event listeners cho các trường CCCD để kiểm tra điều kiện duyệt
-    document.getElementById('citizenIdNumber').addEventListener('input', function() {
-        setTimeout(checkVerificationEligibility, 100);
-    });
-    
-    document.getElementById('citizenIdIssuedDate').addEventListener('change', function() {
-        setTimeout(checkVerificationEligibility, 100);
-    });
-    
-    document.getElementById('citizenIdExpiryDate').addEventListener('change', function() {
-        setTimeout(checkVerificationEligibility, 100);
-    });
+            // Kiểm tra xem có đủ thông tin để yêu cầu duyệt không và áp dụng trạng thái readonly/disabled
+            function checkVerificationEligibility() {
+                if (currentProfile.role === 'landlord') {
+                    // Landlord không được yêu cầu duyệt và không chỉnh sửa được CCCD, số điện thoại
+                    requestVerificationButton.classList.add('hidden');
+                    phoneNumberInput.setAttribute('readonly', true);
+                    citizenIdNumberInput.setAttribute('readonly', true);
+                    cccdFrontInput.setAttribute('disabled', true);
+                    cccdBackInput.setAttribute('disabled', true);
+                    citizenIdExpiryDateInput.setAttribute('disabled', true);
+                    citizenIdIssuedDateInput.setAttribute('disabled', true);
 
-    // 3. Handle form submission (chỉ cập nhật thông tin, không thay đổi trạng thái xác thực)
-    form.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const saveButton = document.getElementById('save-button');
-        saveButton.disabled = true;
-        saveButton.textContent = 'Đang lưu...';
-
-        try {
-            // Step 3a: Upload profile picture if changed
-            const pictureFile = profilePictureInput.files[0];
-            if (pictureFile) {
-                const pictureFormData = new FormData();
-                pictureFormData.append('file', pictureFile);
-                const picResponse = await fetch(`${apiBaseUrl}/api/User/profile-picture`, {
-                    method: 'POST',
-                    credentials: 'include',
-                    body: pictureFormData
-                });
-                if (!picResponse.ok) throw new Error('Cập nhật ảnh đại diện thất bại.');
-            }
-            // Step 3a.1: Upload CCCD front if changed
-            const cccdFrontFile = cccdFrontInput.files[0];
-            if (cccdFrontFile) {
-                const cccdFrontFormData = new FormData();
-                cccdFrontFormData.append('file', cccdFrontFile);
-                const cccdFrontRes = await fetch(`${apiBaseUrl}/api/User/upload-cccd-front`, {
-                    method: 'POST',
-                    credentials: 'include',
-                    body: cccdFrontFormData
-                });
-                if (!cccdFrontRes.ok) throw new Error('Cập nhật ảnh CCCD mặt trước thất bại.');
-            }
-            // Step 3a.2: Upload CCCD back if changed
-            const cccdBackFile = cccdBackInput.files[0];
-            if (cccdBackFile) {
-                const cccdBackFormData = new FormData();
-                cccdBackFormData.append('file', cccdBackFile);
-                const cccdBackRes = await fetch(`${apiBaseUrl}/api/User/upload-cccd-back`, {
-                    method: 'POST',
-                    credentials: 'include',
-                    body: cccdBackFormData
-                });
-                if (!cccdBackRes.ok) throw new Error('Cập nhật ảnh CCCD mặt sau thất bại.');
-            }
-            // Step 3b: Update profile information (không thay đổi trạng thái xác thực)
-            const profileData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                phoneNumber: document.getElementById('phoneNumber').value,
-                citizenIdNumber: document.getElementById('citizenIdNumber').value,
-                citizenIdIssuedDate: document.getElementById('citizenIdIssuedDate').value,
-                citizenIdExpiryDate: document.getElementById('citizenIdExpiryDate').value
-            };
-            const profileResponse = await fetch(`${apiBaseUrl}/api/User/Update-profile`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(profileData)
-            });
-            if (!profileResponse.ok) {
-                const errorData = await profileResponse.json();
-                throw new Error(errorData.message || 'Cập nhật thông tin thất bại.');
-            }
-            
-            const responseData = await profileResponse.json();
-            
-            // Cập nhật profile hiện tại với dữ liệu mới
-            currentProfile = { 
-                ...currentProfile, 
-                ...profileData,
-                // Cập nhật thông tin CCCD từ form
-                citizenIdNumber: document.getElementById('citizenIdNumber').value,
-                citizenIdIssuedDate: document.getElementById('citizenIdIssuedDate').value,
-                citizenIdExpiryDate: document.getElementById('citizenIdExpiryDate').value,
-                // Cập nhật ảnh CCCD nếu có upload mới
-                citizenIdFrontImageUrl: cccdFrontInput.files[0] ? 'updated' : currentProfile.citizenIdFrontImageUrl,
-                citizenIdBackImageUrl: cccdBackInput.files[0] ? 'updated' : currentProfile.citizenIdBackImageUrl
-            };
-            
-            // Kiểm tra lại điều kiện hiển thị nút yêu cầu duyệt
-            checkVerificationEligibility();
-            
-            // Nếu đủ điều kiện để yêu cầu duyệt, hiển thị thông báo đặc biệt
-            if (requestVerificationButton.classList.contains('hidden') === false) {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Thành công!',
-                    text: 'Thông tin đã được cập nhật. Bạn có thể yêu cầu duyệt hồ sơ ngay bây giờ.',
-                    confirmButtonText: 'OK'
-                });
-            } else {
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Thành công!',
-                    text: responseData.message,
-                    confirmButtonText: 'OK'
-                });
-            }
-            
-            // Không redirect về Profile, ở lại trang Edit để user có thể yêu cầu duyệt
-            // window.location.href = '/Profile';
-        } catch (error) {
-            await Swal.fire({
-                icon: 'error',
-                title: 'Lỗi!',
-                text: error.message,
-                confirmButtonText: 'OK'
-            });
-        } finally {
-            saveButton.disabled = false;
-            saveButton.textContent = 'Lưu thay đổi';
-        }
-    });
-
-    // 4. Handle verification request
-    requestVerificationButton.addEventListener('click', async function() {
-        const result = await Swal.fire({
-            title: 'Xác nhận yêu cầu duyệt',
-            text: 'Bạn có chắc chắn muốn gửi yêu cầu duyệt hồ sơ?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Có, gửi yêu cầu!',
-            cancelButtonText: 'Hủy'
-        });
-
-        if (result.isConfirmed) {
-            try {
-                const response = await fetch(`${apiBaseUrl}/api/User/request-verification`, {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Yêu cầu duyệt thất bại.');
+                    return;
                 }
 
-                const responseData = await response.json();
-                
-                // Cập nhật trạng thái hiện tại
-                currentProfile.verificationStatus = 'pending';
+                // Lấy giá trị hiện tại từ form
+                const citizenIdNumber = citizenIdNumberInput.value;
+                const citizenIdIssuedDate = document.getElementById('citizenIdIssuedDate').value;
+                const citizenIdExpiryDate = document.getElementById('citizenIdExpiryDate').value;
+                const hasFrontImage = cccdFrontInput.files[0] || currentProfile.citizenIdFrontImageUrl;
+                const hasBackImage = cccdBackInput.files[0] || currentProfile.citizenIdBackImageUrl;
+
+                console.log('Kiểm tra điều kiện duyệt:', {
+                    citizenIdNumber: !!citizenIdNumber,
+                    citizenIdIssuedDate: !!citizenIdIssuedDate,
+                    citizenIdExpiryDate: !!citizenIdExpiryDate,
+                    hasFrontImage: !!hasFrontImage,
+                    hasBackImage: !!hasBackImage,
+                    verificationStatus: currentProfile.verificationStatus
+                });
+
+                const hasAllRequiredFields = citizenIdNumber &&
+                                           citizenIdIssuedDate &&
+                                           citizenIdExpiryDate &&
+                                           hasFrontImage &&
+                                           hasBackImage;
+
+                if (hasAllRequiredFields && (currentProfile.verificationStatus === 'none' || currentProfile.verificationStatus === 'rejected')) {
+                    requestVerificationButton.classList.remove('hidden');
+                    console.log('Hiển thị nút yêu cầu duyệt');
+                } else {
+                    requestVerificationButton.classList.add('hidden');
+                    console.log('Ẩn nút yêu cầu duyệt');
+                }
+            }
+
+            // 1. Fetch current profile data and populate the form
+            fetch(`${apiBaseUrl}/api/User/Get-Profile`, {
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Không thể tải dữ liệu.');
+                return res.json();
+            })
+            .then(profile => {
+                currentProfile = profile;
+                document.getElementById('name').value = profile.name || '';
+                document.getElementById('email').value = profile.email || '';
+                phoneNumberInput.value = profile.phoneNumber || '';
+                avatarPreview.src = profile.profilePictureUrl ? `${apiBaseUrl}/${profile.profilePictureUrl}` : '/image/default-avatar.png';
+                // Populate CCCD fields
+                citizenIdNumberInput.value = profile.citizenIdNumber || '';
+                document.getElementById('citizenIdIssuedDate').value = profile.citizenIdIssuedDate ? profile.citizenIdIssuedDate.substring(0,10) : '';
+                document.getElementById('citizenIdExpiryDate').value = profile.citizenIdExpiryDate ? profile.citizenIdExpiryDate.substring(0,10) : '';
+                cccdFrontPreview.src = profile.citizenIdFrontImageUrl ? `${apiBaseUrl}/${profile.citizenIdFrontImageUrl}` : '';
+                cccdBackPreview.src = profile.citizenIdBackImageUrl ? `${apiBaseUrl}/${profile.citizenIdBackImageUrl}` : '';
+
+                // Hiển thị lý do từ chối nếu có
+                if (profile.verificationRejectReason && profile.verificationRejectReason.trim() !== '') {
+                    rejectionReasonText.textContent = profile.verificationRejectReason;
+                    rejectionReasonContainer.classList.remove('hidden');
+                }
+
+                // Kiểm tra và hiển thị nút yêu cầu duyệt, đồng thời vô hiệu hóa các trường nếu là Landlord
                 checkVerificationEligibility();
 
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Thành công!',
-                    text: responseData.message,
-                    confirmButtonText: 'OK'
+                loadingState.classList.add('hidden');
+                form.classList.remove('hidden');
+            })
+            .catch(error => {
+                loadingState.innerHTML = `<p class="text-red-600">${error.message}</p>`;
+            });
+
+            // 2. Preview selected image
+            profilePictureInput.addEventListener('change', function(event) {
+                if (event.target.files && event.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        avatarPreview.src = e.target.result;
+                    }
+                    reader.readAsDataURL(event.target.files[0]);
+                }
+            });
+            cccdFrontInput.addEventListener('change', function(event) {
+                if (currentProfile.role === 'landlord') return; // Không cho phép Landlord thay đổi
+                if (event.target.files && event.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        cccdFrontPreview.src = e.target.result;
+                    }
+                    reader.readAsDataURL(event.target.files[0]);
+                }
+                // Kiểm tra điều kiện duyệt sau khi thay đổi ảnh
+                setTimeout(checkVerificationEligibility, 100);
+            });
+            cccdBackInput.addEventListener('change', function(event) {
+                if (currentProfile.role === 'landlord') return; // Không cho phép Landlord thay đổi
+                if (event.target.files && event.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        cccdBackPreview.src = e.target.result;
+                    }
+                    reader.readAsDataURL(event.target.files[0]);
+                }
+                // Kiểm tra điều kiện duyệt sau khi thay đổi ảnh
+                setTimeout(checkVerificationEligibility, 100);
+            });
+
+            // Thêm event listeners cho các trường CCCD để kiểm tra điều kiện duyệt
+            citizenIdNumberInput.addEventListener('input', function() {
+                if (currentProfile.role === 'landlord') return; // Không cho phép Landlord thay đổi
+                setTimeout(checkVerificationEligibility, 100);
+            });
+
+            document.getElementById('citizenIdIssuedDate').addEventListener('change', function() {
+                setTimeout(checkVerificationEligibility, 100);
+            });
+
+            document.getElementById('citizenIdExpiryDate').addEventListener('change', function() {
+                setTimeout(checkVerificationEligibility, 100);
+            });
+
+            // 3. Handle form submission (chỉ cập nhật thông tin, không thay đổi trạng thái xác thực)
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const saveButton = document.getElementById('save-button');
+                saveButton.disabled = true;
+                saveButton.textContent = 'Đang lưu...';
+
+                try {
+                    // Step 3a: Upload profile picture if changed
+                    const pictureFile = profilePictureInput.files[0];
+                    if (pictureFile) {
+                        const pictureFormData = new FormData();
+                        pictureFormData.append('file', pictureFile);
+                        const picResponse = await fetch(`${apiBaseUrl}/api/User/profile-picture`, {
+                            method: 'POST',
+                            credentials: 'include',
+                            body: pictureFormData
+                        });
+                        if (!picResponse.ok) throw new Error('Cập nhật ảnh đại diện thất bại.');
+                    }
+                    // Step 3a.1: Upload CCCD front if changed (không cho phép Landlord)
+                    const cccdFrontFile = cccdFrontInput.files[0];
+                    if (cccdFrontFile && currentProfile.role !== 'landlord') {
+                        const cccdFrontFormData = new FormData();
+                        cccdFrontFormData.append('file', cccdFrontFile);
+                        const cccdFrontRes = await fetch(`${apiBaseUrl}/api/User/upload-cccd-front`, {
+                            method: 'POST',
+                            credentials: 'include',
+                            body: cccdFrontFormData
+                        });
+                        if (!cccdFrontRes.ok) throw new Error('Cập nhật ảnh CCCD mặt trước thất bại.');
+                    }
+                    // Step 3a.2: Upload CCCD back if changed (không cho phép Landlord)
+                    const cccdBackFile = cccdBackInput.files[0];
+                    if (cccdBackFile && currentProfile.role !== 'landlord') {
+                        const cccdBackFormData = new FormData();
+                        cccdBackFormData.append('file', cccdBackFile);
+                        const cccdBackRes = await fetch(`${apiBaseUrl}/api/User/upload-cccd-back`, {
+                            method: 'POST',
+                            credentials: 'include',
+                            body: cccdBackFormData
+                        });
+                        if (!cccdBackRes.ok) throw new Error('Cập nhật ảnh CCCD mặt sau thất bại.');
+                    }
+                    // Step 3b: Update profile information (không thay đổi trạng thái xác thực)
+                    const profileData = {
+                        name: document.getElementById('name').value,
+                        email: document.getElementById('email').value,
+                        phoneNumber: currentProfile.role === 'landlord' ? currentProfile.phoneNumber : phoneNumberInput.value, // Không cho phép Landlord thay đổi số điện thoại
+                        citizenIdNumber: currentProfile.role === 'landlord' ? currentProfile.citizenIdNumber : citizenIdNumberInput.value, // Không cho phép Landlord thay đổi số CCCD
+                        citizenIdIssuedDate: document.getElementById('citizenIdIssuedDate').value,
+                        citizenIdExpiryDate: document.getElementById('citizenIdExpiryDate').value
+                    };
+                    const profileResponse = await fetch(`${apiBaseUrl}/api/User/Update-profile`, {
+                        method: 'PUT',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(profileData)
+                    });
+                    if (!profileResponse.ok) {
+                        const errorData = await profileResponse.json();
+                        throw new Error(errorData.message || 'Cập nhật thông tin thất bại.');
+                    }
+
+                    const responseData = await profileResponse.json();
+
+                    // Cập nhật profile hiện tại với dữ liệu mới
+                    currentProfile = {
+                        ...currentProfile,
+                        ...profileData,
+                        // Cập nhật ảnh CCCD nếu có upload mới và không phải Landlord
+                        citizenIdFrontImageUrl: cccdFrontInput.files[0] && currentProfile.role !== 'landlord' ? 'updated' : currentProfile.citizenIdFrontImageUrl,
+                        citizenIdBackImageUrl: cccdBackInput.files[0] && currentProfile.role !== 'landlord' ? 'updated' : currentProfile.citizenIdBackImageUrl
+                    };
+
+                    // Kiểm tra lại điều kiện hiển thị nút yêu cầu duyệt
+                    checkVerificationEligibility();
+
+                    // Nếu đủ điều kiện để yêu cầu duyệt, hiển thị thông báo đặc biệt
+                    if (requestVerificationButton.classList.contains('hidden') === false) {
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Thành công!',
+                            text: 'Thông tin đã được cập nhật. Bạn có thể yêu cầu duyệt hồ sơ ngay bây giờ.',
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Thành công!',
+                            text: responseData.message,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+
+                    // Không redirect về Profile, ở lại trang Edit để user có thể yêu cầu duyệt
+                    // window.location.href = '/Profile';
+                } catch (error) {
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi!',
+                        text: error.message,
+                        confirmButtonText: 'OK'
+                    });
+                } finally {
+                    saveButton.disabled = false;
+                    saveButton.textContent = 'Lưu thay đổi';
+                }
+            });
+
+            // 4. Handle verification request
+            requestVerificationButton.addEventListener('click', async function() {
+                if (currentProfile.role === 'landlord') {
+                    await Swal.fire({
+                        icon: 'info',
+                        title: 'Không khả dụng',
+                        text: 'Chủ nhà (Landlord) không thể yêu cầu duyệt hồ sơ.',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                const result = await Swal.fire({
+                    title: 'Xác nhận yêu cầu duyệt',
+                    text: 'Bạn có chắc chắn muốn gửi yêu cầu duyệt hồ sơ?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Có, gửi yêu cầu!',
+                    cancelButtonText: 'Hủy'
                 });
 
-                window.location.href = '/Profile';
-            } catch (error) {
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi!',
-                    text: error.message,
-                    confirmButtonText: 'OK'
-                });
-            }
-        }
-    });
-});
-</script>
-} 
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`${apiBaseUrl}/api/User/request-verification`, {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Yêu cầu duyệt thất bại.');
+                        }
+
+                        const responseData = await response.json();
+
+                        // Cập nhật trạng thái hiện tại
+                        currentProfile.verificationStatus = 'pending';
+                        checkVerificationEligibility();
+
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Thành công!',
+                            text: responseData.message,
+                            confirmButtonText: 'OK'
+                        });
+
+                        window.location.href = '/Profile';
+                    } catch (error) {
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi!',
+                            text: error.message,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+}

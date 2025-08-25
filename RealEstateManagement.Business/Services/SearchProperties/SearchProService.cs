@@ -39,7 +39,7 @@ namespace RealEstateManagement.Business.Services.SearchProperties
                     .FirstOrDefault() ?? 0,
                 Title = p.Title,
                 Description = p.Description,
-                Type = p.Type,
+                Type = p.PropertyType.Name,
                 Area = p.Area,
                 AddressId = p.AddressId,
                 DetailedAddress = p.Address.DetailedAddress,  // lấy từ entity Address
@@ -70,7 +70,7 @@ namespace RealEstateManagement.Business.Services.SearchProperties
                 Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
-                Type = p.Type,
+                Type = p.PropertyType.Name,
                 AddressID = p.AddressId,
                 Area = p.Area,
                 Bedrooms = p.Bedrooms,

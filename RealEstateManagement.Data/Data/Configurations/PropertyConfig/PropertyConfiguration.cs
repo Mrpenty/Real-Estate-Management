@@ -10,8 +10,10 @@ public partial class ApplicationUserConfiguration
         {
             builder.Property(p => p.Title).HasMaxLength(50).IsRequired();
             builder.Property(p => p.Description).IsRequired();
-            builder.Property(p => p.Type).HasMaxLength(20).IsRequired()
-                .HasConversion<string>();
+            builder.HasOne(p => p.PropertyType)
+               .WithMany(pt => pt.Properties)
+               .HasForeignKey(p => p.PropertyTypeId)
+               .OnDelete(DeleteBehavior.Restrict); 
             builder.Property(p => p.Area).HasColumnType("decimal(10,2)");
             builder.Property(p => p.Status).HasMaxLength(20).IsRequired()
                 .HasConversion<string>();
