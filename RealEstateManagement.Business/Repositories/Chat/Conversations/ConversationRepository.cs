@@ -38,6 +38,14 @@ namespace RealEstateManagement.Business.Repositories.Chat.Conversations
                     c.LandlordId == landlordId &&
                     (!propertyId.HasValue || c.PropertyId == propertyId));
         }
+        //Lấy cuộc hội thoại của Renter và Landlord
+        public async Task<Conversation?> GetConvesationAsync(int renterId, int landlordId)
+        {
+            return await _context.Conversation
+                .FirstOrDefaultAsync(c =>
+                    c.RenterId == renterId &&
+                    c.LandlordId == landlordId);
+        }
         public async Task<IEnumerable<Conversation>> GetAllByUserIdAsync(int userId)
         {
             return await _context.Conversation

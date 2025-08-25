@@ -15,5 +15,6 @@ namespace RealEstateManagement.Business.Services.Chat.Conversations
         Task<IEnumerable<ConversationDTO>> GetAllByUserIdAsync(int userId);
         Task<IEnumerable<ConversationDTO?>> FilterConversationAsync(int userId, string searchTerm, int skip = 0, int take = 5);
 
+        Task HandleInterestAsync(int renterId, int postId);
     }
 }

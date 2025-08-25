@@ -30,6 +30,7 @@ namespace RealEstateManagement.Business.DTO.Properties
         public List<string> Amenities { get; set; }
         public List<string> ImageUrls { get; set; }
         // Contract Details
+        public int? ContractId { get; set; }
         public decimal? ContractDeposit { get; set; }
         public decimal? ContractMonthlyRent { get; set; }
         public int? ContractDurationMonths { get; set; }

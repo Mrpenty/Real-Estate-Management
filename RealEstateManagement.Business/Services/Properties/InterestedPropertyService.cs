@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RealEstateManagement.Business.DTO.NotificationDTO;
 using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Repositories.Chat.Messages;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Repositories.Properties;
+using RealEstateManagement.Business.Services.NotificationService;
 using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using RealEstateManagement.Data.Entity.User;
@@ -19,13 +21,17 @@ namespace RealEstateManagement.Business.Services.Properties
         private readonly IInterestedPropertyRepository _repository;
         private readonly IPropertyPostRepository _postRepo; // Giả sử bạn đã inject IPropertyPostRepository để cập nhật trạng thái PropertyPost
         private readonly IMessageRepository _msgReadRepo;
-        private readonly IRentalContractRepository _contractRepo; 
-        public InterestedPropertyService(IInterestedPropertyRepository repository, IPropertyPostRepository postRepo, IMessageRepository msgReadRepo, IRentalContractRepository contractRepo)
+        private readonly IRentalContractRepository _contractRepo;
+        private readonly INotificationService _notificationService;
+        private readonly IPropertyRepository _propertyRepo; 
+        public InterestedPropertyService(IInterestedPropertyRepository repository, IPropertyPostRepository postRepo, IMessageRepository msgReadRepo, IRentalContractRepository contractRepo, INotificationService notificationService, IPropertyRepository propertyRepository)
         {
             _repository = repository;
             _postRepo = postRepo;
             _msgReadRepo = msgReadRepo;
             _contractRepo = contractRepo;
+            _notificationService = notificationService;
+            _propertyRepo = propertyRepository;
         }
 
         private InterestedPropertyDTO MapToDTO(InterestedProperty entity)
@@ -58,7 +64,8 @@ namespace RealEstateManagement.Business.Services.Properties
         {
             var ip = await _repository.GetByIdAsync(interestedPropertyId);
             if (ip == null) throw new Exception("Interest not found");
-
+            var l = await _postRepo.GetByPropertyIdAsync(ip.PropertyId);
+            var t = await _propertyRepo.GetPropertyByIdAsync(ip.PropertyId);
             if (isRenter)
             {
                 if (ip.Status != InterestedStatus.WaitingForRenterReply)
@@ -70,6 +77,14 @@ namespace RealEstateManagement.Business.Services.Properties
                 if (confirmed)
                 {
                     ip.Status = InterestedStatus.WaitingForLandlordReply;
+                    await _notificationService.SendNotificationToSpecificUsersAsync(new CreateNotificationDTO
+                    {
+                        Title = "Người thuê muốn thuê",
+                        Content = $"Người thuê xác nhận hợp đồng và muốn thuê: {t.Title}.",
+                        Type = "info",
+                        Audience = "specific",
+                        SpecificUserIds = new List<int> { l.LandlordId }
+                    });
                 }
                 else
                 {
@@ -92,7 +107,15 @@ namespace RealEstateManagement.Business.Services.Properties
                 if (!confirmed)
                 {
                     ip.Status = InterestedStatus.LandlordRejected;
-                    await _repository.UpdateAsync(ip);       
+                    await _repository.UpdateAsync(ip);
+                    await _notificationService.SendNotificationToSpecificUsersAsync(new CreateNotificationDTO
+                    {
+                        Title = "Chủ nhà từ chối",
+                        Content = $"Chủ nhà đã từ chối cho thuê với bài đăng: {t.Title}.",
+                        Type = "warning",
+                        Audience = "specific",
+                        SpecificUserIds = new List<int> { ip.RenterId }
+                    });
                     return true;
                 }
 
@@ -118,7 +141,15 @@ namespace RealEstateManagement.Business.Services.Properties
                     }
                 }
 
-                await _repository.UpdateAsync(ip); 
+                await _repository.UpdateAsync(ip);
+                await _notificationService.SendNotificationToSpecificUsersAsync(new CreateNotificationDTO
+                {
+                    Title = "Giao dịch thành công 🎉",
+                    Content = $"Chủ nhà đã chấp nhận cho thuê với bất động sản: {t.Title}. Truy cập mục Danh sách nhà đang thuê để xem chi tiết",
+                    Type = "success",
+                    Audience = "specific",
+                    SpecificUserIds = new List<int> { ip.RenterId }
+                });
 
                 // CHANGED: đóng tất cả quan tâm khác của cùng property (None)
                 var others = await _repository.GetByPropertyAsync(ip.PropertyId); // đã include Renter

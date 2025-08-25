@@ -369,10 +369,25 @@ class PropertyDetailManager {
             // Sự kiện Quan tâm (dùng propertyId)
             $(".btn-add-interest").off("click").on("click", async () => {
                 try {
+                    // 1. Gọi API thêm quan tâm
                     let apiUrl = `${this.urlBase}/api/Property/InterestedProperty/AddInterest?propertyId=${propertyId}`;
                     let toggleRes = await fetch(apiUrl, { method: "POST", credentials: "include" });
                     if (!toggleRes.ok) throw new Error(`API add interest failed: ${toggleRes.status}`);
-                    location.reload();
+
+                    // 2. Gọi API tự động nhắn tin cho Landlord
+                    let chatUrl = `${this.urlBase}/api/Chat/${propertyId}/interest`;
+                    let chatRes = await fetch(chatUrl, { method: "POST", credentials: "include" });
+                    if (!chatRes.ok) throw new Error(`API auto-message failed: ${chatRes.status}`);                    
+                    // Close loading and show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: 'Đã thêm vào danh sách quan tâm, hãy trao đổi với Landlord để đàm phán hợp đồng',
+                        timer: 4000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload();
+                    });
                 } catch (err) {
                     console.error("Error adding interest:", err);
                     alert("Có lỗi xảy ra khi thêm quan tâm!");

@@ -118,7 +118,9 @@ namespace RealEstateManagement.API.Controllers.Home
                  ?? User.FindFirst("sub")?.Value;
             if (!int.TryParse(userIdStr, out var currentUserId))
                 return Unauthorized();
-            await _service.ConfirmInterestAsync(id, isRenter, confirmed);
+            var success = await _service.ConfirmInterestAsync(id, isRenter, confirmed);
+            if (!success) return BadRequest(new { message = "Xác nhận thất bại" });
+
             return Ok(new { message = "Xác nhận thành công!" });
         }
     }

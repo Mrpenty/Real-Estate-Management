@@ -1,14 +1,15 @@
 ﻿using Humanizer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using RealEstateManagement.API.Hubs;
 using RealEstateManagement.Business.DTO.Chat;
 using RealEstateManagement.Business.Services.Chat.Conversations;
 using RealEstateManagement.Business.Services.Chat.Messages;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.SignalR;
-using RealEstateManagement.API.Hubs;
 using RealEstateManagement.Data.Entity.Messages;
 using RealEstateManagement.Data.Entity.User;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace RealEstateManagement.API.Controllers
 {
@@ -20,13 +21,15 @@ namespace RealEstateManagement.API.Controllers
         private readonly IMessageService _messageService;
         private readonly RentalDbContext _context;
         private readonly IHubContext<ChatHub> _hubContext;
-        
-        public ChatController(IConversationService conversationService, IMessageService messageService, RentalDbContext context, IHubContext<ChatHub> hubContext)
+        private readonly ILogger<ChatController> _logger;
+
+        public ChatController(IConversationService conversationService, IMessageService messageService, RentalDbContext context, IHubContext<ChatHub> hubContext, ILogger<ChatController> logger)
         {
             _conversationService = conversationService;
             _messageService = messageService;
             _context = context;
             _hubContext = hubContext;
+            _logger = logger;
         }
 
         // Helper method để xử lý JWT token
@@ -550,6 +553,33 @@ namespace RealEstateManagement.API.Controllers
 
             var conversations = await _conversationService.FilterConversationAsync(userId, searchTerm, skip, take);
             return Ok(conversations);
+        }
+
+        [HttpPost("{postId}/interest")]
+        public async Task<IActionResult> InterestAndMessage(int postId)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst("id");
+                if (userIdClaim == null)
+                    throw new UnauthorizedAccessException("Không tìm thấy thông tin người dùng");
+
+                if (!int.TryParse(userIdClaim.Value, out var userId))
+                    throw new UnauthorizedAccessException("ID người dùng không hợp lệ");
+
+                _logger.LogInformation("InterestAndMessage: User {UserId} gửi quan tâm đến bài {PostId}", userId, postId);
+
+                await _conversationService.HandleInterestAsync(userId, postId);
+
+                _logger.LogInformation("InterestAndMessage: Tạo conversation và message thành công cho User {UserId} với bài {PostId}", userId, postId);
+
+                return Ok(new { message = "Đã gửi quan tâm và tạo tin nhắn cho Landlord" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "InterestAndMessage: Lỗi khi xử lý Interest cho PostId {PostId}", postId);
+                return StatusCode(500, new { message = "Có lỗi xảy ra khi gửi quan tâm", error = ex.Message });
+            }
         }
     }
 }
