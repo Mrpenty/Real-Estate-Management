@@ -867,6 +867,7 @@ namespace RealEstateManagement.Business.Services.Properties
                     LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
                     Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
                     // Thông tin hợp đồng thuê (RentalContract)
+                    ContractId = rentalContract?.Id,
                     ContractDeposit = rentalContract?.DepositAmount,
                     ContractMonthlyRent = rentalContract?.MonthlyRent,
                     ContractDurationMonths = rentalContract?.ContractDurationMonths,

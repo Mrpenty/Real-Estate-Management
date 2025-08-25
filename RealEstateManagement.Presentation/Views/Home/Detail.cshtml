@@ -120,7 +120,7 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
                         <span class="arrow">➤</span>
                         Để liên hệ với người thuê và xem chi tiết hợp đồng, hãy ấn nút <strong>Quan tâm</strong>
                     </p>
-                    <button class="interest-btn btn-add-interest">
+                    <button class="interest-btn btn-add-interest" onclick="showInterestSuccessMessage()">
                         ❤️ Quan tâm
                     </button>
                     <button class="interest-btn btn-remove-interest" style="display:none;">
@@ -133,6 +133,21 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
                         Tôi muốn thuê
                     </button>
                     <div class="waiting-landlord text-warning" style="display:none;"></div>
+                </div>
+
+                <!-- Success Message Modal -->
+                <div id="successModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 modal-overlay">
+                    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white modal-content">
+                        <div class="mt-3 text-center">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">✅ Thành công!</h3>
+                            <p class="text-gray-600">Bạn đã quan tâm thành công, hãy trao đổi với chủ nhà để chốt hợp đồng nhé</p>
+                            <div class="mt-4">
+                                <button onclick="closeSuccessModal()" class="px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600">
+                                    Đóng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Khung hiển thị hợp đồng -->

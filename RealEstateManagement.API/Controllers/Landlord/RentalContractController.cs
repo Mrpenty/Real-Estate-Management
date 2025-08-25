@@ -111,16 +111,9 @@ namespace RealEstateManagement.API.Controllers.Landlord
         [HttpPut("{rentalContractId}/terminate")]
         public async Task<IActionResult> TerminateContract(int rentalContractId)
         {
-            var statusDto = new RentalContractStatusDto
-            {
-                ContractId = rentalContractId,
-                Status = RentalContract.ContractStatus.Rejected
-            };
-
-            if (!Enum.IsDefined(typeof(RentalContract.ContractStatus), statusDto.Status))
-                return BadRequest("Invalid status.");
-
-            await _rentalContractService.UpdateStatusAsync(statusDto);
+            var result = await _rentalContractService.TerminateContractAsync(rentalContractId);
+            if (!result)
+                return NotFound(new { message = $"Rental contract with ID {rentalContractId} not found." });
             return NoContent();
         }
 

@@ -108,7 +108,7 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
                     && p.Posts.Any(post =>
                         post.Status == PropertyPost.PropertyPostStatus.Rented
                         && post.RentalContract != null
-                        && post.RentalContract.Status == RentalContract.ContractStatus.Confirmed))
+                        && post.RentalContract.Status == RentalContract.ContractStatus.Confirmed || post.RentalContract.Status == RentalContract.ContractStatus.RenewalPending || post.RentalContract.Status == RentalContract.ContractStatus.Terminated))
                 .ToListAsync();
         }
     }

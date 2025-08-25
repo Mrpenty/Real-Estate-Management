@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace RealEstateManagement.API.Controllers.Landlord
 {
-    [Authorize(Roles = "Landlord")]
+    [Authorize(Roles = "landlord, Landlord")]
     [ApiController]
     [Route("api/[controller]")]
     public class OwnerPropertyController : ControllerBase

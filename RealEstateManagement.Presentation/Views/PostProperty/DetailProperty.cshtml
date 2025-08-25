@@ -350,7 +350,7 @@
 
 
      function landlordConfirm(interestId, confirmed) {
-        if (!confirm(confirmed ? "Bạn có chắc muốn đồng ý thuê?" : "Bạn có chắc muốn từ chối?")) return;
+        if (!confirm(confirmed ? "Bạn có chắc muốn đồng ý cho thuê?" : "Bạn có chắc muốn từ chối?")) return;
 
             fetch(`https://localhost:7031/api/Property/InterestedProperty/${interestId}/confirm?isRenter=false&confirmed=${confirmed}`, {
                 method: 'POST',
@@ -363,7 +363,6 @@
         })
         .then(data => {
             alert(data.message);
-            loadPropertyDetail(itemPropertyBody.id); // reload lại danh sách
         })
         .catch(err => {
             console.error("Error confirming:", err);
