@@ -191,6 +191,11 @@
             color: #856404;
         }
 
+        .status-renter {
+            background-color: #fff3cd;
+            color: #0000ffad;
+        }
+
         .status-inactive {
             background-color: #f8d7da;
             color: #721c24;
@@ -494,6 +499,8 @@
             switch (status) {
                 case 'Approved':
                     return '<span class="status-badge status-active">Đã duyệt</span>';
+                case 'Rented':
+                    return '<span class="status-badge status-renter">Đã thuê</span>';
                 case 'Pending':
                     return '<span class="status-badge status-pending">Chờ duyệt</span>';
                 default:
@@ -542,13 +549,27 @@
         }
 
         // Service để xóa bài đăng
-        async function deleteProperty(id) {
+        async function deleteProperty(id,postStatus) {
+            if(postStatus == 'Rented'){
+                showCustomModal("Bài đăng đã có người thuê", false);
+                return;
+            }
             showCustomModal("Bạn có chắc chắn muốn xóa bài đăng này?", true, async () => {
                 try {
                     // Dữ liệu mock
                     // Nếu muốn test API thực, bỏ comment dòng dưới và sửa URL
                     // let response = await fetch(`${API_PROPERTY_BASE_URL_V2}/DeleteProperty?id=${id}`, { ... });
-                    const response = { ok: true, status: 200 }; // Mock response thành công
+                    //const response = { ok: true, status: 200 }; // Mock response thành công
+
+                   const token = localStorage.getItem('authToken');
+                   let response = await fetch(`${API_PROPERTY_BASE_URL_V2}/DeleteProperty?id=${id}`, {
+                       method: 'DELETE',
+                       headers: {
+                           'Authorization': `Bearer ${token}`,
+                           'Content-Type': 'application/json',
+                           'Accept': 'application/json'
+                       }
+                   });
 
                     if (response.ok) {
                         showCustomModal("Xóa bài đăng thành công!", false);
@@ -641,7 +662,7 @@
                                     class="btn-action btn-edit" title="Chỉnh sửa">
                                 <i class="fas fa-edit"></i> Sửa
                             </button>
-                            <button onclick="deleteProperty(${item.id})"
+                            <button onclick="deleteProperty(${item.id},'${postStatus}')"
                                     class="btn-action btn-delete" title="Xóa">
                                 <i class="fas fa-trash"></i> Xóa
                             </button>

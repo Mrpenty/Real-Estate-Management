@@ -31,28 +31,28 @@ const propertyRenterService = {
         }
     },
 
-    async deleteProperty(id){
-        try {
-            if (!confirm("Bạn có muốn xóa ?")) return;
-            const token = localStorage.getItem('authToken');
-            let response = await fetch(`${API_PROPERTY_BASE_URL_V2}/DeleteProperty?id=${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            });
+    //async deleteProperty(id){
+    //    try {
+    //        if (!confirm("Bạn có muốn xóa ?")) return;
+    //        const token = localStorage.getItem('authToken');
+    //        let response = await fetch(`${API_PROPERTY_BASE_URL_V2}/DeleteProperty?id=${id}`, {
+    //            method: 'DELETE',
+    //            headers: {
+    //                'Authorization': `Bearer ${token}`,
+    //                'Content-Type': 'application/json',
+    //                'Accept': 'application/json'
+    //            }
+    //        });
 
-            //let data = response.json();
-            //console.log(data);
-            alert("Xóa thành công");
-            window.location.reload();
-        } catch (error) {
-            console.error('Get property error:', error);
-            throw error;
-        }
-    }
+    //        //let data = response.json();
+    //        //console.log(data);
+    //        alert("Xóa thành công");
+    //        window.location.reload();
+    //    } catch (error) {
+    //        console.error('Get property error:', error);
+    //        throw error;
+    //    }
+    //}
 };
 
 // Export the service

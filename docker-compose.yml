@@ -1,0 +1,44 @@
+﻿services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: rem-db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+    ports:
+      - "1433:1433"            # dev cần kết nối SSMS; prod có thể bỏ
+    volumes:
+      - mssqldata:/var/opt/mssql
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: RealEstateManagement.API/Dockerfile
+    container_name: rem-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__MyCnn=Server=db,1433;Database=RentalDB;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+    depends_on: [db]
+    ports:
+      - "5000:8080"            # host:container
+    volumes:
+    - api_uploads:/app/wwwroot/uploads
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: RealEstateManagement.Presentation/Dockerfile
+    container_name: rem-web
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Api__BaseUrl=http://api:8080   # gọi qua service name 'api'
+    depends_on: [api]
+    ports:
+      - "5001:8080"
+    restart: unless-stopped
+
+volumes:
+  mssqldata:
+  api_uploads:

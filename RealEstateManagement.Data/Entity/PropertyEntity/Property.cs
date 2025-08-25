@@ -13,9 +13,12 @@ namespace RealEstateManagement.Data.Entity.PropertyEntity
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string Type { get; set; }
+        public int PropertyTypeId { get; set; }
         public decimal Area { get; set; }
         public int Bedrooms { get; set; }
+        public int Bathrooms { get; set; }
+
+        public int Floors { get; set; }
         public int LandlordId { get; set; }
         public string? Status { get; set; }
         public bool IsPromoted { get; set; }
@@ -27,6 +30,7 @@ namespace RealEstateManagement.Data.Entity.PropertyEntity
 
         public ApplicationUser Landlord { get; set; }
         public ICollection<PropertyImage> Images { get; set; }
+        public PropertyType PropertyType { get; set; }
         public ICollection<PropertyPost> Posts { get; set; }
         public ICollection<Review> Reviews { get; set; }
         public ICollection<Conversation> Conversations { get; set; }

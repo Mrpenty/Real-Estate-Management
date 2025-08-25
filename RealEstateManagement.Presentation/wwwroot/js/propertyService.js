@@ -1,4 +1,4 @@
-﻿API_PROPERTY_BASE_URL = 'https://localhost:7031/api/Property';
+﻿var API_PROPERTY_BASE_URL3 = 'https://localhost:7031/api/Property';
 var API_PROPERTY_BASE_URL2 = 'https://localhost:7031/api/OwnerProperty';
 
 const propertyService = {
@@ -40,11 +40,12 @@ const propertyService = {
             } else {
                 body = {};
             }
+            var pageNo = sessionStorage.getItem('pageNo') ?? 1;
 
             // Build query parameters - NO TYPE parameter, show all properties
             const queryParams = new URLSearchParams({
-                page: '1',
-                pageSize: '10',
+                page: Number(pageNo),
+                pageSize: 5,
                 provinces: provinces.join(','),
                 wards: wards.join(','),
                 streets: streets.join(','),
@@ -56,10 +57,10 @@ const propertyService = {
                 minRoom: body.minRoom ?? 0,
                 maxRoom: body.maxRoom ?? 15
             });
-
+            //console.log("====", queryParams);
             // Do NOT add type parameter - always show all types
 
-            let response = await fetch(`${API_PROPERTY_BASE_URL}/homepage-paginated?${queryParams.toString()}`, {
+            let response = await fetch(`${API_PROPERTY_BASE_URL3}/homepage-paginated?${queryParams.toString()}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -73,7 +74,10 @@ const propertyService = {
             if (!response.ok) {
                 throw new Error(data.message || data.errorMessage || 'Get property failed');
             }
-            console.log(data.data);
+            //console.log(data);
+            if (!data.hasNextPage) $('#simNext1').attr("disabled", true);
+            if (!data.hasPreviousPage) $('#simPrev1').attr("disabled", true);
+            $('#simInfoIndex1').html(data.page + " / " + data.totalPages);
             return data.data; // Trả về mảng data từ phản hồi
         } catch (error) {
             console.error('Get property error:', error);
@@ -90,7 +94,7 @@ const propertyService = {
                 userId = payload.id;
             }
 
-            const response = await fetch(`${API_PROPERTY_BASE_URL}/${id}?userId=${userId}`, {
+            const response = await fetch(`${API_PROPERTY_BASE_URL3}/${id}?userId=${userId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

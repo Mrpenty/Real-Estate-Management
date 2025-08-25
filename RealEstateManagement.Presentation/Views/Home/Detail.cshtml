@@ -203,16 +203,16 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
                         <div class="rating-input-section">
                             <label class="rating-label">Đánh giá của bạn:</label>
                             <div class="star-rating-input">
-                                <input type="radio" id="star5" name="rating" value="5" class="star-input">
-                                <label for="star5" class="star-label">★</label>
-                                <input type="radio" id="star4" name="rating" value="4" class="star-input">
-                                <label for="star4" class="star-label">★</label>
-                                <input type="radio" id="star3" name="rating" value="3" class="star-input">
-                                <label for="star3" class="star-label">★</label>
-                                <input type="radio" id="star2" name="rating" value="2" class="star-input">
-                                <label for="star2" class="star-label">★</label>
                                 <input type="radio" id="star1" name="rating" value="1" class="star-input">
                                 <label for="star1" class="star-label">★</label>
+                                <input type="radio" id="star2" name="rating" value="2" class="star-input">
+                                <label for="star2" class="star-label">★</label>
+                                <input type="radio" id="star3" name="rating" value="3" class="star-input">
+                                <label for="star3" class="star-label">★</label>
+                                <input type="radio" id="star4" name="rating" value="4" class="star-input">
+                                <label for="star4" class="star-label">★</label>
+                                <input type="radio" id="star5" name="rating" value="5" class="star-input">
+                                <label for="star5" class="star-label">★</label>
                             </div>
                         </div>
 
@@ -235,7 +235,7 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
                 <!-- Comments List -->
                 <div class="comments-section">
                     <div class="comments-header">
-                        <h3 class="comments-title">Tất cả đánh giá (<span id="totalCommentCount">0</span>)</h3>
+                        <h3 class="comments-title">Tất cả đánh giá (<span id="totalCommentCount1">0</span>)</h3>
                     </div>
 
                     <div id="commentsList" class="comments-list">
@@ -305,9 +305,13 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
                     <a href="tel:0369864430" id="contactPhone" class="contact-btn-vertical phone">
                         📞 <span class="contactPhone"></span>
                     </a>
-                    <a href="#" class="contact-btn-vertical zalo">
+                    <a href="javascript:void(0)"
+                       @* onclick="startChatWithLandlord(window.landlordId)" *@
+                       class="contact-btn zalo">
                         💬 Nhắn Zalo
                     </a>
+
+
                 </div>
 
                 <div class="action-buttons">
@@ -415,6 +419,19 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
     </div>
 </div>
 
+@* <script>
+    function getUserIdFromToken(token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const id = payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]
+                || payload["sub"]
+                || payload["nameid"];
+            return parseInt(id);
+        } catch {
+            return null;
+        }
+    }
+</script> *@
 
 <script>
     // Set the current property ID from ViewBag
@@ -435,6 +452,67 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
             console.log('Extracted ID from URL:', window.currentPropertyId);
         }
     }
+
+     
+    function getUserIdFromToken(token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const id = payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]
+                || payload["sub"] || payload["nameid"];
+            return Number(id);
+        } catch {
+            return NaN;
+        }
+    }
+
+    async function startChatWithLandlord(landlordIdRaw, propertyIdRaw) {
+        const token = localStorage.getItem("authToken");
+        if (!token) { window.location.href = "/Auth/Login"; return; }
+
+        // Ép kiểu/chốt dữ liệu chắc chắn là number
+        const renterId = getUserIdFromToken(token);
+        const landlordId = Number(landlordIdRaw);
+        const propertyIdNum = Number(propertyIdRaw);
+
+        if (!Number.isFinite(renterId)) { alert("Token không hợp lệ, vui lòng đăng nhập lại."); return; }
+        if (!Number.isFinite(landlordId)) { alert("Thiếu hoặc sai landlordId."); return; }
+
+        // Xây body: KHÔNG đưa propertyId nếu không có số hợp lệ
+        const dto = {
+            renterId: renterId,
+            landlordId: landlordId
+            // propertyId chỉ thêm khi hợp lệ
+        };
+        if (Number.isFinite(propertyIdNum) && propertyIdNum > 0) {
+            dto.propertyId = propertyIdNum;
+        }
+
+        try {
+            const res = await fetch("https://localhost:7031/api/Chat/Create-Conversation", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(dto) // JSON.stringify sẽ bỏ qua field undefined
+            });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                alert("Không thể mở cuộc trò chuyện: " + errText);
+                return;
+            }
+
+            const data = await res.json(); // { id: ... }
+            if (data && data.id) {
+                window.location.href = `/Chat/Index?conversationId=${data.id}`;
+            }
+        } catch (err) {
+            console.error("Lỗi khi mở chat:", err);
+            alert("Lỗi khi mở chat: " + err);
+        }
+    }
+
 
 </script>
 <script src="~/js/helper.js"></script>

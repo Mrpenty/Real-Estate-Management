@@ -86,10 +86,10 @@ document.addEventListener('click', function(event) {
 // Initialize search bar
 document.addEventListener('DOMContentLoaded', function() {
     // Set default location if available
-    const savedLocation = sessionStorage.getItem('selectedLocation');
-    if (savedLocation) {
-        document.getElementById('locationInput').value = savedLocation;
-    }
+    //const savedLocation = sessionStorage.getItem('selectedLocation');
+    //if (savedLocation) {
+    //    document.getElementById('locationInput').value = savedLocation;
+    //}
     
     // Add keyboard shortcuts
     document.getElementById('searchInput').addEventListener('keypress', function(e) {

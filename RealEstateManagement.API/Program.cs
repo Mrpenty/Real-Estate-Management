@@ -44,6 +44,11 @@ builder.Services.AddSingleton(new PayOS(
 builder.Services.AddElasticsearch(builder.Configuration);
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<RentalDbContext>();
+    db.Database.Migrate();   // áp dụng migrations -> tạo bảng
+}
 app.UseRouting();
 app.UseErrorHandlingMiddleware();
 
@@ -68,4 +73,5 @@ app.UseEndpoints(endpoints =>
 });
 app.MapControllers();
 app.UseSwaggerServices(app.Environment);
+app.MapGet("/", () => Results.Redirect("/swagger"));
 app.Run();

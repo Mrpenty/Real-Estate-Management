@@ -11,9 +11,11 @@ namespace RealEstateManagement.Business.DTO.PropertyOwnerDTO
         public int PostId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string Type { get; set; }
+        public int PropertyTypeId { get; set; }
         public decimal Area { get; set; }
         public int Bedrooms { get; set; }
+        public int Bathrooms { get; set; }
+        public int Floors { get; set; }
         public decimal Price { get; set; }
         public string Location { get; set; }
         public int ProvinceId { get; set; }
