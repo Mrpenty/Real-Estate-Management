@@ -32,6 +32,9 @@ using RealEstateManagement.Business.Repositories.Admin;
 using RealEstateManagement.Business.Repositories.AmenityRepo;
 using RealEstateManagement.Business.Repositories.PropertyTypeRepository;
 using RealEstateManagement.Business.Services.PropertyTypeService;
+using RealEstateManagement.Business.Validators.News;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 
 namespace RealEstateManagement.API.Extensions
 {
