@@ -23,7 +23,7 @@ namespace RealEstateManagement.API.Controllers
             var renterId = int.Parse(User.FindFirst("id").Value);
             // Không cần truyền ContractId, PropertyId từ client
             var (ok, msg) = await _reviewService.AddReviewAsync(dto.PropertyPostId, renterId, dto.ReviewText, dto.Rating);
-            if (!ok) return BadRequest(msg);
+            if (!ok) return Ok(msg);
             return Ok(msg);
         }
 
@@ -53,7 +53,7 @@ namespace RealEstateManagement.API.Controllers
         {
             var landlordId = int.Parse(User.FindFirst("id").Value);
             var (ok, msg) = await _reviewService.EditReplyAsync(dto.ReplyId, landlordId, dto.ReplyContent);
-            if (!ok) return BadRequest(msg);
+            if (!ok) return Ok(msg);
             return Ok(msg);
         }
         [HttpGet("post/{propertyPostId:int}")]
@@ -75,6 +75,15 @@ namespace RealEstateManagement.API.Controllers
         {
             var result = await _reviewService.GetPostRatingSummaryAsync(propertyPostId);
             return Ok(result);
+        }
+
+
+        [HttpGet("reply/report")]
+        [Authorize(Roles = "Landlord")]
+        public async Task<IActionResult> Report([FromQuery] int commentId)
+        {
+            var (ok, msg) = await _reviewService.Report(commentId);
+            return Ok(msg);
         }
     }
 }

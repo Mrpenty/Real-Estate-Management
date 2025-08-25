@@ -38,9 +38,10 @@ namespace RealEstateManagement.Presentation.Controllers
         {
             return View();
         }
-        public IActionResult Detail(int id)
+        public IActionResult Detail(int id,string type = "")
         {
             ViewBag.Id = id;
+            ViewBag.UserType = type;
             return View();
         }
         public IActionResult ListFavorite()

@@ -1,5 +1,5 @@
-﻿let locationData = null;
-const API_PROPERTY_LOCATION_BASE_URL = 'https://localhost:7031/api/Property';
+﻿var locationData = null;
+var API_PROPERTY_LOCATION_BASE_URL = 'https://localhost:7031/api/Property';
 const API_FAVORITE_BASE_URL = 'https://localhost:7031/api/Favorite';
 
 function roundToHalfStar(rating) {

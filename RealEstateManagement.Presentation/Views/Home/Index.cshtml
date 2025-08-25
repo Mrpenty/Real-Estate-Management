@@ -371,7 +371,7 @@
 <!-- Danh sách Tin mới đăng -->
 <h2 style="margin-top:2rem" class="text-lg font-semibold mb-2">Tin mới đăng</h2>
 <div id="listNew" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-<script src="~/js/propertyService.js" asp-append-version="true"></script>
+@* <script src="~/js/propertyService.js" asp-append-version="true"></script> *@
 <script>
     let urlBase = "https://localhost:7031";
     let pageNo = sessionStorage.getItem('pageNo') ?? 1;
@@ -484,6 +484,7 @@
             }
 
             listNewPost = await propertyService.getNewPost();
+            console.log('listNewPost',listNewPost);
             let htmlNew = '';
             listNewPost.forEach(item => {
                 const imageUrl = item.images && item.images.length > 0 && item.images[0] && item.images[0].imageUrl 

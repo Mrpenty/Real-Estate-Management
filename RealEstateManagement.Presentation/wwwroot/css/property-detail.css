@@ -1768,12 +1768,16 @@ textarea:focus {
         color: #374151;
     }
 
-.comment-reply {
+.comment-reply, .reply-form {
     margin-top: 12px;
     padding: 12px;
     background: #f9fafb;
     border-radius: 8px;
     border-left: 3px solid #f59e0b;
+}
+
+.d-none{
+    display:none;
 }
 
 .comment-reply-header {

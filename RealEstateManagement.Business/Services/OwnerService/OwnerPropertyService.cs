@@ -35,7 +35,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                     Id = entity.Id,
                     Title = entity.Title,
                     Description = entity.Description,
-                    Price = entity.Price,
+                    Price = entity.Price, 
                     IsPromoted = entity.IsPromoted,
                     IsVerified = entity.IsVerified,
                     Location = entity.Location,

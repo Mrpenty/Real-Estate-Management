@@ -1,4 +1,4 @@
-﻿API_PROPERTY_BASE_URL = 'https://localhost:7031/api/Property';
+﻿var API_PROPERTY_BASE_URL3 = 'https://localhost:7031/api/Property';
 var API_PROPERTY_BASE_URL2 = 'https://localhost:7031/api/OwnerProperty';
 
 const propertyService = {
@@ -60,7 +60,7 @@ const propertyService = {
             //console.log("====", queryParams);
             // Do NOT add type parameter - always show all types
 
-            let response = await fetch(`${API_PROPERTY_BASE_URL}/homepage-paginated?${queryParams.toString()}`, {
+            let response = await fetch(`${API_PROPERTY_BASE_URL3}/homepage-paginated?${queryParams.toString()}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -94,7 +94,7 @@ const propertyService = {
                 userId = payload.id;
             }
 
-            const response = await fetch(`${API_PROPERTY_BASE_URL}/${id}?userId=${userId}`, {
+            const response = await fetch(`${API_PROPERTY_BASE_URL3}/${id}?userId=${userId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

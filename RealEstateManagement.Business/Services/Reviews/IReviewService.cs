@@ -13,6 +13,7 @@ namespace RealEstateManagement.Business.Services.Reviews
         Task<(bool IsSuccess, string Message)> EditReviewAsync(int reviewId, int renterId, string newText);
         Task<(bool IsSuccess, string Message)> AddReplyAsync(int reviewId, int landlordId, string replyContent);
         Task<(bool IsSuccess, string Message)> EditReplyAsync(int replyId, int landlordId, string newContent);
+        Task<(bool IsSuccess, string Message)> Report(int commentId);
         Task<bool> DeleteReviewWhenReportResolvedAsync(int reviewId);
             
         Task<PagedResultDTO<ReviewItemDTO>> GetReviewsByPostAsync(int propertyPostId, int page = 1, int pageSize = 10, string sort = "-date");

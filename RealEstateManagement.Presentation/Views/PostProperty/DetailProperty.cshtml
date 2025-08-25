@@ -131,9 +131,9 @@
                         <div class="mt-1 flex rounded-md">
                             <input id="price" required name="price" type="number"
                                    class="flex-1 block w-full rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm" />
-                            <select class="rounded-none rounded-r-md border border-l-0 border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select disabled class="rounded-none rounded-r-md border border-l-0 border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option>đồng/tháng</option>
-                                <option>đồng/m<sup>2</sup>/tháng</option>
+                                @* <option>đồng/m<sup>2</sup>/tháng</option> *@
                             </select>
                         </div>
                     </div>
@@ -243,9 +243,14 @@
     <div id="contractActionContainer" class="ml-20 mr-20 mb-6">
     </div>
 
-    <div id="submitContainer" class="ml-20 mr-20 mb-20">
+    <div id="submitContainer" class="ml-20 mr-20 mb-2">
     </div>
-
+    <div id="returnToDetailHome" class="ml-20 mr-20 mb-4">
+        <a href="/Home/Detail/@ViewBag.Id?type=lardlord"
+           class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-full mb-6 transition inline-block text-center">
+            Thông tin chi tiết
+        </a>
+    </div>
 </form>
 
 <!-- Interest Popup -->
@@ -650,6 +655,20 @@
              detailedAddress: detailedAddress
          };
 
+         if(propertyData.price <= 0){
+             alert('Giá cho thuê phải lớn hơn 0');
+             return;
+         }
+
+         if(propertyData.area <= 0){
+             alert('Diện tích phải lớn hơn 0');
+             return;
+         }
+
+         if(propertyData.bedrooms <= 0){
+             alert('Số lượng phòng phải lớn hơn 0');
+             return;
+         }
 
          updateMap();
          // if(imageFiles.length == 0){

@@ -11,6 +11,7 @@ namespace RealEstateManagement.Business.DTO.Review
         public int Id { get; set; }
         public int LandlordId { get; set; }
         public string ReplyContent { get; set; }
+        public bool IsFlagged { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

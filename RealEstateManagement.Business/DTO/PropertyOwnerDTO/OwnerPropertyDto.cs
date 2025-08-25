@@ -11,6 +11,7 @@ namespace RealEstateManagement.Business.DTO.PropertyOwnerDTO
         public bool IsPromoted { get; set; }
         public bool IsVerified { get; set; }
         public string Location { get; set; }
+        public bool Status { get; set; }
         public int Bedrooms { get; set; }
         public decimal Area { get; set; }
 

@@ -29,11 +29,12 @@ class ReviewManager {
 
     setupStarRating() {
         const starLabels = document.querySelectorAll('.star-label');
-        const starInputs = document.querySelectorAll('.star-input');
+        //const starInputs = document.querySelectorAll('.star-input');
 
         starLabels.forEach((label, index) => {
             label.addEventListener('mouseenter', () => {
-                this.highlightStars(starLabels.length - index);
+                //console.log(starLabels.length,index);
+                this.highlightStars(index + 1);
             });
 
             label.addEventListener('mouseleave', () => {
@@ -41,7 +42,8 @@ class ReviewManager {
             });
 
             label.addEventListener('click', () => {
-                const rating = starLabels.length - index;
+                const rating = index + 1;
+                //const rating = starLabels.length - index;
                 this.selectRating(rating);
             });
         });
@@ -81,8 +83,9 @@ class ReviewManager {
 
     async handleCommentSubmit(e) {
         e.preventDefault();
-
+        //console.log('selectedRating', selectedRating);
         const rating = document.querySelector('input[name="rating"]:checked');
+        //const rating = selectedRating;
         const content = document.getElementById('commentContent').value.trim();
 
         if (!rating) {
@@ -97,14 +100,18 @@ class ReviewManager {
 
         try {
             const commentData = {
-                propertyId: window.currentPropertyId,
+                propertyPostId: window.currentPropertyId,
                 rating: parseInt(rating.value),
-                content: content
+                reviewText: content
             };
 
             const result = await addComment(commentData);
 
             if (result) {
+                if (result != 'Thành công') {
+                    this.showMessage(result, 'error');
+                    return;
+                }
                 // Reset form
                 document.getElementById('commentForm').reset();
                 this.resetStarHighlight();
@@ -209,7 +216,7 @@ class ReviewManager {
         const startIndex = (this.currentPage - 1) * this.pageSize;
         const endIndex = startIndex + this.pageSize;
         const pageComments = this.comments.slice(startIndex, endIndex);
-
+        //document.getElementById('totalCommentCount').innerHTML = this.pageComments.length;
         const commentsHTML = pageComments.map(comment => this.renderComment(comment)).join('');
         commentsList.innerHTML = commentsHTML;
 
@@ -217,12 +224,78 @@ class ReviewManager {
         this.updatePagination();
     }
 
+    createCommentHTML(name, text, stars, time) {
+        const starsDisplay = '★'.repeat(stars) + ' ☆'.repeat(5 - stars);
+        const comment = document.createElement('div');
+        comment.className = 'flex space-x-4 items-start';
+
+        comment.innerHTML = `
+            <img src="https://i.pravatar.cc/48?u=${Math.random()}" alt="avatar" class="w-12 h-12 rounded-full shadow-sm">
+            <div class="flex-1">
+              <div class="bg-gray-50 p-4 rounded-xl shadow-sm hover:shadow transition">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-semibold text-gray-800">${name}</span>
+                  <span class="text-sm text-gray-500">${time}</span>
+                </div>
+                <div class="flex mb-2">
+                  <span class="text-yellow-400">${starsDisplay}</span>
+                </div>
+                <p class="text-gray-700">${text}</p>
+                <button class="text-sm text-blue-500 mt-2 hover:underline replyBtn">Trả lời</button>
+                <button class="text-sm text-red-500 hover:underline report-btn">Báo cáo</button>
+                <div class="replies space-y-3 mt-3 pl-8 border-l border-gray-200"></div>
+              </div>
+            </div>
+          `;
+
+
+        const replyBtn = comment.querySelector('.replyBtn');
+        const repliesContainer = comment.querySelector('.replies');
+
+        replyBtn.addEventListener('click', () => {
+            if (comment.querySelector('.replyForm')) return;
+
+            const replyForm = document.createElement('form');
+            replyForm.className = 'replyForm mt-3';
+            replyForm.innerHTML = `
+              <textarea placeholder="Viết trả lời..."
+                class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                rows="2"></textarea>
+              <button type="submit"
+                class="mt-2 bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-1 rounded-lg">
+                Gửi trả lời
+              </button>
+            `;
+
+            replyForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const replyText = replyForm.querySelector('textarea').value.trim();
+                if (replyText) {
+                    const reply = document.createElement('div');
+                    reply.className = 'flex space-x-3 items-start';
+                    reply.innerHTML = `
+                  <img src="https://i.pravatar.cc/36?u=${Math.random()}" alt="avatar" class="w-9 h-9 rounded-full shadow-sm">
+                  <div class="bg-white p-3 rounded-lg shadow-sm flex-1">
+                    <div class="font-semibold text-sm">Người trả lời <span class="text-gray-500 text-xs">vừa xong</span></div>
+                    <p class="text-gray-700 text-sm">${replyText}</p>
+                  </div>
+                `;
+                    repliesContainer.appendChild(reply);
+                    replyForm.remove();
+                }
+            });
+
+            repliesContainer.appendChild(replyForm);
+        });
+
+        return comment;
+    }
+
     renderComment(comment) {
         // Validate comment data
         if (!comment || typeof comment !== 'object') {
             return '';
         }
-
         // Safe data extraction with fallbacks
         const rating = comment.rating || 0;
         const content = comment.content || 'Không có nội dung';
@@ -241,8 +314,11 @@ class ReviewManager {
         } catch (error) {
             console.warn('Error parsing comment date:', error);
         }
-
+        const params = new URLSearchParams(window.location.search);
         const stars = this.renderStars(rating);
+
+        let type = params.get('type');
+
 
         return `
             <div class="comment-item" data-comment-id="${commentId}">
@@ -265,15 +341,15 @@ class ReviewManager {
                 <div class="comment-content">
                     ${content}
                 </div>
-                <div class="comment-actions">
-                    <button class="comment-action-btn" onclick="reviewManager.likeComment('${commentId}')">
-                        👍 Thích
-                    </button>
+                <div class="comment-actions ${type != 'lardlord' ? 'd-none' : ''}">
                     <button class="comment-action-btn" onclick="reviewManager.replyToComment('${commentId}')">
-                        💬 Trả lời
+                        Trả lời
+                    </button>
+                    <button class="comment-action-btn" onclick="reviewManager.reportComment('${commentId}')">
+                        Báo cáo
                     </button>
                 </div>
-                ${comment.replies && Array.isArray(comment.replies) && comment.replies.length > 0 ? this.renderReplies(comment.replies) : ''}
+                ${comment.replies && Array.isArray(comment.replies) && comment.replies.length > 0 ? this.renderReplies(comment.replies, commentId) : ''}
             </div>
         `;
     }
@@ -290,7 +366,45 @@ class ReviewManager {
         return starsHTML;
     }
 
-    renderReplies(replies) {
+    async reportComment(commentId) {
+        if (!confirm("Bạn có muốn report ?")) return;
+        try {
+            let urlReply = `https://localhost:7031/api/Review/reply/report?commentId=${commentId}`;
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = '/Auth/Login';
+                return;
+            }
+            //let dto = {};
+            //dto['ReviewId'] = commentId;
+            //console.log(dto);
+            const response = await fetch(urlReply, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                //body: JSON.stringify(dto)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            alert(data);
+            if (data.includes('thành công')) {
+                window.location.reload();
+            }
+            return data;
+        } catch (error) {
+            console.error('Add comment error:', error);
+            throw error;
+        }
+    }
+
+    renderReplies(replies, commentId) {
         if (!Array.isArray(replies) || replies.length === 0) {
             return '';
         }
@@ -325,9 +439,17 @@ class ReviewManager {
                     </div>
                     <div class="comment-reply-content">${content}</div>
                 </div>
+                <div class="reply-form d-none" id="reply-${reply.id}">
+                    <form class="comment-reply-content" data-reply-for="${commentId}">
+                        <textarea class="reply-text comment-textarea" value="${content}" placeholder="Nhập phản hồi...">${content}</textarea>
+                        <div class="reply-actions">
+                            <button class="comment-action-btn" type="button" onclick="reviewManager.submitReply('${commentId}',${reply.id})">Gửi</button>
+                            <button class="comment-action-btn" type="button" onclick="reviewManager.cancelReply('${commentId}')">Hủy</button>
+                        </div>
+                    </form>
+                </div>
             `;
         }).join('');
-
         return repliesHTML;
     }
 
@@ -343,8 +465,10 @@ class ReviewManager {
 
     updateCommentCount() {
         const totalCommentCount = document.getElementById('totalCommentCount');
-        if (totalCommentCount) {
+        const totalCommentCount1 = document.getElementById('totalCommentCount1');
+        if (totalCommentCount && totalCommentCount1) {
             totalCommentCount.textContent = this.totalComments;
+            totalCommentCount1.textContent = this.totalComments;
         }
 
         // Also update the header comment count if it exists
@@ -393,8 +517,66 @@ class ReviewManager {
     }
 
     async replyToComment(commentId) {
-        // Implement reply functionality
-        console.log('Replying to comment:', commentId);
+        const actionsDivContent = document.querySelector(`.comment-item[data-comment-id="${commentId}"] .comment-reply`);
+        const actionsDiv = document.querySelector(`.comment-item[data-comment-id="${commentId}"] .reply-form`);
+        if (!actionsDiv) return;
+        actionsDivContent.classList.add('d-none');
+        actionsDiv.classList.remove('d-none');
+    }
+
+    async cancelReply(commentId) {
+        const actionsDivContent = document.querySelector(`.comment-item[data-comment-id="${commentId}"] .comment-reply`);
+        const actionsDiv = document.querySelector(`.comment-item[data-comment-id="${commentId}"] .reply-form`);
+        if (!actionsDiv) return;
+        actionsDiv.classList.add('d-none');
+        actionsDivContent.classList.remove('d-none');
+        $('.comment-textarea').val('');
+    }
+
+    async submitReply(commentId,replyId) {
+        try {
+            const textArea = document.querySelector(`.comment-item[data-comment-id="${commentId}"] .reply-form .comment-textarea`);
+            const actionsDiv = document.querySelector(`.comment-item[data-comment-id="${commentId}"] .reply-form`);
+            let urlReply = "https://localhost:7031/api/Review/reply";
+            if (replyId != 0) urlReply += '/edit';
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = '/Auth/Login';
+                return;
+            }
+            let dto = {};
+            //dto['ReplyContent'] = textArea.val();
+            if (replyId == 0) {
+                dto['ReviewId'] = commentId;      
+            }
+            else {
+                dto['ReplyId'] = actionsDiv.id.split('-')[1];  
+            }
+            dto['ReplyContent'] = textArea.value; 
+            const response = await fetch(urlReply, {
+                method: replyId == 0 ? 'POST' : 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(dto)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            alert(data);
+            if (data.includes('thành công')) {
+                window.location.reload();
+            }
+            return data;
+        } catch (error) {
+            console.error('Add comment error:', error);
+            throw error;
+        }
     }
 
     showMessage(message, type = 'info') {
@@ -427,6 +609,7 @@ async function addComment(dto) {
             window.location.href = '/Auth/Login';
             return;
         }
+        console.log(dto);
 
         const response = await fetch(`https://localhost:7031/api/Review/add`, {
             method: 'POST',
