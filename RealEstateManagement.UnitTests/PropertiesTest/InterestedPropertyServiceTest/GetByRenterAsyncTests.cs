@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using RealEstateManagement.Business.Repositories.Chat.Messages;
+using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Business.Services.Properties;
 using RealEstateManagement.Data.Entity.PropertyEntity;
@@ -11,41 +13,54 @@ using System.Threading.Tasks;
 namespace RealEstateManagement.UnitTests.PropertiesTest.InterestedPropertyServiceTest
 {
     [TestClass]
-    public class GetByRenterAsyncTests
+    public class GetById1AsyncTests
     {
-        private Mock<IInterestedPropertyRepository> _repoMock;
+        private Mock<IInterestedPropertyRepository> _interestedRepoMock;
+        private Mock<IPropertyPostRepository> _propertyPostRepoMock;
+        private Mock<IMessageRepository> _messageRepoMock;
+        private Mock<IRentalContractRepository> _contractRepoMock;
+
         private InterestedPropertyService _service;
 
         [TestInitialize]
         public void Setup()
         {
-            _repoMock = new Mock<IInterestedPropertyRepository>();
-            _service = new InterestedPropertyService(_repoMock.Object, null, null);
+            _interestedRepoMock = new Mock<IInterestedPropertyRepository>();
+            _propertyPostRepoMock = new Mock<IPropertyPostRepository>();
+            _messageRepoMock = new Mock<IMessageRepository>();
+            _contractRepoMock = new Mock<IRentalContractRepository>();
+
+            _service = new InterestedPropertyService(
+                _interestedRepoMock.Object,
+                _propertyPostRepoMock.Object,
+                _messageRepoMock.Object,
+                _contractRepoMock.Object
+            );
         }
 
         [TestMethod]
-        public async Task Returns_Empty_When_No_Data()
+        public async Task Returns_Null_When_NotFound()
         {
-            _repoMock.Setup(r => r.GetByRenterAsync(2)).ReturnsAsync(new List<InterestedProperty>());
+            _interestedRepoMock.Setup(r => r.GetByIdAsync(99))
+                               .ReturnsAsync((InterestedProperty)null);
 
-            var result = await _service.GetByRenterAsync(1);
+            var result = await _service.GetByIdAsync(99);
 
-            Assert.AreEqual(0, result.Count());
+            Assert.IsNull(result);
         }
 
         [TestMethod]
-        public async Task Returns_List_When_Data_Exists()
+        public async Task Returns_Entity_When_Found()
         {
-            var list = new List<InterestedProperty>
-            {
-                new InterestedProperty { Id = 1, RenterId = 1, PropertyId = 10, Status = InterestedStatus.WaitingForLandlordReply },
-                new InterestedProperty { Id = 2, RenterId = 1, PropertyId = 20, Status = InterestedStatus.WaitingForRenterReply }
-            };
-            _repoMock.Setup(r => r.GetByRenterAsync(1)).ReturnsAsync(list);
+            var ip = new InterestedProperty { Id = 5, RenterId = 1, PropertyId = 99 };
 
-            var result = await _service.GetByRenterAsync(1);
+            _interestedRepoMock.Setup(r => r.GetByIdAsync(5))
+                               .ReturnsAsync(ip);
 
-            Assert.AreEqual(2, result.Count());
+            var result = await _service.GetByIdAsync(5);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(99, result.PropertyId);
         }
     }
 }

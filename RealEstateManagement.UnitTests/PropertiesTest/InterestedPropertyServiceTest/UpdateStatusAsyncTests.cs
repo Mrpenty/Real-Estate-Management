@@ -1,12 +1,14 @@
-﻿using Moq;
-using RealEstateManagement.Business.Repositories.Properties;
-using RealEstateManagement.Business.Services.Properties;
-using RealEstateManagement.Data.Entity.User;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+
+using RealEstateManagement.Business.Services.Properties;
+using RealEstateManagement.Business.Repositories.Properties;
+using RealEstateManagement.Business.Repositories.Chat.Messages;       // chỉnh theo namespace thực tế của bạn
+using RealEstateManagement.Data.Entity.PropertyEntity;
+using RealEstateManagement.Business.Repositories.OwnerRepo;
+using RealEstateManagement.Data.Entity.User;              // InterestedProperty ở đây
 
 namespace RealEstateManagement.UnitTests.PropertiesTest.InterestedPropertyServiceTest
 {
@@ -14,20 +16,34 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.InterestedPropertyServic
     public class UpdateStatusAsyncTests
     {
         private Mock<IInterestedPropertyRepository> _repoMock;
+        private Mock<IPropertyPostRepository> _postRepoMock;
+        private Mock<IMessageRepository> _msgRepoMock;
+        private Mock<IRentalContractRepository> _contractRepoMock;
+
         private InterestedPropertyService _service;
 
         [TestInitialize]
         public void Setup()
         {
             _repoMock = new Mock<IInterestedPropertyRepository>();
-            _service = new InterestedPropertyService(_repoMock.Object, null, null);
+            _postRepoMock = new Mock<IPropertyPostRepository>();
+            _msgRepoMock = new Mock<IMessageRepository>();
+            _contractRepoMock = new Mock<IRentalContractRepository>();
+
+            _service = new InterestedPropertyService(
+                _repoMock.Object,
+                _postRepoMock.Object,
+                _msgRepoMock.Object,
+                _contractRepoMock.Object
+            );
         }
 
         [TestMethod]
         [ExpectedException(typeof(Exception))]
         public async Task Throws_When_NotFound()
         {
-            _repoMock.Setup(r => r.GetByIdAsync(2)).ReturnsAsync((InterestedProperty)null);
+            _repoMock.Setup(r => r.GetByIdAsync(2))
+                     .ReturnsAsync((InterestedProperty)null);
 
             await _service.UpdateStatusAsync(1, InterestedStatus.WaitingForRenterReply);
         }
@@ -52,7 +68,5 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.InterestedPropertyServic
 
             Assert.AreEqual(InterestedStatus.WaitingForLandlordReply, ip.Status);
         }
-
     }
-
 }

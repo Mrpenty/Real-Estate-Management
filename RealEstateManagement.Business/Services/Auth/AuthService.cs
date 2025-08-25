@@ -76,17 +76,17 @@ namespace RealEstateManagement.Business.Services.Auth
 
         public async Task<AuthMessDTO> RegisterAsync(RegisterDTO registerDTO)
         {
-            
-            var existingUser = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == registerDTO.PhoneNumber);
-            if (existingUser != null)
+            try
             {
-                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Phone number already registered." };
-            }
-            var existingEmail = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == registerDTO.Email);
-            if (existingEmail != null)
-            {
-                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Email already registered." };
-            }
+                var existingUser = await _userManager.Users
+                    .FirstOrDefaultAsync(u => u.PhoneNumber == registerDTO.PhoneNumber);
+                if (existingUser != null)
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Phone number already registered." };
+
+                var existingEmail = await _userManager.Users
+                    .FirstOrDefaultAsync(u => u.Email == registerDTO.Email);
+                if (existingEmail != null)
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Email already registered." };
 
                 var user = new ApplicationUser
                 {
@@ -94,20 +94,16 @@ namespace RealEstateManagement.Business.Services.Auth
                     UserName = registerDTO.Name,
                     PhoneNumber = registerDTO.PhoneNumber,
                     NormalizedUserName = _userManager.NormalizeName(registerDTO.PhoneNumber),
-                    NormalizedEmail = null, 
+                    NormalizedEmail = null, // hoặc _userManager.NormalizeEmail(registerDTO.Email)
                     SecurityStamp = Guid.NewGuid().ToString(),
-                    IsVerified = false 
+                    IsVerified = false
                 };
 
                 var createdUser = await _userManager.CreateAsync(user, registerDTO.Password);
-
                 if (!createdUser.Succeeded)
-                {
                     return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = string.Join(", ", createdUser.Errors.Select(e => e.Description)) };
-                }
 
                 var roleResult = await _userManager.AddToRoleAsync(user, "Renter");
-
                 if (!roleResult.Succeeded)
                 {
                     await _userManager.DeleteAsync(user);
@@ -117,12 +113,13 @@ namespace RealEstateManagement.Business.Services.Auth
                 // Tạo ví cho user mới
                 await _walletService.CreateWalletAsync(user.Id);
 
+                // Tạo và lưu OTP
                 var confirmationCode = _tokenRepository.GenerateConfirmationCode();
                 user.ConfirmationCode = confirmationCode;
-                user.ConfirmationCodeExpiry = DateTime.Now.AddMinutes(5); 
+                user.ConfirmationCodeExpiry = DateTime.UtcNow.AddMinutes(5);
                 await _userManager.UpdateAsync(user);
 
-                // Wrap SMS sending in try-catch to prevent registration failure
+                // Gửi SMS OTP (không làm fail đăng ký nếu SMS lỗi)
                 try
                 {
                     await _smsService.SendOtpAsync(user.PhoneNumber, confirmationCode);
@@ -130,10 +127,13 @@ namespace RealEstateManagement.Business.Services.Auth
                 catch (Exception smsEx)
                 {
                     _logger.LogWarning(smsEx, "Failed to send OTP via SMS for user {UserId}, but registration continues", user.Id);
-                    // Continue with registration even if SMS fails
                 }
 
-                return new AuthMessDTO { IsAuthSuccessful = true, ErrorMessage = "Registration successful. An OTP has been sent to your phone for verification." };
+                return new AuthMessDTO
+                {
+                    IsAuthSuccessful = true,
+                    ErrorMessage = "Registration successful. An OTP has been sent to your phone for verification."
+                };
             }
             catch (Exception ex)
             {
@@ -141,6 +141,7 @@ namespace RealEstateManagement.Business.Services.Auth
                 return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Registration failed due to a server error. Please try again." };
             }
         }
+
 
         public async Task LogoutAsync()
         {

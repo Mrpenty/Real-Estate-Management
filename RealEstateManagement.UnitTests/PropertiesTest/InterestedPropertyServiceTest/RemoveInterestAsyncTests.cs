@@ -1,12 +1,13 @@
-﻿using Moq;
-using RealEstateManagement.Business.Repositories.Properties;
-using RealEstateManagement.Business.Services.Properties;
-using RealEstateManagement.Data.Entity.User;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System.Threading.Tasks;
+
+using RealEstateManagement.Business.Services.Properties;
+using RealEstateManagement.Business.Repositories.Properties;
+using RealEstateManagement.Business.Repositories.Chat.Messages;       // chỉnh theo namespace thực tế
+using RealEstateManagement.Data.Entity.PropertyEntity;
+using RealEstateManagement.Business.Repositories.OwnerRepo;
+using RealEstateManagement.Data.Entity.User;              // InterestedProperty ở đây
 
 namespace RealEstateManagement.UnitTests.PropertiesTest.InterestedPropertyServiceTest
 {
@@ -14,30 +15,48 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.InterestedPropertyServic
     public class RemoveInterestAsyncTests
     {
         private Mock<IInterestedPropertyRepository> _repoMock;
+        private Mock<IPropertyPostRepository> _postRepoMock;
+        private Mock<IMessageRepository> _msgRepoMock;
+        private Mock<IRentalContractRepository> _contractRepoMock;
+
         private InterestedPropertyService _service;
 
         [TestInitialize]
         public void Setup()
         {
             _repoMock = new Mock<IInterestedPropertyRepository>();
-            _service = new InterestedPropertyService(_repoMock.Object, null, null);
+            _postRepoMock = new Mock<IPropertyPostRepository>();
+            _msgRepoMock = new Mock<IMessageRepository>();
+            _contractRepoMock = new Mock<IRentalContractRepository>();
+
+            _service = new InterestedPropertyService(
+                _repoMock.Object,
+                _postRepoMock.Object,
+                _msgRepoMock.Object,
+                _contractRepoMock.Object
+            );
         }
 
         [TestMethod]
         public async Task Returns_False_When_NotFound()
         {
-            _repoMock.Setup(r => r.GetByRenterAndPropertyAsync(1, 2)).ReturnsAsync((InterestedProperty)null);
+            // cố tình trả null để RemoveInterestAsync(1,1) trả false
+            _repoMock.Setup(r => r.GetByRenterAndPropertyAsync(1, 1))
+                     .ReturnsAsync((InterestedProperty)null);
 
             var result = await _service.RemoveInterestAsync(1, 1);
 
             Assert.IsFalse(result);
+            _repoMock.Verify(r => r.DeleteAsync(It.IsAny<InterestedProperty>()), Times.Never);
         }
 
         [TestMethod]
         public async Task Deletes_When_Exists()
         {
             var ip = new InterestedProperty { Id = 1, RenterId = 1, PropertyId = 1 };
-            _repoMock.Setup(r => r.GetByRenterAndPropertyAsync(1, 1)).ReturnsAsync(ip);
+
+            _repoMock.Setup(r => r.GetByRenterAndPropertyAsync(1, 1))
+                     .ReturnsAsync(ip);
 
             var result = await _service.RemoveInterestAsync(1, 1);
 
@@ -45,5 +64,4 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.InterestedPropertyServic
             _repoMock.Verify(r => r.DeleteAsync(ip), Times.Once);
         }
     }
-
 }
