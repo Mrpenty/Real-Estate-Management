@@ -1,4 +1,5 @@
 ﻿using RealEstateManagement.Data.Entity.PropertyEntity;
+using RealEstateManagement.Data.Entity.ReportEntity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,12 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         Task<PropertyPost> GetPropertyPostByIdAsync(int id, int landlordId);
 
         Task UpdatePropertyAmenities(int propertyId, List<int> amenityIds);
+        Task<PropertyPost?> GetPostWithPropertyAsync(int propertyPostId);
+        Task<List<Report>> GetReportsForPostAsync(int propertyPostId);
+        Task<int> SaveChangesAsync();
+        Task<PropertyPost?> GetPostDetailForAdminAsync(int postId);
+        Task<int> CountByStatusAsync(PropertyPost.PropertyPostStatus? status);
+        Task<List<PropertyPost>> GetPostsByStatusAsync(PropertyPost.PropertyPostStatus? status, int page, int pageSize);
     }
 
 }

@@ -9,6 +9,7 @@ using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.AddressEnity;
 using RealEstateManagement.Data.Entity.PropertyEntity;
+using RealEstateManagement.Data.Entity.Reviews;
 using RealEstateManagement.Data.Entity.User;
 using System;
 using System.Collections.Generic;
@@ -71,7 +72,7 @@ namespace RealEstateManagement.Business.Services.Properties
                         LandlordName = p.Landlord?.Name,
                         LandlordPhoneNumber = p.Landlord?.PhoneNumber,
                         LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
-                        PropertyPostId = p.Posts.FirstOrDefault(post => post.Status == PropertyPost.PropertyPostStatus.Approved)?.Id ?? 0,
+                        PropertyPostId = p.Posts?.FirstOrDefault(post => post.Status == PropertyPost.PropertyPostStatus.Approved)?.Id ?? 0,
                         Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
                         PromotionPackageName = p.PropertyPromotions?
                                                 .OrderByDescending(pp => pp.PromotionPackage.Level)
@@ -88,60 +89,88 @@ namespace RealEstateManagement.Business.Services.Properties
 
         }
 
-        public async Task<PaginatedResponseDTO<HomePropertyDTO>> GetPaginatedPropertiesAsync(int page = 1, int pageSize = 10, 
-                int? userId = 0, string type = "", string provinces = "", string wards = "", string streets = "",
-                int minPrice = 0, int maxPrice = 100,
-                int minArea = 0, int maxArea = 100, int minRoom = 0,  int maxRoom = 15)
+        public async Task<PaginatedResponseDTO<HomePropertyDTO>> GetPaginatedPropertiesAsync(
+            int page = 1, int pageSize = 10,
+            int? userId = 0, string type = "", string provinces = "", string wards = "", string streets = "",
+            int minPrice = 0, int maxPrice = 100,
+            int minArea = 0, int maxArea = 100, int minRoom = 0, int maxRoom = 15)
         {
-            var properties = await _repository.GetAllAsync();
-            var interestedProp = await _context.InterestedProperties.Where(c => c.RenterId == userId).ToListAsync();
-            var favoriteUsers = await _context.UserFavoriteProperties.Where(c => c.UserId == userId).ToListAsync();
+            // Lấy danh sách properties
+            var properties = (await _repository.GetAllAsync()).AsQueryable();
+            if (!properties.Any())
+            {
+                return new PaginatedResponseDTO<HomePropertyDTO>
+                {
+                    Data = new List<HomePropertyDTO>(),
+                    TotalCount = 0,
+                    Page = page,
+                    PageSize = pageSize,
+                    TotalPages = 0,
+                    HasNextPage = false,
+                    HasPreviousPage = false
+                };
+            }
+            var interestedProp = await _context.InterestedProperties
+                .Where(c => c.RenterId == userId)
+                .ToListAsync();
+
+            var favoriteUsers = await _context.UserFavoriteProperties
+                .Where(c => c.UserId == userId)
+                .ToListAsync();
 
             var result = new List<HomePropertyDTO>();
 
-            // Apply type filter only if type is specified and not empty
-            if (!string.IsNullOrEmpty(type) && type.Trim() != "")
+            // Apply filters
+            if (!string.IsNullOrWhiteSpace(type))
             {
-                properties = properties.Where(p => p.Type.ToLower() == type.ToLower());
+                properties = properties.Where(p => p.Type != null &&
+                                                   p.Type.ToLower() == type.ToLower());
             }
 
-            // Apply other filters
             if (!string.IsNullOrEmpty(provinces))
             {
-                var Provinces = provinces.Split(',').Select(c => int.Parse(c)).ToList();
-                properties = properties.Where(p => Provinces.Contains(p.Address.Province.Id));
+                var Provinces = provinces.Split(',').Select(int.Parse).ToList();
+                properties = properties.Where(p => p.Address != null &&
+                                                   p.Address.Province != null &&
+                                                   Provinces.Contains(p.Address.Province.Id));
             }
 
             if (!string.IsNullOrEmpty(wards))
             {
-                var Wards = wards.Split(',').Select(c => int.Parse(c)).ToList();
-                properties = properties.Where(p => Wards.Contains(p.Address.Ward.Id));
+                var Wards = wards.Split(',').Select(int.Parse).ToList();
+                properties = properties.Where(p => p.Address != null &&
+                                                   p.Address.Ward != null &&
+                                                   Wards.Contains(p.Address.Ward.Id));
             }
 
             if (!string.IsNullOrEmpty(streets))
             {
-                var Streets = streets.Split(',').Select(c => int.Parse(c)).ToList();
-                properties = properties.Where(p => Streets.Contains(p.Address.Street.Id));
+                var Streets = streets.Split(',').Select(int.Parse).ToList();
+                properties = properties.Where(p => p.Address != null &&
+                                                   p.Address.Street != null &&
+                                                   Streets.Contains(p.Address.Street.Id));
             }
 
             var now = DateTime.UtcNow;
+
             foreach (var p in properties)
             {
                 try
                 {
-                    var ratingNo = p.Reviews.Where(c => !c.IsFlagged && c.IsVisible).Count();
-                    var ratingSum = p.Reviews.Where(c => !c.IsFlagged && c.IsVisible).Sum(c => c.Rating);
+                    var ratingNo = p.Reviews?.Where(c => !c.IsFlagged && c.IsVisible).Count() ?? 0;
+                    var ratingSum = p.Reviews?.Where(c => !c.IsFlagged && c.IsVisible).Sum(c => c.Rating) ?? 0;
                     var rating = ratingNo > 0 ? ratingSum / ratingNo : 0;
+
                     var interested = interestedProp.FirstOrDefault(c => c.PropertyId == p.Id);
 
-                    //quy doi ra gio (sau 1h => 2h)
+                    // Quy đổi giờ cho reminder
                     var startTime = 1;
                     var endTime = 2;
 
                     var isReminderRenterConfirmInterested = interested?.Status == InterestedStatus.WaitingForRenterReply
                         && now.Subtract(interested.InterestedAt).TotalHours >= startTime
-                        && now.Subtract(interested.InterestedAt).TotalHours <= endTime ? 1 
-                        : interested?.Status == InterestedStatus.WaitingForRenterReply 
+                        && now.Subtract(interested.InterestedAt).TotalHours <= endTime ? 1
+                        : interested?.Status == InterestedStatus.WaitingForRenterReply
                         && now.Subtract(interested.InterestedAt).TotalHours > endTime ? 2 : 0;
 
                     result.Add(new HomePropertyDTO
@@ -177,11 +206,14 @@ namespace RealEstateManagement.Business.Services.Properties
                         RatingNo = ratingNo,
                         LandlordPhoneNumber = p.Landlord?.PhoneNumber,
                         LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
-                        Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                        Amenities = p.PropertyAmenities?
+                                      .Where(pa => pa.Amenity != null)
+                                      .Select(pa => pa.Amenity.Name)
+                                      .ToList() ?? new List<string>(),
                         PromotionPackageName = p.PropertyPromotions?
-                                                .OrderByDescending(pp => pp.PromotionPackage.Level)
-                                                .Select(pp => pp.PromotionPackage.Name)
-                                                .FirstOrDefault()
+                                                  .OrderByDescending(pp => pp.PromotionPackage.Level)
+                                                  .Select(pp => pp.PromotionPackage.Name)
+                                                  .FirstOrDefault()
                     });
                 }
                 catch (Exception ex)
@@ -191,11 +223,9 @@ namespace RealEstateManagement.Business.Services.Properties
             }
 
             var totalCount = result.Count;
-            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
-            
-            // Đảm bảo page không vượt quá totalPages
+            var totalPages = Math.Max(1, (int)Math.Ceiling((double)totalCount / pageSize));
             page = Math.Max(1, Math.Min(page, totalPages));
-            
+
             var pagedData = result
                 .OrderByDescending(p => p.CreatedAt)
                 .Skip((page - 1) * pageSize)
@@ -213,21 +243,20 @@ namespace RealEstateManagement.Business.Services.Properties
                 HasPreviousPage = page > 1
             };
         }
-        public async Task<PropertyDetailDTO> GetPropertyByIdAsync(int id,int userId = 0)
+
+        public async Task<PropertyDetailDTO> GetPropertyByIdAsync(int id, int userId = 0)
         {
             var p = await _repository.GetPropertyByIdAsync(id);
-            var rentalContract = p.Posts
-                .FirstOrDefault(pp => pp.RentalContract != null)?.RentalContract;
-            if (p == null)
-            {
-                throw new KeyNotFoundException($"Property with ID = {id} not found.");
-            }
+            if (p == null) return null;
 
+            var rentalContract = p.Posts?.FirstOrDefault(pp => pp.RentalContract != null)?.RentalContract;
             var isFavorite = await _repositoryFavorite.GetFavoritePropertyByIdAsync(userId, id);
 
-            var ratingNo = p.Reviews.Where(c => !c.IsFlagged && c.IsVisible).Count();
-            var ratingSum = p.Reviews.Where(c => !c.IsFlagged && c.IsVisible).Sum(c => c.Rating);
+            var reviews = p.Reviews ?? new List<Review>();
+            var ratingNo = reviews.Count(c => !c.IsFlagged && c.IsVisible);
+            var ratingSum = reviews.Where(c => !c.IsFlagged && c.IsVisible).Sum(c => c.Rating);
             var rating = ratingNo > 0 ? ratingSum / ratingNo : 0;
+
             return new PropertyDetailDTO
             {
                 Id = p.Id,
@@ -242,20 +271,21 @@ namespace RealEstateManagement.Business.Services.Properties
                 Location = p.Location,
                 CreatedAt = p.CreatedAt,
                 ViewsCount = p.ViewsCount,
-                IsFavorite = isFavorite == null ? false : true,
+                IsFavorite = isFavorite != null,
                 PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
-                ImageUrls = p.Images?.Select(c => c.Url).ToList(),
+                ImageUrls = p.Images?.Select(c => c.Url).ToList() ?? new List<string>(),
                 LandlordId = p.LandlordId,
                 LandlordName = p.Landlord?.Name,
                 LandlordPhoneNumber = p.Landlord?.PhoneNumber,
                 LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
-                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity?.Name).ToList() ?? new List<string>(),
                 PromotionPackageName = p.PropertyPromotions?
-                                        .OrderByDescending(pp => pp.PromotionPackage.Level)
-                                        .Select(pp => pp.PromotionPackage.Name)
-                                        .FirstOrDefault(),
+                    .Where(pp => pp.PromotionPackage != null)
+                    .OrderByDescending(pp => pp.PromotionPackage.Level)
+                    .Select(pp => pp.PromotionPackage.Name)
+                    .FirstOrDefault(),
 
-                // Mapping thêm thông tin hợp đồng
+                // Contract
                 ContractDeposit = rentalContract?.DepositAmount,
                 ContractMonthlyRent = rentalContract?.MonthlyRent,
                 ContractDurationMonths = rentalContract?.ContractDurationMonths,
@@ -264,19 +294,22 @@ namespace RealEstateManagement.Business.Services.Properties
                 ContractStatus = rentalContract?.Status.ToString(),
                 ContractPaymentMethod = rentalContract?.PaymentMethod,
                 ContractContactInfo = rentalContract?.ContactInfo,
-                Street = p.Address.Street.Name,
-                Province = p.Address.Province.Name,
-                Ward = p.Address.Ward.Name,
-                DetailedAddress = p.Address.DetailedAddress,
-                StreetId = p.Address.StreetId,
-                ProvinceId = p.Address.ProvinceId,
-                WardId = p.Address.WardId,
+
+                // Address
+                Street = p.Address?.Street?.Name,
+                Province = p.Address?.Province?.Name,
+                Ward = p.Address?.Ward?.Name,
+                DetailedAddress = p.Address?.DetailedAddress,
+                StreetId = p.Address?.StreetId ?? 0,
+                ProvinceId = p.Address?.ProvinceId ?? 0,
+                WardId = p.Address?.WardId ?? 0,
+
                 Rating = rating,
                 CommentNo = ratingNo,
                 RatingNo = ratingNo
-
             };
         }
+
         public async Task<IEnumerable<HomePropertyDTO>> FilterByPriceAsync([FromQuery] decimal? minPrice, [FromQuery] decimal? maxPrice)
         {
             var p = await _repository.FilterByPriceAsync(minPrice, maxPrice);
@@ -357,15 +390,17 @@ namespace RealEstateManagement.Business.Services.Properties
                 LandlordPhoneNumber = p.Landlord?.PhoneNumber,
                 LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
                 LandlordCreatedAt = p.Landlord?.CreatedAt ?? DateTime.MinValue,
-                Amenities = p.PropertyAmenities.Select(pa => pa.Amenity.Name).ToList(),
-                ImageUrls = p.Images.Select(i => i.Url).ToList()
+                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                ImageUrls = p.Images.Select(i => i.Url).ToList() ?? new List<string>(),
             }).ToList();
         }
 
         public async Task<IEnumerable<HomePropertyDTO>> FilterAdvancedAsync(PropertyFilterDTO filter)
         {
             var properties = await _repository.FilterAdvancedAsync(filter);
-            var favoriteUsers = await _repositoryFavorite.AllFavoritePropertyAsync(filter.UserId);
+            var favoriteUsers = await _repositoryFavorite.AllFavoritePropertyAsync(filter.UserId) ?? Enumerable.Empty<Property>();
+
+            //var favoriteUsers = await _repositoryFavorite.AllFavoritePropertyAsync(filter.UserId);
             return properties.Select(p => new HomePropertyDTO
             {
                 Id = p.Id,
@@ -444,12 +479,12 @@ namespace RealEstateManagement.Business.Services.Properties
                 AddressId = p.AddressId,
                 Location = p.Location,
                 PrimaryImageUrl = p.Images.FirstOrDefault(i => i.IsPrimary)?.Url,
-                Amenities = p.PropertyAmenities.Select(pa => pa.Amenity.Name).ToList(),
-                LandlordName = p.Landlord.Name,
-                LandlordPhoneNumber = p.Landlord.PhoneNumber,
-                LandlordProfilePictureUrl = p.Landlord.ProfilePictureUrl,
-                AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : null,
-                TotalReviews = p.Reviews.Count,
+                Amenities = p.PropertyAmenities.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                LandlordName = p.Landlord?.Name,
+                LandlordPhoneNumber = p.Landlord?.PhoneNumber,
+                LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
+                AverageRating = (p.Reviews?.Any() ?? false) ? p.Reviews!.Average(r => r.Rating) : (double?)null,
+                TotalReviews = p.Reviews?.Count ?? 0,
                 // Cái nào tốt nhất thì hiện là TRUE
                 IsBestPrice = p.Price == bestPrice,
                 IsBestArea = p.Area == bestArea,
@@ -528,7 +563,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 LandlordName = p.Landlord?.Name,
                 LandlordPhoneNumber = p.Landlord?.PhoneNumber,
                 LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
-                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>() ?? new List<string>(),
                 PromotionPackageName = p.PropertyPromotions?
                     .OrderByDescending(pp => pp.PromotionPackage.Level)
                     .Select(pp => pp.PromotionPackage.Name)

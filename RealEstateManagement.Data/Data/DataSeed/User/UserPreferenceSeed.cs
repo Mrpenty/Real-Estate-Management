@@ -43,9 +43,9 @@ namespace RealEstateManagement.Data.Data.DataSeed.User
 
             // Seed UserPreferenceFavoriteProperties
             modelBuilder.Entity<UserFavoriteProperty>().HasData(
-                new { UserId = 1, PropertyId = 1 }, // Renter favors District 1 apartment
-                new { UserId = 1, PropertyId = 2 }, // Renter favors Go Vap room
-                new { UserId = 3, PropertyId = 3 }  // Renter 2 favors Tan Binh house
+                new { UserId = 1, PropertyId = 1, CreatedAt = DateTime.UtcNow }, // Renter favors District 1 apartment
+                new { UserId = 1, PropertyId = 2, CreatedAt = DateTime.UtcNow }, // Renter favors Go Vap room
+                new { UserId = 3, PropertyId = 3, CreatedAt = DateTime.UtcNow }  // Renter 2 favors Tan Binh house
             );
         }
     }

@@ -30,7 +30,8 @@ namespace RealEstateManagement.Business.Services.Favorite
         }
         public async Task<IEnumerable<HomePropertyDTO>> AllFavoritePropertyAsync(int userId)
         {
-            var properties = await _repository.AllFavoritePropertyAsync(userId);
+            var properties = (await _repository.AllFavoritePropertyAsync(userId))
+                             ?? Enumerable.Empty<Property>();
             return properties.Select(p => new HomePropertyDTO
             {
                 Id = p.Id,
