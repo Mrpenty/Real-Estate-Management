@@ -4,6 +4,7 @@
 }
 
 <link rel="stylesheet" href="~/css/search.css">
+<link rel="stylesheet" href="~/css/HomePage.css">
 
 <style>
     .filter-group {
@@ -494,8 +495,20 @@
 
             // Create property card
             function createPropertyCard(property) {
+                const token = localStorage.getItem("authToken");
+                let isOwner = false;
+                if (token) {
+                    const userId = getUserIdFromToken(token);
+                    if (userId && property.landlordId && userId === property.landlordId) {
+                        isOwner = true;
+                    }
+                }
+                const detailUrl = isOwner
+                    ? `/PostProperty/DetailProperty/${property.id}`
+                    : `/Home/Detail/${property.id}`;
+
                 const imageUrl = getPropertyImageUrl(property);
-                const price = property.price ? `${formatVietnameseNumber(property.price)}/tháng` : 'Thỏa thuận';
+                const price = property.price ? `${formatVietnameseNumber(property.price)}` : 'Thỏa thuận';
                 const area = property.area ? `${property.area}m²` : 'N/A';
                 const bedrooms = property.bedrooms || 'N/A';
                 const address = property.detailedAddress || property.address || 'Không có địa chỉ';
@@ -504,45 +517,152 @@
                 const province = property.province || '';
                 const fullAddress = [address, street, ward, province].filter(Boolean).join(', ');
 
+                // Calculate time ago
+                const timeAgoText = timeAgo(property.createdAt);
+                
+                // Count images
+                const imageCount = property.imageUrls && Array.isArray(property.imageUrls) ? property.imageUrls.length : 0;
+
                 return `
-                    <div class="property-card">
-                        <div class="property-image">
-                            <img src="${imageUrl}" alt="${property.title || 'Bất động sản'}"
-                                 onerror="handleImageError(this)"
-                                 loading="lazy">
-                            <div class="property-badge">${property.type || 'BDS'}</div>
-                            <div class="property-price">${price}</div>
-                        </div>
-                        <div class="property-content">
-                            <h3 class="property-title" onclick="viewProperty(${property.id})" style="cursor: pointer;">
-                                ${property.title || 'Không có tiêu đề'}
-                            </h3>
-                            <div class="property-location">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <div id="card-property-${property.id}" class="property-card" data-id="${property.id}">
+                        <div class="property-image-container">
+                            <img
+                                onerror="handleImageError(this)"
+                                src="${imageUrl}"
+                                alt="${property.type || 'Bất động sản'}"
+                                class="property-image"
+                                loading="lazy"
+                            >
+                            <div class="property-overlay"></div>
+                            
+                            <!-- Time Badge -->
+                            <div class="image-badge time-badge">
+                                ${timeAgoText}
+                            </div>
+                            
+                            <!-- Photo Count Badge -->
+                            <div class="image-badge photo-badge">
+                                ${imageCount}
+                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
                                 </svg>
-                                <span>${fullAddress}</span>
                             </div>
-                            <div class="property-details">
-                                <div class="property-detail">
-                                    <div class="property-detail-value">${area}</div>
-                                    <div class="property-detail-label">Diện tích</div>
+                            
+                            <!-- Promotion Badge -->
+                            ${property.promotionPackageName ? `
+                            <div class="promotion-badge">
+                                <i class="fas fa-star"></i>
+                                ${property.promotionPackageName}
+                            </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Property Content -->
+                        <div class="property-content">
+                            <div class="property-header">
+                                <div class="property-status-indicator"></div>
+                                <h3
+                                    onclick="window.location.href='${detailUrl}'"
+                                    class="property-title"
+                                    title="${property.title || 'Không có tiêu đề'}"
+                                >
+                                    ${property.title || 'Không có tiêu đề'}
+                                </h3>
+                            </div>
+                            
+                            <div class="property-price">
+                                <span>${price}</span>
+                                <span class="price-negotiable">TL</span>
+                            </div>
+                            
+                            <div class="property-features">
+                                <div class="feature-line">
+                                    <span class="feature-item">${bedrooms} PN</span>
+                                    <span class="feature-separator">•</span>
+                                    <span class="feature-item">Hướng Bắc</span>
+                                    <span class="feature-separator">•</span>
+                                    <span class="feature-item">Nhà ngõ, hẻm</span>
                                 </div>
-                                <div class="property-detail">
-                                    <div class="property-detail-value">${bedrooms}</div>
-                                    <div class="property-detail-label">Số phòng</div>
-                                </div>
-                                <div class="property-detail">
-                                    <div class="property-detail-value">${timeAgo(property.createdAt)}</div>
-                                    <div class="property-detail-label">Đăng lúc</div>
+                                <div class="feature-line">
+                                    <span class="feature-item">${property.price && property.area ? Math.round(property.price / property.area / 1000000) : 'N/A'} tr/m²</span>
+                                    <span class="feature-separator">•</span>
+                                    <span class="feature-item">${area}</span>
                                 </div>
                             </div>
-                            <div class="property-actions">
-                                <a href="/Home/Detail/${property.id}" class="action-btn btn-primary">Xem chi tiết</a>
-                                <button class="action-btn btn-outline" onclick="toggleFavorite(event, ${property.id}, ${property.isFavorite || false})">
-                                    ${property.isFavorite ? 'Bỏ yêu thích' : 'Yêu thích'}
-                                </button>
+                            
+                            <div class="property-location">
+                                <svg class="location-icon" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                </svg>
+                                <span>${province || 'Tp Hồ Chí Minh'}</span>
+                            </div>
+
+                            <!-- Property Footer -->
+                            <div class="property-footer">
+                                <div class="landlord-info">
+                                    <div 
+                                        class="landlord-avatar"
+                                        onclick="window.location.href='/Home/Landlord/${property.landlordId || 0}'"
+                                        title="Xem thông tin chủ nhà"
+                                    >
+                                        <img
+                                            onerror="handleImageError(this)"
+                                            src="${property.landlordProfilePictureUrl?.includes('http') ? property.landlordProfilePictureUrl : `https://localhost:7031${property.landlordProfilePictureUrl}`}"
+                                            alt="Ảnh chủ nhà"
+                                            class="w-full h-full object-cover"
+                                        >
+                                    </div>
+                                    <div class="landlord-details">
+                                        <div 
+                                            class="landlord-name"
+                                            onclick="window.location.href='/Home/Landlord/${property.landlordId || 0}'"
+                                            title="Xem thông tin chủ nhà"
+                                        >
+                                            ${property.landlordName || 'Không có tên'}
+                                        </div>
+                                        <div class="landlord-stats">
+                                            <i class="fas fa-briefcase"></i>
+                                            // <span>20 tin đăng</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Property Actions -->
+                                <div class="property-actions">
+                                    <button
+                                        id="btnFavourite-${property.id}"
+                                        onclick="updateFavorite(${property.id}, ${property.isFavorite || false})"
+                                        class="action-btn heart"
+                                        title="Yêu thích"
+                                    >
+                                        ${property.isFavorite
+                                            ? `<svg id="heart-icon-${property.id}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
+                                               </svg>`
+                                            : `<svg id="heart-icon-${property.id}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
+                                               </svg>`
+                                        }
+                                    </button>
+                                    <button
+                                        id="btn-compare-${property.id}"
+                                        onclick="addToCompare(${property.id})"
+                                        class="action-btn compare"
+                                        title="So sánh"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        id="interest-${property.id}"
+                                        onclick="clickInterest(${property.id},${property.isInterested || false},${property.interestedStatus || 0},${property.isReminderRenterConfirmInterested || 0},${property.interestedId || 0})"
+                                        class="action-btn interest"
+                                        title="Quan tâm"
+                                    >
+                                        <i class="fa-solid fa-square-plus ${property.isInterested && property.interestedStatus != 1 ? 'text-red-500' : ''}"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -626,6 +746,30 @@
                 document.getElementById('pagination').style.display = 'none';
             }
 
+            // Helper functions
+            function getUserIdFromToken(token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    return parseInt(payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]);
+                } catch (error) {
+                    console.error("Không thể giải mã token:", error);
+                    return null;
+                }
+            }
+
+            function StatusInterest(item) {
+                if (!item.isInterested) return "";
+                if (item.interestedStatus == 2) {
+                    if (item.isReminderRenterConfirmInterested == 2) return `<span style="color:red">Quá hạn xác nhận quan tâm</span>`;
+                    if (item.isReminderRenterConfirmInterested == 1) return `<span style="color:green">Xác nhận quan tâm lại</span>`;
+                    if (item.isReminderRenterConfirmInterested == 0) return `<span style="color:blue">Chờ phản hồi hệ thống</span>`;
+                }
+                if (item.interestedStatus == 0) return "";
+                if (item.interestedStatus == 3) {
+                    if (item.isReminderRenterConfirmInterested == 0) return `<span style="color:blue">Chờ xác nhận từ người cho thuê</span>`;
+                }
+            }
+
             // Favorite functions
             async function updateFavorite(id, isFavorite) {
                 const isAuthenticated = checkAuthStatus();
@@ -651,6 +795,24 @@
 
             // Check URL parameters for initial search
             const urlParams = new URLSearchParams(window.location.search);
+            
+            // Handle featured and recommended parameters
+            if (urlParams.has('featured') && urlParams.get('featured') === 'true') {
+                document.getElementById('searchType').value = '';
+                document.getElementById('searchKeyword').value = 'Bất động sản nổi bật';
+                // Set promotion filter
+                setTimeout(() => performSearch(), 1000);
+                return;
+            }
+            
+            if (urlParams.has('recommended') && urlParams.get('recommended') === 'true') {
+                document.getElementById('searchType').value = '';
+                document.getElementById('searchKeyword').value = 'Bất động sản dành cho bạn';
+                // Set non-promotion filter
+                setTimeout(() => performSearch(), 1000);
+                return;
+            }
+            
             if (urlParams.has('type') || urlParams.has('province') || urlParams.has('keyword') ||
                 urlParams.has('minRoom') || urlParams.has('maxRoom') || urlParams.has('minPrice') ||
                 urlParams.has('maxPrice') || urlParams.has('minArea') || urlParams.has('maxArea')) {
