@@ -193,7 +193,7 @@
 <div id="featuredProperties" class="properties-grid"></div>
 <div class="section-footer">
     <button onclick="viewAllFeatured()" class="view-more-btn">
-        <span>Xem thêm bất động sản nổi bật</span>
+        <span>Xem tất cả bất động sản</span>
         <i class="fas fa-arrow-right"></i>
     </button>
 </div>
@@ -210,7 +210,7 @@
 <div id="recommendedProperties" class="properties-grid"></div>
 <div class="section-footer">
     <button onclick="viewAllRecommended()" class="view-more-btn">
-        <span>Xem thêm bất động sản dành cho bạn</span>
+        <span>Xem tất cả bất động sản</span>
         <i class="fas fa-arrow-right"></i>
     </button>
 </div>
@@ -700,21 +700,21 @@
                     <div class="property-rating">
                         <div class="rating-item">
                             <span class="rating-stars">
-                            ${item.rating != 0 ? `
+                            ${item.rating && item.rating > 0 ? `
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:14px;height:14px" viewBox="0 0 24 24">
                                 <path d="M12 .587l3.668 7.568L24 9.423l-6 5.854L19.335 24 12 20.202 4.665 24 6 15.277 0 9.423l8.332-1.268z" />
                             </svg>` : ''}
                             </span>
                             <span class="font-semibold text-gray-800">
-                                ${item.rating == 0 ? 'Chưa có đánh giá' : item.rating}
+                                ${!item.rating || item.rating == 0 ? 'Chưa có đánh giá' : item.rating}
                             </span>
                         </div>
                         <div class="rating-item">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:14px;height:14px" viewBox="0 0 24 24" class="rating-comments">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:14px;height:14px" class="rating-comments">
                                 <path d="M20 2H4C1.8 2 0 3.8 0 6v12c0 2.2 1.8 4 4 4h4v2.4c0 .6.4 1 1 1 .2 0 .5-.1.7-.3L14.3 22H20c2.2 0 4-1.8 4-4V6c0-2.2-1.8-4-4-4z" />
                             </svg>
                             <span class="rating-comments">
-                                <span id="totalComment">${item.ratingNo}</span> bình luận
+                                ${!item.ratingNo || item.ratingNo == 0 ? 'Chưa có bình luận' : `${item.ratingNo} bình luận`}
                             </span>
                         </div>
                     </div>
@@ -1157,15 +1157,13 @@
 
     // View more functions
     window.viewAllFeatured = function() {
-        const searchParams = new URLSearchParams();
-        searchParams.append('featured', 'true');
-        window.location.href = `/Home/Search?${searchParams.toString()}`;
+        // Chuyển sang trang Search và hiển thị tất cả bất động sản
+        window.location.href = '/Home/Search';
     };
 
     window.viewAllRecommended = function() {
-        const searchParams = new URLSearchParams();
-        searchParams.append('recommended', 'true');
-        window.location.href = `/Home/Search?${searchParams.toString()}`;
+        // Chuyển sang trang Search và hiển thị tất cả bất động sản
+        window.location.href = '/Home/Search';
     };
 
     // Initialize data fetching
