@@ -50,5 +50,15 @@ namespace RealEstateManagement.Business.DTO.Properties
         //0 => none
         //1 => reminder
         //2 => expire
+
+        // Thêm các thuộc tính mới cần thiết
+        public int Bathrooms { get; set; }
+        public int PropertyTypeId { get; set; }
+        public string PropertyTypeName { get; set; }
+        public string ImageUrl { get; set; }
+        public bool IsPromoted { get; set; }
+        public string ProvinceName { get; set; }
+        public string WardName { get; set; }
+        public string StreetName { get; set; }
     }
 }
