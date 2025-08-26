@@ -1,6 +1,11 @@
 ﻿const API_PROPERTY_BASE_URL_V1 = 'https://localhost:7031/api/Property';
 const API_PROPERTY_BASE_URL_V2 = 'https://localhost:7031/api/OwnerProperty';
-
+//
+//const API_BASE = '/api';
+//const API = {
+//    property: `${API_BASE}/Property`,
+//    ownerProperty: `${API_BASE}/OwnerProperty`,
+//};
 const propertyRenterService = {
 
     async getAllBylandlordProperty() {

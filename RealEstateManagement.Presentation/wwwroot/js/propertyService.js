@@ -1,5 +1,7 @@
-﻿var API_PROPERTY_BASE_URL = 'https://localhost:7031/api/Property';
-var API_PROPERTY_BASE_URL2 = 'https://localhost:7031/api/OwnerProperty';
+﻿//var API_PROPERTY_BASE_URL = 'https://localhost:7031/api/Property';
+//var API_PROPERTY_BASE_URL2 = 'https://localhost:7031/api/OwnerProperty';
+var API_PROPERTY_BASE_URL = 'http://194.233.81.64:5000/api/Property';
+var API_PROPERTY_BASE_URL2 = 'http://194.233.81.64:5000/api/OwnerProperty';
 
 const propertyService = {
     async getAllproperty() {

@@ -1,10 +1,12 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
-
+using Microsoft.Extensions.DependencyInjection;
+using Yarp.ReverseProxy;                 
+using Yarp.ReverseProxy.Configuration;
 var builder = WebApplication.CreateBuilder(args);
-
+var apiBase = builder.Configuration["Api:BaseUrl"] ?? "http://api:8080";
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -67,7 +69,29 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
+var routes = new[]
+{
+    new RouteConfig
+    {
+        RouteId = "api",
+        ClusterId = "api-cluster",
+        Match = new RouteMatch { Path = "/api/{**catch-all}" }
+    }
+};
 
+var clusters = new[]
+{
+    new ClusterConfig
+    {
+        ClusterId = "api-cluster",
+        Destinations = new Dictionary<string, DestinationConfig>
+        {
+            ["d1"] = new DestinationConfig { Address = apiBase } // ví dụ http://api:8080
+        }
+    }
+};
+
+builder.Services.AddReverseProxy().LoadFromMemory(routes, clusters);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -76,7 +100,6 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -88,6 +111,7 @@ app.UseCors("AllowPresentation");
 // Add authentication and authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapReverseProxy();
 
 app.MapControllerRoute(
     name: "default",
