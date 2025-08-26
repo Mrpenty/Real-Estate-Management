@@ -7,6 +7,7 @@ using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using RealEstateManagement.Business.Repositories.AddressRepo;
 
 namespace RealEstateManagement.Business.Services
 {
@@ -15,12 +16,14 @@ namespace RealEstateManagement.Business.Services
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
         private readonly RentalDbContext _context;
+        private readonly IAddressRepository _addressRepository;
 
-        public OpenAIService(IConfiguration configuration, RentalDbContext rentalDbContext)
+        public OpenAIService(IConfiguration configuration, RentalDbContext rentalDbContext, IAddressRepository addressRepository)
         {
             _httpClient = new HttpClient();
             _apiKey = configuration["OpenAI:ApiKey"]; // Lấy từ appsettings.json
             _context = rentalDbContext;
+            _addressRepository = addressRepository;
         }
 
         public async Task<string> AskGPTAsync(RealEstateDescriptionRequest request)
@@ -140,8 +143,22 @@ namespace RealEstateManagement.Business.Services
             if (amenityDescriptions.Any())
                 builder.AppendLine($"Tiện ích bao gồm: {string.Join(", ", amenityDescriptions)}");
             builder.AppendLine($"Tiện ích: {string.Join(", ", amenityDescriptions)}");
-            builder.AppendLine($"Địa chỉ: {req.DetailedAddress}, Đường (StreetID): {req.StreetId}, Phường (WardID): {req.WardId}, Tỉnh (ProvinceID): {req.ProvinceId}");
-            builder.AppendLine($"Viết bằng tiếng Việt, giọng thân thiện, chuyên nghiệp, chi tiết 1 chút.");
+
+            var address = await _addressRepository.GetAddressAsync(req.ProvinceId ?? 0, req.WardId ?? 0, req.StreetId ?? 0, req.DetailedAddress ?? String.Empty);
+            if (address != null)
+            {
+                builder.AppendLine(
+                    $"Địa chỉ: {req.DetailedAddress}, " +
+                    $"Đường: {address.Street?.Name}, " +
+                    $"Phường: {address.Ward?.Name}, " +
+                    $"Tỉnh: {address.Province?.Name}"
+                );
+            }
+            else
+            {
+                builder.AppendLine($"Địa chỉ: {req.DetailedAddress}");
+            }
+            builder.AppendLine($"Viết bằng tiếng Việt, giọng thân thiện, chuyên nghiệp, chi tiết 1 chút. Thêm cả những địa điểm nổi tiếng gần địa chỉ ở phía dưới nữa");
             return builder.ToString();
         }
 

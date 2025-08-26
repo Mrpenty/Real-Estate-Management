@@ -1312,8 +1312,8 @@
                 throw new Error(`API Error: ${response.status} - ${errorMessage}`);
             }
 
-            const result = await response.text();
-            document.getElementById('description').value = result.suggestedDescription || result.description || JSON.stringify(result);
+            const result = await response.json();
+            document.getElementById('description').value = result.suggestedDescription;
             alert("Gợi ý mô tả đã được tạo thành công! Ví của bạn đã bị trừ 100 VNĐ."); // Thông báo thành công
 
         } catch (error) {

@@ -5,61 +5,7 @@
 
 <link rel="stylesheet" href="~/css/search.css">
 
-<style>
-    .filter-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
 
-    .dual-range-container {
-        position: relative;
-        width: 100%;
-        padding: 10px 0;
-    }
-
-    .dual-range-track {
-        position: relative;
-        height: 6px;
-        background: #e5e7eb;
-        border-radius: 3px;
-    }
-
-    .dual-range-filled {
-        position: absolute;
-        height: 6px;
-        background: #2563eb;
-        border-radius: 3px;
-    }
-
-    .dual-range-container input[type="range"] {
-        position: absolute;
-        width: 100%;
-        height: 6px;
-        margin: 0;
-        pointer-events: none;
-        background: none;
-        -webkit-appearance: none;
-    }
-
-        .dual-range-container input[type="range"]::-webkit-slider-thumb {
-            pointer-events: auto;
-            width: 16px;
-            height: 16px;
-            background: #2563eb;
-            border-radius: 50%;
-            cursor: pointer;
-            -webkit-appearance: none;
-        }
-
-    .range-values {
-        display: flex;
-        justify-content: space-between;
-        font-size: 14px;
-        color: #333;
-        margin-top: 5px;
-    }
-</style>
 
 <div class="search-container">
     <!-- Search Header -->
@@ -200,6 +146,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const apiBaseUrl = 'https://localhost:7031/api';
+            const urlBase = 'https://localhost:7031';
             let currentPage = 1;
             let currentPageSize = 12;
             let totalPages = 0;
@@ -478,13 +425,26 @@
                 if (province) searchParams.append('provinces', province);
                 if (ward) searchParams.append('wards', ward);
                 if (street) searchParams.append('streets', street);
-                
+
                 // Xử lý tìm kiếm theo từ khóa (có thể là địa chỉ hoặc title)
                 if (keyword && keyword.trim() !== '') {
-                    searchParams.append('keyword', keyword);
-                    // Không cần gửi address riêng vì keyword đã bao gồm cả địa chỉ và title
+                    // Clean và normalize từ khóa
+                    const cleanKeyword = keyword.trim().replace(/\s+/g, ' ');
+                    console.log('Original keyword:', keyword);
+                    console.log('Clean keyword:', cleanKeyword);
+
+                    // Nếu từ khóa chứa dấu phẩy, có thể là địa chỉ đầy đủ
+                    if (cleanKeyword.includes(',')) {
+                        console.log('Keyword contains commas, might be full address');
+                        // Gửi cả keyword và address để API có thể xử lý tốt hơn
+                        searchParams.append('keyword', cleanKeyword);
+                        searchParams.append('address', cleanKeyword);
+                    } else {
+                        // Từ khóa đơn giản, chỉ gửi keyword
+                        searchParams.append('keyword', cleanKeyword);
+                    }
                 }
-                
+
                 if (minPrice && minPrice !== '0') searchParams.append('minPrice', minPrice);
                 if (maxPrice && maxPrice !== '50') searchParams.append('maxPrice', maxPrice);
                 if (minArea && minArea !== '0') searchParams.append('minArea', minArea);
@@ -497,12 +457,19 @@
 
                 // Debug log for search parameters
                 console.log('Search parameters:', Object.fromEntries(searchParams.entries()));
+                console.log('Search URL:', `${apiBaseUrl}/Property/homepage-paginated?${searchParams.toString()}`);
 
                 showLoading();
 
                 try {
                     const response = await fetch(`${apiBaseUrl}/Property/homepage-paginated?${searchParams.toString()}`);
                     const result = await response.json();
+
+                    // Debug log for API response
+                    console.log('API Response:', result);
+                    console.log('Total items:', result.totalItems);
+                    console.log('Data length:', result.data ? result.data.length : 0);
+
                     if (response.ok) {
                         displayResults(result);
                     } else {
@@ -532,6 +499,12 @@
                 totalPages = Math.ceil(totalItems / currentPageSize);
                 document.getElementById('totalResults').textContent = totalItems;
 
+                // Debug log for first property to understand data structure
+                if (result.data.length > 0) {
+                    console.log('First property data structure:', result.data[0]);
+                    console.log('All properties:', result.data);
+                }
+
                 const propertiesHtml = result.data.map(property => createPropertyCard(property)).join('');
                 container.innerHTML = propertiesHtml;
 
@@ -541,57 +514,279 @@
 
             // Create property card
             function createPropertyCard(property) {
-                const card = document.createElement('div');
-                card.className = 'property-card';
-                
                 // Sử dụng cả thuộc tính cũ và mới để đảm bảo tương thích
                 const propertyType = property.propertyTypeName || property.type || 'N/A';
-                const imageUrl = property.imageUrl || property.primaryImageUrl || '/images/default-property.jpg';
-                const address = property.detailedAddress || property.streetName || property.wardName || property.provinceName || 
-                               property.street || property.ward || property.province || property.location || 'N/A';
-                
-                // Tạo HTML cho property card với thông tin mới
-                card.innerHTML = `
-                    <div class="property-image">
-                        <img src="${imageUrl}" alt="${property.title}" onerror="this.src='/images/default-property.jpg'">
-                        ${property.isPromoted ? '<div class="promotion-badge">VIP</div>' : ''}
-                        <button class="favorite-btn ${property.isInterested ? 'active' : ''}" onclick="updateFavorite(${property.id}, ${property.isInterested})">
-                            <i class="fas fa-heart"></i>
-                        </button>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-title">${property.title}</h3>
-                        <div class="property-info-section">
-                            <div class="property-type">
-                                <i class="fas fa-home"></i>
-                                <span>${propertyType}</span>
-                            </div>
-                            <div class="property-rooms">
-                                <i class="fas fa-bed"></i>
-                                <span>${property.bedrooms || 0} phòng ngủ</span>
-                            </div>
-                            <div class="property-price-info">
-                                <i class="fas fa-tag"></i>
-                                <span class="price-value">${property.price ? property.price.toLocaleString('vi-VN') : '0'} triệu/tháng</span>
-                            </div>
-                            <div class="property-address">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>${address}</span>
+                const imageUrl = getPropertyImageUrl(property);
+
+                // Xây dựng địa chỉ đầy đủ từ các thành phần
+                let fullAddress = '';
+
+                // Kiểm tra và xử lý từng trường địa chỉ
+                if (property.detailedAddress && property.detailedAddress.trim() !== '') {
+                    // Kiểm tra xem detailedAddress có phải là số đơn giản không
+                    if (/^\d+$/.test(property.detailedAddress.trim())) {
+                        console.warn(`Property ${property.id}: detailedAddress is just a number: ${property.detailedAddress}`);
+                        // Nếu chỉ là số, thử tìm địa chỉ đầy đủ từ các trường khác
+                        if (property.streetName && property.wardName && property.provinceName) {
+                            fullAddress = `${property.detailedAddress} ${property.streetName}, ${property.wardName}, ${property.provinceName}`;
+                            console.log(`Property ${property.id}: Combining number with streetName+wardName+provinceName: ${fullAddress}`);
+                        } else {
+                            fullAddress = property.detailedAddress;
+                        }
+                    } else {
+                        fullAddress = property.detailedAddress;
+                        console.log(`Property ${property.id}: Using detailedAddress: ${fullAddress}`);
+                    }
+                } else if (property.streetName && property.wardName && property.provinceName) {
+                    fullAddress = `${property.streetName}, ${property.wardName}, ${property.provinceName}`;
+                    console.log(`Property ${property.id}: Using streetName+wardName+provinceName: ${fullAddress}`);
+                } else if (property.street && property.ward && property.province) {
+                    fullAddress = `${property.street}, ${property.ward}, ${property.province}`;
+                    console.log(`Property ${property.id}: Using street+ward+province: ${fullAddress}`);
+                } else if (property.location && property.location.trim() !== '') {
+                    fullAddress = property.location;
+                    console.log(`Property ${property.id}: Using location: ${fullAddress}`);
+                } else if (property.address && property.address.trim() !== '') {
+                    fullAddress = property.address;
+                    console.log(`Property ${property.id}: Using address: ${fullAddress}`);
+                } else if (property.streetName && property.streetName.trim() !== '') {
+                    fullAddress = property.streetName;
+                    console.log(`Property ${property.id}: Using only streetName: ${fullAddress}`);
+                } else if (property.wardName && property.wardName.trim() !== '') {
+                    fullAddress = property.wardName;
+                    console.log(`Property ${property.id}: Using only wardName: ${fullAddress}`);
+                } else if (property.provinceName && property.provinceName.trim() !== '') {
+                    fullAddress = property.provinceName;
+                    console.log(`Property ${property.id}: Using only provinceName: ${fullAddress}`);
+                } else {
+                    fullAddress = 'N/A';
+                    console.log(`Property ${property.id}: No address found, using N/A`);
+                }
+
+                // Debug log để kiểm tra dữ liệu
+                console.log('Property data:', {
+                    id: property.id,
+                    title: property.title,
+                    detailedAddress: property.detailedAddress,
+                    streetName: property.streetName,
+                    wardName: property.wardName,
+                    provinceName: property.provinceName,
+                    street: property.street,
+                    ward: property.ward,
+                    province: property.province,
+                    location: property.location,
+                    address: property.address,
+                    fullAddress: fullAddress,
+                    promotionPackageName: property.promotionPackageName,
+                    isPromoted: property.isPromoted
+                });
+
+                // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
+                if (property.detailedAddress && property.detailedAddress.length < 10) {
+                    console.warn(`Property ${property.id}: detailedAddress seems too short: "${property.detailedAddress}"`);
+                }
+
+                // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
+                if (property.streetName && property.streetName.length < 5) {
+                    console.warn(`Property ${property.id}: streetName seems too short: "${property.streetName}"`);
+                }
+
+                // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
+                if (property.wardName && property.wardName.length < 5) {
+                    console.warn(`Property ${property.id}: wardName seems too short: "${property.wardName}"`);
+                }
+
+                // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
+                if (property.provinceName && property.provinceName.length < 5) {
+                    console.warn(`Property ${property.id}: provinceName seems too short: "${property.provinceName}"`);
+                }
+
+                // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
+                if (property.address && property.address.length < 5) {
+                    console.warn(`Property ${property.id}: address seems too short: "${property.address}"`);
+                }
+
+                // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
+                if (property.location && property.location.length < 5) {
+                    console.warn(`Property ${property.id}: location seems too short: "${property.location}"`);
+                }
+
+                // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
+                if (property.street && property.street.length < 5) {
+                    console.warn(`Property ${property.id}: street seems too short: "${property.street}"`);
+                }
+
+                // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
+                if (property.ward && property.ward.length < 5) {
+                    console.warn(`Property ${property.id}: ward seems too short: "${property.ward}"`);
+                }
+
+
+
+                // Tạo HTML string cho property card với thông tin mới
+                // Tạo promotion badge dựa trên promotionPackageName
+                let promotionBadge = '';
+                if (property.promotionPackageName && property.promotionPackageName.trim() !== '') {
+                    promotionBadge = `<div class="promotion-badge">${property.promotionPackageName}</div>`;
+                    console.log(`Property ${property.id}: Promotion badge created with: ${property.promotionPackageName}`);
+                } else {
+                    console.log(`Property ${property.id}: No promotion package name (${property.promotionPackageName})`);
+                }
+
+                // Xác định URL chi tiết dựa trên quyền sở hữu
+                const token = localStorage.getItem("authToken");
+                let isOwner = false;
+                let detailUrl = `/Home/Detail/${property.id}`;
+
+                if (token) {
+                    const userId = getUserIdFromToken(token);
+                    if (userId && property.landlordId && userId === property.landlordId) {
+                        isOwner = true;
+                        detailUrl = `/PostProperty/DetailProperty/${property.id}`;
+                    }
+                }
+
+                return `
+                    <div class="property-card">
+                        <div class="property-image-container">
+                            <img
+                                onerror="handleImageError(this)"
+                                src="${imageUrl}"
+                                alt="${property.title || 'Bất động sản'}"
+                                class="property-image"
+                            >
+                            <div class="property-overlay"></div>
+
+                            <!-- Promotion Badge -->
+                            ${promotionBadge}
+
+                            <!-- Property Actions -->
+                            <div class="property-actions">
+                                <button
+                                    id="btnFavourite-${property.id}"
+                                    onclick="updateFavorite(${property.id}, ${property.isFavorite || false})"
+                                    class="action-btn heart ${property.isFavorite ? 'active' : ''}"
+                                    title="Yêu thích"
+                                >
+                                    ${property.isFavorite
+                                        ? `<svg id="heart-icon-${property.id}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
+                                           </svg>`
+                                        : `<svg id="heart-icon-${property.id}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 7.284a5.754 5.754 0 00-9.406-1.045L12 7.158l-.346-.92A5.754 5.754 0 002.248 7.284c-1.1 2.238-.432 4.92 1.528 6.596l7.04 6.211a.75.75 0 001.368 0l7.04-6.211c1.96-1.676 2.628-4.358 1.528-6.596z" />
+                                           </svg>`
+                                    }
+                                </button>
+                                <button
+                                    id="btn-compare-${property.id}"
+                                    onclick="addToCompare(${property.id})"
+                                    class="action-btn compare"
+                                    title="So sánh"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
+                                    </svg>
+                                </button>
+                                <button
+                                    id="interest-${property.id}"
+                                    onclick="clickInterest(${property.id},${property.isInterested || false},${property.interestedStatus || 0},${property.isReminderRenterConfirmInterested || 0},${property.interestedId || 0})"
+                                    class="action-btn interest"
+                                    title="Quan tâm"
+                                >
+                                    <i class="fa-solid fa-square-plus ${property.isInterested && property.interestedStatus != 1 ? 'text-red-500' : ''}"></i>
+                                </button>
                             </div>
                         </div>
-                        <div class="property-footer">
-                            <div class="property-meta">
-                                <span><i class="fas fa-ruler-combined"></i> ${property.area} m²</span>
-                                <span><i class="fas fa-bath"></i> ${property.bathrooms || 0} phòng tắm</span>
+
+                        <!-- Property Content -->
+                        <div class="property-content">
+                            <div class="property-header">
+                                <div class="property-type-badge">
+                                    <i class="fas fa-building text-blue-500 mr-2"></i>
+                                    ${propertyType}
+                                </div>
+                                <div class="property-status">
+                                    ${StatusInterest(property)}
+                                </div>
                             </div>
-                            <div class="property-actions">
-                                <button class="btn btn-primary btn-sm" onclick="viewProperty(${property.id})">Xem chi tiết</button>
+
+                            <h3
+                                onclick="window.location.href='${detailUrl}'"
+                                class="property-title"
+                                title="${property.title || 'Không có tiêu đề'}"
+                            >
+                                ${property.title || 'Không có tiêu đề'}
+                            </h3>
+
+                            <div class="property-price">
+                                ${property.price ? property.price.toLocaleString('vi-VN') : '0'} <span class="text-sm font-normal">triệu/tháng</span>
+                            </div>
+
+                            <div class="property-location">
+                                <i class="fas fa-map-marker-alt location-icon"></i>
+                                <div class="location-text">
+                                    ${property.area || 0} m² · ${fullAddress}
+                                </div>
+                            </div>
+
+                            <p class="property-description" title="${property.description || ''}">
+                                ${property.description || 'Không có mô tả'}
+                            </p>
+                        </div>
+
+                        <!-- Property Footer -->
+                        <div class="property-footer">
+                            <div class="landlord-info">
+                                <div
+                                    class="landlord-avatar"
+                                    onclick="window.location.href='/Home/Landlord/${property.landlordId || 0}'"
+                                    title="Xem thông tin chủ nhà"
+                                >
+                                    <img
+                                        onerror="handleImageError(this)"
+                                        src="${property.landlordProfilePictureUrl?.includes('http') ? property.landlordProfilePictureUrl : (property.landlordProfilePictureUrl ? urlBase + property.landlordProfilePictureUrl : '/image/default-avatar.png')}"
+                                        alt="Ảnh chủ nhà"
+                                        class="w-full h-full object-cover"
+                                    >
+                                </div>
+                                <div class="landlord-details">
+                                    <div
+                                        class="landlord-name"
+                                        onclick="window.location.href='/Home/Landlord/${property.landlordId || 0}'"
+                                        title="Xem thông tin chủ nhà"
+                                    >
+                                        ${property.landlordName || 'Không xác định'}
+                                    </div>
+                                    <div class="landlord-date">
+                                        ${timeAgo(property.createdAt)}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="property-rating">
+                                <div class="rating-item">
+                                    <span class="rating-stars">
+                                        ${property.rating && property.rating > 0 ? `
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:14px;height:14px" viewBox="0 0 24 24">
+                                                <path d="M12 .587l3.668 7.568L24 9.423l-6 5.854L19.335 24 12 20.202 4.665 24 6 15.277 0 9.423l8.332-1.268z" />
+                                            </svg>` : ''}
+                                    </span>
+                                    <span class="font-semibold text-gray-800">
+                                        ${!property.rating || property.rating == 0 ? 'Chưa có đánh giá' : property.rating}
+                                    </span>
+                                </div>
+                                <div class="rating-item">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:14px;height:14px" class="rating-comments">
+                                        <path d="M20 2H4C1.8 2 0 3.8 0 6v12c0 2.2 1.8 4 4 4h4v2.4c0 .6.4 1 1 1 .2 0 .5-.1.7-.3L14.3 22H20c2.2 0 4-1.8 4-4V6c0-2.2-1.8-4-4-4z" />
+                                    </svg>
+                                    <span class="rating-comments">
+                                        ${!property.ratingNo || property.ratingNo == 0 ? 'Chưa có bình luận' : `${property.ratingNo} bình luận`}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 `;
-                
-                return card;
             }
 
             // Render pagination
@@ -710,9 +905,127 @@
                 return !!token;
             }
 
+            // Add to compare function
+            function addToCompare(propertyId) {
+                try {
+                    const token = localStorage.getItem('authToken');
+                    if (!token) {
+                        window.location.href = '/Auth/Login';
+                        return;
+                    }
+
+                    // Lấy danh sách so sánh từ localStorage
+                    let compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
+
+                    // Kiểm tra xem property đã có trong danh sách chưa
+                    if (compareList.includes(propertyId)) {
+                        alert('Bất động sản này đã có trong danh sách so sánh!');
+                        return;
+                    }
+
+                    // Kiểm tra giới hạn số lượng (tối đa 3)
+                    if (compareList.length >= 3) {
+                        alert('Danh sách so sánh đã đầy (tối đa 3 bất động sản)!');
+                        return;
+                    }
+
+                    // Thêm vào danh sách
+                    compareList.push(propertyId);
+                    localStorage.setItem('compareList', JSON.stringify(compareList));
+
+                    alert('Đã thêm vào danh sách so sánh!');
+
+                    // Cập nhật UI nếu cần
+                    const compareBtn = document.getElementById(`btn-compare-${propertyId}`);
+                    if (compareBtn) {
+                        compareBtn.classList.add('active');
+                    }
+                } catch (error) {
+                    console.error('Error adding to compare:', error);
+                    alert('Có lỗi xảy ra khi thêm vào danh sách so sánh!');
+                }
+            }
+
+            // Click interest function
+            function clickInterest(propertyId, isInterested, interestedStatus, isReminderRenterConfirmInterested, interestedId) {
+                try {
+                    const token = localStorage.getItem('authToken');
+                    if (!token) {
+                        window.location.href = '/Auth/Login';
+                        return;
+                    }
+
+                    // Gọi API để cập nhật trạng thái quan tâm
+                    fetch(`/api/Property/interest/${propertyId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Cập nhật UI
+                            const interestBtn = document.getElementById(`interest-${propertyId}`);
+                            if (interestBtn) {
+                                interestBtn.classList.toggle('active');
+                                const icon = interestBtn.querySelector('i');
+                                if (icon) {
+                                    icon.classList.toggle('text-red-500');
+                                }
+                            }
+
+                            // Reload để cập nhật trạng thái
+                            setTimeout(() => {
+                                performSearch();
+                            }, 500);
+                        } else {
+                            alert(data.message || 'Có lỗi xảy ra!');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating interest:', error);
+                        alert('Có lỗi xảy ra khi cập nhật trạng thái quan tâm!');
+                    });
+                } catch (error) {
+                    console.error('Error in clickInterest:', error);
+                    alert('Có lỗi xảy ra!');
+                }
+            }
+
+            // Time ago function
+            function timeAgo(dateString) {
+                if (!dateString) return 'Không xác định';
+
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffInSeconds = Math.floor((now - date) / 1000);
+
+                if (diffInSeconds < 60) return 'Vừa xong';
+                if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
+                if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+                if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} ngày trước`;
+                if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} tháng trước`;
+
+                return `${Math.floor(diffInSeconds / 31536000)} năm trước`;
+            }
+
+            // Handle image error function
+            function handleImageError(img) {
+                img.src = '/image/no-image.png';
+                img.alt = 'Không có ảnh';
+                img.onerror = null;
+            }
+
             // Check URL parameters for initial search
             const urlParams = new URLSearchParams(window.location.search);
-            
+
+            // Debug log for URL parameters
+            console.log('URL Parameters:', Object.fromEntries(urlParams.entries()));
+            console.log('Raw URL:', window.location.href);
+            console.log('Search string:', window.location.search);
+
             // Handle featured and recommended parameters
             if (urlParams.has('featured') && urlParams.get('featured') === 'true') {
                 document.getElementById('searchType').value = '';
@@ -721,7 +1034,7 @@
                 setTimeout(() => performSearch(), 1000);
                 return;
             }
-            
+
             if (urlParams.has('recommended') && urlParams.get('recommended') === 'true') {
                 document.getElementById('searchType').value = '';
                 document.getElementById('searchKeyword').value = 'Bất động sản dành cho bạn';
@@ -729,11 +1042,13 @@
                 setTimeout(() => performSearch(), 1000);
                 return;
             }
-            
+
             // Handle search parameters from Home page
             if (urlParams.has('type') || urlParams.has('province') || urlParams.has('keyword') || urlParams.has('address') ||
                 urlParams.has('minRoom') || urlParams.has('maxRoom') || urlParams.has('minPrice') ||
                 urlParams.has('maxPrice') || urlParams.has('minArea') || urlParams.has('maxArea')) {
+
+                console.log('Setting search parameters from URL...');
 
                 // Set property type
                 if (urlParams.has('type') && urlParams.get('type').trim() !== '') {
@@ -754,10 +1069,18 @@
                 // Set keyword and address
                 if (urlParams.has('keyword') && urlParams.get('keyword').trim() !== '') {
                     const keywordElement = document.getElementById('searchKeyword');
-                    if (keywordElement) keywordElement.value = urlParams.get('keyword');
+                    if (keywordElement) {
+                        const keywordValue = decodeURIComponent(urlParams.get('keyword'));
+                        console.log('Setting keyword:', keywordValue);
+                        keywordElement.value = keywordValue;
+                    }
                 } else if (urlParams.has('address') && urlParams.get('address').trim() !== '') {
                     const keywordElement = document.getElementById('searchKeyword');
-                    if (keywordElement) keywordElement.value = urlParams.get('address');
+                    if (keywordElement) {
+                        const addressValue = decodeURIComponent(urlParams.get('address'));
+                        console.log('Setting address as keyword:', addressValue);
+                        keywordElement.value = addressValue;
+                    }
                 }
 
                 // Set room range
@@ -860,10 +1183,16 @@
 
                         if (filterData.keyword) {
                             const keywordElement = document.getElementById('searchKeyword');
-                            if (keywordElement) keywordElement.value = filterData.keyword;
+                            if (keywordElement) {
+                                console.log('Setting keyword from session storage:', filterData.keyword);
+                                keywordElement.value = filterData.keyword;
+                            }
                         } else if (filterData.address) {
                             const keywordElement = document.getElementById('searchKeyword');
-                            if (keywordElement) keywordElement.value = filterData.address;
+                            if (keywordElement) {
+                                console.log('Setting address from session storage:', filterData.address);
+                                keywordElement.value = filterData.address;
+                            }
                         }
 
                         if (filterData.minRoom) {
@@ -962,3 +1291,5 @@
         });
     </script>
 }
+
+

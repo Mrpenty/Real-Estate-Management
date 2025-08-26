@@ -4,7 +4,9 @@ using RealEstateManagement.Business.DTO.Properties;
 using RealEstateManagement.Business.Repositories.Chat.Messages;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Repositories.Properties;
+using RealEstateManagement.Business.Services.Mail;
 using RealEstateManagement.Business.Services.NotificationService;
+using RealEstateManagement.Business.Services.User;
 using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using RealEstateManagement.Data.Entity.User;
@@ -23,8 +25,10 @@ namespace RealEstateManagement.Business.Services.Properties
         private readonly IMessageRepository _msgReadRepo;
         private readonly IRentalContractRepository _contractRepo;
         private readonly INotificationService _notificationService;
-        private readonly IPropertyRepository _propertyRepo; 
-        public InterestedPropertyService(IInterestedPropertyRepository repository, IPropertyPostRepository postRepo, IMessageRepository msgReadRepo, IRentalContractRepository contractRepo, INotificationService notificationService, IPropertyRepository propertyRepository)
+        private readonly IPropertyRepository _propertyRepo;
+        private readonly IMailService _mailService;
+        private readonly IProfileService _user;
+        public InterestedPropertyService(IInterestedPropertyRepository repository, IPropertyPostRepository postRepo, IMessageRepository msgReadRepo, IRentalContractRepository contractRepo, INotificationService notificationService, IPropertyRepository propertyRepository, IMailService mailService, IProfileService profileService)
         {
             _repository = repository;
             _postRepo = postRepo;
@@ -32,6 +36,8 @@ namespace RealEstateManagement.Business.Services.Properties
             _contractRepo = contractRepo;
             _notificationService = notificationService;
             _propertyRepo = propertyRepository;
+            _mailService = mailService;
+            _user = profileService;
         }
 
         private InterestedPropertyDTO MapToDTO(InterestedProperty entity)
@@ -66,6 +72,7 @@ namespace RealEstateManagement.Business.Services.Properties
             if (ip == null) throw new Exception("Interest not found");
             var l = await _postRepo.GetByPropertyIdAsync(ip.PropertyId);
             var t = await _propertyRepo.GetPropertyByIdAsync(ip.PropertyId);
+           
             if (isRenter)
             {
                 if (ip.Status != InterestedStatus.WaitingForRenterReply)
@@ -85,6 +92,21 @@ namespace RealEstateManagement.Business.Services.Properties
                         Audience = "specific",
                         SpecificUserIds = new List<int> { l.LandlordId }
                     });
+                    var landlord = await _user.GetUserBasicInfoAsync(t.LandlordId);
+                    var emailBody = $@"
+                    <html><body>
+                      <p>Xin chào {l.Landlord.Name},</p>
+                      <p>Người thuê đã xác nhận muốn thuê bất động sản <b>{t.Title}</b>.</p>
+                      <p>Vui lòng đăng nhập hệ thống để phản hồi.</p>
+                      <br/>
+                      <p>Trân trọng,<br/>BĐS Management</p>
+                    </body></html>";
+
+                    await _mailService.SendEmailAsync(
+                        landlord.Email,
+                        "Người thuê muốn thuê",
+                        emailBody
+                    );
                 }
                 else
                 {
@@ -116,6 +138,20 @@ namespace RealEstateManagement.Business.Services.Properties
                         Audience = "specific",
                         SpecificUserIds = new List<int> { ip.RenterId }
                     });
+                    var renter = await _user.GetUserBasicInfoAsync(ip.RenterId);
+                    var emailBody1 = $@"
+                    <html><body>
+                      <p>Xin chào {ip.Renter.Name},</p>
+                      <p>Chủ nhà đã từ chối cho thuê bất động sản <b>{t.Title}</b>.</p>
+                      <p>Bạn có thể tìm kiếm thêm các lựa chọn khác trên hệ thống.</p>
+                      <br/>
+                      <p>Trân trọng,<br/>BĐS Management</p>
+                    </body></html>";
+                    await _mailService.SendEmailAsync(
+                    renter.Email,
+                    "Chủ nhà từ chối cho thuê",
+                    emailBody1
+                    );
                     return true;
                 }
 
@@ -144,13 +180,27 @@ namespace RealEstateManagement.Business.Services.Properties
                 await _repository.UpdateAsync(ip);
                 await _notificationService.SendNotificationToSpecificUsersAsync(new CreateNotificationDTO
                 {
-                    Title = "Giao dịch thành công 🎉",
+                    Title = "Cho thuê thành công 🎉",
                     Content = $"Chủ nhà đã chấp nhận cho thuê với bất động sản: {t.Title}. Truy cập mục Danh sách nhà đang thuê để xem chi tiết",
                     Type = "success",
                     Audience = "specific",
                     SpecificUserIds = new List<int> { ip.RenterId }
                 });
+                var renter1 = await _user.GetUserBasicInfoAsync(ip.RenterId);
+                var emailBody2 = $@"
+                <html><body>
+                  <p>Xin chào {ip.Renter.Name},</p>
+                  <p>Chúc mừng 🎉! Chủ nhà đã chấp nhận cho thuê bất động sản <b>{t.Title}</b>.</p>
+                  <p>Bạn có thể xem chi tiết trong mục <b>Danh sách nhà đang thuê</b> trên hệ thống.</p>
+                  <br/>
+                  <p>Trân trọng,<br/>BĐS Management</p>
+                </body></html>";
 
+                await _mailService.SendEmailAsync(
+                    renter1.Email,
+                    "Cho thuê thành công 🎉",
+                    emailBody2
+                );
                 // CHANGED: đóng tất cả quan tâm khác của cùng property (None)
                 var others = await _repository.GetByPropertyAsync(ip.PropertyId); // đã include Renter
                 foreach (var other in others.Where(o => o.Id != ip.Id))

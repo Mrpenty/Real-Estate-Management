@@ -103,8 +103,10 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         public async Task<List<Property>> GetRentedPropertiesByLandlordIdAsync(int landlordId)
         {
             return await _context.Properties
+                .Include(p => p.PropertyType)
                 .Include(p => p.Posts)
                     .ThenInclude(post => post.RentalContract)
+
                 .Where(p => p.LandlordId == landlordId
                     && p.Posts.Any(post =>
                         post.Status == PropertyPost.PropertyPostStatus.Rented
