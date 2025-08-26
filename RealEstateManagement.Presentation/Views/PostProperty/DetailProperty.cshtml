@@ -471,7 +471,18 @@
                 </a>`;
         }
 
-        $('#type').val(itemPropertyBody.type?.trim().toLowerCase());
+        // Gán lại giá trị cho select #type (property type) khi load detail
+        if (itemPropertyBody.propertyTypeId) {
+            $('#type').val(itemPropertyBody.propertyTypeId.toString());
+        } else if (itemPropertyBody.type) {
+            // Nếu không có id, dò theo tên
+            const typeName = itemPropertyBody.type.trim().toLowerCase();
+            $('#type option').each(function() {
+                if ($(this).text().trim().toLowerCase() === typeName) {
+                    $('#type').val($(this).val());
+                }
+            });
+        }
         provinceSelect.val(itemPropertyBody.provinceId);
         addressInfo.val(itemPropertyBody.detailedAddress);
 
@@ -613,10 +624,11 @@
         const wardId = parseInt(formData.get('WardId'));
         const streetId = parseInt(formData.get('StreetId'));
         const detailedAddress = formData.get('AddressInfo') || '';
+        const propertyTypeId = parseInt(formData.get('type'));
         const propertyData = {
             title: formData.get('title'),
             description: formData.get('description'),
-            type: formData.get('type'), // Changed to match API expectation
+            propertyTypeId: propertyTypeId,
             area: parseFloat(formData.get('area')),
             bedrooms: parseInt(formData.get('bedrooms')),
             bathrooms: parseInt(formData.get('bathrooms')),
@@ -1230,10 +1242,12 @@
         const streetName = streetSelect.find("option:selected").text();
         const fullAddressDisplay = `${addressInfo.val() || ''} ${streetName === '-- Chọn đường phố --' ? '' : streetName} ${wardName === '-- Chọn phường/xã --' ? '' : wardName} ${provinceName === '-- Chọn Tỉnh/Thành --' ? '' : provinceName}`.trim();
 
+        // Lấy tên loại bất động sản (type) từ option đang chọn
+        const typeNameForAI = $('#type option:selected').text();
         const propertyDataForAI = {
             title: formData.get('title') || '',
             address: fullAddressDisplay,
-            type: formData.get('type') || '',
+            type: typeNameForAI || '',
             area: parseFloat(formData.get('area')) || 0,
             bedrooms: parseInt(formData.get('bedrooms')) || 0,
             bathrooms: parseInt(formData.get('bathrooms')) || 0,
