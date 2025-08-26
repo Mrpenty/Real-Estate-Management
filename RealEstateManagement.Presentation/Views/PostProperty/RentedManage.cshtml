@@ -501,7 +501,9 @@
 
             function getContractStatusText(status) {
                 if (status === 1) return "Đang thuê";
-                if (status === 2) return "Chấm dứt hợp đồng";
+                if (status === 2) return "Hợp đồng bị chấm dứt";
+                if (status === 3) return "Hợp đồng hết hạn";
+                if (status === 4) return "chờ renter đồng ý";
                 return "-";
             }
 
@@ -871,7 +873,6 @@
                         const res = await fetch(`https://localhost:7031/api/owner/rental-contracts/${contractId}/terminate`, {
                             method: "PUT",
                             headers: {
-                                "Content-Type": "application/json",
                                 "Authorization": "Bearer " + token
                             }
                         });
@@ -906,8 +907,8 @@
                 }
 
                 try {
-                    const res = await fetch(`https://localhost:7031/api/owner/rental-contracts/${contractId}/extend`, {
-                        method: "PUT",
+                    const res = await fetch(`https://localhost:7031/api/owner/rental-contracts/${contractId}/renew`, {
+                        method: "POST",
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": "Bearer " + token

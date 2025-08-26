@@ -47,7 +47,7 @@ namespace RealEstateManagement.Data.Entity
         {
             Pending = 0, //Tạo hợp đồng lần đầu, chờ renter xác nhận khi thuê
             Confirmed = 1, //Hợp đồng đang cho thuê
-            Rejected = 2, //Hợp đồng bị chấm dứt
+            Terminated = 2, //Hợp đồng bị chấm dứt
             Expired = 3, //Hợp đồng hết hạn
             RenewalPending = 4 // landlord đề xuất gia hạn, chờ renter duyệt
         }

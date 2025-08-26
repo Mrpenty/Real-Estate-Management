@@ -11,7 +11,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstateManagement.Data",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstateManagement.Presentation", "RealEstateManagement.Presentation\RealEstateManagement.Presentation.csproj", "{91A6D49C-9AEC-4768-974C-B32D81C32D9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealEstateManagement.UnitTests", "RealEstateManagement.UnitTests\RealEstateManagement.UnitTests.csproj", "{BE517F9C-D009-42B8-8E88-C80909BD4600}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealEstateManagement.UnitTests", "RealEstateManagement.UnitTests\RealEstateManagement.UnitTests.csproj", "{BE517F9C-D009-42B8-8E88-C80909BD4600}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{85E63C3D-4503-48C2-8F40-75C2FB4EBA8A}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.env = .env
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

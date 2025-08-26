@@ -100,18 +100,31 @@ namespace RealEstateManagement.Business.Services.OwnerService
             if (contract == null)
                 throw new Exception("Không tìm thấy hợp đồng.");
 
+            var newStatus = (RentalContract.ContractStatus)statusDto.Status;
             // ✅ Kiểm tra giá trị hợp lệ
             if (!Enum.IsDefined(typeof(RentalContract.ContractStatus), statusDto.Status))
                 throw new ArgumentException("Trạng thái hợp đồng không hợp lệ.");
 
-            contract.Status = statusDto.Status;
+            contract.Status = newStatus;
 
-            if (statusDto.Status == RentalContract.ContractStatus.Confirmed)
+            if (newStatus == RentalContract.ContractStatus.Confirmed)
             {
                 contract.ConfirmedAt = DateTime.Now;
             }
 
             await _repository.UpdateStatusAsync(contract.Id, contract.Status);
+        }
+
+        public async Task<bool> TerminateContractAsync(int contractId)
+        {
+            var contract = await _repository.GetByRentalContractIdAsync(contractId);
+
+            if (contract == null) return false;
+
+            contract.Status = RentalContract.ContractStatus.Terminated;
+
+            await _repository.UpdateStatusAsync(contract.Id, contract.Status);
+            return true;
         }
 
         public async Task UpdateContractAsync(int contractId, RentalContractUpdateDto dto)

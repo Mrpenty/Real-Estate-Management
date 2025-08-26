@@ -138,6 +138,7 @@ namespace RealEstateManagement.Business.Services.Reviews
                         Id = r.Reply.Id,
                         LandlordId = r.Reply.LandlordId,
                         ReplyContent = r.Reply.ReplyContent,
+                        IsFlagged = r.IsFlagged,
                         CreatedAt = r.Reply.CreatedAt
                     }
                 })
@@ -182,6 +183,16 @@ namespace RealEstateManagement.Business.Services.Reviews
                 CountStar4 = c4,
                 CountStar5 = c5
             };
+        }
+
+        public async Task<(bool IsSuccess, string Message)> Report(int commentId)
+        {
+            var report = await _repo.GetReviewByIdAsync(commentId);
+            if(report == null) return (false, "Không có bình luận");
+            if(report.IsFlagged) return (false, "Bình luận đã được báo cáo trước đó");
+            report.IsFlagged = true;
+            await _repo.SaveChangesAsync();
+            return (true, "thành công");
         }
     }
 }

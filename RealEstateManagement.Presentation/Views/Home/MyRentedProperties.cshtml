@@ -7,95 +7,127 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
     <meta charset="UTF-8">
     <title>Bất động sản tôi đang thuê</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #f0f2f5;
-            margin: 0;
-            padding: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #1a237e;
-            font-size: 2rem;
-        }
-
         .properties {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
         }
 
         .property-card {
             background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
             transition: transform 0.2s;
         }
 
-        .property-card:hover {
-            transform: translateY(-5px);
-        }
+            .property-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            }
 
         .property-info {
             padding: 20px;
         }
 
-        .property-info h2 {
-            margin: 0 0 15px;
-            font-size: 1.25rem;
-            color: #1a237e;
-            border-bottom: 2px solid #e3e3e3;
-            padding-bottom: 10px;
-        }
+            .property-info h2 {
+                color: #1a237e;
+                margin: 0 0 15px 0;
+                font-size: 1.5rem;
+            }
 
-        .property-info p {
-            margin: 8px 0;
-            color: #37474f;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
+            .property-info p {
+                margin: 8px 0;
+                color: #333;
+                line-height: 1.4;
+            }
 
         .contract-details {
-            background: #f8f9fa;
+            background: #f5f5f5;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 6px;
             margin: 15px 0;
-            border-left: 4px solid #1a237e;
         }
 
-        .contract-details h3 {
-            margin: 0 0 10px;
-            color: #1a237e;
-            font-size: 1.1rem;
-        }
+            .contract-details h3 {
+                color: #1a237e;
+                margin: 0 0 10px 0;
+                font-size: 1.2rem;
+            }
 
         .landlord {
             display: flex;
             align-items: center;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #e3e3e3;
+            padding: 10px;
+            background: #e8eaf6;
+            border-radius: 6px;
         }
 
-        .landlord img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin-right: 15px;
-            border: 2px solid #1a237e;
+            .landlord img {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-right: 15px;
+            }
+
+        .landlord-info {
+            flex: 1;
         }
 
-        .landlord-info p {
-            margin: 3px 0;
-        }
+            .landlord-info p {
+                margin: 2px 0;
+            }
 
-        .landlord-info .phone {
+        .phone {
             color: #1a237e;
-            font-weight: 600;
+            font-weight: 500;
+        }
+
+        button {
+            background: #1a237e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background 0.2s;
+        }
+
+            button:hover {
+                background: #283593;
+            }
+
+            button:last-child {
+                background: #d32f2f;
+            }
+
+                button:last-child:hover {
+                    background: #b71c1c;
+                }
+
+        @@media (max-width: 768px) {
+            .properties
+
+        {
+            padding: 10px;
+        }
+
+        .property-info h2 {
+            font-size: 1.2rem;
+        }
+
+        .landlord {
+            flex-direction: column;
+            text-align: center;
+        }
+
+            .landlord img {
+                margin: 0 0 10px 0;
+            }
+
         }
     </style>
 </head>
@@ -122,11 +154,45 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
             }
 
             const data = await response.json();
-            renderProperties(data);
+            await renderProperties(data);
           } catch (err) {
             console.error("Fetch error:", err);
             document.getElementById("properties").innerHTML = `<p style="color:#d32f2f;text-align:center;font-size:1.1rem;">Lỗi tải dữ liệu: ${err.message}</p>`;
           }
+        }
+
+        async function fetchRenewalProposal(contractId) {
+            try {
+                const res = await fetch(`https://localhost:7031/api/owner/rental-contracts/${contractId}/renew/proposal`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    }
+                });
+                if (!res.ok) return null;
+                return await res.json();
+            } catch (err) {
+                console.error("Fetch proposal error:", err);
+                return null;
+            }
+        }
+
+        async function respondRenewal(contractId, approve) {
+            try {
+                const res = await fetch(`https://localhost:7031/api/owner/rental-contracts/${contractId}/renew/respond?approve=${approve}`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                });
+                const data = await res.json();
+                alert(data.message);
+                await fetchRented(); // reload lại danh sách
+            } catch (err) {
+                console.error("Respond error:", err);
+                alert("Lỗi khi gửi phản hồi");
+            }
         }
 
         function formatDate(dateString) {
@@ -139,11 +205,11 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
             return (typeof num === "number" && !isNaN(num)) ? num.toLocaleString() : "N/A";
         }
 
-        function renderProperties(properties) {
+        async function renderProperties(properties) {
           const container = document.getElementById("properties");
           container.innerHTML = "";
 
-          properties.forEach(p => {
+          for (const p of properties) {
             const card = document.createElement("div");
             card.className = "property-card";
             card.innerHTML = `
@@ -159,6 +225,7 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
                     <p><strong>Ngày kết thúc:</strong> ${formatDate(p.contractEndDate)}</p>
                     <p><strong>Tiền đặt cọc:</strong> ${formatNumber(p.contractDeposit)} VND</p>
                     <p><strong>Trạng thái:</strong> ${p.contractStatus ?? ""}</p>
+                    <div id="renewal-${p.id}"></div>
                 </div>
 
                 <div class="landlord">
@@ -171,11 +238,25 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
               </div>
             `;
             container.appendChild(card);
-          });
+
+            const proposal = await fetchRenewalProposal(p.contractId);
+            if (proposal) {
+                document.getElementById(`renewal-${p.contractId}`).innerHTML = `
+                    <div style="margin-top:15px;padding:10px;border:1px dashed #1a237e;border-radius:8px;">
+                        <h4>Đề xuất gia hạn</h4>
+                        <p><strong>Giá thuê mới:</strong> ${formatNumber(proposal.proposedMonthlyRent)} VND</p>
+                        <p><strong>Kỳ hạn:</strong> ${proposal.proposedContractDurationMonths} tháng</p>
+                        <p><strong>Ngày TT:</strong> ${proposal.proposedPaymentDayOfMonth}</p>
+                        <p><strong>Kết thúc:</strong> ${formatDate(proposal.proposedEndDate)}</p>
+                        <button onclick="respondRenewal(${p.contractId}, true)">Đồng ý</button>
+                        <button onclick="respondRenewal(${p.contractId}, false)">Từ chối</button>
+                    </div>
+                `;
+            }
+          }
         }
 
         fetchRented();
     </script>
 </body>
 </html>
-                                                                                

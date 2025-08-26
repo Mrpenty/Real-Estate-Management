@@ -27,6 +27,7 @@ namespace RealEstateManagement.Data.Data
             PropertyAmenitySeed.SeedPropertyAmenities(modelBuilder);
             PropertyImageSeed.SeedPropertyImages(modelBuilder);
             PropertyPostSeed.SeedPropertyPosts(modelBuilder);
+            PropertyTypeSeed.SeedPropertyTypes(modelBuilder);
 
             //Payment and transaction seeding
             WalletSeed.SeedWallets(modelBuilder);

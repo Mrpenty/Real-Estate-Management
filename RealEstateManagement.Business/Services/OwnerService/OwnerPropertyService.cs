@@ -35,7 +35,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                     Id = entity.Id,
                     Title = entity.Title,
                     Description = entity.Description,
-                    Price = entity.Price,
+                    Price = entity.Price, 
                     IsPromoted = entity.IsPromoted,
                     IsVerified = entity.IsVerified,
                     Location = entity.Location,
@@ -54,7 +54,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                     }).ToList(),
                     IsExistRenterContract = entity.Posts.Any(post => post.RentalContract != null),
                     RenterContractId = entity.Posts.Any(post => post.RentalContract != null) ? entity.Posts.FirstOrDefault().RentalContract.Id : 0,
-                    Type = entity.Type,
+                    Type = entity.PropertyType.Name,
                     DetailedAddress = entity.Address.DetailedAddress,
                     Images = entity.Images.Select(img => new OwnerPropertyImageDto
                     {
@@ -82,7 +82,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 Location = entity.Location,
                 Bedrooms = entity.Bedrooms,
                 Area = entity.Area,
-                Type = entity.Type,
+                Type = entity.PropertyType.Name,
                 InterestedProperties = interestDtos.Select(c => new DTO.Properties.InterestedPropertyDTO
                 {
                     Id = c.Id,
@@ -158,12 +158,13 @@ namespace RealEstateManagement.Business.Services.OwnerService
             property.Price = dto.Price;
             property.Area = dto.Area;
             property.Bedrooms = dto.Bedrooms;
-            property.Type = dto.Type;
+            property.PropertyTypeId = dto.PropertyTypeId;
             property.Location = dto.Location;
 
             if (dto.ProvinceId != null || dto.WardId != null || dto.StreetId != null || !string.IsNullOrEmpty(dto.DetailedAddress))
             {
-                await _ownerPropertyRepo.UpdateAddressAsync(propertyId, dto.ProvinceId, dto.WardId, dto.StreetId, dto.DetailedAddress);
+                await _ownerPropertyRepo.UpdateAddressAsync(propertyId, dto.ProvinceId ?? 0, dto.WardId ?? 0, dto.StreetId ?? 0, dto.DetailedAddress);
+                //await _ownerPropertyRepo.UpdateAddressAsync(propertyId, dto.ProvinceId, dto.WardId, dto.StreetId, dto.DetailedAddress);
             }
 
             // Xử lý cập nhật Amenities nếu cần
@@ -192,7 +193,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
         //Gia hạn các property hết hạn
         public async Task<(bool IsSuccess, string Message)> ExtendPostAsync(int postId, int days, int landlordId)
         {
-            var post = await _rentalDbContext.PropertyPosts
+            var post = await _rentalDbContext.Set<PropertyPost>()
                 .FirstOrDefaultAsync(p => p.Id == postId && p.LandlordId == landlordId);
 
             if (post == null)
@@ -264,7 +265,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                         }
                     }).ToList(),
                 IsExistRenterContract = entity.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Rented && post.RentalContract != null),
-                Type = entity.Type,
+                Type = entity.PropertyType.Name,
             }).ToList();
         }
     }

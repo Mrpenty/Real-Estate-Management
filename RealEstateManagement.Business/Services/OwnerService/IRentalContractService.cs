@@ -24,6 +24,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
 
         Task<RentalContractRenewalDto?> GetRenewalProposalAsync(int contractId);
 
+        Task<bool> TerminateContractAsync(int contractId);
     }
 
 }
