@@ -39,6 +39,7 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         {
             return await _context.Properties
                 .Include(p => p.Images)
+                .Include(p => p.PropertyType)
                 .Include(p => p.Posts)
                     .ThenInclude(p => p.RentalContract)
                 .Include(p => p.PropertyAmenities)

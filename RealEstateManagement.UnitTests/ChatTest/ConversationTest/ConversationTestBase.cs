@@ -9,16 +9,16 @@ using System.Threading.Tasks;
 
 namespace RealEstateManagement.UnitTests.ChatTest.ConversationTest
 {
-    public abstract class ConversationTestBase
-    {
-        protected Mock<IConversationRepository> Repo = null!;
-        protected ConversationService Svc = null!;
+    //public abstract class ConversationTestBase
+    //{
+    //    protected Mock<IConversationRepository> Repo = null!;
+    //    protected ConversationService Svc = null!;
 
-        [TestInitialize]
-        public void Init()
-        {
-            Repo = new Mock<IConversationRepository>(MockBehavior.Strict);
-            Svc = new ConversationService(Repo.Object);
-        }
-    }
+    //    [TestInitialize]
+    //    public void Init()
+    //    {
+    //        Repo = new Mock<IConversationRepository>(MockBehavior.Strict);
+    //        Svc = new ConversationService(Repo.Object);
+    //    }
+    //}
 }

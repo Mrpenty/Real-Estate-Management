@@ -280,11 +280,13 @@ class PropertyDetailManager {
         this.updateElement('.descriptionId', prop.description || 'Không có mô tả');
         this.updateElement('.wardId', prop.ward || 'N/A');
         this.updateElement('.provinceId', prop.province || 'N/A');
-        this.updateElement('#propId', prop.id || 'N/A');
+        this.updateElement('#propId', prop.type || 'N/A');
         this.updateElement('#createTimeId', this.formatDateTime(prop.createdAt));
         this.updateElement('.contactName', prop.landlordName || 'Không xác định');
-
-        // Handle favorite buttons
+        this.updateElement('.bedrooms', prop.bedrooms || 'Không có mô tả' );
+        this.updateElement('.bathrooms', prop.bathrooms || 'Không có mô tả');
+        this.updateElement('.floors', prop.floors || 'Không có mô tả');
+        this.updateElement('.amenity', Array.isArray(prop.amenities) ? prop.amenities.join(' · ') : (prop.amenities || 'Không có mô tả'));
         this.handleFavoriteButtons(prop.isFavorite);
 
         // Populate image thumbnails with null check

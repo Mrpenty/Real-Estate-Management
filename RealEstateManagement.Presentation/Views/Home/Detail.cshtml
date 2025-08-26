@@ -24,6 +24,59 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
             background: #e64a19;
         }
 
+    .property-amenities {
+        margin: 1rem 0;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .amenities-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .amenity-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+        .amenity-item i {
+            color: #ff5722;
+            font-size: 1.2rem;
+        }
+
+    .extra-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-label {
+        font-weight: 500;
+        color: #666;
+    }
+
+    .detail-value {
+        color: #333;
+    }
+
 </style>
 <div class="property-detail-container">
     <div class="property-detail-grid">
@@ -66,6 +119,8 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
                         <span class="price priceId"></span>
                         <span class="text-black">•</span>
                         <span class="area"><span class="areaId"></span> m²</span>
+                        <span class="text-black">•</span>
+                        <span class="bedrooma"><span class="bedrooms"></span> Phòng</span>
                     </div>
                     <span class="update-time">Cập nhật: <span class="timeAgoId"></span></span>
                 </div>
@@ -84,20 +139,25 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
                         <span class="detail-value addressId"></span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Mã tin:</span>
-                        <span class="detail-value">#<span id="propId"></span></span>
+                        <span class="detail-label">Loại bất động sản </span>
+                        <span class="detail-value "><span id="propId"></span></span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Ngày đăng:</span>
                         <span class="detail-value" id="createTimeId"></span>
                     </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Tiện ích </span>
+                        <span class="detail-value" id="amenity"></span>
+                    </div>
                 </div>
+
 
                 <h2 class="section-title">Thông tin mô tả</h2>
                 <div class="description">
                     <p><strong class="titleId"></strong></p>
-                    <p>Giá thuê: <span class="priceId"></span>/tháng</p>
-                    <p>Cọc: 1 tháng</p>
+                    @* <p>Giá thuê: <span class="priceId"></span>/tháng</p>
+                    <p>Cọc: 1 tháng</p> *@
                     <p class="descriptionId"></p>
                 </div>
 

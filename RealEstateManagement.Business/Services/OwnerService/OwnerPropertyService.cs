@@ -70,7 +70,20 @@ namespace RealEstateManagement.Business.Services.OwnerService
             var entity = await _ownerPropertyRepo.GetByIdAsync(id, landlordId);
             if (entity == null)
                 throw new Exception("Property not found.");
-            var interestDtos = await _rentalDbContext.InterestedProperties.Include(c => c.Renter).Where(c => c.PropertyId == id).ToListAsync();
+
+            // Ensure PropertyType is loaded (if not already included in repo)
+            var propertyType = entity.PropertyType;
+            if (propertyType == null)
+            {
+                propertyType = await _rentalDbContext.Set<PropertyType>()
+                    .FirstOrDefaultAsync(pt => pt.Id == entity.PropertyTypeId);
+            }
+
+            var interestDtos = await _rentalDbContext.InterestedProperties
+                .Include(c => c.Renter)
+                .Where(c => c.PropertyId == id)
+                .ToListAsync();
+
             var dto = new OwnerPropertyDto
             {
                 Id = entity.Id,
@@ -82,7 +95,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
                 Location = entity.Location,
                 Bedrooms = entity.Bedrooms,
                 Area = entity.Area,
-                Type = entity.PropertyType.Name,
+                Type = propertyType?.Name, // Get Type from PropertyType table
                 InterestedProperties = interestDtos.Select(c => new DTO.Properties.InterestedPropertyDTO
                 {
                     Id = c.Id,
