@@ -270,6 +270,16 @@
 
     function removeItem(locationName) {
         selectedLocationLists = selectedLocationLists.filter(l => l.locationName !== locationName);
+        
+        // Cập nhật ô search input dựa trên địa chỉ còn lại
+        if (selectedLocationLists.length > 0) {
+            // Nếu còn địa chỉ, hiển thị địa chỉ cuối cùng
+            locationInput.value = selectedLocationLists[selectedLocationLists.length - 1].locationName;
+        } else {
+            // Nếu không còn địa chỉ nào, xóa nội dung ô search
+            locationInput.value = "";
+        }
+        
         renderSelectedLocations();
     }
 
@@ -387,7 +397,12 @@
     // Function to select a property type
     function selectPropertyType(typeName) {
         selectedPropertyType = typeName;
-        document.querySelector('#propertyTypeBtn span:first-child').textContent = typeName || 'Loại bất động sản';
+        const displayElement = document.querySelector('#propertyTypeBtn span:first-child');
+        if (displayElement) {
+            displayElement.textContent = typeName || 'Loại bất động sản';
+        }
+        
+        // Close the dropdown
         document.getElementById('propertyTypeBtn').classList.remove('active');
         document.getElementById('propertyTypeMenu').classList.remove('active');
     }
@@ -420,7 +435,16 @@
                             <button class="text-blue-600 hover:text-red-500 font-bold">×</button>`;
             tag.querySelector("button").addEventListener("click", () => {
                 selectedLocationLists = selectedLocationLists.filter(l => l.locationName !== loc.locationName);
-                dropdown2.style.height = 25.3 + 2.1 * selectedLocationLists.length + 'rem';
+                
+                // Cập nhật ô search input dựa trên địa chỉ còn lại
+                if (selectedLocationLists.length > 0) {
+                    // Nếu còn địa chỉ, hiển thị địa chỉ cuối cùng
+                    locationInput.value = selectedLocationLists[selectedLocationLists.length - 1].locationName;
+                } else {
+                    // Nếu không còn địa chỉ nào, xóa nội dung ô search
+                    locationInput.value = "";
+                }
+                
                 renderSelectedLocations();
             });
             selectedLocationsEl.appendChild(tag);
@@ -432,6 +456,10 @@
         selectedLocationLists = [];
         renderSelectedLocations();
         listLocationBackup = [];
+        
+        // Xóa nội dung ô search input khi thay đổi tỉnh
+        locationInput.value = "";
+        
         dropdown2.style.height = 25.3 + 2.1 * selectedLocationLists.length + 'rem';
         renderLocations(id);
     }
@@ -479,8 +507,11 @@
             return;
         }
         selectedLocationLists.push(loc);
+        
+        // Cập nhật ô search input để hiển thị địa chỉ đã chọn
+        locationInput.value = loc.locationName;
+        
         renderSelectedLocations();
-        locationInput.value = "";
         renderLocations(searchInput.dataset.id);
     }
 
@@ -505,7 +536,10 @@
         $('#provinceSelected').html(val);
         listLocationBackup = [];
         dropdown2.classList.add('hidden');
-        $('#locationBtn').click();
+        
+        // Close the location dropdown
+        document.getElementById('locationBtn').classList.remove('active');
+        document.getElementById('locationMenu').classList.remove('active');
     }
 
     function showSlides(n) {
@@ -718,6 +752,16 @@
         menu.addEventListener('click', function (e) {
             e.stopPropagation();
         });
+
+        // Close dropdown when clicking on a menu item
+        menu.addEventListener('click', function (e) {
+            if (e.target.classList.contains('location-item')) {
+                setTimeout(() => {
+                    button.classList.remove('active');
+                    menu.classList.remove('active');
+                }, 100);
+            }
+        });
     }
 
     if (!window._dropdownDocClick) {
@@ -740,16 +784,27 @@
         const searchText = document.getElementById('searchInput').value;
         const activeTab = document.querySelector('.tab-item.active');
         const propertyType = selectedPropertyType || (activeTab ? activeTab.dataset.type : null);
+        
+        // Get price range values
+        const minPrice = document.getElementById('minInputPrice').value;
+        const maxPrice = document.getElementById('maxInputPrice').value;
+        
+        // Get area range values
+        const minArea = document.getElementById('minInputArea').value;
+        const maxArea = document.getElementById('maxInputArea').value;
+
+        // Check if search text contains address information
+        const hasAddressSearch = searchText && searchText.trim() !== '';
 
         const filterData = {
             type: propertyType,
             province: provinceSelected,
             provinceName: provinceName,
             keyword: searchText,
-            minPrice: $('#minInputPrice').val(),
-            maxPrice: $('#maxInputPrice').val(),
-            minArea: $('#minInputArea').val(),
-            maxArea: $('#maxInputArea').val(),
+            minPrice: minPrice,
+            maxPrice: maxPrice,
+            minArea: minArea,
+            maxArea: maxArea,
             selectedLocations: selectedLocationLists
         };
 
@@ -763,11 +818,13 @@
             searchParams.append('type', propertyType);
         }
         if (provinceSelected) searchParams.append('province', provinceSelected);
-        if (searchText) searchParams.append('keyword', searchText);
-        if (filterData.minPrice) searchParams.append('minPrice', filterData.minPrice);
-        if (filterData.maxPrice) searchParams.append('maxPrice', filterData.maxPrice);
-        if (filterData.minArea) searchParams.append('minArea', filterData.minArea);
-        if (filterData.maxArea) searchParams.append('maxArea', filterData.maxArea);
+        if (searchText && searchText.trim() !== '') {
+            searchParams.append('keyword', searchText); // Chỉ gửi keyword, không cần address riêng
+        }
+        if (minPrice && minPrice !== '0') searchParams.append('minPrice', minPrice);
+        if (maxPrice && maxPrice !== '100') searchParams.append('maxPrice', maxPrice);
+        if (minArea && minArea !== '0') searchParams.append('minArea', minArea);
+        if (maxArea && maxArea !== '100') searchParams.append('maxArea', maxArea);
 
         const searchUrl = `/Home/Search?${searchParams.toString()}`;
         window.location.href = searchUrl;
@@ -780,16 +837,27 @@
         const searchText = document.getElementById('searchInput').value;
         const activeTab = document.querySelector('.tab-item.active');
         const propertyType = selectedPropertyType || (activeTab ? activeTab.dataset.type : null);
+        
+        // Get price range values
+        const minPrice = document.getElementById('minInputPrice').value;
+        const maxPrice = document.getElementById('maxInputPrice').value;
+        
+        // Get area range values
+        const minArea = document.getElementById('minInputArea').value;
+        const maxArea = document.getElementById('maxInputArea').value;
+
+        // Check if search text contains address information
+        const hasAddressSearch = searchText && searchText.trim() !== '';
 
         const aiSearchData = {
             type: propertyType,
             province: provinceSelected,
             provinceName: provinceName,
             keyword: searchText,
-            minPrice: $('#minInputPrice').val(),
-            maxPrice: $('#maxInputPrice').val(),
-            minArea: $('#minInputArea').val(),
-            maxArea: $('#maxInputArea').val(),
+            minPrice: minPrice,
+            maxPrice: maxPrice,
+            minArea: minArea,
+            maxArea: maxArea,
             selectedLocations: selectedLocationLists
         };
 

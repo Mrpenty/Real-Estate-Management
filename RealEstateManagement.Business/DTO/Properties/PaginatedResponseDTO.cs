@@ -4,6 +4,7 @@ namespace RealEstateManagement.Business.DTO.Properties
     {
         public List<T> Data { get; set; }
         public int TotalCount { get; set; }
+        public int totalItems { get; set; } // Added for API compatibility
         public int Page { get; set; }
         public int PageSize { get; set; }
         public int TotalPages { get; set; }

@@ -92,8 +92,8 @@ namespace RealEstateManagement.Business.Services.Properties
         public async Task<PaginatedResponseDTO<HomePropertyDTO>> GetPaginatedPropertiesAsync(
             int page = 1, int pageSize = 10,
             int? userId = 0, string type = "", string provinces = "", string wards = "", string streets = "",
-            int minPrice = 0, int maxPrice = 100,
-            int minArea = 0, int maxArea = 100, int minRoom = 0, int maxRoom = 15)
+            string keyword = "", int minPrice = 0, int maxPrice = 100,
+            int minArea = 0, int maxArea = 100, int minRoom = 0, int maxRoom = 15, string sortBy = "newest")
         {
             // Lấy danh sách properties
             var properties = (await _repository.GetAllAsync()).AsQueryable();
@@ -103,6 +103,7 @@ namespace RealEstateManagement.Business.Services.Properties
                 {
                     Data = new List<HomePropertyDTO>(),
                     TotalCount = 0,
+                    totalItems = 0, // Add this for API compatibility
                     Page = page,
                     PageSize = pageSize,
                     TotalPages = 0,
@@ -118,127 +119,244 @@ namespace RealEstateManagement.Business.Services.Properties
                 .Where(c => c.UserId == userId)
                 .ToListAsync();
 
-            var result = new List<HomePropertyDTO>();
-
             // Apply filters
             if (!string.IsNullOrWhiteSpace(type))
             {
-                properties = properties.Where(p => p.PropertyType.Name.ToLower() == type.ToLower());
+                properties = properties.Where(p => p.PropertyType != null && p.PropertyType.Name != null && p.PropertyType.Name.ToLower().Contains(type.ToLower()));
             }
 
-            if (!string.IsNullOrEmpty(provinces))
+            if (!string.IsNullOrWhiteSpace(keyword))
             {
-                var Provinces = provinces.Split(',').Select(int.Parse).ToList();
-                properties = properties.Where(p => p.Address != null &&
-                                                   p.Address.Province != null &&
-                                                   Provinces.Contains(p.Address.Province.Id));
+                var keywordLower = keyword.ToLower().Trim();
+                
+                // Debug logging
+                Console.WriteLine($"Original keyword: '{keyword}'");
+                Console.WriteLine($"Processed keyword: '{keywordLower}'");
+                
+                // Tách từ khóa thành các phần nhỏ hơn để tìm kiếm linh hoạt hơn
+                var keywordParts = keywordLower.Split(new[] { ',', ' ', '-', '_' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Where(part => part.Length > 2) // Chỉ xem xét các phần có độ dài > 2 ký tự
+                    .Select(part => part.Trim())
+                    .ToList();
+
+                Console.WriteLine($"Keyword parts: [{string.Join(", ", keywordParts)}]");
+                
+                // Nếu có nhiều phần từ khóa, tìm kiếm theo từng phần
+                if (keywordParts.Count > 1)
+                {
+                    Console.WriteLine($"Using multi-part search with {keywordParts.Count} parts");
+                    properties = properties.Where(p => keywordParts.Any(part =>
+                        (p.Title != null && p.Title.ToLower().Contains(part)) ||
+                        (p.Description != null && p.Description.ToLower().Contains(part)) ||
+                        (p.PropertyType != null && p.PropertyType.Name != null && p.PropertyType.Name.ToLower().Contains(part)) ||
+                        // Tìm kiếm theo địa chỉ
+                        (p.Address != null && (
+                            (p.Address.DetailedAddress != null && p.Address.DetailedAddress.ToLower().Contains(part)) ||
+                            (p.Address.Street != null && p.Address.Street.Name != null && p.Address.Street.Name.ToLower().Contains(part)) ||
+                            (p.Address.Ward != null && p.Address.Ward.Name != null && p.Address.Ward.Name.ToLower().Contains(part)) ||
+                            (p.Address.Province != null && p.Address.Province.Name != null && p.Address.Province.Name.ToLower().Contains(part))
+                        ))
+                    ));
+                }
+                else
+                {
+                    Console.WriteLine($"Using single keyword search");
+                    // Tìm kiếm theo từ khóa đầy đủ
+                    properties = properties.Where(p => 
+                        (p.Title != null && p.Title.ToLower().Contains(keywordLower)) ||
+                        (p.Description != null && p.Description.ToLower().Contains(keywordLower)) ||
+                        (p.PropertyType != null && p.PropertyType.Name != null && p.PropertyType.Name.ToLower().Contains(keywordLower)) ||
+                        // Tìm kiếm theo địa chỉ
+                        (p.Address != null && (
+                            (p.Address.DetailedAddress != null && p.Address.DetailedAddress.ToLower().Contains(keywordLower)) ||
+                            (p.Address.Street != null && p.Address.Street.Name != null && p.Address.Street.Name.ToLower().Contains(keywordLower)) ||
+                            (p.Address.Ward != null && p.Address.Ward.Name != null && p.Address.Ward.Name.ToLower().Contains(keywordLower)) ||
+                            (p.Address.Province != null && p.Address.Province.Name != null && p.Address.Province.Name.ToLower().Contains(keywordLower))
+                        ))
+                    );
+                }
+                
+                // Log số lượng kết quả sau khi filter
+                var countAfterKeyword = properties.Count();
+                Console.WriteLine($"Properties count after keyword filter: {countAfterKeyword}");
             }
-
-            if (!string.IsNullOrEmpty(wards))
-            {
-                var Wards = wards.Split(',').Select(int.Parse).ToList();
-                properties = properties.Where(p => p.Address != null &&
-                                                   p.Address.Ward != null &&
-                                                   Wards.Contains(p.Address.Ward.Id));
-            }
-
-            if (!string.IsNullOrEmpty(streets))
-            {
-                var Streets = streets.Split(',').Select(int.Parse).ToList();
-                properties = properties.Where(p => p.Address != null &&
-                                                   p.Address.Street != null &&
-                                                   Streets.Contains(p.Address.Street.Id));
-            }
-
-            var now = DateTime.UtcNow;
-
-            foreach (var p in properties)
+            
+            // Apply province filter
+            if (!string.IsNullOrWhiteSpace(provinces))
             {
                 try
                 {
-                    var ratingNo = p.Reviews?.Where(c => !c.IsFlagged && c.IsVisible).Count() ?? 0;
-                    var ratingSum = p.Reviews?.Where(c => !c.IsFlagged && c.IsVisible).Sum(c => c.Rating) ?? 0;
-                    var rating = ratingNo > 0 ? ratingSum / ratingNo : 0;
-
-                    var interested = interestedProp.FirstOrDefault(c => c.PropertyId == p.Id);
-
-                    // Quy đổi giờ cho reminder
-                    var startTime = 1;
-                    var endTime = 2;
-
-                    var isReminderRenterConfirmInterested = interested?.Status == InterestedStatus.WaitingForRenterReply
-                        && now.Subtract(interested.InterestedAt).TotalHours >= startTime
-                        && now.Subtract(interested.InterestedAt).TotalHours <= endTime ? 1
-                        : interested?.Status == InterestedStatus.WaitingForRenterReply
-                        && now.Subtract(interested.InterestedAt).TotalHours > endTime ? 2 : 0;
-
-                    result.Add(new HomePropertyDTO
-                    {
-                        Id = p.Id,
-                        Title = p.Title,
-                        Description = p.Description,
-                        Type = p.PropertyType.Name,
-                        AddressID = p.AddressId,
-                        StreetId = p.Address?.StreetId,
-                        Street = p.Address?.Street?.Name,
-                        ProvinceId = p.Address?.ProvinceId,
-                        Province = p.Address?.Province?.Name,
-                        WardId = p.Address?.WardId,
-                        Ward = p.Address?.Ward?.Name,
-                        DetailedAddress = p.Address?.DetailedAddress,
-                        Area = p.Area,
-                        Bedrooms = p.Bedrooms,
-                        IsFavorite = favoriteUsers.Any(c => c.PropertyId == p.Id),
-                        Price = p.Price,
-                        Status = p.Status,
-                        Location = p.Location,
-                        CreatedAt = p.CreatedAt,
-                        ViewsCount = p.ViewsCount,
-                        PrimaryImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary)?.Url,
-                        LandlordId = p.Landlord?.Id ?? 0,
-                        IsInterested = interestedProp.Any(c => c.PropertyId == p.Id),
-                        InterestedStatus = interested?.Status ?? InterestedStatus.None,
-                        InterestedId = interested?.Id ?? 0,
-                        IsReminderRenterConfirmInterested = isReminderRenterConfirmInterested,
-                        LandlordName = p.Landlord?.Name,
-                        Rating = rating,
-                        RatingNo = ratingNo,
-                        LandlordPhoneNumber = p.Landlord?.PhoneNumber,
-                        LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl,
-                        Amenities = p.PropertyAmenities?
-                                      .Where(pa => pa.Amenity != null)
-                                      .Select(pa => pa.Amenity.Name)
-                                      .ToList() ?? new List<string>(),
-                        PromotionPackageName = p.PropertyPromotions?
-                                                  .OrderByDescending(pp => pp.PromotionPackage.Level)
-                                                  .Select(pp => pp.PromotionPackage.Name)
-                                                  .FirstOrDefault()
-                    });
+                    var provinceIds = provinces.Split(',').Select(int.Parse).ToList();
+                    properties = properties.Where(p => p.Address != null && provinceIds.Contains(p.Address.ProvinceId ?? 0));
+                    Console.WriteLine($"Properties count after province filter: {properties.Count()}");
                 }
-                catch (Exception ex)
+                catch (FormatException)
                 {
-                    Console.WriteLine($"Lỗi khi xử lý Property Id = {p.Id}: {ex.Message}");
+                    Console.WriteLine("Invalid province format, skipping province filter");
                 }
             }
 
-            var totalCount = result.Count;
-            var totalPages = Math.Max(1, (int)Math.Ceiling((double)totalCount / pageSize));
-            page = Math.Max(1, Math.Min(page, totalPages));
+            if (!string.IsNullOrWhiteSpace(wards))
+            {
+                try
+                {
+                    var wardIds = wards.Split(',').Select(int.Parse).ToList();
+                    properties = properties.Where(p => p.Address != null && wardIds.Contains(p.Address.WardId ?? 0));
+                    Console.WriteLine($"Properties count after ward filter: {properties.Count()}");
+                }
+                catch (FormatException)
+                {
+                    Console.WriteLine("Invalid ward format, skipping ward filter");
+                }
+            }
 
-            var pagedData = result
-                .OrderByDescending(p => p.CreatedAt)
+            if (!string.IsNullOrWhiteSpace(streets))
+            {
+                try
+                {
+                    var streetIds = streets.Split(',').Select(int.Parse).ToList();
+                    properties = properties.Where(p => p.Address != null && streetIds.Contains(p.Address.StreetId ?? 0));
+                    Console.WriteLine($"Properties count after street filter: {properties.Count()}");
+                }
+                catch (FormatException)
+                {
+                    Console.WriteLine("Invalid street format, skipping street filter");
+                }
+            }
+
+            if (minPrice > 0)
+            {
+                properties = properties.Where(p => p.Price >= minPrice);
+            }
+
+            if (maxPrice < 100)
+            {
+                properties = properties.Where(p => p.Price <= maxPrice);
+            }
+
+            if (minArea > 0)
+            {
+                properties = properties.Where(p => p.Area >= minArea);
+            }
+
+            if (maxArea < 100)
+            {
+                properties = properties.Where(p => p.Area <= maxArea);
+            }
+
+            if (minRoom > 0)
+            {
+                properties = properties.Where(p => p.Bedrooms >= minRoom);
+            }
+
+            if (maxRoom < 15)
+            {
+                properties = properties.Where(p => p.Bedrooms <= maxRoom);
+            }
+
+            // Apply sorting
+            properties = sortBy switch
+            {
+                "price_asc" => properties.OrderBy(p => p.Price),
+                "price_desc" => properties.OrderByDescending(p => p.Price),
+                "area_asc" => properties.OrderBy(p => p.Area),
+                "area_desc" => properties.OrderByDescending(p => p.Area),
+                "newest" => properties.OrderByDescending(p => p.CreatedAt),
+                _ => properties.OrderByDescending(p => p.CreatedAt)
+            };
+
+            var totalCount = properties.Count();
+            Console.WriteLine($"Total properties count before pagination: {totalCount}");
+
+            // Apply pagination
+            var paginatedProperties = properties
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
 
+            Console.WriteLine($"Final paginated result count: {paginatedProperties.Count}");
+
+            var result = new List<HomePropertyDTO>();
+
+            foreach (var p in paginatedProperties)
+            {
+                try
+                {
+                    Console.WriteLine($"Processing property ID: {p.Id}, Title: {p.Title}");
+                    Console.WriteLine($"Property Address: {p.Address?.DetailedAddress}, Street: {p.Address?.Street?.Name}, Ward: {p.Address?.Ward?.Name}, Province: {p.Address?.Province?.Name}");
+                    
+                    var propertyDto = new HomePropertyDTO
+                    {
+                        Id = p.Id,
+                        Title = p.Title,
+                        Description = p.Description,
+                        Type = p.PropertyType?.Name ?? "",
+                        AddressID = p.AddressId,
+                        Area = p.Area,
+                        Bedrooms = p.Bedrooms,
+                        Price = p.Price,
+                        Status = p.Status,
+                        Location = $"{p.Address?.DetailedAddress ?? ""}, {p.Address?.Street?.Name ?? ""}, {p.Address?.Ward?.Name ?? ""}, {p.Address?.Province?.Name ?? ""}".Trim(',', ' '),
+                        PrimaryImageUrl = p.Images?.FirstOrDefault()?.Url ?? "",
+                        CreatedAt = p.CreatedAt,
+                        ViewsCount = p.ViewsCount,
+                        LandlordId = p.LandlordId,
+                        LandlordName = p.Landlord?.Name ?? "",
+                        LandlordPhoneNumber = p.Landlord?.PhoneNumber ?? "",
+                        LandlordProfilePictureUrl = p.Landlord?.ProfilePictureUrl ?? "",
+                        PromotionPackageName = p.PropertyPromotions?
+                            .OrderByDescending(pp => pp.PromotionPackage.Level)
+                            .Select(pp => pp.PromotionPackage.Name)
+                            .FirstOrDefault(),
+                        Amenities = p.PropertyAmenities?.Select(pa => pa.Amenity.Name).ToList() ?? new List<string>(),
+                        
+                        // Address information
+                        ProvinceId = p.Address?.ProvinceId,
+                        Province = p.Address?.Province?.Name ?? "",
+                        WardId = p.Address?.WardId,
+                        Ward = p.Address?.Ward?.Name ?? "",
+                        StreetId = p.Address?.StreetId,
+                        Street = p.Address?.Street?.Name ?? "",
+                        DetailedAddress = p.Address?.DetailedAddress ?? "",
+                        
+                        // Interest and favorites
+                        IsFavorite = favoriteUsers.Any(f => f.PropertyId == p.Id),
+                        PropertyPostId = p.Posts?.FirstOrDefault(post => post.Status == PropertyPost.PropertyPostStatus.Approved)?.Id ?? 0,
+                        InterestedId = 0, // Set default since InterestedProperties doesn't exist in Property entity
+                        IsInterested = false, // Set default since InterestedProperties doesn't exist in Property entity
+                        InterestedStatus = InterestedStatus.None, // Set default since InterestedProperties doesn't exist in Property entity
+                        Rating = null, // Set default since Ratings doesn't exist in Property entity
+                        RatingNo = 0, // Set default since Ratings doesn't exist in Property entity
+                        IsReminderRenterConfirmInterested = 0, // Set default since InterestedProperties doesn't exist in Property entity
+                        
+                        // New properties for enhanced functionality
+                        Bathrooms = p.Bathrooms,
+                        PropertyTypeId = p.PropertyTypeId,
+                        PropertyTypeName = p.PropertyType?.Name ?? "",
+                        ImageUrl = p.Images?.FirstOrDefault()?.Url ?? "",
+                        IsPromoted = p.IsPromoted,
+                        ProvinceName = p.Address?.Province?.Name ?? "",
+                        WardName = p.Address?.Ward?.Name ?? "",
+                        StreetName = p.Address?.Street?.Name ?? ""
+                    };
+                    
+                    result.Add(propertyDto);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error processing property {p.Id}: {ex.Message}");
+                }
+            }
+
             return new PaginatedResponseDTO<HomePropertyDTO>
             {
-                Data = pagedData,
+                Data = result,
                 TotalCount = totalCount,
+                totalItems = totalCount, // Add this for API compatibility
                 Page = page,
                 PageSize = pageSize,
-                TotalPages = totalPages,
-                HasNextPage = page < totalPages,
+                TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
+                HasNextPage = page < (int)Math.Ceiling((double)totalCount / pageSize),
                 HasPreviousPage = page > 1
             };
         }
@@ -914,6 +1032,20 @@ namespace RealEstateManagement.Business.Services.Properties
             }).ToList();
 
             return result;
+        }
+
+        private int CalculateReminderStatus(InterestedProperty interestedProperty)
+        {
+            if (interestedProperty == null || interestedProperty.Status != InterestedStatus.WaitingForRenterReply)
+                return 0;
+
+            var timeDiff = DateTime.UtcNow - interestedProperty.InterestedAt;
+            if (timeDiff.TotalHours >= 1 && timeDiff.TotalHours <= 2)
+                return 1; // reminder
+            else if (timeDiff.TotalHours > 2)
+                return 2; // expire
+
+            return 0;
         }
     }
 }

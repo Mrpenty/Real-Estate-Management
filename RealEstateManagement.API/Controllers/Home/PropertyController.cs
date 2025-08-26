@@ -45,8 +45,10 @@ namespace RealEstateManagement.API.Controllers.Home
         [EnableQuery]
         public async Task<IActionResult> GetPaginatedProperties([FromQuery] int page = 1, [FromQuery] int pageSize = 10, 
             [FromQuery] string type = "", [FromQuery] string provinces = "", 
-            [FromQuery] string wards = "", [FromQuery] string streets = "", [FromQuery] int minPrice = 0, [FromQuery] int maxPrice = 100,
-            [FromQuery] int minArea = 0, [FromQuery] int maxArea = 100, [FromQuery] int minRoom = 0, [FromQuery] int maxRoom = 15)
+            [FromQuery] string wards = "", [FromQuery] string streets = "", [FromQuery] string keyword = "",
+            [FromQuery] int minPrice = 0, [FromQuery] int maxPrice = 100,
+            [FromQuery] int minArea = 0, [FromQuery] int maxArea = 100, [FromQuery] int minRoom = 0, [FromQuery] int maxRoom = 15,
+            [FromQuery] string sortBy = "newest")
         {
             try
             {
@@ -63,7 +65,7 @@ namespace RealEstateManagement.API.Controllers.Home
                 }
 
                 var result = await _propertyService.GetPaginatedPropertiesAsync(page, pageSize, 
-                    userId, type, provinces, wards, streets, minPrice, maxPrice, minArea, maxArea, minRoom, maxRoom);
+                    userId, type, provinces, wards, streets, keyword, minPrice, maxPrice, minArea, maxArea, minRoom, maxRoom, sortBy);
 
                 //if (result == null || !result.Data.Any())
                 //    return NotFound("Không tìm thấy bất động sản nào");

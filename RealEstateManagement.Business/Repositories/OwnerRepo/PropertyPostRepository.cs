@@ -146,6 +146,9 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
                 .Include(p => p.Property)
                     .ThenInclude(prop => prop.PropertyAmenities)
                         .ThenInclude(pa => pa.Amenity)
+                .Include(p => p.Property)
+                    .ThenInclude(prop => prop.PropertyType)
+
                 .Include(p => p.Landlord)
                 .FirstOrDefaultAsync(p => p.Id == postId);
         }

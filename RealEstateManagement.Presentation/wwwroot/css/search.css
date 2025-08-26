@@ -586,20 +586,82 @@
     color: #ff6b35;
 }
 
-#propertiesContainer .property-price {
-    font-size: 1.3rem;
-    font-weight: 800;
-    color: #ef4444;
-    margin-bottom: 8px;
+/* Property Info Section - New Structure */
+#propertiesContainer .property-info-section {
+    margin-bottom: 16px;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 8px;
 }
 
-#propertiesContainer .price-negotiable {
+#propertiesContainer .property-info-section > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 0.9rem;
+    color: #4b5563;
+}
+
+#propertiesContainer .property-info-section i {
+    width: 16px;
+    height: 16px;
+    color: #6b7280;
+    flex-shrink: 0;
+}
+
+#propertiesContainer .property-type {
+    color: #059669;
+    font-weight: 500;
+}
+
+#propertiesContainer .property-type i {
+    color: #059669;
+}
+
+#propertiesContainer .property-rooms {
+    color: #7c3aed;
+    font-weight: 500;
+}
+
+#propertiesContainer .property-rooms i {
+    color: #7c3aed;
+}
+
+#propertiesContainer .property-price-info {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+#propertiesContainer .property-price-info i {
+    color: #dc2626;
+}
+
+#propertiesContainer .price-value {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+#propertiesContainer .price-negotiable {
+    font-size: 0.8rem;
     font-weight: 400;
     color: #6b7280;
+}
+
+#propertiesContainer .property-address {
+    color: #6b7280;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+#propertiesContainer .property-address i {
+    color: #6b7280;
+}
+
+#propertiesContainer .property-address span {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 #propertiesContainer .property-features {
@@ -892,6 +954,16 @@
         padding: 16px;
     }
     
+    #propertiesContainer .property-info-section {
+        gap: 7px;
+        margin-bottom: 14px;
+    }
+    
+    #propertiesContainer .property-info-section > div {
+        font-size: 0.85rem;
+        gap: 7px;
+    }
+    
     #propertiesContainer .property-footer {
         flex-direction: row;
         gap: 16px;
@@ -923,6 +995,25 @@
         padding: 15px;
     }
     
+    #propertiesContainer .property-info-section {
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+    
+    #propertiesContainer .property-info-section > div {
+        font-size: 0.8rem;
+        gap: 6px;
+    }
+    
+    #propertiesContainer .property-info-section i {
+        width: 14px;
+        height: 14px;
+    }
+    
+    #propertiesContainer .price-value {
+        font-size: 0.9rem;
+    }
+    
     #propertiesContainer .property-footer {
         flex-direction: column;
         gap: 16px;
@@ -935,10 +1026,6 @@
     
     #propertiesContainer .property-title {
         font-size: 1rem;
-    }
-    
-    #propertiesContainer .property-price {
-        font-size: 1.1rem;
     }
     
     #propertiesContainer .property-features {
