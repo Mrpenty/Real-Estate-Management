@@ -769,12 +769,6 @@
     font-weight: 700;
 }
 
-#propertiesContainer .price-negotiable {
-    font-size: 0.8rem;
-    font-weight: 400;
-    color: #6b7280;
-}
-
 #propertiesContainer .property-address {
     color: #6b7280;
     font-weight: 400;
@@ -791,6 +785,73 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+#propertiesContainer .property-meta {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+#propertiesContainer .property-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+#propertiesContainer .property-meta i {
+    color: #9ca3af;
+    width: 14px;
+    height: 14px;
+}
+
+#propertiesContainer .property-actions {
+    display: flex;
+    gap: 10px;
+}
+
+#propertiesContainer .action-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 120px;
+    font-size: 14px;
+}
+
+#propertiesContainer .btn-primary {
+    background: #ff6b35;
+    color: white;
+}
+
+#propertiesContainer .btn-primary:hover {
+    background: #e55a2b;
+}
+
+#propertiesContainer .btn-outline {
+    background: transparent;
+    color: #ff6b35;
+    border: 2px solid #ff6b35;
+}
+
+#propertiesContainer .btn-outline:hover {
+    background: #ff6b35;
+    color: white;
+}
+
+
+
+
 
 #propertiesContainer .property-features {
     margin-bottom: 12px;
@@ -815,6 +876,8 @@
     color: #d1d5db;
     font-size: 0.8rem;
 }
+
+
 
 
 
