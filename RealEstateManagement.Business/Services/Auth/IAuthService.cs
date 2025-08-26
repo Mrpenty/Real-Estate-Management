@@ -18,5 +18,10 @@ namespace RealEstateManagement.Business.Services.Auth
         Task<AuthMessDTO> HandleGoogleOAuthCallbackAsync(string code, string redirectUri);
         Task<AuthMessDTO> VerifyEmailConfirmationAsync(string email);
         Task<AuthMessDTO> ResendOtpAsync(string phoneNumber);
+        
+        // Forgot Password methods
+        Task<AuthMessDTO> ForgotPasswordAsync(string phoneNumber);
+        Task<AuthMessDTO> VerifyOtpForPasswordResetAsync(string phoneNumber, string otp);
+        Task<AuthMessDTO> ResetPasswordWithOTPAsync(ResetPasswordWithOTPDTO resetPasswordDTO);
     }
 }

@@ -133,6 +133,84 @@ namespace RealEstateManagement.API.Controllers
             return BadRequest(new { success = false, message = result.ErrorMessage });
         }
 
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDTO request)
+        {
+            if (string.IsNullOrEmpty(request.PhoneNumber))
+            {
+                return BadRequest(new { success = false, message = "Phone number is required" });
+            }
+
+            try
+            {
+                var result = await _authService.ForgotPasswordAsync(request.PhoneNumber);
+                
+                if (result.IsAuthSuccessful)
+                {
+                    return Ok(new { success = true, message = result.ErrorMessage });
+                }
+                
+                return BadRequest(new { success = false, message = result.ErrorMessage });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while processing forgot password request.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpPost("verify-otp-for-password-reset")]
+        public async Task<IActionResult> VerifyOtpForPasswordReset([FromBody] VerifyOtpDTO verifyOtpDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var response = await _authService.VerifyOtpForPasswordResetAsync(verifyOtpDTO.PhoneNumber, verifyOtpDTO.Otp);
+                
+                if (response.IsAuthSuccessful)
+                {
+                    return Ok(new { success = true, message = response.ErrorMessage });
+                }
+                
+                return BadRequest(new { success = false, message = response.ErrorMessage });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while verifying OTP for password reset.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpPost("reset-password-with-otp")]
+        public async Task<IActionResult> ResetPasswordWithOTP([FromBody] ResetPasswordWithOTPDTO resetPasswordDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var response = await _authService.ResetPasswordWithOTPAsync(resetPasswordDTO);
+                
+                if (response.IsAuthSuccessful)
+                {
+                    return Ok(new { success = true, message = response.ErrorMessage });
+                }
+                
+                return BadRequest(new { success = false, message = response.ErrorMessage });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while resetting password with OTP.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
+            }
+        }
+
         [HttpPost("google-login")]
         public async Task<IActionResult> GoogleLoginAsync([FromBody] GoogleLoginDTO googleLoginDTO)
         {

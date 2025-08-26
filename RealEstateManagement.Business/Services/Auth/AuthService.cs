@@ -158,17 +158,30 @@ namespace RealEstateManagement.Business.Services.Auth
                 return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "User not found." };
             }
 
-            if (user.ConfirmationCode != otp || user.ConfirmationCodeExpiry < DateTime.Now)
+            try
             {
-                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Invalid or expired OTP." };
+                // Use Twilio Verify API to verify OTP
+                bool isOtpValid = await _smsService.VerifyOtpAsync(phoneNumber, otp);
+                
+                if (isOtpValid)
+                {
+                    user.PhoneNumberConfirmed = true;
+                    user.ConfirmationCode = null; 
+                    user.ConfirmationCodeExpiry = null;
+                    await _userManager.UpdateAsync(user);
+
+                    return new AuthMessDTO { IsAuthSuccessful = true, ErrorMessage = "Phone number verified successfully." };
+                }
+                else
+                {
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Invalid OTP." };
+                }
             }
-
-            user.PhoneNumberConfirmed = true;
-            user.ConfirmationCode = null; 
-            user.ConfirmationCodeExpiry = null;
-            await _userManager.UpdateAsync(user);
-
-            return new AuthMessDTO { IsAuthSuccessful = true, ErrorMessage = "Phone number verified successfully." };
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error verifying OTP for phone number: {PhoneNumber}", phoneNumber);
+                return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Error verifying OTP. Please try again." };
+            }
         }
 
         public async Task<AuthMessDTO> GoogleLoginAsync(string idToken)
@@ -329,6 +342,119 @@ namespace RealEstateManagement.Business.Services.Auth
             // Generate a 6-digit OTP
             Random random = new Random();
             return random.Next(100000, 999999).ToString();
+        }
+
+        // Forgot Password methods
+        public async Task<AuthMessDTO> ForgotPasswordAsync(string phoneNumber)
+        {
+            try
+            {
+                var user = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber);
+                if (user == null)
+                {
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Số điện thoại không tồn tại trong hệ thống." };
+                }
+
+                // Send OTP via Twilio Verify API (Twilio generates and sends OTP automatically)
+                await _smsService.SendOtpAsync(phoneNumber, ""); // Empty string since Verify API generates OTP
+
+                return new AuthMessDTO 
+                { 
+                    IsAuthSuccessful = true, 
+                    ErrorMessage = "Mã OTP đã được gửi đến số điện thoại của bạn." 
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ForgotPasswordAsync for phone: {PhoneNumber}", phoneNumber);
+                return new AuthMessDTO 
+                { 
+                    IsAuthSuccessful = false, 
+                    ErrorMessage = $"Không thể gửi mã OTP: {ex.Message}" 
+                };
+            }
+        }
+
+        public async Task<AuthMessDTO> VerifyOtpForPasswordResetAsync(string phoneNumber, string otp)
+        {
+            try
+            {
+                var user = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber);
+                if (user == null)
+                {
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Số điện thoại không tồn tại." };
+                }
+
+                // Use Twilio Verify API to verify OTP
+                bool isOtpValid = await _smsService.VerifyOtpAsync(phoneNumber, otp);
+                
+                if (isOtpValid)
+                {
+                    return new AuthMessDTO 
+                    { 
+                        IsAuthSuccessful = true, 
+                        ErrorMessage = "Xác thực OTP thành công. Vui lòng nhập mật khẩu mới." 
+                    };
+                }
+                else
+                {
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Mã OTP không đúng hoặc đã hết hạn." };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in VerifyOtpForPasswordResetAsync for phone: {PhoneNumber}", phoneNumber);
+                return new AuthMessDTO 
+                { 
+                    IsAuthSuccessful = false, 
+                    ErrorMessage = $"Lỗi xác thực OTP: {ex.Message}" 
+                };
+            }
+        }
+
+        public async Task<AuthMessDTO> ResetPasswordWithOTPAsync(ResetPasswordWithOTPDTO resetPasswordDTO)
+        {
+            try
+            {
+                // Validate passwords match
+                if (resetPasswordDTO.NewPassword != resetPasswordDTO.ConfirmPassword)
+                {
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Mật khẩu mới và xác nhận mật khẩu không khớp." };
+                }
+
+                var user = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == resetPasswordDTO.PhoneNumber);
+                if (user == null)
+                {
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Số điện thoại không tồn tại." };
+                }
+
+                // Reset password
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var result = await _userManager.ResetPasswordAsync(user, token, resetPasswordDTO.NewPassword);
+
+                if (result.Succeeded)
+                {
+                    return new AuthMessDTO 
+                    { 
+                        IsAuthSuccessful = true, 
+                        ErrorMessage = "Đặt lại mật khẩu thành công. Vui lòng đăng nhập với mật khẩu mới." 
+                    };
+                }
+                else
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = $"Không thể đặt lại mật khẩu: {errors}" };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ResetPasswordWithOTPAsync for phone: {PhoneNumber}", resetPasswordDTO.PhoneNumber);
+                return new AuthMessDTO 
+                { 
+                    IsAuthSuccessful = false, 
+                    ErrorMessage = $"Lỗi đặt lại mật khẩu: {ex.Message}" 
+                };
+            }
         }
 
     }

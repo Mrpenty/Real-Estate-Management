@@ -50,6 +50,22 @@ namespace RealEstateManagement.Presentation.Controllers
             return View();
         }
 
+        [HttpGet]
+        public IActionResult ResetPassword(string phone)
+        {
+            if (string.IsNullOrEmpty(phone))
+            {
+                return RedirectToAction("ForgotPassword");
+            }
+            return View();
+        }
+
+        [AllowAnonymous]
+        public IActionResult TestForgotPassword()
+        {
+            return View();
+        }
+
     }
 
    

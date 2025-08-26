@@ -42,6 +42,8 @@ namespace RealEstateManagement.Business.Services
             _httpClient = new HttpClient();
             _openAiApiKey = configuration["OpenAI:ApiKey"];
             _openStreetMapService = openStreetMapService;
+            
+            Console.WriteLine($"AIRecommendationService initialized. OpenStreetMap service: {_openStreetMapService != null}");
         }
 
         public async Task<LocationRecommendationResponse> GetLocationBasedRecommendationsAsync(LocationRecommendationRequest request)
@@ -95,18 +97,18 @@ namespace RealEstateManagement.Business.Services
         {
             try
             {
-                Console.WriteLine($"=== AI Recommendation Request ===");
+                Console.WriteLine("=== AI Recommendation Request ===");
                 Console.WriteLine($"Search Location: {request.SearchLocation}");
                 Console.WriteLine($"Property Type: {request.PropertyType}");
-                Console.WriteLine($"Price Range: {request.MinPrice} - {request.MaxPrice} triệu");
+                Console.WriteLine($"Price Range: {request.MinPrice} - {request.MaxPrice} trieu");
                 Console.WriteLine($"Bedrooms: {request.MinBedrooms}");
-                Console.WriteLine($"Area: {request.MinArea} - {request.MaxArea} m²");
+                Console.WriteLine($"Area: {request.MinArea} - {request.MaxArea} m2");
                 
                 // Lấy tọa độ từ địa chỉ tìm kiếm
                 var searchLocation = await GetCoordinatesFromAddressAsync(request.SearchLocation);
                 if (searchLocation == null)
                 {
-                    throw new Exception("Không thể xác định tọa độ từ địa chỉ tìm kiếm");
+                    throw new Exception("Khong the xac dinh toa do tu dia chi tim kiem");
                 }
                 
                 Console.WriteLine($"Resolved coordinates: ({searchLocation.Latitude}, {searchLocation.Longitude}) - {searchLocation.Address}");
@@ -155,6 +157,8 @@ namespace RealEstateManagement.Business.Services
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in GetRecommendationsByCriteriaAsync: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 throw new Exception($"Error getting recommendations by criteria: {ex.Message}");
             }
         }
@@ -169,6 +173,7 @@ namespace RealEstateManagement.Business.Services
                 .Include(p => p.Address)
                 .ThenInclude(a => a.Street)
                 .Include(p => p.Images)
+                .Include(p => p.PropertyType) // Thêm PropertyType Include
                 .Include(p => p.PropertyAmenities)
                 .ThenInclude(pa => pa.Amenity)
                 .Include(p => p.Landlord)
@@ -224,12 +229,12 @@ namespace RealEstateManagement.Business.Services
                         Id = property.Id,
                         Title = property.Title,
                         Description = property.Description,
-                        Type = property.PropertyType.Name,
+                        Type = property.PropertyType?.Name ?? "Không xác định",
                         Area = property.Area,
                         Bedrooms = property.Bedrooms,
                         Price = property.Price,
                         Status = property.Status,
-                        PrimaryImageUrl = property.Images.FirstOrDefault()?.Url,
+                        PrimaryImageUrl = property.Images?.FirstOrDefault()?.Url,
                         Province = property.Address?.Province?.Name,
                         Ward = property.Address?.Ward?.Name,
                         Street = property.Address?.Street?.Name,
@@ -239,9 +244,12 @@ namespace RealEstateManagement.Business.Services
                         DistanceKm = distance,
                         WalkingTimeMinutes = (int)(distance * 15), // Ước tính thời gian đi bộ
                         DrivingTimeMinutes = (int)(distance * 3), // Ước tính thời gian lái xe
-                        Amenities = property.PropertyAmenities.Select(pa => pa.Amenity.Description).ToList(),
+                        Amenities = property.PropertyAmenities?.Select(pa => pa.Amenity?.Description).Where(d => !string.IsNullOrEmpty(d)).ToList() ?? new List<string>(),
                         NearbyPoints = new List<string>() // Bỏ sample data
                     };
+                    
+                    // Debug: Log property type information
+                    Console.WriteLine($"  Created DTO for Property {property.Id}: Type='{propertyDto.Type}' from PropertyType.Name='{property.PropertyType?.Name}'");
 
                     nearbyProperties.Add(propertyDto);
                     Console.WriteLine($"Added property {property.Id} to nearby list");
@@ -679,17 +687,37 @@ namespace RealEstateManagement.Business.Services
         {
             var filtered = properties.AsQueryable();
 
-            Console.WriteLine($"Filtering {properties.Count} properties with criteria:");
-            Console.WriteLine($"PropertyType: {request.PropertyType}");
-            Console.WriteLine($"Price: {request.MinPrice} - {request.MaxPrice}");
-            Console.WriteLine($"Bedrooms: {request.MinBedrooms}");
-            Console.WriteLine($"Area: {request.MinArea} - {request.MaxArea}");
+                            Console.WriteLine($"Filtering {properties.Count} properties with criteria:");
+                Console.WriteLine($"PropertyType: '{request.PropertyType}' (length: {request.PropertyType?.Length ?? 0})");
+                Console.WriteLine($"Price: {request.MinPrice} - {request.MaxPrice}");
+                Console.WriteLine($"Bedrooms: {request.MinBedrooms}");
+                Console.WriteLine($"Area: {request.MinArea} - {request.MaxArea}");
+                
+                // Debug: Log first few properties to see their types
+                Console.WriteLine("Sample properties and their types:");
+                foreach (var prop in properties.Take(3))
+                {
+                    Console.WriteLine($"  Property {prop.Id}: Type='{prop.Type}' (length: {prop.Type?.Length ?? 0})");
+                }
 
             // Lọc theo loại bất động sản (nếu có)
             if (!string.IsNullOrEmpty(request.PropertyType))
             {
                 var originalCount = filtered.Count();
-                filtered = filtered.Where(p => p.Type.ToLower().Contains(request.PropertyType.ToLower()));
+                var searchType = request.PropertyType.ToLower().Trim();
+                
+                // Debug: Log the search type and available types
+                var availableTypes = filtered.Select(p => p.Type).Where(t => !string.IsNullOrEmpty(t)).Distinct().ToList();
+                Console.WriteLine($"Searching for PropertyType: '{request.PropertyType}' (normalized: '{searchType}')");
+                Console.WriteLine($"Available types in database: {string.Join(", ", availableTypes)}");
+                
+                // More flexible matching logic
+                filtered = filtered.Where(p => !string.IsNullOrEmpty(p.Type) && 
+                    (p.Type.ToLower().Contains(searchType) || 
+                     searchType.Contains(p.Type.ToLower()) ||
+                     p.Type.ToLower().Replace(" ", "").Contains(searchType.Replace(" ", "")) ||
+                     searchType.Replace(" ", "").Contains(p.Type.ToLower().Replace(" ", ""))));
+                
                 Console.WriteLine($"After PropertyType filter: {filtered.Count()} (removed {originalCount - filtered.Count()})");
             }
 
@@ -751,7 +779,7 @@ namespace RealEstateManagement.Business.Services
                 // Không còn sử dụng UserPreference
 
                 // Tăng điểm nếu có nhiều tiện ích
-                score += property.Amenities.Count * 2;
+                score += (property.Amenities?.Count ?? 0) * 2;
 
                 // Đảm bảo điểm không âm
                 property.MatchScore = Math.Max(0, Math.Min(100, score));
@@ -808,7 +836,7 @@ namespace RealEstateManagement.Business.Services
                 {
                     var typeScore = CalculateTypeScore(property.Type, request.PropertyType);
                     score = score * 0.9 + typeScore * 0.1;
-                    reasons.Add($"Loại BDS: {property.Type} (điểm: {typeScore:F1})");
+                    reasons.Add($"Loại BDS: {property.Type ?? "N/A"} (điểm: {typeScore:F1})");
                 }
 
                 // 6. Điểm bonus theo sở thích người dùng - ĐÃ BỎ
@@ -891,6 +919,9 @@ namespace RealEstateManagement.Business.Services
 
         private double CalculateTypeScore(string propertyType, string searchType)
         {
+            if (string.IsNullOrEmpty(propertyType) || string.IsNullOrEmpty(searchType))
+                return 60; // Không match nếu thiếu thông tin
+            
             var propType = propertyType.ToLower();
             var search = searchType.ToLower();
             
@@ -948,8 +979,8 @@ namespace RealEstateManagement.Business.Services
             if (!requiredAmenities.Any()) return 0;
             
             var matchedCount = requiredAmenities.Count(required => 
-                property.Amenities.Any(amenity => 
-                    amenity.ToLower().Contains(required.ToLower())));
+                (property.Amenities?.Any(amenity => 
+                    amenity.ToLower().Contains(required.ToLower())) ?? false));
             
             return matchedCount * 8; // 8 điểm cho mỗi tiện ích match
         }
@@ -1245,21 +1276,42 @@ namespace RealEstateManagement.Business.Services
                 {
                     Console.WriteLine($"Lấy tiện ích và giao thông riêng cho BDS {property.Id} tại {property.Province}, {property.Ward}, {property.Street}");
                     
-                    // Lấy tiện ích riêng cho BDS này từ OpenStreetMap API
-                    var propertyAmenities = await _openStreetMapService.GetAmenitiesByAddressAsync(
-                        property.Province ?? "Unknown",
-                        property.Ward ?? "Unknown", 
-                        property.Street ?? "Unknown",
-                        property.DetailedAddress ?? "Unknown"
-                    );
+                    List<DetailedAmenityDTO> propertyAmenities = new List<DetailedAmenityDTO>();
+                    List<string> propertyTransportation = new List<string>();
+                    
+                    // Kiểm tra xem OpenStreetMap service có sẵn sàng không
+                    if (_openStreetMapService != null)
+                    {
+                        try
+                        {
+                            // Lấy tiện ích riêng cho BDS này từ OpenStreetMap API
+                            propertyAmenities = await _openStreetMapService.GetAmenitiesByAddressAsync(
+                                property.Province ?? "Unknown",
+                                property.Ward ?? "Unknown", 
+                                property.Street ?? "Unknown",
+                                property.DetailedAddress ?? "Unknown"
+                            ) ?? new List<DetailedAmenityDTO>();
 
-                    // Lấy giao thông riêng cho BDS này từ OpenStreetMap API
-                    var propertyTransportation = await _openStreetMapService.GetTransportationByAddressAsync(
-                        property.Province ?? "Unknown",
-                        property.Ward ?? "Unknown",
-                        property.Street ?? "Unknown", 
-                        property.DetailedAddress ?? "Unknown"
-                    );
+                            // Lấy giao thông riêng cho BDS này từ OpenStreetMap API
+                            propertyTransportation = await _openStreetMapService.GetTransportationByAddressAsync(
+                                property.Province ?? "Unknown",
+                                property.Ward ?? "Unknown",
+                                property.Street ?? "Unknown", 
+                                property.DetailedAddress ?? "Unknown"
+                            ) ?? new List<string>();
+                        }
+                        catch (Exception osmEx)
+                        {
+                            Console.WriteLine($"Lỗi OpenStreetMap API cho BDS {property.Id}: {osmEx.Message}");
+                            // Sử dụng danh sách rỗng nếu có lỗi
+                            propertyAmenities = new List<DetailedAmenityDTO>();
+                            propertyTransportation = new List<string>();
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"OpenStreetMap service không khả dụng cho BDS {property.Id}");
+                    }
 
                     // Tạo BDS mới với tiện ích và giao thông thực từ API
                     var propertyWithAmenities = new PropertyRecommendationDTO

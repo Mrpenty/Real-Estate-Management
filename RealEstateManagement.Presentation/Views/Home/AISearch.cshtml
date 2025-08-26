@@ -28,10 +28,7 @@
                 <label for="propertyType">🏠 Loại bất động sản</label>
                 <select id="propertyType">
                     <option value="">Tất cả loại</option>
-                    <option value="apartment">Căn hộ</option>
-                    <option value="house">Nhà nguyên căn</option>
-                    <option value="room">Phòng trọ</option>
-                    <option value="villa">Biệt thự</option>
+                    <!-- Property types will be loaded dynamically -->
                 </select>
             </div>
 
@@ -104,6 +101,15 @@
                 🔍 Tìm kiếm với AI
             </button>
             
+            <!-- Test button for debugging -->
+            <button type="button" class="test-button" onclick="testAPI()" style="margin-top: 10px; background-color: #6b7280; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                🧪 Test API
+            </button>
+            
+            <!-- Test button with PropertyType -->
+            <button type="button" class="test-button" onclick="testAPIWithType()" style="margin-top: 10px; background-color: #059669; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                🧪 Test với PropertyType
+            </button>
 
         </form>
 
@@ -142,6 +148,7 @@
             initializeForm();
             loadStoredData();
             setupRangeSliders();
+            loadPropertyTypes(); // Call loadPropertyTypes here
         }, 100);
     });
 
@@ -328,6 +335,7 @@
                 maxBedrooms: parseInt(document.getElementById('maxBedrooms').value),
                 minArea: parseInt(document.getElementById('minArea').value),
                 maxArea: parseInt(document.getElementById('maxArea').value),
+                maxResults: 100,
                 requiredAmenities: getSelectedAmenities()
             };
             
@@ -348,11 +356,7 @@
 
             const result = await response.json();
             
-            // Debug: Log kết quả từ API
-            console.log('=== API RESPONSE DEBUG ===');
-            console.log('Total properties:', result.properties?.length);
-            console.log('Properties:', result.properties);
-            console.log('========================');
+
             
             // Update AI recommendation
             updateAIRecommendation(result.recommendationReason);
@@ -596,16 +600,9 @@
             const amenitiesContainer = document.getElementById(`amenities-${property.id}`);
             if (!amenitiesContainer) return;
 
-            // Debug: Kiểm tra config
-            console.log('Config object:', config);
-            console.log('Config.ai:', config.ai);
-            console.log('Config.ai.nearbyAmenities:', config.ai.nearbyAmenities);
-            
             const endpoint = config.ai.nearbyAmenities;
             if (!endpoint) {
-                console.error('Config không load đúng, sử dụng fallback URL');
                 const fallbackUrl = `https://localhost:7031/api/AIRecommendation/nearby-amenities?latitude=${property.latitude}&longitude=${property.longitude}&radiusKm=2`;
-                console.log('Using fallback URL:', fallbackUrl);
                 const response = await fetch(fallbackUrl, {
                     method: 'GET',
                     headers: {
@@ -623,7 +620,6 @@
             }
 
             const url = `${config.buildApiUrl(endpoint)}?latitude=${property.latitude}&longitude=${property.longitude}&radiusKm=2`;
-            console.log('Calling URL:', url);
 
             // Gọi API để lấy tiện ích xung quanh BDS này
             const response = await fetch(url, {
@@ -652,8 +648,7 @@
         const amenitiesContainer = document.getElementById(`amenities-${propertyId}`);
         if (!amenitiesContainer) return;
 
-        // Kiểm tra cấu trúc dữ liệu từ API
-        console.log('Amenities data for property', propertyId, ':', amenities);
+
         
         // API trả về { amenities: [...], searchRadius: ..., userLocation: {...} }
         let amenitiesList = amenities;
@@ -723,14 +718,9 @@
             const transportationContainer = document.getElementById(`transportation-${property.id}`);
             if (!transportationContainer) return;
 
-            // Debug: Kiểm tra config
-            console.log('Transportation endpoint:', config.ai.transportationInfo);
-            
             const endpoint = config.ai.transportationInfo;
             if (!endpoint) {
-                console.error('Config không load đúng, sử dụng fallback URL');
                 const fallbackUrl = `https://localhost:7031/api/AIRecommendation/transportation-info?latitude=${property.latitude}&longitude=${property.longitude}`;
-                console.log('Using fallback URL:', fallbackUrl);
                 const response = await fetch(fallbackUrl, {
                     method: 'GET',
                     headers: {
@@ -748,7 +738,6 @@
             }
 
             const url = `${config.buildApiUrl(endpoint)}?latitude=${property.latitude}&longitude=${property.longitude}`;
-            console.log('Calling transportation URL:', url);
 
             // Gọi API để lấy thông tin giao thông xung quanh BDS này
             const response = await fetch(url, {
@@ -777,8 +766,7 @@
         const transportationContainer = document.getElementById(`transportation-${propertyId}`);
         if (!transportationContainer) return;
 
-        // Kiểm tra cấu trúc dữ liệu từ API
-        console.log('Transportation data for property', propertyId, ':', transportationInfo);
+
         
         // API trả về { transportationInfo: [...], userLocation: {...} }
         let transportationList = transportationInfo;
@@ -821,5 +809,138 @@
             return (price / 1000).toFixed(1) + ' nghìn';
         }
         return price + ' VND';
+    }
+
+    async function loadPropertyTypes() {
+        try {
+            const response = await fetch('https://localhost:7031/api/PropertyType/GetAllPropertyTypes');
+            if (response.ok) {
+                const propertyTypes = await response.json();
+                const propertyTypeSelect = document.getElementById('propertyType');
+                
+                // Clear existing options except the first one
+                propertyTypeSelect.innerHTML = '<option value="">Tất cả loại</option>';
+                
+                // Add property types from database
+                propertyTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type.name; // Use the actual name from database
+                    option.textContent = type.name;
+                    propertyTypeSelect.appendChild(option);
+                });
+            } else {
+                console.error('Failed to load property types');
+            }
+        } catch (error) {
+            console.error('Error loading property types:', error);
+        }
+    }
+</script> 
+
+<script>
+    // Test function to debug API
+    async function testAPI() {
+        const testData = {
+            searchLocation: "Ha Noi",
+            propertyType: "", // Test without property type first
+            minPrice: 0,
+            maxPrice: 1000,
+            minBedrooms: 0,
+            maxBedrooms: 10,
+            minArea: 0,
+            maxArea: 1000,
+            maxResults: 100,
+            requiredAmenities: []
+        };
+        
+        try {
+            const response = await fetch(config.buildApiUrl(config.ai.searchByCriteria), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(testData)
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert('API test thành công!');
+            } else {
+                const errorText = await response.text();
+                alert('API test thất bại!');
+            }
+        } catch (error) {
+            alert('Lỗi khi test API: ' + error.message);
+        }
+    }
+
+    async function testAPIWithType() {
+        const propertyType = document.getElementById('propertyType').value;
+        const testData = {
+            searchLocation: "Ha Noi",
+            propertyType: propertyType,
+            minPrice: 0,
+            maxPrice: 1000,
+            minBedrooms: 0,
+            maxBedrooms: 10,
+            minArea: 0,
+            maxArea: 1000,
+            maxResults: 100,
+            requiredAmenities: []
+        };
+        
+        try {
+            const response = await fetch(config.buildApiUrl(config.ai.searchByCriteria), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(testData)
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert('API test thành công!');
+            } else {
+                const errorText = await response.text();
+                alert('API test thất bại!');
+            }
+        } catch (error) {
+            alert('Lỗi khi test API: ' + error.message);
+        }
+    }
+</script> 
+
+<script>
+    // Test function to check PropertyType values
+    async function testPropertyTypes() {
+        try {
+            const response = await fetch('/api/PropertyType/GetAllPropertyTypes');
+            if (response.ok) {
+                const propertyTypes = await response.json();
+                alert('PropertyType test hoàn thành!');
+            } else {
+                console.error('Failed to load property types for test');
+                alert('Không thể load PropertyType để test');
+            }
+        } catch (error) {
+            console.error('PropertyType test error:', error);
+            alert('Lỗi khi test PropertyType: ' + error.message);
+        }
+    }
+
+    // Test PropertyType dropdown functionality
+    function testPropertyTypeDropdown() {
+        const propertyTypeSelect = document.getElementById('propertyType');
+        if (!propertyTypeSelect) {
+            console.error('PropertyType select not found');
+            return;
+        }
+        
+        // Test selecting different values
+        if (propertyTypeSelect.options.length > 1) {
+            const testValue = propertyTypeSelect.options[1].value;
+            propertyTypeSelect.value = testValue;
+        }
     }
 </script> 
