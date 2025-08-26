@@ -283,10 +283,34 @@ class PropertyDetailManager {
         this.updateElement('#propId', prop.type || 'N/A');
         this.updateElement('#createTimeId', this.formatDateTime(prop.createdAt));
         this.updateElement('.contactName', prop.landlordName || 'Không xác định');
-        this.updateElement('.bedrooms', prop.bedrooms || 'Không có mô tả' );
-        this.updateElement('.bathrooms', prop.bathrooms || 'Không có mô tả');
-        this.updateElement('.floors', prop.floors || 'Không có mô tả');
-        this.updateElement('.amenity', Array.isArray(prop.amenities) ? prop.amenities.join(' · ') : (prop.amenities || 'Không có mô tả'));
+        this.updateElement('.bedrooms', prop.bedrooms || 'N/A');
+        this.updateElement('.bathrooms', prop.bathrooms || 'N/A');
+        this.updateElement('.floors', prop.floors || 'N/A');
+        // Only show bedrooms if it has a valid value
+        if (prop.bedrooms && prop.bedrooms > 0) {
+            this.updateElement('.bedrooms', prop.bedrooms);
+            $('.bedrooma').show();
+        } else {
+            $('.bedrooma').hide();
+        }
+
+        // Only show bathrooms if it has a valid value
+        if (prop.bathrooms && prop.bathrooms > 0) {
+            this.updateElement('.bathrooms', prop.bathrooms);
+            $('.bathrooms').show();
+        } else {
+            $('.bathrooms').hide();
+        }
+
+        // Only show floors if it has a valid value
+        if (prop.floors && prop.floors > 0) {
+            this.updateElement('.floors', prop.floors);
+            $('.floors').show();
+        } else {
+            $('.floors').hide();
+        }
+        // Handle amenities display
+        this.updateAmenitiesDisplay(prop.amenities);
         this.handleFavoriteButtons(prop.isFavorite);
 
         // Populate image thumbnails with null check
@@ -476,6 +500,39 @@ class PropertyDetailManager {
         if (element.length && value !== undefined) {
             element.html(value);
         }
+    }
+
+    updateAmenitiesDisplay(amenities) {
+        const container = $('#amenitiesContainer');
+        const noAmenities = $('#noAmenities');
+        
+        if (!amenities || !Array.isArray(amenities) || amenities.length === 0) {
+            container.hide();
+            noAmenities.removeClass('hidden');
+            return;
+        }
+
+        // Hide no amenities message
+        noAmenities.addClass('hidden');
+        container.show();
+
+        // Clear existing content
+        container.empty();
+
+        // Add each amenity
+        amenities.forEach(amenity => {
+            if (amenity && amenity.trim()) {
+                const amenityElement = $(`
+                    <div class="amenity-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>${this.escapeHtml(amenity.trim())}</span>
+                    </div>
+                `);
+                container.append(amenityElement);
+            }
+        });
+
+        console.log('Amenities updated:', amenities);
     }
 
     buildAddressString(prop) {

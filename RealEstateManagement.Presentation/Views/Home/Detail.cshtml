@@ -42,16 +42,30 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.5rem;
+        padding: 0.75rem;
         background: white;
-        border-radius: 6px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border-left: 4px solid #ff5722;
     }
 
-        .amenity-item i {
-            color: #ff5722;
-            font-size: 1.2rem;
-        }
+    .amenity-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .amenity-item i {
+        color: #ff5722;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .amenity-item span {
+        font-weight: 500;
+        color: #333;
+        font-size: 0.95rem;
+    }
 
     .extra-details {
         display: grid;
@@ -77,6 +91,25 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
         color: #333;
     }
 
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin: 2rem 0 1rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #ff5722;
+        position: relative;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 50px;
+        height: 2px;
+        background: #ff5722;
+    }
 </style>
 <div class="property-detail-container">
     <div class="property-detail-grid">
@@ -121,6 +154,10 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
                         <span class="area"><span class="areaId"></span> m²</span>
                         <span class="text-black">•</span>
                         <span class="bedrooma"><span class="bedrooms"></span> Phòng</span>
+                        <span class="text-black">•</span>
+                        <span class="bathrooms"><span class="bathrooms"></span> Phòng tắm</span>
+                        @* <span class="text-black">•</span> *@
+                        <span class="floors"><span class="floors"></span> Tầng</span>
                     </div>
                     <span class="update-time">Cập nhật: <span class="timeAgoId"></span></span>
                 </div>
@@ -146,12 +183,18 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
                         <span class="detail-label">Ngày đăng:</span>
                         <span class="detail-value" id="createTimeId"></span>
                     </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Tiện ích </span>
-                        <span class="detail-value" id="amenity"></span>
-                    </div>
                 </div>
 
+                <!-- Amenities Section -->
+                <h2 class="section-title">Tiện ích</h2>
+                <div class="property-amenities">
+                    <div id="amenitiesContainer" class="amenities-grid">
+                        <!-- Amenities will be populated by JavaScript -->
+                    </div>
+                    <div id="noAmenities" class="text-center py-4 text-gray-500 hidden">
+                        Không có tiện ích nào được liệt kê
+                    </div>
+                </div>
 
                 <h2 class="section-title">Thông tin mô tả</h2>
                 <div class="description">
