@@ -425,14 +425,13 @@
                 if (province) searchParams.append('provinces', province);
                 if (ward) searchParams.append('wards', ward);
                 if (street) searchParams.append('streets', street);
-                
+
                 // Xử lý tìm kiếm theo từ khóa (có thể là địa chỉ hoặc title)
                 if (keyword && keyword.trim() !== '') {
                     // Clean và normalize từ khóa
                     const cleanKeyword = keyword.trim().replace(/\s+/g, ' ');
                     console.log('Original keyword:', keyword);
                     console.log('Clean keyword:', cleanKeyword);
-                    
                     // Nếu từ khóa chứa dấu phẩy, có thể là địa chỉ đầy đủ
                     if (cleanKeyword.includes(',')) {
                         console.log('Keyword contains commas, might be full address');
@@ -444,7 +443,7 @@
                         searchParams.append('keyword', cleanKeyword);
                     }
                 }
-                
+
                 if (minPrice && minPrice !== '0') searchParams.append('minPrice', minPrice);
                 if (maxPrice && maxPrice !== '50') searchParams.append('maxPrice', maxPrice);
                 if (minArea && minArea !== '0') searchParams.append('minArea', minArea);
@@ -464,12 +463,10 @@
                 try {
                     const response = await fetch(`${apiBaseUrl}/Property/homepage-paginated?${searchParams.toString()}`);
                     const result = await response.json();
-                    
                     // Debug log for API response
                     console.log('API Response:', result);
                     console.log('Total items:', result.totalItems);
                     console.log('Data length:', result.data ? result.data.length : 0);
-                    
                     if (response.ok) {
                         displayResults(result);
                     } else {
@@ -517,10 +514,8 @@
                 // Sử dụng cả thuộc tính cũ và mới để đảm bảo tương thích
                 const propertyType = property.propertyTypeName || property.type || 'N/A';
                 const imageUrl = getPropertyImageUrl(property);
-                
                 // Xây dựng địa chỉ đầy đủ từ các thành phần
                 let fullAddress = '';
-                
                 // Kiểm tra và xử lý từng trường địa chỉ
                 if (property.detailedAddress && property.detailedAddress.trim() !== '') {
                     // Kiểm tra xem detailedAddress có phải là số đơn giản không
@@ -562,7 +557,6 @@
                     fullAddress = 'N/A';
                     console.log(`Property ${property.id}: No address found, using N/A`);
                 }
-                
                 // Debug log để kiểm tra dữ liệu
                 console.log('Property data:', {
                     id: property.id,
@@ -580,49 +574,38 @@
                     promotionPackageName: property.promotionPackageName,
                     isPromoted: property.isPromoted
                 });
-                
                 // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
                 if (property.detailedAddress && property.detailedAddress.length < 10) {
                     console.warn(`Property ${property.id}: detailedAddress seems too short: "${property.detailedAddress}"`);
                 }
-                
                 // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
                 if (property.streetName && property.streetName.length < 5) {
                     console.warn(`Property ${property.id}: streetName seems too short: "${property.streetName}"`);
                 }
-                
                 // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
                 if (property.wardName && property.wardName.length < 5) {
                     console.warn(`Property ${property.id}: wardName seems too short: "${property.wardName}"`);
                 }
-                
                 // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
                 if (property.provinceName && property.provinceName.length < 5) {
                     console.warn(`Property ${property.id}: provinceName seems too short: "${property.provinceName}"`);
                 }
-                
                 // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
                 if (property.address && property.address.length < 5) {
                     console.warn(`Property ${property.id}: address seems too short: "${property.address}"`);
                 }
-                
                 // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
                 if (property.location && property.location.length < 5) {
                     console.warn(`Property ${property.id}: location seems too short: "${property.location}"`);
                 }
-                
                 // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
                 if (property.street && property.street.length < 5) {
                     console.warn(`Property ${property.id}: street seems too short: "${property.street}"`);
                 }
-                
                 // Kiểm tra xem có phải địa chỉ bị cắt ngắn không
                 if (property.ward && property.ward.length < 5) {
                     console.warn(`Property ${property.id}: ward seems too short: "${property.ward}"`);
                 }
-                
-
-                
                 // Tạo HTML string cho property card với thông tin mới
                 // Tạo promotion badge dựa trên promotionPackageName
                 let promotionBadge = '';
@@ -632,12 +615,10 @@
                 } else {
                     console.log(`Property ${property.id}: No promotion package name (${property.promotionPackageName})`);
                 }
-                
                 // Xác định URL chi tiết dựa trên quyền sở hữu
                 const token = localStorage.getItem("authToken");
                 let isOwner = false;
                 let detailUrl = `/Home/Detail/${property.id}`;
-                
                 if (token) {
                     const userId = getUserIdFromToken(token);
                     if (userId && property.landlordId && userId === property.landlordId) {
@@ -645,7 +626,6 @@
                         detailUrl = `/PostProperty/DetailProperty/${property.id}`;
                     }
                 }
-                
                 return `
                     <div class="property-card">
                         <div class="property-image-container">
@@ -656,10 +636,11 @@
                                 class="property-image"
                             >
                             <div class="property-overlay"></div>
+
                             
                             <!-- Promotion Badge -->
                             ${promotionBadge}
-                            
+
                             <!-- Property Actions -->
                             <div class="property-actions">
                                 <button
@@ -709,7 +690,6 @@
                                     ${StatusInterest(property)}
                                 </div>
                             </div>
-                            
                             <h3
                                 onclick="window.location.href='${detailUrl}'"
                                 class="property-title"
@@ -721,14 +701,13 @@
                             <div class="property-price">
                                 ${property.price ? property.price.toLocaleString('vi-VN') : '0'} <span class="text-sm font-normal">triệu/tháng</span>
                             </div>
-                            
+
                             <div class="property-location">
                                 <i class="fas fa-map-marker-alt location-icon"></i>
                                 <div class="location-text">
                                     ${property.area || 0} m² · ${fullAddress}
                                 </div>
                             </div>
-                            
                             <p class="property-description" title="${property.description || ''}">
                                 ${property.description || 'Không có mô tả'}
                             </p>
@@ -737,7 +716,8 @@
                         <!-- Property Footer -->
                         <div class="property-footer">
                             <div class="landlord-info">
-                                <div 
+                                <div
+
                                     class="landlord-avatar"
                                     onclick="window.location.href='/Home/Landlord/${property.landlordId || 0}'"
                                     title="Xem thông tin chủ nhà"
@@ -750,7 +730,8 @@
                                     >
                                 </div>
                                 <div class="landlord-details">
-                                    <div 
+                                    <div
+
                                         class="landlord-name"
                                         onclick="window.location.href='/Home/Landlord/${property.landlordId || 0}'"
                                         title="Xem thông tin chủ nhà"
@@ -762,7 +743,6 @@
                                     </div>
                                 </div>
                             </div>
-                            
                             <div class="property-rating">
                                 <div class="rating-item">
                                     <span class="rating-stars">
@@ -916,25 +896,23 @@
 
                     // Lấy danh sách so sánh từ localStorage
                     let compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
-                    
                     // Kiểm tra xem property đã có trong danh sách chưa
                     if (compareList.includes(propertyId)) {
                         alert('Bất động sản này đã có trong danh sách so sánh!');
                         return;
                     }
-                    
                     // Kiểm tra giới hạn số lượng (tối đa 3)
                     if (compareList.length >= 3) {
                         alert('Danh sách so sánh đã đầy (tối đa 3 bất động sản)!');
                         return;
                     }
-                    
+
                     // Thêm vào danh sách
                     compareList.push(propertyId);
                     localStorage.setItem('compareList', JSON.stringify(compareList));
                     
                     alert('Đã thêm vào danh sách so sánh!');
-                    
+
                     // Cập nhật UI nếu cần
                     const compareBtn = document.getElementById(`btn-compare-${propertyId}`);
                     if (compareBtn) {
@@ -975,7 +953,6 @@
                                     icon.classList.toggle('text-red-500');
                                 }
                             }
-                            
                             // Reload để cập nhật trạng thái
                             setTimeout(() => {
                                 performSearch();
@@ -1001,13 +978,12 @@
                 const date = new Date(dateString);
                 const now = new Date();
                 const diffInSeconds = Math.floor((now - date) / 1000);
-                
+
                 if (diffInSeconds < 60) return 'Vừa xong';
                 if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
                 if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
                 if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} ngày trước`;
                 if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} tháng trước`;
-                
                 return `${Math.floor(diffInSeconds / 31536000)} năm trước`;
             }
 
@@ -1020,12 +996,10 @@
 
             // Check URL parameters for initial search
             const urlParams = new URLSearchParams(window.location.search);
-            
             // Debug log for URL parameters
             console.log('URL Parameters:', Object.fromEntries(urlParams.entries()));
             console.log('Raw URL:', window.location.href);
             console.log('Search string:', window.location.search);
-            
             // Handle featured and recommended parameters
             if (urlParams.has('featured') && urlParams.get('featured') === 'true') {
                 document.getElementById('searchType').value = '';
@@ -1034,7 +1008,7 @@
                 setTimeout(() => performSearch(), 1000);
                 return;
             }
-            
+
             if (urlParams.has('recommended') && urlParams.get('recommended') === 'true') {
                 document.getElementById('searchType').value = '';
                 document.getElementById('searchKeyword').value = 'Bất động sản dành cho bạn';
@@ -1042,7 +1016,7 @@
                 setTimeout(() => performSearch(), 1000);
                 return;
             }
-            
+
             // Handle search parameters from Home page
             if (urlParams.has('type') || urlParams.has('province') || urlParams.has('keyword') || urlParams.has('address') ||
                 urlParams.has('minRoom') || urlParams.has('maxRoom') || urlParams.has('minPrice') ||
@@ -1291,3 +1265,5 @@
         });
     </script>
 }
+
+

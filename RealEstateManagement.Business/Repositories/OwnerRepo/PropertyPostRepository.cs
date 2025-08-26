@@ -28,35 +28,24 @@ namespace RealEstateManagement.Business.Repositories.OwnerRepo
         //Landlord tạo 1 bài đăng mới với status Draft
         public async Task<int> CreatePropertyPostAsync(Property property, PropertyPost post, List<int> amenityIds)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            _context.Properties.Add(property);
+            await _context.SaveChangesAsync(); // lúc này property.Id mới có
 
-            try
+            foreach (var amenityId in amenityIds)
             {
-                _context.Properties.Add(property);
-                await _context.SaveChangesAsync();
-
-                foreach (var amenityId in amenityIds)
+                _context.PropertyAmenities.Add(new PropertyAmenity
                 {
-                    _context.PropertyAmenities.Add(new PropertyAmenity
-                    {
-                        PropertyId = property.Id,
-                        AmenityId = amenityId
-                    });
-                }
-
-                post.PropertyId = property.Id;
-                _context.PropertyPosts.Add(post);
-
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return property.Id;
+                    PropertyId = property.Id,
+                    AmenityId = amenityId
+                });
             }
-            catch (Exception)
-            {
-                await transaction.RollbackAsync();
-                throw; // Ném lại ngoại lệ để xử lý ở tầng trên
-            }
+
+            post.PropertyId = property.Id;
+            _context.PropertyPosts.Add(post);
+
+            await _context.SaveChangesAsync();
+
+            return property.Id;
         }
 
         //Kiểm tra Bài viết tương ứng với chủ nhà

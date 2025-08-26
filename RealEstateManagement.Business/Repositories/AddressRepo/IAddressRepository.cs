@@ -8,5 +8,7 @@ namespace RealEstateManagement.Business.Repositories.AddressRepo
     {
         Task<int> SaveChangesAsync();
         Task<Address> GetByDetailsAsync(int provinceId, int wardId, string street);
+
+        Task<Address> GetAddressAsync(int provinceId, int wardId, int streetId, string detailedAddress);
     }
 } 

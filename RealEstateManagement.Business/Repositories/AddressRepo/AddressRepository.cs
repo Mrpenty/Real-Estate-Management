@@ -23,6 +23,18 @@ namespace RealEstateManagement.Business.Repositories.AddressRepo
                                           a.DetailedAddress == street);
         }
 
+        public async Task<Address> GetAddressAsync(int provinceId, int wardId, int streetId, string detailedAddress)
+        {
+            return await _context.Addresses
+                .Include(a => a.Province)
+                .Include(a => a.Ward)
+                .Include(a => a.Street)
+                .FirstOrDefaultAsync(a => a.ProvinceId == provinceId &&
+                                          a.WardId == wardId &&
+                                          a.StreetId == streetId &&
+                                          a.DetailedAddress == detailedAddress);
+        }
+
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();

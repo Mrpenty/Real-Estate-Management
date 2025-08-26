@@ -102,7 +102,7 @@ namespace RealEstateManagement.API.Controllers.Landlord
                 }
 
                 var result = await _openAIService.AskGPTAsync(dto);
-                return Ok(result);
+                return Ok(new { suggestedDescription = result });
             }
             catch (Exception ex)
             {

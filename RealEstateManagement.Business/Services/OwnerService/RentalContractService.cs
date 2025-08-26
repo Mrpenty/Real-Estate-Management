@@ -1,5 +1,7 @@
 ﻿using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
+using RealEstateManagement.Business.Services.Mail;
+using RealEstateManagement.Business.Services.User;
 using RealEstateManagement.Data.Entity;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using System;
@@ -14,11 +16,15 @@ namespace RealEstateManagement.Business.Services.OwnerService
     {
         private readonly IRentalContractRepository _repository;
         private readonly IPropertyPostRepository _propertyPostRepo;
+        private readonly IProfileService _user;
+        private readonly IMailService _mailService;
 
-        public RentalContractService(IRentalContractRepository repository, IPropertyPostRepository propertyPost)
+        public RentalContractService(IRentalContractRepository repository, IPropertyPostRepository propertyPost, IProfileService profileService, IMailService mailService)
         {
             _repository = repository;
             _propertyPostRepo = propertyPost;
+            _user = profileService;
+            _mailService = mailService;
         }
 
         //Xem hợp đồng của bài Post đó
@@ -245,6 +251,22 @@ namespace RealEstateManagement.Business.Services.OwnerService
             contract.ProposedAt = DateTime.Now;
             contract.Status = RentalContract.ContractStatus.RenewalPending;
             contract.RenterApproved = null;
+
+            var property = await _propertyPostRepo.GetPostWithPropertyAsync(contract.PropertyPostId);
+            var renter = await _user.GetUserBasicInfoAsync(contract.RenterId ?? 0);
+            var emailBody1 = $@"
+                    <html><body>
+                      <p>Xin chào {renter.Name},</p>
+                      <p>Chủ nhà vừa đề xuất gia hạn hợp đồng của bất động sản <b>{property.Property.Title}</b>.</p>
+                      <p>Bạn hãy vào trang web để xem các yêu cầu đề xuất.</p>
+                      <br/>
+                      <p>Trân trọng,<br/>BĐS Management</p>
+                    </body></html>";
+            await _mailService.SendEmailAsync(
+            renter.Email,
+            "Chủ nhà từ chối cho thuê",
+            emailBody1
+            );
 
             await _repository.UpdateContractAsync(contract);
         }

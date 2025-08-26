@@ -176,7 +176,7 @@ namespace RealEstateManagement.Business.Services.OwnerService
 
             if (dto.ProvinceId != null || dto.WardId != null || dto.StreetId != null || !string.IsNullOrEmpty(dto.DetailedAddress))
             {
-                await _ownerPropertyRepo.UpdateAddressAsync(propertyId, dto.ProvinceId ?? 0, dto.WardId ?? 0, dto.StreetId ?? 0, dto.DetailedAddress);
+                await _ownerPropertyRepo.UpdateAddressAsync(propertyId, dto.ProvinceId, dto.WardId, dto.StreetId, dto.DetailedAddress);
                 //await _ownerPropertyRepo.UpdateAddressAsync(propertyId, dto.ProvinceId, dto.WardId, dto.StreetId, dto.DetailedAddress);
             }
 

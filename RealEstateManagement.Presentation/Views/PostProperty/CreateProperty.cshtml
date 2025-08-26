@@ -637,7 +637,7 @@
         const propertyDataForAI = {
             title: formData.get('title') || '',
             address: fullAddressDisplay,
-            propertyTypeId: parseInt(formData.get('type')) || 0,
+            type: formData.get('type') || '',
             area: parseFloat(formData.get('area')) || 0,
             bedrooms: parseInt(formData.get('bedrooms')) || 0,
             bathrooms: parseInt(formData.get('bathrooms')) || 0,
@@ -697,8 +697,8 @@
                 throw new Error(`API Error: ${response.status} - ${errorMessage}`);
             }
 
-            const result = await response.text();
-            document.getElementById('description').value = result.suggestedDescription || result.description || JSON.stringify(result);
+            const result = await response.json();
+            document.getElementById('description').value = result.suggestedDescription;
             alert("Gợi ý mô tả đã được tạo thành công! Ví của bạn đã bị trừ 100 VNĐ.");
         } catch (error) {
             console.error("Lỗi khi gọi API gợi ý mô tả AI:", error);

@@ -21,9 +21,9 @@ namespace RealEstateManagement.Business.DTO.PropertyOwnerDTO
         public List<int> AmenityIds { get; set; }
 
         // Address fields
-        public int? ProvinceId { get; set; }
-        public int? WardId { get; set; }
-        public int?  StreetId { get; set; }
+        public int ProvinceId { get; set; }
+        public int WardId { get; set; }
+        public int  StreetId { get; set; }
         public string DetailedAddress { get; set; }
 
     }
