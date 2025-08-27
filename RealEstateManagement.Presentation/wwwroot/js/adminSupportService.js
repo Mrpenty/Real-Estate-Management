@@ -1,7 +1,7 @@
 // Admin Support Service for handling admin support-related API calls
 class AdminSupportService {
     constructor() {
-        this.baseUrl = 'https://localhost:7031/api/Support';
+        this.baseUrl = 'http://194.233.81.64:5000/api/Support';
         this.token = localStorage.getItem('authToken') || localStorage.getItem('accessToken') || localStorage.getItem('token');
     }
 

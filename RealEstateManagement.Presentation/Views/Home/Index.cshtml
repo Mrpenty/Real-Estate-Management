@@ -301,7 +301,8 @@
 <div id="listNew" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 <script src="~/js/propertyService.js" asp-append-version="true"></script>
 <script>
-    let urlBase = "https://localhost:5000";
+    var API_BASE_URL = 'http://194.233.81.64:5000/api';
+    // let urlBase = "https://localhost:5000";
     let urlParams1 = new URLSearchParams(window.location.search);
     let type1 = urlParams1.get('type');
     const locationInput = document.getElementById('searchInput');
@@ -346,7 +347,7 @@
             const [properties, sliders,location1s] = await Promise.all([
                 propertyService.getAllproperty(),
 
-                fetch(`${urlBase}/api/slider`).then(res => res.json()),
+                fetch(`${API_BASE_URL}/slider`).then(res => res.json()),
                 getAllLocation()
             ]);
             if(location1s){
@@ -934,7 +935,7 @@
         };
 
         try {
-            const res = await fetch("https://localhost:7031/api/Chat/Create-Conversation", {
+            const res = await fetch("${API_BASE_URL}/Chat/Create-Conversation", {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`,

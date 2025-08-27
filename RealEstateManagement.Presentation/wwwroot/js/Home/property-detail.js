@@ -1,7 +1,7 @@
 // Property Detail Page JavaScript
 class PropertyDetailManager {
     constructor() {
-        this.urlBase = "https://localhost:7031";
+        this.urlBase = "http://194.233.81.64:5000";
         this.currentId = null;
         this.landlordId = 0;
         this.currentUserId = 0;

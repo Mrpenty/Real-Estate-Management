@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (parts.length === 2) return parts.pop().split(';').shift();
     }
     const token = localStorage.getItem('authToken') || getCookie('accessToken');
-    
-    const apiBaseUrl = 'https://localhost:7031';
+
+            const apiBaseUrl = 'http://194.233.81.64:5000';
 
     fetch(`${apiBaseUrl}/api/User/Get-Profile`, {
         method: 'GET',

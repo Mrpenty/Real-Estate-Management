@@ -252,9 +252,9 @@
 
      let itemPropertyBody = null;
 
-     const apiBaseUrl = 'https://localhost:7031/api';
-     const baseUrl = 'https://localhost:7031';
-     const backendBaseUrl = 'https://localhost:7031'; // Base URL cho ảnh
+    const apiBaseUrl = 'http://194.233.81.64:5000/api';
+    const baseUrl = 'http://194.233.81.64:5000/';
+    const backendBaseUrl = 'http://194.233.81.64:5000/'; // Base URL cho ảnh
      const provinceSelect = $('#province-select');
      const wardSelect = $('#ward-select');
      const streetSelect = $('#street-select');
@@ -264,7 +264,7 @@
      getRentalContract();
      async function getRentalContract(){
          try{
-             const response = await fetch(`https://localhost:7031/api/owner/rental-contracts/${@ViewBag.Id}`, {
+            const response = await fetch(`http://194.233.81.64:5000/api/owner/rental-contracts/${@ViewBag.Id}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -589,7 +589,7 @@
             alert('Bạn không thể cập nhật bài viết này vì nó đang ở trạng thái Rented hoặc Sold.');
             return;
         }
-        const res = await fetch(`https://localhost:7031/api/OwnerProperty/${propertyId}`, {
+        const res = await fetch(`http://194.233.81.64:5000/api/OwnerProperty/${propertyId}`, {
              method: 'PUT',
              headers: {
                  'Content-Type': 'application/json',
@@ -608,7 +608,7 @@
         if (hasExpiredPost) {
             const expiredPost = posts.find(post => expiredStatuses.includes((post.status || '').toLowerCase()));
             try {
-                const extendRes = await fetch(`https://localhost:7031/api/OwnerProperty/extend/${expiredPost.id}/${landlordId}?days=${extendDays}`, {
+                const extendRes = await fetch(`http://194.233.81.64:5000/api/OwnerProperty/extend/${expiredPost.id}/${landlordId}?days=${extendDays}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -874,7 +874,7 @@
                  
                  // Xóa tất cả ảnh cũ khỏi database
                  try {
-                     const clearResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/clear`, {
+                const clearResponse = await fetch(`http://194.233.81.64:5000/api/properties/${propertyId}/images/clear`, {
                          method: 'DELETE',
                          headers: {
                              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -895,7 +895,7 @@
 
              // Xóa tất cả ảnh cũ khỏi database trước khi upload ảnh mới
              try {
-                 const clearResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/clear`, {
+            const clearResponse = await fetch(`http://194.233.81.64:5000/api/properties/${propertyId}/images/clear`, {
                      method: 'DELETE',
                      headers: {
                          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -920,7 +920,7 @@
                      const formData = new FormData();
                      formData.append('file', file);
 
-                     const uploadResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/upload`, {
+                const uploadResponse = await fetch(`http://194.233.81.64:5000/api/properties/${propertyId}/images/upload`, {
                          method: 'POST',
                          headers: {
                              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -946,7 +946,7 @@
                          order: idx
                      };
 
-                     const saveResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images`, {
+                const saveResponse = await fetch(`http://194.233.81.64:5000/api/properties/${propertyId}/images`, {
                          method: 'POST',
                          headers: {
                              'Content-Type': 'application/json',
@@ -1315,7 +1315,7 @@
                 return;
             }
 
-            const response = await fetch(`https://localhost:7031/api/PropertyPosts/suggest-description`, {
+            const response = await fetch(`http://194.233.81.64:5000/api/PropertyPosts/suggest-description`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -922,7 +922,8 @@
         async function testApiConnectivity() {
             try {
                 console.log('Testing API connectivity...');
-                const response = await fetch(config.apiBaseUrl + '/api/UserNotification/my-notifications', {
+                const response = await fetch(
+                    config.apiBaseUrl + '/api/UserNotification/my-notifications', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'

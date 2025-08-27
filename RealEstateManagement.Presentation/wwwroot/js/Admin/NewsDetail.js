@@ -1,5 +1,5 @@
-const API_NEW_BASE_URL = "https://localhost:7031/api/News";
-const API_IMAGES_BASE_URL = "https://localhost:7031/api/NewImage";
+const API_NEW_BASE_URL = "http://194.233.81.64:5000/api/News";
+const API_IMAGES_BASE_URL = "http://194.233.81.64:5000/api/NewImage";
 
 let currentNews = null;
 
@@ -159,7 +159,7 @@ function getFullImageUrl(imageUrl) {
     }
     
     // Nếu là relative path thì thêm base URL của API
-    const API_BASE = "https://localhost:7031";
+    const API_BASE = "http://194.233.81.64:5000";
     return API_BASE + imageUrl;
 }
 

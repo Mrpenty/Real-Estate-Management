@@ -1,6 +1,6 @@
 window.config = {
     // API Base URL
-    apiBaseUrl: 'https://localhost:7031',
+    apiBaseUrl: 'http://194.233.81.64:5000',
     
     // Chat API endpoints
     chat: {

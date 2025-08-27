@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-var connection = new signalR.HubConnectionBuilder().withUrl("https://localhost:7031/chatHub").build();
+var connection = new signalR.HubConnectionBuilder().withUrl("http://194.233.81.64:5000/chatHub").build();
 let currentConversationId = null;
 let userId = null;
 
@@ -46,7 +46,7 @@ async function loadConversations() {
     }
 
     try {
-        const res = await fetch("https://localhost:7031/api/Chat/List-Conversation", {
+        const res = await fetch("http://194.233.81.64:5000/api/Chat/List-Conversation", {
             headers: {
                 "Authorization": `Bearer ${token}`
             }
@@ -158,7 +158,7 @@ window.loadMessages = async function (conversationId, skip = 0, take = 20, appen
     const container = document.getElementById("messagesContainer");
     if (!append) container.innerHTML = "";
 
-    const url = `https://localhost:7031/api/Chat/conversation/${conversationId}?skip=${skip}&take=${take}`;
+    const url = `http://194.233.81.64:5000/api/Chat/conversation/${conversationId}?skip=${skip}&take=${take}`;
     const res = await fetch(url, {
         headers: { "Authorization": `Bearer ${token}` }
     });
@@ -229,7 +229,7 @@ document.getElementById("sendButton").addEventListener("click", async function (
     if (editingMessageId) {
         // 👉 Gửi API cập nhật
         try {
-            const res = await fetch(`https://localhost:7031/api/Chat/edit-message/${editingMessageId}`, {
+            const res = await fetch(`http://194.233.81.64:5000/api/Chat/edit-message/${editingMessageId}`, {
                 method: "PUT",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -364,7 +364,7 @@ async function deleteMessage(messageId) {
 
     const token = localStorage.getItem("authToken");
     try {
-        const res = await fetch(`https://localhost:7031/api/Chat/delete-message/${messageId}`, {
+        const res = await fetch(`http://194.233.81.64:5000/api/Chat/delete-message/${messageId}`, {
             method: "DELETE",
             headers: {
                 "Authorization": `Bearer ${token}`
@@ -447,7 +447,7 @@ async function startChatWithLandlord(landlordId, propertyid) {
     const dto = { renterId, landlordId, propertyid };
 
     try {
-        const res = await fetch("https://localhost:7031/api/Chat/create-conversation", {
+        const res = await fetch("http://194.233.81.64:5000/api/Chat/create-conversation", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${token}`,

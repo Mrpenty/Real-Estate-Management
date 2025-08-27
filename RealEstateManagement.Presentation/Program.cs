@@ -15,7 +15,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowPresentation", policy =>
     {
-        policy.WithOrigins("https://localhost:7160") // Update this to match your API URL
+        policy.WithOrigins(
+            "https://localhost:7160",
+            "http://localhost:5039",
+            "http://194.233.81.64:5000") // Update this to match your API URL
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -25,7 +28,7 @@ builder.Services.AddCors(options =>
 // Add HttpClient and configure the named client for the API
 builder.Services.AddHttpClient("REMApi", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7031/"); // Make sure this is your API's base URL
+    client.BaseAddress = new Uri("http://194.233.81.64:5000/"); // Make sure this is your API's base URL
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 

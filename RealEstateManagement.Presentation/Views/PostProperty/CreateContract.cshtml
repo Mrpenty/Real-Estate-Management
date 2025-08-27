@@ -195,7 +195,7 @@ document.getElementById('create-contract-form').addEventListener('submit', async
     e.preventDefault();
 
     const formData = new FormData(this);
-    const API_BASE_URL = 'https://localhost:7031/api';
+    const API_BASE_URL = 'http://194.233.81.64:5000/api';
     const token = localStorage.getItem('authToken');
     
     // Debug: Log all form data

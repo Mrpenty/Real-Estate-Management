@@ -1,5 +1,5 @@
-﻿const API_PROPERTY_BASE_URL_V1 = 'https://localhost:7031/api/Property';
-const API_PROPERTY_BASE_URL_V2 = 'https://localhost:7031/api/OwnerProperty';
+﻿const API_PROPERTY_BASE_URL_V1 = 'http://194.233.81.64:5000/api/Property';
+const API_PROPERTY_BASE_URL_V2 = 'http://194.233.81.64:5000/api/OwnerProperty';
 //
 //const API_BASE = '/api';
 //const API = {

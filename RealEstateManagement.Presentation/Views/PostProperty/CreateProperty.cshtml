@@ -234,13 +234,13 @@
          window.location.href = '/Auth/Login';
      }
 
-     const apiBaseUrl = 'https://localhost:7031/api';
+    const APP.API_BASE = 'http://194.233.81.64:5000/api';
      const provinceSelect = $('#province-select');
      const wardSelect = $('#ward-select');
      const streetSelect = $('#street-select');
      const addressInfo = $('#addressInfoId');
      const fullAddressInput = $('#open-address-modal');
-     $.get(`${apiBaseUrl}/Property/provinces`,async function (data) {
+    $.get(`${APP.API_BASE}/Property/provinces`, async function (data) {
             provinceSelect.empty().append('<option value="">Chọn Tỉnh/Thành</option>');
             data.forEach(p => provinceSelect.append(`<option value="${p.id}">${p.name}</option>`));
      });
@@ -294,7 +294,7 @@
 
          propertyData['location'] = await fetchLocationAndSetPropertyData();
          const token = localStorage.getItem('authToken');
-         const res = await fetch('https://localhost:7031/api/PropertyPosts', {
+         const res = await fetch('{APP.API_BASE}/api/PropertyPosts', {
              method: 'POST',
              headers: {
                  'Content-Type': 'application/json',
@@ -355,7 +355,7 @@
             formData.append('file', file);
 
             // Upload file lên server
-            const uploadResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images/upload`, {
+            const uploadResponse = await fetch(`${APP.API_BASE}api/properties/${propertyId}/images/upload`, {
                 method: 'POST',
                 headers: {
                     ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -379,7 +379,7 @@
                 order: idx
             };
 
-            const saveResponse = await fetch(`https://localhost:7031/api/properties/${propertyId}/images`, {
+            const saveResponse = await fetch(`http://194.233.81.64:5000/api/properties/${propertyId}/images`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

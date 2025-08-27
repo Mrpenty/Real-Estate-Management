@@ -18,7 +18,7 @@ function initializeUserSignalR() {
     
     try {
         userSignalRConnection = new signalR.HubConnectionBuilder()
-            .withUrl('https://localhost:7031/chatHub', { accessTokenFactory: () => token })
+            .withUrl('http://194.233.81.64:5000/chatHub', { accessTokenFactory: () => token })
             .withAutomaticReconnect()
             .build();
 

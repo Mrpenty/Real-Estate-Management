@@ -101,7 +101,7 @@
     async function getRentalContract(){
         try{
             const token = localStorage.getItem('authToken');
-            const response = await fetch(`https://localhost:7031/api/owner/rental-contracts/${propertyId}`, {
+            const response = await fetch(`http://194.233.81.64:5000/api/owner/rental-contracts/${propertyId}`, {
                method: 'GET',
                headers: {
                    'Content-Type': 'application/json',
@@ -161,7 +161,7 @@
            paymentMethod: formData.get('PaymentMethod'),
            contactInfo: formData.get('ContactInfo'),
         };
-        const res = await fetch(`https://localhost:7031/api/owner/rental-contracts/${userId}/${propertyId}`, {
+        const res = await fetch(`http://194.233.81.64:5000/api/owner/rental-contracts/${userId}/${propertyId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -199,7 +199,7 @@
            paymentMethod: formData.get('PaymentMethod'),
            contactInfo: formData.get('ContactInfo'),
         };
-        const res = await fetch(`https://localhost:7031/api/owner/rental-contracts/${id}`, {
+        const res = await fetch(`http://194.233.81.64:5000/api/owner/rental-contracts/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

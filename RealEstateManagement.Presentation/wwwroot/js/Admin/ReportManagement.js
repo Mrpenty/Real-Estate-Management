@@ -1,6 +1,6 @@
 // Report Management Service
 const ReportManagementService = {
-    baseUrl: 'https://localhost:7031',
+    baseUrl: 'http://194.233.81.64:5000',
 
     async getAllReports(filters = {}) {
         const params = new URLSearchParams();

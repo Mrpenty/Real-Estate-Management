@@ -129,7 +129,7 @@
 <script src="~/js/helper.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const apiBaseUrl = 'https://localhost:7031/api';
+    const apiBaseUrl = 'http://194.233.81.64:5000/api/';
     let currentPage = 1;
     let currentPageSize = 12;
     let totalPages = 0;
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!property.imageUrls || !Array.isArray(property.imageUrls) || property.imageUrls.length === 0) {
             // Kiểm tra xem có primaryImageUrl không
             if (property.primaryImageUrl && property.primaryImageUrl.trim() !== '') {
-                const finalUrl = property.primaryImageUrl.includes('http') ? property.primaryImageUrl : `https://localhost:7031${property.primaryImageUrl}`;
+                        const finalUrl = property.primaryImageUrl.includes('http') ? property.primaryImageUrl : `http://194.233.81.64:5000${property.primaryImageUrl}`;
                 console.log('Using primaryImageUrl:', finalUrl);
                 return finalUrl;
             }
@@ -291,12 +291,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (typeof selectedImage === 'object' && selectedImage.url) {
                 const imageUrl = selectedImage.url;
                 if (imageUrl && imageUrl.trim() !== '') {
-                    const finalUrl = imageUrl.includes('http') ? imageUrl : `https://localhost:7031${imageUrl}`;
+                            const finalUrl = imageUrl.includes('http') ? imageUrl : `http://194.233.81.64:5000${imageUrl}`;
                     console.log('Using imageUrls[].url:', finalUrl);
                     return finalUrl;
                 }
             } else if (typeof selectedImage === 'string' && selectedImage.trim() !== '') {
-                const finalUrl = selectedImage.includes('http') ? selectedImage : `https://localhost:7031${selectedImage}`;
+                        const finalUrl = selectedImage.includes('http') ? selectedImage : `http://194.233.81.64:5000${selectedImage}`;
                 console.log('Using imageUrls[] string:', finalUrl);
                 return finalUrl;
             }
@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Kiểm tra xem có primaryImageUrl không (fallback)
         if (property.primaryImageUrl && property.primaryImageUrl.trim() !== '') {
-            const finalUrl = property.primaryImageUrl.includes('http') ? property.primaryImageUrl : `https://localhost:7031${property.primaryImageUrl}`;
+                    const finalUrl = property.primaryImageUrl.includes('http') ? property.primaryImageUrl : `http://194.233.81.64:5000${property.primaryImageUrl}`;
             console.log('Using primaryImageUrl fallback:', finalUrl);
             return finalUrl;
         }

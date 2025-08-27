@@ -2,6 +2,7 @@
 //var API_PROPERTY_BASE_URL2 = 'https://localhost:7031/api/OwnerProperty';
 var API_PROPERTY_BASE_URL = 'http://194.233.81.64:5000/api/Property';
 var API_PROPERTY_BASE_URL2 = 'http://194.233.81.64:5000/api/OwnerProperty';
+var API_BASE_URL = 'http://194.233.81.64:5000/api';
 
 const propertyService = {
     async getAllproperty() {
@@ -61,7 +62,7 @@ const propertyService = {
 
             // Do NOT add type parameter - always show all types
 
-            let response = await fetch(`${API_PROPERTY_BASE_URL}/homepage-paginated?${queryParams.toString()}`, {
+            let response = await fetch(`${API_BASE_URL}/Property/homepage-paginated?${queryParams.toString()}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -92,7 +93,7 @@ const propertyService = {
                 userId = payload.id;
             }
 
-            const response = await fetch(`${API_PROPERTY_BASE_URL}/${id}?userId=${userId}`, {
+            const response = await fetch(`${API_BASE_URL}/Property/${id}?userId=${userId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -121,7 +122,7 @@ const propertyService = {
                 userId = payload.id;
             }
 
-            const response = await fetch(`${API_PROPERTY_BASE_URL2}/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/OwnerProperty/${id}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -146,7 +147,7 @@ const propertyService = {
     async getNewPost() {
         try {
 
-            const response = await fetch(`https://localhost:7031/api/News/published`, {
+            const response = await fetch(`${API_BASE_URL}/News/published`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -170,7 +171,7 @@ const propertyService = {
     async getNewPostDetail(id) {
         try {
 
-            const response = await fetch(`https://localhost:7031/api/News/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/News/${id}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -195,7 +196,7 @@ const propertyService = {
     async getLandlord(landlordId) {
         try {
             const token = localStorage.getItem('authToken');
-            const response = await fetch(`https://localhost:7031/api/Property/${landlordId}/profile-with-properties`, {
+            const response = await fetch(`${API_BASE_URL}/Property/${landlordId}/profile-with-properties`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,6 +1,7 @@
 ﻿let locationData = null;
-const API_PROPERTY_LOCATION_BASE_URL = 'https://localhost:7031/api/Property';
-const API_FAVORITE_BASE_URL = 'https://localhost:7031/api/Favorite';
+const API_PROPERTY_LOCATION_BASE_URL = 'http://194.233.81.64:5000/api/Property';
+const API_FAVORITE_BASE_URL = 'http://194.233.81.64:5000/api/Favorite';
+var API_BASE_URL = 'http://194.233.81.64:5000/api';
 
 function roundToHalfStar(rating) {
     const thresholds = [0, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
@@ -127,7 +128,7 @@ function formatVietnameseDateTime(dateInput) {
 
 async function getAllAmenities() {
     try {
-        const response = await fetch(`${API_PROPERTY_LOCATION_BASE_URL}/amenities`, {
+        const response = await fetch(`${API_BASE_URL}/Property/amenities`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -151,7 +152,7 @@ async function getAllAmenities() {
 async function getAllLocation() {
     try {
 
-        const response = await fetch(`${API_PROPERTY_LOCATION_BASE_URL}/list-location`, {
+        const response = await fetch(`${API_BASE_URL}/Property/list-location`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -304,7 +305,7 @@ async function clickInterest(id, isExist, interestedStatus, isReminderRenterConf
         const payload = JSON.parse(atob(token.split('.')[1]));
         userId = payload.id;
         try {
-            const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/AddInterest?renterId=${userId}&propertyId=${id}`, {
+            const response = await fetch(`${API_BASE_URL}/Property/InterestedProperty/AddInterest?renterId=${userId}&propertyId=${id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -334,7 +335,7 @@ async function clickInterest(id, isExist, interestedStatus, isReminderRenterConf
             const payload = JSON.parse(atob(token.split('.')[1]));
             userId = payload.id;
             try {
-                const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/RemoveInterest?renterId=${userId}&propertyId=${id}`, {
+                const response = await fetch(`http://194.233.81.64:5000/api/Property/InterestedProperty/RemoveInterest?renterId=${userId}&propertyId=${id}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
@@ -361,7 +362,7 @@ async function clickInterest(id, isExist, interestedStatus, isReminderRenterConf
             const payload = JSON.parse(atob(token.split('.')[1]));
             userId = payload.id;
             try {
-                const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/${interestId}/confirm?isRenter=true&confirmed=true`, {
+                const response = await fetch(`${API_BASE_URL}/Property/InterestedProperty/${interestId}/confirm?isRenter=true&confirmed=true`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -421,7 +422,7 @@ async function removeToFavorite(id) {
     try {
         const token = localStorage.getItem('authToken');
         if (!token) throw new Error(data.message || data.errorMessage || 'Update failed');
-        const response = await fetch(`${API_FAVORITE_BASE_URL}/favorite`, {
+        const response = await fetch(`${API_BASE_URL}/Favorite/favorite`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -453,7 +454,7 @@ async function listFavorite() {
     try {
         const token = localStorage.getItem('authToken');
         if (!token) throw new Error(data.message || data.errorMessage || 'Update failed');
-        const response = await fetch(`${API_FAVORITE_BASE_URL}/all-favorite`, {
+        const response = await fetch(`${API_BASE_URL}/Favorite/all-favorite`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,

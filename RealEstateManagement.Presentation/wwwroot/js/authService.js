@@ -1,5 +1,4 @@
-﻿const API_BASE_URL = 'https://localhost:7031/api/Auth';
-
+﻿var API_BASE_URL = 'http://194.233.81.64:5000/api';
 const authService = {
     // Phone number utilities
     formatPhoneForDisplay(phone) {
@@ -51,7 +50,7 @@ const authService = {
 
             const apiPhone = this.formatPhoneForAPI(phone);
 
-            const response = await fetch(`${API_BASE_URL}/login`, {
+            const response = await fetch(`${API_BASE_URL}/Auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -87,7 +86,7 @@ const authService = {
 
             const apiPhone = this.formatPhoneForAPI(registerData.phoneNumber);
 
-            const response = await fetch(`${API_BASE_URL}/register`, {
+            const response = await fetch(`${API_BASE_URL}/Auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -118,7 +117,7 @@ const authService = {
         try {
             console.log('Verify OTP attempt:', { phone, otp });
 
-            const response = await fetch(`${API_BASE_URL}/verify-otp`, {
+            const response = await fetch(`${API_BASE_URL}/Auth/verify-otp`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -145,7 +144,7 @@ const authService = {
         try {
             console.log('Resend OTP attempt for phone:', phone);
 
-            const response = await fetch(`${API_BASE_URL}/resend-otp`, {
+            const response = await fetch(`${API_BASE_URL}/Auth/resend-otp`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -172,7 +171,7 @@ const authService = {
         try {
             const token = localStorage.getItem('authToken');
             if (token) {
-                await fetch(`${API_BASE_URL}/logout`, {
+                await fetch(`${API_BASE_URL}/Auth/logout`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -287,7 +286,7 @@ const authService = {
         try {
             console.log('Verify email attempt:', email);
 
-            const response = await fetch(`${API_BASE_URL}/verify-email`, {
+            const response = await fetch(`${API_BASE_URL}/Auth/verify-email`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -318,7 +317,7 @@ const authService = {
         try {
             console.log('Google login attempt');
 
-            const response = await fetch(`${API_BASE_URL}/google-login`, {
+            const response = await fetch(`${API_BASE_URL}/Auth/google-login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

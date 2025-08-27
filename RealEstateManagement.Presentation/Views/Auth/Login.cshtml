@@ -67,6 +67,7 @@
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+   
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -129,7 +130,7 @@
 
         function handleGoogleLogin() {
             const clientId = "944025248011-2a95pmqqhlp6skoi9lippbvm7ierc8h7.apps.googleusercontent.com"; // Your Google Client ID
-            const redirectUri = "https://localhost:7031/api/Auth/google-oauth-callback"; // Must match the Authorized redirect URI in Google Cloud Console
+            const redirectUri = "http://194.233.81.64:5000/api/Auth/google-oauth-callback"; // Must match the Authorized redirect URI in Google Cloud Console
             const scope = "email profile openid";
             const responseType = "code";
             const accessType = "offline"; // To get a refresh token if needed

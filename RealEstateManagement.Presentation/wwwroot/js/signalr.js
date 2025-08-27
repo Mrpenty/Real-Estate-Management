@@ -12,7 +12,7 @@ function startSignalRConnection(token, onConnectedCallback = () => { }) {
     }
 
     const connection = new signalR.HubConnectionBuilder()
-        .withUrl("https://localhost:7031/chatHub", {
+        .withUrl("http://194.233.81.64:5000/chatHub", {
             accessTokenFactory: () => token
         })
         .build();

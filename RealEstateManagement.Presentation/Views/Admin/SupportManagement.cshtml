@@ -3,8 +3,6 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-
-
 <div class="bg-white rounded-lg shadow-md p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Quản lý hỗ trợ khách hàng</h1>
@@ -79,7 +77,7 @@
 <script>
     let currentSupportConversationId = null;
     let supportConnection = null;
-
+    var APP.API_BASE = http://194.233.81.64:5000/api/
     // Initialize admin support page
     document.addEventListener('DOMContentLoaded', function() {
         loadAllSupportConversations();
@@ -392,7 +390,7 @@
 
         try {
             supportConnection = new signalR.HubConnectionBuilder()
-                .withUrl('https://localhost:7031/chatHub', { accessTokenFactory: () => token })
+                .withUrl('http://194.233.81.64:5000/chatHub', { accessTokenFactory: () => token })
                 .withAutomaticReconnect()
                 .build();
 
