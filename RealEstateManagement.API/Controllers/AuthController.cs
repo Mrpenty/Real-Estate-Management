@@ -270,17 +270,17 @@ namespace RealEstateManagement.API.Controllers
                 var response = await _authService.HandleGoogleOAuthCallbackAsync(code, redirectUriForGoogle);
                 if (response.IsAuthSuccessful)
                 {
-                    return Redirect("https://localhost:7160/");
+                    return Redirect("http://194.233.81.64:5001/");
                 }
                 else
                 {
-                    return Redirect($"https://localhost:7160/Auth/Login?error={Uri.EscapeDataString(response.ErrorMessage)}");
+                    return Redirect($"http://194.233.81.64:5001/Auth/Login?error={Uri.EscapeDataString(response.ErrorMessage)}");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in Google OAuth callback.");
-                return Redirect($"https://localhost:7160/Auth/Login?error={Uri.EscapeDataString("Google login failed: " + ex.Message)}");
+                return Redirect($"http://194.233.81.64:5001/Auth/Login?error={Uri.EscapeDataString("Google login failed: " + ex.Message)}");
             }
         }
 

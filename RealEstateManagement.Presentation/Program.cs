@@ -13,7 +13,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowPresentation", policy =>
     {
-        policy.WithOrigins("https://localhost:7160") // Update this to match your API URL
+        policy.WithOrigins("http://194.233.81.64:5001") // Update this to match your API URL
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();

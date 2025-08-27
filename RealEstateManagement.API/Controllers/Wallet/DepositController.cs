@@ -59,7 +59,7 @@ namespace RealEstateManagement.API.Controllers.Wallet
         [FromQuery] string desc)
         {
             // ... logic xử lý và redirect đến frontend ...
-            return Redirect($"https://localhost:7160/Deposit/Success?orderCode={orderCode}&status={code}&desc={desc}");
+            return Redirect($"http://194.233.81.64:5001/Deposit/Success?orderCode={orderCode}&status={code}&desc={desc}");
         }
 
         [HttpGet("Cancel")] // tương tự cho /api/Deposit/Cancel
@@ -69,7 +69,7 @@ namespace RealEstateManagement.API.Controllers.Wallet
             [FromQuery] string desc)
         {
             // ... logic xử lý và redirect đến frontend ...
-            return Redirect("https://localhost:7160/Deposit/Cancel?orderCode=" + orderCode + "&message=" + desc);
+            return Redirect("http://194.233.81.64:5001/Deposit/Cancel?orderCode=" + orderCode + "&message=" + desc);
         }
 
         //[HttpPost("payos_webhook")]
