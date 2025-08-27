@@ -92,8 +92,25 @@
                         window.location.href = '/';
                     }
                 } else {
-                    errorMessage.textContent = data.errorMessage || 'Đăng nhập thất bại';
-                    errorMessage.style.display = 'block';
+                    // Kiểm tra nếu lỗi là "Phone number not verified"
+                    if (data.errorMessage && data.errorMessage.includes('Phone number not verified')) {
+                        // Encode số điện thoại để gửi qua URL parameter (giống như Register)
+                        const encodedPhone = encodeURIComponent(phone);
+                        
+                        // Hiển thị thông báo và chuyển hướng
+                        errorMessage.textContent = 'Số điện thoại chưa được xác thực. Đang chuyển đến trang xác thực...';
+                        errorMessage.style.display = 'block';
+                        errorMessage.className = 'bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-4';
+                        
+                        // Chuyển hướng sau 2 giây với phone parameter (giống như Register)
+                        setTimeout(() => {
+                            window.location.href = `/Auth/VerifyOTP?phone=${encodedPhone}`;
+                        }, 2000);
+                    } else {
+                        errorMessage.textContent = data.errorMessage || 'Đăng nhập thất bại';
+                        errorMessage.style.display = 'block';
+                        errorMessage.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4';
+                    }
                 }
             } catch (error) {
                 console.error('Login error:', error);
