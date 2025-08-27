@@ -120,6 +120,11 @@ window.config = {
         calculateDistance: '/api/AIRecommendation/calculate-distance'
     },
     
+    // Property endpoints
+    property: {
+        types: '/api/PropertyType/GetAllPropertyTypes'
+    },
+    
     // Helper function to build full API URL
     buildApiUrl: function(endpoint) {
         return this.apiBaseUrl + endpoint;
