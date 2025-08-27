@@ -71,6 +71,8 @@ namespace RealEstateManagement.Business.Repositories.FavoriteRepository
                 .Where(pro => pro.UserId == userId)
                 .Include(f => f.Property)
                     .ThenInclude(p => p.Images)
+                    .Include(f => f.Property)
+                    .ThenInclude(p => p.PropertyType)
                 .Include(f => f.Property)
                     .ThenInclude(p => p.Address)
                         .ThenInclude(c => c.Province)
