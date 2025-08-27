@@ -88,12 +88,19 @@ namespace RealEstateManagement.Business.Services.Auth
                 if (existingEmail != null)
                     return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Email already registered." };
 
+                // Tạo UserName duy nhất từ Name (loại bỏ khoảng trắng và ký tự đặc biệt)
+                var userName = registerDTO.Name.Replace(" ", "").Replace("-", "").Replace("_", "");
+                if (string.IsNullOrEmpty(userName))
+                {
+                    userName = registerDTO.PhoneNumber; // Fallback về PhoneNumber nếu Name rỗng
+                }
+
                 var user = new ApplicationUser
                 {
                     Name = registerDTO.Name,
-                    UserName = registerDTO.Name,
+                    UserName = userName,
                     PhoneNumber = registerDTO.PhoneNumber,
-                    NormalizedUserName = _userManager.NormalizeName(registerDTO.PhoneNumber),
+                    NormalizedUserName = _userManager.NormalizeName(userName),
                     NormalizedEmail = null, // hoặc _userManager.NormalizeEmail(registerDTO.Email)
                     SecurityStamp = Guid.NewGuid().ToString(),
                     IsVerified = false

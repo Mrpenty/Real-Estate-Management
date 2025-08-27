@@ -808,9 +808,9 @@
                         detailUrl = `/PostProperty/DetailProperty/${property.id}`;
                     }
                 }
-                                 return `
+                return `
                      <div class="property-card" data-property-id="${property.id}">
-                         <div class="property-image-container">
+                        <div class="property-image-container">
                             <img
                                 onerror="handleImageError(this)"
                                 src="${imageUrl}"
@@ -890,27 +890,27 @@
                                     </div>
                                 </div>
                             </div>
-                                                    <div class="property-rating">
-                            <div class="rating-item">
-                                <span class="rating-stars">
-                                    ${property.rating && property.rating > 0 ? `
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:14px;height:14px" viewBox="0 0 24 24">
-                                            <path d="M12 .587l3.668 7.568L24 9.423l-6 5.854L19.335 24 12 20.202 4.665 24 6 15.277 0 9.423l8.332-1.268z" />
-                                        </svg>` : ''}
-                                </span>
-                                <span class="font-semibold text-gray-800">
-                                    ${!property.rating || property.rating == 0 ? 'Chưa có đánh giá' : property.rating}
-                                </span>
+                            <div class="property-rating">
+                                <div class="rating-item">
+                                    <span class="rating-stars">
+                                        ${property.rating && property.rating > 0 ? `
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" style="width:14px;height:14px" viewBox="0 0 24 24">
+                                                <path d="M12 .587l3.668 7.568L24 9.423l-6 5.854L19.335 24 12 20.202 4.665 24 6 15.277 0 9.423l8.332-1.268z" />
+                                            </svg>` : ''}
+                                    </span>
+                                    <span class="font-semibold text-gray-800">
+                                        ${!property.rating || property.rating == 0 ? 'Chưa có đánh giá' : property.rating}
+                                    </span>
+                                </div>
+                                <div class="rating-item">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:14px;height:14px" class="rating-comments">
+                                        <path d="M20 2H4C1.8 2 0 3.8 0 6v12c0 2.2 1.8 4 4 4h4v2.4c0 .6.4 1 1 1 .2 0 .5-.1.7-.3L14.3 22H20c2.2 0 4-1.8 4-4V6c0-2.2-1.8-4-4-4z" />
+                                    </svg>
+                                    <span class="rating-comments">
+                                        ${!property.ratingNo || property.ratingNo == 0 ? 'Chưa có bình luận' : `${property.ratingNo} bình luận`}
+                                    </span>
+                                </div>
                             </div>
-                            <div class="rating-item">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:14px;height:14px" class="rating-comments">
-                                    <path d="M20 2H4C1.8 2 0 3.8 0 6v12c0 2.2 1.8 4 4 4h4v2.4c0 .6.4 1 1 1 .2 0 .5-.1.7-.3L14.3 22H20c2.2 0 4-1.8 4-4V6c0-2.2-1.8-4-4-4z" />
-                                </svg>
-                                <span class="rating-comments">
-                                    ${!property.ratingNo || property.ratingNo == 0 ? 'Chưa có bình luận' : `${property.ratingNo} bình luận`}
-                                </span>
-                            </div>
-                        </div>
                         
                         <!-- Property Actions Footer -->
                         <div class="property-actions-footer">
@@ -937,7 +937,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
                                 </svg>
                             </button>
-                        </div>
+                            </div>
                         </div>
                     </div>
                 `;
