@@ -86,9 +86,23 @@
                 const data = await authService.login(phone, password);
                 if (data.isAuthSuccessful) {
                     const user = authService.getCurrentUser();
-                    if (user && user.role && user.role.toLowerCase() === 'admin') {
-                        window.location.href = '/Admin';
+                    console.log('Login successful, user info:', user);
+
+                    if (user && user.role) {
+                        const userRole = user.role; // Giữ nguyên case gốc
+                        console.log('User role:', userRole);
+
+                        // So sánh role với case-insensitive
+                        if (userRole.toLowerCase() === 'admin') {
+                            console.log('Redirecting to Admin page');
+                            window.location.href = '/Admin';
+
+                        } else {
+                            console.log('Redirecting to Home page');
+                            window.location.href = '/';
+                        }
                     } else {
+                        console.warn('User role not found, redirecting to home page');
                         window.location.href = '/';
                     }
                 } else {
