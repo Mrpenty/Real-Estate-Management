@@ -6,8 +6,13 @@ using RealEstateManagement.API.Hubs;
 using RealEstateManagement.API.Middleware;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Business.Services.Properties;
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var envPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).FullName, ".env");
+DotNetEnv.Env.Load(envPath);
+
 //signalr để chat
 builder.Services.AddSignalR()
     .AddMessagePackProtocol()
@@ -32,7 +37,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSwaggerServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDependencyInjectionServices();
-
+;
 // ✅ Thêm PayOS từ cấu hình
 builder.Services.AddSingleton(new PayOS(
    clientId: builder.Configuration["PayOS:ClientId"],

@@ -18,10 +18,11 @@ namespace RealEstateManagement.Business.Services
         private readonly RentalDbContext _context;
         private readonly IAddressRepository _addressRepository;
 
-        public OpenAIService(IConfiguration configuration, RentalDbContext rentalDbContext, IAddressRepository addressRepository)
+        public OpenAIService(RentalDbContext rentalDbContext, IAddressRepository addressRepository)
         {
             _httpClient = new HttpClient();
-            _apiKey = configuration["OpenAI:ApiKey"]; // Lấy từ appsettings.json
+            _apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
+              ?? throw new Exception("OPENAI_API_KEY not found in environment");
             _context = rentalDbContext;
             _addressRepository = addressRepository;
         }
