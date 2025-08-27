@@ -307,9 +307,11 @@ const authService = {
                 localStorage.removeItem('userInfo'); // Xóa dữ liệu bị lỗi
             }
         }
+        
 
         // Fallback: lấy từ token nếu không có trong localStorage
         const token = localStorage.getItem('authToken');
+
         if (!token) return null;
 
 
@@ -317,12 +319,12 @@ const authService = {
             const payload = JSON.parse(atob(token.split('.')[1]));
             // The key for the name claim in JWT is often 'name' or a schema URL
             const name = payload.name || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
-            const role = payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+            const role = payload.role; /*|| payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];*/
             const userInfo = {
                 id: payload.sub,
                 name: name,
                 email: payload.email,
-                role: role,
+                role: userInfoObj?.role || '',   // lấy từ localStorage nếu có
                 phone: payload.prn || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/prn']
             };
 
