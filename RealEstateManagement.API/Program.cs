@@ -8,6 +8,10 @@ using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Business.Services.Properties;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables(); // <- .env sẽ có hiệu lực từ đây
 //signalr để chat
 builder.Services.AddSignalR()
     .AddMessagePackProtocol()
