@@ -54,11 +54,13 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<RentalDbContext>();
     db.Database.Migrate();   // áp dụng migrations -> tạo bảng
 }
+
 app.UseRouting();
+app.UseCorsPolicy(app.Environment);
+
 app.UseErrorHandlingMiddleware();
 app.UseStaticFiles();
 
-app.UseCorsPolicy(app.Environment);
 
 // Add CORS before other middleware
 //app.UseCorsPolicy(app.Environment);
@@ -68,15 +70,19 @@ app.UseCorsPolicy(app.Environment);
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-    endpoints.MapHub<ChatHub>("/chatHub", options =>
-    {
-        options.CloseOnAuthenticationExpiration = true;
-    });
-});
 app.MapControllers();
+app.MapHub<ChatHub>("/chatHub", options =>
+{
+    options.CloseOnAuthenticationExpiration = true;
+});
+//app.UseEndpoints(endpoints =>
+//{
+//    endpoints.MapControllers();
+//    endpoints.MapHub<ChatHub>("/chatHub", options =>
+//    {
+//        options.CloseOnAuthenticationExpiration = true;
+//    });
+//});
 app.UseSwaggerServices(app.Environment);
 app.MapGet("/", () => Results.Redirect("/swagger"));
 app.Run();
