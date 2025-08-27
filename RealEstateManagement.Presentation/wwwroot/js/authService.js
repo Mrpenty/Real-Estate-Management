@@ -1,11 +1,13 @@
 ﻿const API_BASE_URL = 'http://194.233.81.64:5000/api/Auth';
 
+
 const authService = {
     // Phone number utilities
     formatPhoneForDisplay(phone) {
         if (!phone) return '';
         return phone.startsWith('+84') ? '0' + phone.substring(3) : phone;
     },
+
 
     formatPhoneForAPI(phone) {
         if (!phone) return '';
@@ -16,12 +18,15 @@ const authService = {
         return phone;
     },
 
+
     validatePhoneNumber(phone) {
         if (!phone) return false;
-        return (phone.startsWith('0') && phone.length === 11) || 
-               (phone.startsWith('+84') && phone.length === 12);
+        return (phone.startsWith('0') && phone.length === 11) ||
+            (phone.startsWith('+84') && phone.length === 12);
+
 
     },
+
 
     // Authentication methods
     setAuthToken(token) {
@@ -34,6 +39,22 @@ const authService = {
         } catch (e) {
             console.error('[setAuthToken] Error saving token to localStorage:', e);
         }
+
+        // Lưu thông tin user vào localStorage khi set token
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const userInfo = {
+                id: payload.sub,
+                name: payload.name || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
+                email: payload.email,
+                role: payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
+                phone: payload.prn || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/prn']
+            };
+            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            console.log('[setAuthToken] User info saved to localStorage');
+        } catch (e) {
+            console.error('[setAuthToken] Error saving user info to localStorage:', e);
+        }
         try {
             document.cookie = `accessToken=${token}; path=/; secure; samesite=strict; expires=${expiryDate.toUTCString()}`;
             console.log('[setAuthToken] Token saved to cookie with expiry');
@@ -44,12 +65,16 @@ const authService = {
     clearAuthToken() {
         localStorage.removeItem('authToken');
         localStorage.removeItem('authTokenExpiry');
+        localStorage.removeItem('userInfo'); // Xóa thông tin user
         document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        console.log('[clearAuthToken] All auth data cleared from localStorage and cookies');
     },
     async login(phone, password) {
         try {
 
+
             const apiPhone = this.formatPhoneForAPI(phone);
+
 
             const response = await fetch(`${API_BASE_URL}/login`, {
                 method: 'POST',
@@ -63,11 +88,14 @@ const authService = {
                 })
             });
 
+
             const data = await response.json();
+
 
             if (!response.ok) {
                 throw new Error(data.message || data.errorMessage || 'Login failed');
             }
+
 
             if (data.token) {
                 this.setAuthToken(data.token);
@@ -82,10 +110,13 @@ const authService = {
         }
     },
 
+
     async register(registerData) {
         try {
 
+
             const apiPhone = this.formatPhoneForAPI(registerData.phoneNumber);
+
 
             const response = await fetch(`${API_BASE_URL}/register`, {
                 method: 'POST',
@@ -101,11 +132,14 @@ const authService = {
                 })
             });
 
+
             const data = await response.json();
+
 
             if (!response.ok) {
                 throw new Error(data.message || data.errorMessage || 'Registration failed');
             }
+
 
             return data;
         } catch (error) {
@@ -114,9 +148,11 @@ const authService = {
         }
     },
 
+
     async verifyOTP(phone, otp) {
         try {
             console.log('Verify OTP attempt:', { phone, otp });
+
 
             const response = await fetch(`${API_BASE_URL}/verify-otp`, {
                 method: 'POST',
@@ -127,12 +163,15 @@ const authService = {
                 body: JSON.stringify({ phoneNumber: phone, otp })
             });
 
+
             const data = await response.json();
             console.log('Verify OTP response:', data);
+
 
             if (!response.ok || !data.isAuthSuccessful) {
                 throw new Error(data.errorMessage || 'OTP verification failed');
             }
+
 
             return data;
         } catch (error) {
@@ -141,9 +180,11 @@ const authService = {
         }
     },
 
+
     async resendOTP(phone) {
         try {
             console.log('Resend OTP attempt for phone:', phone);
+
 
             const response = await fetch(`${API_BASE_URL}/resend-otp`, {
                 method: 'POST',
@@ -154,12 +195,15 @@ const authService = {
                 body: JSON.stringify({ phoneNumber: phone })
             });
 
+
             const data = await response.json();
             console.log('Resend OTP response:', data);
+
 
             if (!response.ok) {
                 throw new Error(data.message || data.errorMessage || 'Failed to resend OTP');
             }
+
 
             return data;
         } catch (error) {
@@ -167,6 +211,7 @@ const authService = {
             throw error;
         }
     },
+
 
     async logout() {
         try {
@@ -189,10 +234,12 @@ const authService = {
         }
     },
 
+
     isAuthenticated() {
         const token = localStorage.getItem('authToken');
         const expiry = localStorage.getItem('authTokenExpiry');
         //console.log('Checking authentication, token exists:', !!token);
+
 
         if (!token || !expiry) return false;
         if (Date.now() > parseInt(expiry)) {
@@ -200,17 +247,20 @@ const authService = {
             return false;
         }
 
+
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             const isExpired = payload.exp * 1000 < Date.now();
             //console.log('Token payload:', payload);
             //console.log('Token expired (JWT exp):', isExpired);
 
+
             if (isExpired) {
                 console.log('Token is expired by JWT, logging out');
                 this.logout();
                 return false;
             }
+
 
             const userNameValue = document.getElementById('userNameIdC');
             const phoneNumberIdC = document.getElementById('phoneNumberIdC');
@@ -225,6 +275,7 @@ const authService = {
                 phoneCls.innerHTML = payload.prn;
             }
 
+
             const userProfileLink = document.getElementById('userProfileLink');
             if (userProfileLink) {
                 userProfileLink.innerHTML = '<i class="fas fa-user mr-1"></i>' + payload.name;
@@ -237,31 +288,55 @@ const authService = {
         }
     },
 
+
     getAuthToken() {
         return localStorage.getItem('authToken');
     },
 
+
     getCurrentUser() {
+        // Thử lấy từ localStorage trước
+        const userInfoStr = localStorage.getItem('userInfo');
+        if (userInfoStr) {
+            try {
+                const userInfo = JSON.parse(userInfoStr);
+                console.log('[getCurrentUser] User info retrieved from localStorage');
+                return userInfo;
+            } catch (e) {
+                console.error('[getCurrentUser] Error parsing user info from localStorage:', e);
+                localStorage.removeItem('userInfo'); // Xóa dữ liệu bị lỗi
+            }
+        }
+
+        // Fallback: lấy từ token nếu không có trong localStorage
         const token = localStorage.getItem('authToken');
         if (!token) return null;
+
 
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             // The key for the name claim in JWT is often 'name' or a schema URL
             const name = payload.name || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
             const role = payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-            return {
+            const userInfo = {
                 id: payload.sub,
                 name: name,
                 email: payload.email,
-                role: role
-                // Add other fields from payload as needed
+                role: role,
+                phone: payload.prn || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/prn']
             };
+
+            // Lưu lại vào localStorage để lần sau sử dụng
+            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+            console.log('[getCurrentUser] User info parsed from token and saved to localStorage');
+
+            return userInfo;
         } catch (e) {
             console.error('Failed to parse token or get user info:', e);
             return null;
         }
     },
+
 
     updateNavigation() {
         console.log('Updating navigation');
@@ -269,8 +344,11 @@ const authService = {
         console.log('Is authenticated:', isAuthenticated);
 
 
+
+
         const userProfileNavItem = document.getElementById('userProfileNavItem');
         const authNavItems = document.getElementById('authNavItems');
+
 
         if (userProfileNavItem) {
             console.log('Login nav item visibility:', !isAuthenticated);
@@ -281,11 +359,14 @@ const authService = {
             authNavItems.style.display = isAuthenticated ? 'none' : 'block';
         }
 
+
     },
+
 
     async verifyEmail(email) {
         try {
             console.log('Verify email attempt:', email);
+
 
             const response = await fetch(`${API_BASE_URL}/verify-email`, {
                 method: 'POST',
@@ -296,12 +377,15 @@ const authService = {
                 body: JSON.stringify({ email })
             });
 
+
             const data = await response.json();
             console.log('Verify email response:', data);
+
 
             if (!response.ok) {
                 throw new Error(data.errorMessage || 'Email verification failed');
             }
+
 
             if (data.token) {
                 this.setAuthToken(data.token);
@@ -314,9 +398,11 @@ const authService = {
         }
     },
 
+
     async googleLogin(idToken) {
         try {
             console.log('Google login attempt');
+
 
             const response = await fetch(`${API_BASE_URL}/google-login`, {
                 method: 'POST',
@@ -327,12 +413,15 @@ const authService = {
                 body: JSON.stringify({ idToken })
             });
 
+
             const data = await response.json();
             console.log('Google login response:', data);
+
 
             if (!response.ok) {
                 throw new Error(data.errorMessage || 'Google login failed');
             }
+
 
             if (data.token) {
                 this.setAuthToken(data.token);
@@ -346,11 +435,14 @@ const authService = {
     },
 };
 
+
 // Export the service
 window.authService = authService;
+
 
 // Initialize navigation on page load
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Page loaded, initializing navigation');
     authService.updateNavigation();
-}); 
+});
+

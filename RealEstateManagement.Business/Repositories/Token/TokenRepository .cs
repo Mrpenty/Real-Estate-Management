@@ -87,6 +87,7 @@ namespace RealEstateManagement.Business.Repositories.Token
                         HttpOnly = true,
                         IsEssential = true,
                         Secure = false,
+                        Domain = "194.233.81.64",
                         SameSite = SameSiteMode.Lax
                     }
                 );
@@ -98,6 +99,7 @@ namespace RealEstateManagement.Business.Repositories.Token
                     HttpOnly = true,
                     IsEssential = true,
                     Secure = false,
+                    Domain = "194.233.81.64",
                     SameSite = SameSiteMode.Lax
                 }
             );
