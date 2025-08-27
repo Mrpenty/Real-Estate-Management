@@ -86,7 +86,7 @@ namespace RealEstateManagement.Business.Repositories.Token
                         Expires = DateTimeOffset.UtcNow.AddDays(3),
                         HttpOnly = true,
                         IsEssential = true,
-                        Secure = true,
+                        Secure = false,
                         SameSite = SameSiteMode.Lax
                     }
                 );
@@ -97,7 +97,7 @@ namespace RealEstateManagement.Business.Repositories.Token
                     Expires = DateTimeOffset.UtcNow.AddDays(7),
                     HttpOnly = true,
                     IsEssential = true,
-                    Secure = true,
+                    Secure = false,
                     SameSite = SameSiteMode.Lax
                 }
             );
