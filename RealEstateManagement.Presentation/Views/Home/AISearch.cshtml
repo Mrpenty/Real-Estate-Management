@@ -391,7 +391,7 @@
         try {
             console.log('🔍 Loading property types directly...');
             
-            const url = 'https://localhost:7031/api/PropertyType/GetAllPropertyTypes';
+            const url = 'http://194.233.81.64:5000/api/PropertyType/GetAllPropertyTypes';
             console.log('📡 Direct API URL:', url);
             
             // Make API call
@@ -495,7 +495,7 @@
             };
 
             // Call AI Recommendation API - Sử dụng URL trực tiếp
-            const response = await fetch('https://localhost:7031/api/AIRecommendation/search-by-criteria', {
+            const response = await fetch('http://194.233.81.64:5000/api/AIRecommendation/search-by-criteria', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

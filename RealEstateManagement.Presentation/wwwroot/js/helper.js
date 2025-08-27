@@ -1,6 +1,6 @@
 ﻿var locationData = null;
-var API_PROPERTY_LOCATION_BASE_URL = 'https://localhost:7031/api/Property';
-const API_FAVORITE_BASE_URL = 'https://localhost:7031/api/Favorite';
+var API_PROPERTY_LOCATION_BASE_URL = 'http://194.233.81.64:5000/api/Property';
+const API_FAVORITE_BASE_URL = 'http://194.233.81.64:5000/api/Favorite';
 
 function roundToHalfStar(rating) {
     const thresholds = [0, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
@@ -304,7 +304,7 @@ async function clickInterest(id, isExist, interestedStatus, isReminderRenterConf
         const payload = JSON.parse(atob(token.split('.')[1]));
         userId = payload.id;
         try {
-            const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/AddInterest?propertyId=${id}`, {
+            const response = await fetch(`http://194.233.81.64:5000/api/Property/InterestedProperty/AddInterest?propertyId=${id}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': token ? `Bearer ${token}` : '',
@@ -335,7 +335,7 @@ async function clickInterest(id, isExist, interestedStatus, isReminderRenterConf
             const payload = JSON.parse(atob(token.split('.')[1]));
             userId = payload.id;
             try {
-                const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/RemoveInterest?propertyId=${id}`, {
+                const response = await fetch(`http://194.233.81.64:5000/api/Property/InterestedProperty/RemoveInterest?propertyId=${id}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': token ? `Bearer ${token}` : '',
@@ -363,7 +363,7 @@ async function clickInterest(id, isExist, interestedStatus, isReminderRenterConf
             const payload = JSON.parse(atob(token.split('.')[1]));
             userId = payload.id;
             try {
-                const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/${interestId}/confirm?isRenter=true&confirmed=true`, {
+                const response = await fetch(`http://194.233.81.64:5000/api/Property/InterestedProperty/${interestId}/confirm?isRenter=true&confirmed=true`, {
                     method: 'POST',
                     headers: {
                         'Authorization': token ? `Bearer ${token}` : '',
@@ -390,7 +390,7 @@ async function clickInterest(id, isExist, interestedStatus, isReminderRenterConf
             const payload = JSON.parse(atob(token.split('.')[1]));
             userId = payload.id;
             try {
-                const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/AddInterest?propertyId=${id}`, {
+                const response = await fetch(`http://194.233.81.64:5000/api/Property/InterestedProperty/AddInterest?propertyId=${id}`, {
                     method: 'POST',
                     headers: {
                         'Authorization': token ? `Bearer ${token}` : '',

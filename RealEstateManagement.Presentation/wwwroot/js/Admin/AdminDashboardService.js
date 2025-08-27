@@ -1,4 +1,4 @@
-const ADMIND_API_BASE_URL = "https://localhost:7031";
+const ADMIND_API_BASE_URL = "http://194.233.81.64:5000";
 
 const AdminDashboardService = {
     /**

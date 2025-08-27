@@ -66,7 +66,7 @@ function getListCompare() {
     });
     //try {
     //    let body = { ides: compareList.join(",") };
-    //    const response = await fetch(`https://localhost:7031/api/Property/compare`, {
+    //    const response = await fetch(`http://194.233.81.64:5000/api/Property/compare`, {
     //        method: 'POST',
     //        headers: {
     //            'Content-Type': 'application/json',

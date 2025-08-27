@@ -492,8 +492,8 @@
         </div>
 
         <script>
-            const API_URL = "https://localhost:7031/api/OwnerProperty/GetMyRentedProperties";
-            const USER_INFO_API = "https://localhost:7031/api/User/basic-info?userId=";
+            const API_URL = "http://194.233.81.64:5000/api/OwnerProperty/GetMyRentedProperties";
+            const USER_INFO_API = "http://194.233.81.64:5000/api/User/basic-info?userId=";
             const token = localStorage.getItem("authToken");
 
             let allContracts = [];
@@ -840,7 +840,7 @@
                 }
 
                 try {
-                    const res = await fetch(`https://localhost:7031/api/owner/rental-contracts/${contractId}/pay`, {
+                    const res = await fetch(`http://194.233.81.64:5000/api/owner/rental-contracts/${contractId}/pay`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -870,7 +870,7 @@
 
                 async function handleTerminate(contractId) {
                     try {
-                        const res = await fetch(`https://localhost:7031/api/owner/rental-contracts/${contractId}/terminate`, {
+                        const res = await fetch(`http://194.233.81.64:5000/api/owner/rental-contracts/${contractId}/terminate`, {
                             method: "PUT",
                             headers: {
                                 "Authorization": "Bearer " + token
@@ -907,7 +907,7 @@
                 }
 
                 try {
-                    const res = await fetch(`https://localhost:7031/api/owner/rental-contracts/${contractId}/renew`, {
+                    const res = await fetch(`http://194.233.81.64:5000/api/owner/rental-contracts/${contractId}/renew`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",

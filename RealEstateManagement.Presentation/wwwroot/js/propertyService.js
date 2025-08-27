@@ -1,5 +1,5 @@
-﻿var API_PROPERTY_BASE_URL3 = 'https://localhost:7031/api/Property';
-var API_PROPERTY_BASE_URL2 = 'https://localhost:7031/api/OwnerProperty';
+﻿var API_PROPERTY_BASE_URL3 = 'http://194.233.81.64:5000/api/Property';
+var API_PROPERTY_BASE_URL2 = 'http://194.233.81.64:5000/api/OwnerProperty';
 
 const propertyService = {
     async getAllproperty() {
@@ -148,7 +148,7 @@ const propertyService = {
     async getNewPost() {
         try {
 
-            const response = await fetch(`https://localhost:7031/api/News/published`, {
+            const response = await fetch(`http://194.233.81.64:5000/api/News/published`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -172,7 +172,7 @@ const propertyService = {
     async getNewPostDetail(id) {
         try {
 
-            const response = await fetch(`https://localhost:7031/api/News/${id}`, {
+            const response = await fetch(`http://194.233.81.64:5000/api/News/${id}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -197,7 +197,7 @@ const propertyService = {
     async getLandlord(landlordId) {
         try {
             const token = localStorage.getItem('authToken');
-            const response = await fetch(`https://localhost:7031/api/Property/${landlordId}/profile-with-properties`, {
+            const response = await fetch(`http://194.233.81.64:5000/api/Property/${landlordId}/profile-with-properties`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

@@ -3,7 +3,7 @@
  */
 class ReportService {
     constructor() {
-        this.baseUrl = 'https://localhost:7031';
+        this.baseUrl = 'http://194.233.81.64:5000';
     }
 
     /**

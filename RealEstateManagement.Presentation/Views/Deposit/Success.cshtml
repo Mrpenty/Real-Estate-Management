@@ -39,7 +39,7 @@
                         return;
                     }
 
-                    const response = await fetch(`https://localhost:7031/api/Deposit/check-payment-status?orderCode=${orderCode}`, {
+                    const response = await fetch(`http://194.233.81.64:5000/api/Deposit/check-payment-status?orderCode=${orderCode}`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${token}` // Gửi token trong header

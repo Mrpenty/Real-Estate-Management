@@ -91,7 +91,7 @@
                         return;
                     }
 
-                    const response = await fetch(`https://localhost:7031/api/Report/myReport/${userId}`, {
+                    const response = await fetch(`http://194.233.81.64:5000/api/Report/myReport/${userId}`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${token}`

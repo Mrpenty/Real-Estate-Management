@@ -136,7 +136,7 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
     <div class="properties" id="properties"></div>
 
     <script>
-        const API_URL = "https://localhost:7031/api/Property/MyRentedProperties";
+        const API_URL = "http://194.233.81.64:5000/api/Property/MyRentedProperties";
         const token = localStorage.getItem("authToken");
 
         async function fetchRented() {
@@ -163,7 +163,7 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
 
         async function fetchRenewalProposal(contractId) {
             try {
-                const res = await fetch(`https://localhost:7031/api/owner/rental-contracts/${contractId}/renew/proposal`, {
+                const res = await fetch(`http://194.233.81.64:5000/api/owner/rental-contracts/${contractId}/renew/proposal`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -180,7 +180,7 @@ Layout = "~/Views/Shared/_LayoutV2.cshtml";
 
         async function respondRenewal(contractId, approve) {
             try {
-                const res = await fetch(`https://localhost:7031/api/owner/rental-contracts/${contractId}/renew/respond?approve=${approve}`, {
+                const res = await fetch(`http://194.233.81.64:5000/api/owner/rental-contracts/${contractId}/renew/respond?approve=${approve}`, {
                     method: "POST",
                     headers: {
                         "Authorization": "Bearer " + token

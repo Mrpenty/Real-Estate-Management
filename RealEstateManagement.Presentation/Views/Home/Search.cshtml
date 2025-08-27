@@ -327,8 +327,8 @@
         // }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const apiBaseUrl = 'https://localhost:7031/api';
-            const urlBase = 'https://localhost:7031';
+            const apiBaseUrl = 'http://194.233.81.64:5000/api';
+            const urlBase = 'http://194.233.81.64:5000';
             let currentPage = 1;
             let currentPageSize = 12;
             let totalPages = 0;
@@ -558,7 +558,7 @@
                 const defaultImage = '/image/no-image.png';
                 if (!property.imageUrls || !Array.isArray(property.imageUrls) || property.imageUrls.length === 0) {
                     if (property.primaryImageUrl && property.primaryImageUrl.trim() !== '') {
-                        return property.primaryImageUrl.includes('http') ? property.primaryImageUrl : `https://localhost:7031${property.primaryImageUrl}`;
+                        return property.primaryImageUrl.includes('http') ? property.primaryImageUrl : `http://194.233.81.64:5000${property.primaryImageUrl}`;
                     }
                     return defaultImage;
                 }
@@ -566,13 +566,13 @@
                 if (!selectedImage) selectedImage = property.imageUrls[0];
                 if (selectedImage) {
                     if (typeof selectedImage === 'object' && selectedImage.url) {
-                        return selectedImage.url.includes('http') ? selectedImage.url : `https://localhost:7031${selectedImage.url}`;
+                        return selectedImage.url.includes('http') ? selectedImage.url : `http://194.233.81.64:5000${selectedImage.url}`;
                     } else if (typeof selectedImage === 'string' && selectedImage.trim() !== '') {
-                        return selectedImage.includes('http') ? selectedImage : `https://localhost:7031${selectedImage}`;
+                        return selectedImage.includes('http') ? selectedImage : `http://194.233.81.64:5000${selectedImage}`;
                     }
                 }
                 if (property.primaryImageUrl && property.primaryImageUrl.trim() !== '') {
-                    return property.primaryImageUrl.includes('http') ? property.primaryImageUrl : `https://localhost:7031${property.primaryImageUrl}`;
+                    return property.primaryImageUrl.includes('http') ? property.primaryImageUrl : `http://194.233.81.64:5000${property.primaryImageUrl}`;
                 }
                 return defaultImage;
             }

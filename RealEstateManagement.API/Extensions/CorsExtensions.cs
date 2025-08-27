@@ -9,7 +9,7 @@
                 options.AddPolicy("DefaultCorsPolicy",
                     builder =>
                     {
-                        builder.WithOrigins("https://localhost:7160", "https://http://194.233.81.64:5000", "http://http://194.233.81.64:5000") 
+                        builder.WithOrigins("https://localhost:7160", "http://localhost:7160", "https://194.233.81.64:5000", "http://194.233.81.64:5000") 
                                .AllowAnyMethod()
                                .AllowAnyHeader()
                                .AllowCredentials();

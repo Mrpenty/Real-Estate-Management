@@ -369,7 +369,7 @@ class ReviewManager {
     async reportComment(commentId) {
         if (!confirm("Bạn có muốn report ?")) return;
         try {
-            let urlReply = `https://localhost:7031/api/Review/reply/report?commentId=${commentId}`;
+            let urlReply = `http://194.233.81.64:5000/api/Review/reply/report?commentId=${commentId}`;
             const token = localStorage.getItem('authToken');
             if (!token) {
                 window.location.href = '/Auth/Login';
@@ -537,7 +537,7 @@ class ReviewManager {
         try {
             const textArea = document.querySelector(`.comment-item[data-comment-id="${commentId}"] .reply-form .comment-textarea`);
             const actionsDiv = document.querySelector(`.comment-item[data-comment-id="${commentId}"] .reply-form`);
-            let urlReply = "https://localhost:7031/api/Review/reply";
+            let urlReply = "http://194.233.81.64:5000/api/Review/reply";
             if (replyId != 0) urlReply += '/edit';
             const token = localStorage.getItem('authToken');
             if (!token) {
@@ -611,7 +611,7 @@ async function addComment(dto) {
         }
         console.log(dto);
 
-        const response = await fetch(`https://localhost:7031/api/Review/add`, {
+        const response = await fetch(`http://194.233.81.64:5000/api/Review/add`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -645,7 +645,7 @@ async function listInterest() {
         const payload = JSON.parse(atob(token.split('.')[1]));
         userId = payload.id;
 
-        const response = await fetch(`https://localhost:7031/api/Property/InterestedProperty/ByRenter/${userId}`, {
+        const response = await fetch(`http://194.233.81.64:5000/api/Property/InterestedProperty/ByRenter/${userId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -673,7 +673,7 @@ async function editReplyComment(dto) {
             return;
         }
 
-        const response = await fetch(`https://localhost:7031/api/Review/reply/edit`, {
+        const response = await fetch(`http://194.233.81.64:5000/api/Review/reply/edit`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -697,7 +697,7 @@ async function editReplyComment(dto) {
 
 async function getComment(propertyId) {
     try {
-        const response = await fetch(`https://localhost:7031/api/Review/post/${propertyId}`, {
+        const response = await fetch(`http://194.233.81.64:5000/api/Review/post/${propertyId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

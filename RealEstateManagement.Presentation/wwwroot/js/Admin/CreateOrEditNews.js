@@ -1,5 +1,5 @@
-const API_New_BASE_URL = "https://localhost:7031/api/News";
-const API_IMAGES_BASE_URL = "https://localhost:7031/api/NewImage";
+const API_New_BASE_URL = "http://194.233.81.64:5000/api/News";
+const API_IMAGES_BASE_URL = "http://194.233.81.64:5000/api/NewImage";
 
 const newsId = window.ViewBag && window.ViewBag.NewsId ? window.ViewBag.NewsId : null;
 const form = document.getElementById('newsForm');
@@ -151,7 +151,7 @@ function getFullImageUrl(imageUrl) {
 }
 
     // Nếu là relative path thì thêm base URL của API
-    const API_BASE = "https://localhost:7031";
+    const API_BASE = "http://194.233.81.64:5000";
     return API_BASE + imageUrl;
 }
 

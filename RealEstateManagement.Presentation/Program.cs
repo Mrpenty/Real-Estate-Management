@@ -23,7 +23,7 @@ builder.Services.AddCors(options =>
 // Add HttpClient and configure the named client for the API
 builder.Services.AddHttpClient("REMApi", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7031/"); // Make sure this is your API's base URL
+    client.BaseAddress = new Uri("http://194.233.81.64:5000/"); // Make sure this is your API's base URL
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
@@ -77,7 +77,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();

@@ -71,7 +71,7 @@
 
     async function loadContract() {
         try {
-            const response = await fetch(`https://localhost:7031/api/owner/rental-contracts/${contractId}`, {
+            const response = await fetch(`http://194.233.81.64:5000/api/owner/rental-contracts/${contractId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -164,7 +164,7 @@
         };
 
         try {
-            const response = await fetch(`https://localhost:7031/api/owner/rental-contracts/${contractId}`, {
+            const response = await fetch(`http://194.233.81.64:5000/api/owner/rental-contracts/${contractId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
