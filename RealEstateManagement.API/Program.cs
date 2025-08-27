@@ -56,15 +56,15 @@ using (var scope = app.Services.CreateScope())
 }
 app.UseRouting();
 app.UseErrorHandlingMiddleware();
+app.UseStaticFiles();
 
 app.UseCorsPolicy(app.Environment);
 
 // Add CORS before other middleware
-app.UseCorsPolicy(app.Environment);
+//app.UseCorsPolicy(app.Environment);
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
-app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();

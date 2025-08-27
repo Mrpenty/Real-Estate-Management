@@ -39,7 +39,7 @@
       - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - Api__BaseUrl=http://api:8080   # gọi qua service name 'api'
+      - Api__BaseUrl=http://194.233.81.64:5000
     depends_on: [api]
     ports:
       - "5001:8080"
