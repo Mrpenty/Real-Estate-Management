@@ -2,6 +2,8 @@
   db:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: rem-db
+    env_file:
+      - .env
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=${SA_PASSWORD}
@@ -16,6 +18,8 @@
       context: .
       dockerfile: RealEstateManagement.API/Dockerfile
     container_name: rem-api
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__MyCnn=Server=db,1433;Database=RentalDB;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
@@ -31,6 +35,8 @@
       context: .
       dockerfile: RealEstateManagement.Presentation/Dockerfile
     container_name: rem-web
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - Api__BaseUrl=http://api:8080   # gọi qua service name 'api'
