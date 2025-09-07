@@ -94,13 +94,12 @@ namespace RealEstateManagement.Business.Services.Properties
                     });
                     var landlord = await _user.GetUserBasicInfoAsync(t.LandlordId);
                     var emailBody = $@"
-                    <html><body>
-                      <p>Xin chào {l.Landlord.Name},</p>
-                      <p>Người thuê đã xác nhận muốn thuê bất động sản <b>{t.Title}</b>.</p>
-                      <p>Vui lòng đăng nhập hệ thống để phản hồi.</p>
-                      <br/>
-                      <p>Trân trọng,<br/>BĐS Management</p>
-                    </body></html>";
+                   
+                      Xin chào {l.Landlord.Name},
+                      Người thuê đã xác nhận muốn thuê bất động sản {t.Title}.
+                      Vui lòng đăng nhập hệ thống để phản hồi và xử lý, trân trọng.
+                      
+                      BĐS Management";
 
                     await _mailService.SendEmailAsync(
                         landlord.Email,
@@ -140,13 +139,13 @@ namespace RealEstateManagement.Business.Services.Properties
                     });
                     var renter = await _user.GetUserBasicInfoAsync(ip.RenterId);
                     var emailBody1 = $@"
-                    <html><body>
-                      <p>Xin chào {ip.Renter.Name},</p>
-                      <p>Chủ nhà đã từ chối cho thuê bất động sản <b>{t.Title}</b>.</p>
-                      <p>Bạn có thể tìm kiếm thêm các lựa chọn khác trên hệ thống.</p>
-                      <br/>
-                      <p>Trân trọng,<br/>BĐS Management</p>
-                    </body></html>";
+                    
+                      Xin chào {ip.Renter.Name},
+                      Chủ nhà đã từ chối cho thuê bất động sản <b>{t.Title}.
+                      Bạn có thể tìm kiếm thêm các lựa chọn khác trên hệ thống.
+                      
+                      Trân trọng, BĐS Management
+                    ";
                     await _mailService.SendEmailAsync(
                     renter.Email,
                     "Chủ nhà từ chối cho thuê",
@@ -188,13 +187,13 @@ namespace RealEstateManagement.Business.Services.Properties
                 });
                 var renter1 = await _user.GetUserBasicInfoAsync(ip.RenterId);
                 var emailBody2 = $@"
-                <html><body>
-                  <p>Xin chào {ip.Renter.Name},</p>
-                  <p>Chúc mừng 🎉! Chủ nhà đã chấp nhận cho thuê bất động sản <b>{t.Title}</b>.</p>
-                  <p>Bạn có thể xem chi tiết trong mục <b>Danh sách nhà đang thuê</b> trên hệ thống.</p>
-                  <br/>
-                  <p>Trân trọng,<br/>BĐS Management</p>
-                </body></html>";
+                
+                  Xin chào {ip.Renter.Name},
+                  Chúc mừng 🎉! Chủ nhà đã chấp nhận cho thuê bất động sản <b>{t.Title}.
+                  Bạn có thể xem chi tiết trong mục (Danh sách nhà đang thuê) trên hệ thống.</p>
+                  
+                  Trân trọng,BĐS Management
+                ";
 
                 await _mailService.SendEmailAsync(
                     renter1.Email,
@@ -274,7 +273,9 @@ namespace RealEstateManagement.Business.Services.Properties
         public async Task<IEnumerable<InterestedPropertyDTO>> GetByRenterAsync(int renterId)
         {
             var list = await _repository.GetByRenterAsync(renterId);
-            return list.Select(MapToDTO);
+            return list
+                .Where(p => p.Property.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved ))
+                .Select(MapToDTO);
         }
 
         public async Task<InterestedPropertyDTO> GetByIdAsync(int id)

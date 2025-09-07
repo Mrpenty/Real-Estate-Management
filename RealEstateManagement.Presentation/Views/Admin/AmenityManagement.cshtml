@@ -53,8 +53,7 @@
                         <th>ID</th>
                         <th>Tên tiện ích</th>
                         <th>Mô tả</th>
-                        <th>Ngày tạo</th>
-                        <th class="text-center">Hành động</th>
+                        <th>Hành động</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -274,7 +273,6 @@
                         ${amenity.description || 'Không có mô tả'}
                     </td>
                     
-                    <td>${formatDate(amenity.createdAt)}</td>
                     <td class="text-center">
                         <button onclick="editAmenity(${amenity.id})" class="btn btn-primary btn-sm mr-2" title="Chỉnh sửa">
                             <i class="fas fa-edit"></i>

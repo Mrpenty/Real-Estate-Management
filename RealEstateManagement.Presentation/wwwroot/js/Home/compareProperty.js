@@ -28,7 +28,6 @@ function getListCompare() {
                 { label: 'Diện tích', key: 'area', highlight: 'isBestArea', format: v => v + ' m²' },
                 { label: 'Phòng ngủ', key: 'bedrooms', highlight: 'isMostBedrooms' },
                 //{ label: 'Đánh giá', key: 'totalReviews', highlight: 'IsBestRating' },
-                { label: 'Lượt xem', key: 'viewsCount', highlight: 'isMostViewed' },
                 { label: 'Lượt đánh giá', key: 'totalReviews', highlight: 'isBestRating' },
             ];
 

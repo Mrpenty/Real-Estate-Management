@@ -255,13 +255,12 @@ namespace RealEstateManagement.Business.Services.OwnerService
             var property = await _propertyPostRepo.GetPostWithPropertyAsync(contract.PropertyPostId);
             var renter = await _user.GetUserBasicInfoAsync(contract.RenterId ?? 0);
             var emailBody1 = $@"
-                    <html><body>
-                      <p>Xin chào {renter.Name},</p>
-                      <p>Chủ nhà vừa đề xuất gia hạn hợp đồng của bất động sản <b>{property.Property.Title}</b>.</p>
-                      <p>Bạn hãy vào trang web để xem các yêu cầu đề xuất.</p>
-                      <br/>
-                      <p>Trân trọng,<br/>BĐS Management</p>
-                    </body></html>";
+                    
+                      Xin chào {renter.Name},
+                      Chủ nhà vừa đề xuất gia hạn hợp đồng của bất động sản {property.Property.Title}.
+                      Bạn hãy vào trang web để xem các yêu cầu đề xuất.
+                      Trân trọng, BĐS Management.
+                    ";
             await _mailService.SendEmailAsync(
             renter.Email,
             "Chủ nhà từ chối cho thuê",

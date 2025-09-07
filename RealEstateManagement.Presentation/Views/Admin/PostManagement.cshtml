@@ -318,7 +318,7 @@
                         <div class="font-medium text-gray-900">${post.title || (post.property && post.property.title) || ''}</div>
 
                     </td>
-                    <td>${post.name || (post.landlord && (post.landlord.fullName || post.landlord.name)) || post.landlordId || ''}</td>
+                    <td>${post.landlordName || (post.landlord && (post.landlord.fullName || post.landlord.name)) || post.landlordId || ''}</td>
                     <td>
                         <span class="font-medium text-green-600">
                             ${post.property.price ? post.property.price.toLocaleString('vi-VN') + ' VNĐ' : 'N/A'}

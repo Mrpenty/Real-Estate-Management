@@ -1,17 +1,19 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2.Flows;
+using Google.Apis.Util.Store;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using RealEstateManagement.Business.DTO.AuthDTO;
 using RealEstateManagement.Business.Repositories.Token;
 using RealEstateManagement.Business.Services.Mail;
-
-using Google.Apis.Auth.OAuth2.Flows;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using Google.Apis.Util.Store;
-using Google.Apis.Auth.OAuth2;
-using RealEstateManagement.Data.Entity.User;
 using RealEstateManagement.Business.Services.Wallet;
+using RealEstateManagement.Data.Entity.User;
+using System.Globalization;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace RealEstateManagement.Business.Services.Auth
 {
@@ -89,10 +91,10 @@ namespace RealEstateManagement.Business.Services.Auth
                     return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Email already registered." };
 
                 // Tạo UserName duy nhất từ Name (loại bỏ khoảng trắng và ký tự đặc biệt)
-                var userName = registerDTO.Name.Replace(" ", "").Replace("-", "").Replace("_", "");
+                var userName = await GenerateUniqueUserName(registerDTO.Name, registerDTO.PhoneNumber, _userManager);
                 if (string.IsNullOrEmpty(userName))
                 {
-                    userName = registerDTO.PhoneNumber; // Fallback về PhoneNumber nếu Name rỗng
+                    return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Invalid name or phone number for username generation." };
                 }
 
                 var user = new ApplicationUser
@@ -101,7 +103,8 @@ namespace RealEstateManagement.Business.Services.Auth
                     UserName = userName,
                     PhoneNumber = registerDTO.PhoneNumber,
                     NormalizedUserName = _userManager.NormalizeName(userName),
-                    NormalizedEmail = null, // hoặc _userManager.NormalizeEmail(registerDTO.Email)
+                    Email = registerDTO.Email,
+                    NormalizedEmail = _userManager.NormalizeEmail(registerDTO.Email),
                     SecurityStamp = Guid.NewGuid().ToString(),
                     IsVerified = false
                 };
@@ -148,6 +151,7 @@ namespace RealEstateManagement.Business.Services.Auth
                 return new AuthMessDTO { IsAuthSuccessful = false, ErrorMessage = "Registration failed due to a server error. Please try again." };
             }
         }
+
 
 
         public async Task LogoutAsync()
@@ -463,6 +467,58 @@ namespace RealEstateManagement.Business.Services.Auth
                 };
             }
         }
+
+
+
+        private string RemoveDiacritics(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return text;
+
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString)
+            {
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+        }
+
+        // Hàm tạo UserName duy nhất
+        private async Task<string> GenerateUniqueUserName(string name, string phoneNumber, UserManager<ApplicationUser> userManager)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = phoneNumber; // Fallback về phoneNumber nếu name rỗng
+            }
+
+            // Chuyển đổi tên có dấu sang không dấu và loại bỏ ký tự không hợp lệ
+            string baseUserName = RemoveDiacritics(name);
+            baseUserName = Regex.Replace(baseUserName, @"[^a-zA-Z0-9]", ""); // Chỉ giữ chữ cái và số
+            if (string.IsNullOrEmpty(baseUserName))
+            {
+                baseUserName = phoneNumber; // Fallback về phoneNumber nếu tên không hợp lệ
+            }
+
+            string userName = baseUserName;
+            int suffix = 1;
+
+            // Kiểm tra tính duy nhất của UserName
+            while (await userManager.FindByNameAsync(userName) != null)
+            {
+                userName = $"{baseUserName}{suffix++}";
+            }
+
+            return userName;
+        }
+
+
 
     }
 }

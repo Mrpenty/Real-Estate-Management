@@ -210,7 +210,7 @@
     <!-- Floating Support Chat Button -->
     <div class="floating-support-btn">
         <button onclick="openSimpleSupportChat()" class="support-btn">
-            <i class="fas fa-comments"></i>
+            <i class="fas fa-headset"></i>
             
             <!-- Unread Badge -->
             <div id="supportUnreadBadge" class="support-unread-badge" style="display: none;">
@@ -220,6 +220,24 @@
             <!-- Tooltip -->
             <div class="support-tooltip">
                 Liên hệ hỗ trợ
+                <div class="tooltip-arrow"></div>
+            </div>
+        </button>
+    </div>
+
+    <!-- Nút Cuộc trò chuyện -->
+    <div class="floating-chat-btn">
+        <button onclick="window.location.href='/Chat/Index'" class="chat-btn">
+            <i class="fas fa-comments"></i>
+            
+            <!-- Unread Badge -->
+           @*  <div id="supportUnreadBadge" class="support-unread-badge" style="display: none;">
+                0
+            </div> *@
+            
+            <!-- Tooltip -->
+            <div class="support-tooltip">
+                Cuộc trò chuyện
                 <div class="tooltip-arrow"></div>
             </div>
         </button>

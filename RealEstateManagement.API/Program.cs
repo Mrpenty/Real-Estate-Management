@@ -37,7 +37,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSwaggerServices();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDependencyInjectionServices();
-;
+
 // ✅ Thêm PayOS từ cấu hình
 builder.Services.AddSingleton(new PayOS(
    clientId: builder.Configuration["PayOS:ClientId"],

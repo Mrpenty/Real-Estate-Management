@@ -73,6 +73,8 @@ namespace RealEstateManagement.Business.Repositories.FavoriteRepository
                     .ThenInclude(p => p.Images)
                     .Include(f => f.Property)
                     .ThenInclude(p => p.PropertyType)
+                .Include(f =>f.Property)
+                    .ThenInclude( p => p.Posts)
                 .Include(f => f.Property)
                     .ThenInclude(p => p.Address)
                         .ThenInclude(c => c.Province)

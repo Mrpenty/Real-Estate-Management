@@ -32,6 +32,9 @@ namespace RealEstateManagement.Business.Services.Favorite
         {
             var properties = (await _repository.AllFavoritePropertyAsync(userId))
                              ?? Enumerable.Empty<Property>();
+
+            properties = properties
+        .Where(p => p.Posts != null && p.Posts.Any(post => post.Status == PropertyPost.PropertyPostStatus.Approved));
             return properties.Select(p => new HomePropertyDTO
             {
                 Id = p.Id,

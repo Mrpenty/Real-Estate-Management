@@ -33,6 +33,7 @@ namespace RealEstateManagement.Business.Repositories.Properties
         public async Task<IEnumerable<InterestedProperty>> GetByRenterAsync(int renterId)
             => await _context.InterestedProperties
                 .Include(x => x.Property)
+                    .ThenInclude(x => x.Posts)
                 .Where(x => x.RenterId == renterId)
                 .ToListAsync();
 

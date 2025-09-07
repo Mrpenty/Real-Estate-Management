@@ -110,53 +110,16 @@ namespace RealEstateManagement.Business.Services.Chat.Conversations
                 throw new Exception("Không tìm thấy landlord hoặc landlord chưa có email");
 
             var emailBody = $@"
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset='UTF-8'>
-              <style>
-                body {{
-                    font-family: Arial, sans-serif;
-                    font-size: 14px;
-                    color: #333;
-                }}
-                .container {{
-                    max-width: 600px;
-                    margin: 0 auto;
-                    padding: 20px;
-                    border: 1px solid #eee;
-                    border-radius: 8px;
-                    background-color: #fafafa;
-                }}
-                h2 {{
-                    color: #2c3e50;
-                }}
-                p {{
-                    line-height: 1.5;
-                }}
-                .footer {{
-                    margin-top: 20px;
-                    font-size: 12px;
-                    color: #777;
-                }}
-              </style>
-            </head>
-            <body>
-              <div class='container'>
-                <h2>Xin chào {landlord.Name},</h2>
-                <p>
-                  Một người thuê vừa quan tâm tới bài đăng <b>{property.Title}</b> của bạn.
-                </p>
-                <p>
+          
+                  Xin chào {landlord.Name},
+                
+                  Một người thuê vừa quan tâm tới bài đăng {property.Title} của bạn.
+               
                   Hãy đăng nhập vào hệ thống để xem chi tiết.
-                </p>
-                <div class='footer'>
-                  Trân trọng,<br/>
-                  Đội ngũ BĐS Management
-                </div>
-              </div>
-            </body>
-            </html>";
+               
+                  Trân trọng,
+                  Đội ngũ BĐS Management.
+                  ";
 
             var existingConversation = await _repository.GetConvesationAsync(renterId, landlordId);
             if (existingConversation != null)
@@ -217,10 +180,11 @@ namespace RealEstateManagement.Business.Services.Chat.Conversations
             await _mailService.SendEmailAsync(
                 landlord.Email,
                 "Có người quan tâm tới bài đăng của bạn",
-                $"Xin chào {landlord.Name},<br/><br/>" +
-                $"Một người thuê vừa quan tâm tới bài đăng <b>{property.Title}</b> của bạn.<br/>" +
-                $"Hãy đăng nhập vào hệ thống để xem chi tiết.<br/><br/>" +
-                $"Trân trọng,<br/>Đội ngũ BĐS Management"
+                $"Xin chào {landlord.Name}," +
+                $"Một người thuê vừa quan tâm tới bài đăng {property.Title} của bạn. " +
+                $"Hãy đăng nhập vào hệ thống để xem chi tiết." +
+                $"Trân trọng," +
+                $"Đội ngũ BĐS Management"
             );
         }
     }
