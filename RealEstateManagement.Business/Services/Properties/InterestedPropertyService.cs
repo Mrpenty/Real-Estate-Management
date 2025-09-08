@@ -87,7 +87,8 @@ namespace RealEstateManagement.Business.Services.Properties
                     await _notificationService.SendNotificationToSpecificUsersAsync(new CreateNotificationDTO
                     {
                         Title = "Người thuê muốn thuê",
-                        Content = $"Người thuê xác nhận hợp đồng và muốn thuê: {t.Title}.",
+                        Content = $"Người thuê xác nhận hợp đồng và muốn thuê: {t.Title}. " +
+                          $"<a href='/PostProperty/DetailProperty/{t.Id}'>Xem chi tiết</a>",
                         Type = "info",
                         Audience = "specific",
                         SpecificUserIds = new List<int> { l.LandlordId }
@@ -180,7 +181,8 @@ namespace RealEstateManagement.Business.Services.Properties
                 await _notificationService.SendNotificationToSpecificUsersAsync(new CreateNotificationDTO
                 {
                     Title = "Cho thuê thành công 🎉",
-                    Content = $"Chủ nhà đã chấp nhận cho thuê với bất động sản: {t.Title}. Truy cập mục Danh sách nhà đang thuê để xem chi tiết",
+                    Content = $"Chủ nhà đã chấp nhận cho thuê với bất động sản: {t.Title}. " +
+                      $"<a href='/Home/MyRentedProperties'>Xem chi tiết</a>",
                     Type = "success",
                     Audience = "specific",
                     SpecificUserIds = new List<int> { ip.RenterId }

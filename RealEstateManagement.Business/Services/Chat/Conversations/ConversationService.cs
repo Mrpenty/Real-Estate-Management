@@ -135,7 +135,8 @@ namespace RealEstateManagement.Business.Services.Chat.Conversations
                 await _notificationService.SendNotificationToSpecificUsersAsync(new CreateNotificationDTO
                 {
                     Title = "Có người quan tâm bài đăng của bạn",
-                    Content = $"Một người thuê vừa quan tâm tới bài đăng: {property.Title}",
+                    Content = $"Một người thuê vừa quan tâm tới bài đăng: {property.Title}. " +
+                   $"<a href='/PostProperty/DetailProperty/{property.Id}'>Click vào đây để xem chi tiết</a>",
                     Type = "info",
                     Audience = "specific",
                     SpecificUserIds = new List<int> { landlordId }
@@ -171,7 +172,8 @@ namespace RealEstateManagement.Business.Services.Chat.Conversations
             await _notificationService.SendNotificationToSpecificUsersAsync(new CreateNotificationDTO
             {
                 Title = "Có người quan tâm bài đăng của bạn",
-                Content = $"Một người thuê vừa quan tâm tới bài đăng: {property.Title}",
+                Content = $"Một người thuê vừa quan tâm tới bài đăng: {property.Title}. " +
+                 $"<a href='/PostProperty/DetailProperty/{property.Id}'>Click vào đây để xem chi tiết</a>",
                 Type = "info",
                 Audience = "specific",
                 SpecificUserIds = new List<int> { landlordId }

@@ -1,5 +1,6 @@
 ﻿using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
+using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Business.Services.Mail;
 using RealEstateManagement.Business.Services.User;
 using RealEstateManagement.Data.Entity;
@@ -18,13 +19,15 @@ namespace RealEstateManagement.Business.Services.OwnerService
         private readonly IPropertyPostRepository _propertyPostRepo;
         private readonly IProfileService _user;
         private readonly IMailService _mailService;
+        private readonly IPropertyRepository _propertyRepo;
 
-        public RentalContractService(IRentalContractRepository repository, IPropertyPostRepository propertyPost, IProfileService profileService, IMailService mailService)
+        public RentalContractService(IRentalContractRepository repository, IPropertyPostRepository propertyPost, IProfileService profileService, IMailService mailService, IPropertyRepository propertyRepository)
         {
             _repository = repository;
             _propertyPostRepo = propertyPost;
             _user = profileService;
             _mailService = mailService;
+            _propertyRepo = propertyRepository;
         }
 
         //Xem hợp đồng của bài Post đó
@@ -124,12 +127,30 @@ namespace RealEstateManagement.Business.Services.OwnerService
         public async Task<bool> TerminateContractAsync(int contractId)
         {
             var contract = await _repository.GetByRentalContractIdAsync(contractId);
-
+            var renterId = contract.RenterId ?? 1;
+            var t = await _propertyRepo.GetPropertyByIdAsync(contract.PropertyPostId);
             if (contract == null) return false;
 
             contract.Status = RentalContract.ContractStatus.Terminated;
 
             await _repository.UpdateStatusAsync(contract.Id, contract.Status);
+
+            var renter = await _user.GetUserBasicInfoAsync(renterId);
+            if (renter != null && !string.IsNullOrEmpty(renter.Email))
+            {
+                var renterEmailBody = $@"
+                Xin chào {renter.Name},
+                Hợp đồng thuê của bạn với bất động sản {t.Title} đã bị chấm dứt.
+                Trân trọng,
+                BĐS Management
+            ";
+
+                await _mailService.SendEmailAsync(
+                    renter.Email,
+                    "Hợp đồng đã chấm dứt",
+                    renterEmailBody
+                );
+            }
             return true;
         }
 
