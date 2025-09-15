@@ -38,7 +38,6 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.PropertyServiceTest
                     Id = 1,
                     Title = "House 1",
                     Description = "Desc 1",
-                    Type = "Apartment",
                     AddressId = 11,
                     Area = 80,
                     Bedrooms = 3,

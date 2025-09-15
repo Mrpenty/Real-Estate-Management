@@ -3,7 +3,10 @@ using Moq;
 using RealEstateManagement.Business.Repositories.Chat.Messages;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Repositories.Properties;
+using RealEstateManagement.Business.Services.Mail;
+using RealEstateManagement.Business.Services.NotificationService;
 using RealEstateManagement.Business.Services.Properties;
+using RealEstateManagement.Business.Services.User;
 using RealEstateManagement.Data.Entity.PropertyEntity;
 using RealEstateManagement.Data.Entity.User;
 using System.Collections.Generic;
@@ -16,25 +19,37 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.InterestedPropertyServic
     public class GetById1AsyncTests
     {
         private Mock<IInterestedPropertyRepository> _interestedRepoMock;
-        private Mock<IPropertyPostRepository> _propertyPostRepoMock;
+        private Mock<IPropertyPostRepository> _postRepoMock;
         private Mock<IMessageRepository> _messageRepoMock;
         private Mock<IRentalContractRepository> _contractRepoMock;
+        private Mock<INotificationService> _notiSvcMock;
+        private Mock<IPropertyRepository> _propertyRepoMock;
+        private Mock<IMailService> _mailSvcMock;
+        private Mock<IProfileService> _profileSvcMock;
 
         private InterestedPropertyService _service;
 
         [TestInitialize]
         public void Setup()
         {
-            _interestedRepoMock = new Mock<IInterestedPropertyRepository>();
-            _propertyPostRepoMock = new Mock<IPropertyPostRepository>();
-            _messageRepoMock = new Mock<IMessageRepository>();
-            _contractRepoMock = new Mock<IRentalContractRepository>();
+            _interestedRepoMock = new Mock<IInterestedPropertyRepository>(MockBehavior.Loose);
+            _postRepoMock = new Mock<IPropertyPostRepository>(MockBehavior.Loose);
+            _messageRepoMock = new Mock<IMessageRepository>(MockBehavior.Loose);
+            _contractRepoMock = new Mock<IRentalContractRepository>(MockBehavior.Loose);
+            _notiSvcMock = new Mock<INotificationService>(MockBehavior.Loose);
+            _propertyRepoMock = new Mock<IPropertyRepository>(MockBehavior.Loose);
+            _mailSvcMock = new Mock<IMailService>(MockBehavior.Loose);
+            _profileSvcMock = new Mock<IProfileService>(MockBehavior.Loose);
 
             _service = new InterestedPropertyService(
                 _interestedRepoMock.Object,
-                _propertyPostRepoMock.Object,
+                _postRepoMock.Object,
                 _messageRepoMock.Object,
-                _contractRepoMock.Object
+                _contractRepoMock.Object,
+                _notiSvcMock.Object,
+                _propertyRepoMock.Object,
+                _mailSvcMock.Object,
+                _profileSvcMock.Object
             );
         }
 

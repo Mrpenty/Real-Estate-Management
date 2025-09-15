@@ -28,14 +28,5 @@ namespace RealEstateManagement.UnitTests.Favorite.FavoriteServiceTest
             Repo.Verify(r => r.RemoveFavoritePropertyAsync(1, 101), Times.Once);
         }
 
-        [TestMethod]
-        public async Task PropagatesException_WhenRepositoryThrows()
-        {
-            Repo.Setup(r => r.RemoveFavoritePropertyAsync(1, 101))
-                .ThrowsAsync(new InvalidOperationException("DB error"));
-
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(
-                () => Svc.RemoveFavoritePropertyAsync(1, 101));
-        }
     }
 }

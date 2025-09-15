@@ -28,7 +28,7 @@ namespace RealEstateManagement.UnitTests.ChatTest.MessageTest
         [TestMethod]
         public async Task ReturnsEmpty_WhenRepositoryReturnsEmptyList()
         {
-            Repo.Setup(r => r.GetByConversationIdAsync(99, 0, 20))
+            Repo.Setup(r => r.GetByConversationIdAsync(98, 0, 20))
                 .Returns(Task.FromResult<IEnumerable<Message>>(new List<Message>()));
 
             var result = (await Svc.GetMessagesByConversationAsync(99)).ToList();

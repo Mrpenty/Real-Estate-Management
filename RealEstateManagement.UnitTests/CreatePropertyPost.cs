@@ -47,7 +47,6 @@ public class CreatePropertyPost
             Description = "Test Description",
             Area = 100,
             Price = 5000000,
-            Type = "Apartment",
             Bedrooms = 2,
             ProvinceId = 1,
             WardId = 2,

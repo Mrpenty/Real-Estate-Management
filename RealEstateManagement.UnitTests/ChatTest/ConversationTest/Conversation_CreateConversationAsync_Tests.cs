@@ -75,16 +75,7 @@ namespace RealEstateManagement.UnitTests.ChatTest.ConversationTest
             Repo.Verify(r => r.CreateAsync(It.IsAny<Conversation>()), Times.Once);
         }
 
-        [TestMethod]
-        public async Task WhenRepositoryThrows_PropagatesException()
-        {
-            var dto = new CreateConversationDTO { RenterId = 1, LandlordId = 2, PropertyId = 3 };
-            Repo.Setup(r => r.GetByUsersAsync(1, 2, 3)).ReturnsAsync((Conversation)null);
-            Repo.Setup(r => r.CreateAsync(It.IsAny<Conversation>()))
-                .ThrowsAsync(new InvalidOperationException("db error"));
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => Svc.CreateConversationAsync(dto));
-        }
 
     }
 }

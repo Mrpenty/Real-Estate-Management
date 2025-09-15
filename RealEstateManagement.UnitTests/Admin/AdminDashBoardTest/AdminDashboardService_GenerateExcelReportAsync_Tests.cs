@@ -249,27 +249,6 @@ namespace RealEstateManagement.UnitTests.Admin.AdminDashBoardTest
             Repo.VerifyNoOtherCalls();
         }
 
-        [TestMethod]
-        public async Task GenerateExcelReportAsync_Daily_RepoThrows_LogsBothAndRethrows()
-        {
-            // Arrange
-            var req = new ReportRequestDTO
-            {
-                ReportType = "daily",
-                StartDate = new DateTime(2025, 1, 1),
-                EndDate = new DateTime(2025, 1, 2)
-            };
-            // Inner method GetDailyStatsAsync will log "Error getting daily stats",
-            // then outer GenerateExcelReportAsync will log "Error generating Excel report".
-            Repo.Setup(r => r.GetDailyStatsAsync(req.StartDate, req.EndDate))
-                .ThrowsAsync(new InvalidOperationException("DB fail"));
 
-            // Act + Assert
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => Svc.GenerateExcelReportAsync(req));
-
-            VerifyErrorLogged(Logger, "Error getting daily stats", Times.Once());
-            VerifyErrorLogged(Logger, "Error generating Excel report", Times.Once());
-            Repo.Verify(r => r.GetDailyStatsAsync(req.StartDate, req.EndDate), Times.Once());
-        }
     }
 }

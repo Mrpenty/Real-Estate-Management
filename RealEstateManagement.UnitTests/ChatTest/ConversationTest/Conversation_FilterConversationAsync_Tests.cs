@@ -55,13 +55,21 @@ namespace RealEstateManagement.UnitTests.ChatTest.ConversationTest
         }
 
         [TestMethod]
-        public async Task WhenRepoThrows_PropagatesException()
+        public async Task WhenRepoReturnsConversationWithoutRenter_MapsWithNullRenterName()
         {
-            Repo.Setup(r => r.FilterConversationAsync(1, "x", 0, 10))
-                .ThrowsAsync(new InvalidOperationException("db err"));
+            var convs = new List<Conversation>
+            {
+                new Conversation { Id = 1, PropertyId = 100, Renter = null, Landlord = new ApplicationUser { Name = "Landlord Y" } }
+            };
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(
-                () => Svc.FilterConversationAsync(1, "x", 0, 10));
+            Repo.Setup(r => r.FilterConversationAsync(1, "x", 0, 10))
+                .ReturnsAsync(convs);
+
+            var result = (await Svc.FilterConversationAsync(1, "x", 0, 10)).ToList();
+
+            Assert.AreEqual(1, result.Count);
+            Assert.IsNull(result[0].RenterName);
+            Assert.AreEqual("Landlord Y", result[0].LandlordName);
         }
     }
 }

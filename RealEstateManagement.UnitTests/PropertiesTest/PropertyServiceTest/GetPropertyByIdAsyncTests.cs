@@ -76,7 +76,6 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.PropertyServiceTest
                 Id = 2,
                 Title = "Luxury Apartment",
                 Description = "Nice View",
-                Type = "Apartment",
                 Price = 2500,
                 Area = 75,
                 Bedrooms = 3,
@@ -100,7 +99,6 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.PropertyServiceTest
             Assert.IsNotNull(result);
             Assert.AreEqual(property.Id, result.Id);
             Assert.AreEqual(property.Title, result.Title);
-            Assert.AreEqual(property.Type, result.Type);
             Assert.AreEqual(property.Price, result.Price);
         }
 

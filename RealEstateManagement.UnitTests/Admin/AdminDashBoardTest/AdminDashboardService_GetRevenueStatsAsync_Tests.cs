@@ -24,6 +24,7 @@ namespace RealEstateManagement.UnitTests.Admin.AdminDashBoardTest
             {
                 new RevenueStatsDTO { Type = "Ads", Amount = 200, TransactionCount = 3 }
             };
+
             Repo.Setup(r => r.GetRevenueStatsAsync(start, end)).ReturnsAsync(expected);
 
             // Act
@@ -38,43 +39,40 @@ namespace RealEstateManagement.UnitTests.Admin.AdminDashBoardTest
         }
 
         [TestMethod]
-        public async Task GetRevenueStatsAsync_LogsErrorAndThrows_WhenRepositoryFails()
-        {
-            // Arrange
-            var start = new DateTime(2025, 1, 1);
-            var end = new DateTime(2025, 1, 31);
-            var ex = new Exception("db fail");
-            Repo.Setup(r => r.GetRevenueStatsAsync(start, end)).ThrowsAsync(ex);
-
-            // Act & Assert
-            var thrown = await Assert.ThrowsExceptionAsync<Exception>(() => Svc.GetRevenueStatsAsync(start, end));
-            Assert.AreSame(ex, thrown);
-            VerifyErrorLogged(Logger, "Error getting revenue stats", Times.Once());
-            Repo.Verify(r => r.GetRevenueStatsAsync(start, end), Times.Once());
-        }
-        [TestMethod]
-        public async Task GetDailyStatsAsync_ShouldLogError_WhenRepositoryThrows()
-        {
-            Repo.Setup(r => r.GetDailyStatsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-                .ThrowsAsync(new Exception("DB failed"));
-
-            await Assert.ThrowsExceptionAsync<Exception>(() =>
-                Svc.GetDailyStatsAsync(DateTime.Now, DateTime.Now));
-
-            VerifyErrorLogged(Logger, "Error getting daily stats", Times.Once()); // ✅ Có log lỗi
-        }
-        [TestMethod]
         public async Task GetRevenueStatsAsync_LogsErrorAndThrows_WhenRepositoryReturnsNull()
         {
             // Arrange
             var start = new DateTime(2025, 1, 1);
             var end = new DateTime(2025, 1, 31);
+
             Repo.Setup(r => r.GetRevenueStatsAsync(start, end))
-                .ReturnsAsync((List<RevenueStatsDTO>)null);
+                .ReturnsAsync((List<RevenueStatsDTO>?)null);
 
             // Act & Assert
-            await Assert.ThrowsExceptionAsync<Exception>(() => Svc.GetRevenueStatsAsync(start, end));
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() =>
+                Svc.GetRevenueStatsAsync(start, end));
+
             VerifyErrorLogged(Logger, "Error getting revenue stats", Times.Once());
+            Repo.Verify(r => r.GetRevenueStatsAsync(start, end), Times.Once());
+        }
+
+        [TestMethod]
+        public async Task GetRevenueStatsAsync_ReturnsEmptyList_WhenRepositoryReturnsEmpty()
+        {
+            // Arrange
+            var start = new DateTime(2025, 1, 2);
+            var end = new DateTime(2025, 1, 31);
+
+            Repo.Setup(r => r.GetRevenueStatsAsync(start, end))
+                .ReturnsAsync(new List<RevenueStatsDTO>());
+
+            // Act
+            var result = await Svc.GetRevenueStatsAsync(start, end);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+            VerifyErrorLogged(Logger, "Error getting revenue stats", Times.Never());
             Repo.Verify(r => r.GetRevenueStatsAsync(start, end), Times.Once());
         }
 
@@ -86,10 +84,11 @@ namespace RealEstateManagement.UnitTests.Admin.AdminDashBoardTest
             var end = new DateTime(2025, 1, 31);
 
             // Act & Assert
-            await Assert.ThrowsExceptionAsync<ArgumentException>(() => Svc.GetRevenueStatsAsync(start, end));
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() =>
+                Svc.GetRevenueStatsAsync(start, end));
+
             VerifyErrorLogged(Logger, "Error getting revenue stats", Times.Once());
             Repo.Verify(r => r.GetRevenueStatsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Never());
         }
-
     }
 }

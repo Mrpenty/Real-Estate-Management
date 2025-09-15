@@ -31,9 +31,15 @@ namespace RealEstateManagement.Business.Services.Admin
 
         public async Task<List<DailyStatsDTO>> GetDailyStatsAsync(DateTime startDate, DateTime endDate)
         {
+            if (endDate < startDate)
+            {
+                _logger.LogError("Error getting daily stats: endDate must not be earlier than startDate");
+                throw new ArgumentException("endDate must not be earlier than startDate");
+            }
             try
             {
                 return await _adminDashboardRepository.GetDailyStatsAsync(startDate, endDate);
+
             }
             catch (Exception ex)
             {
@@ -44,9 +50,18 @@ namespace RealEstateManagement.Business.Services.Admin
 
         public async Task<List<MonthlyStatsDTO>> GetMonthlyStatsAsync(int year)
         {
+
             try
             {
-                return await _adminDashboardRepository.GetMonthlyStatsAsync(year);
+                var result = await _adminDashboardRepository.GetMonthlyStatsAsync(year);
+
+                if (result == null)
+                {
+                    _logger.LogError("Error getting monthly stats: repository returned null");
+                    throw new InvalidOperationException("Repository returned null");
+                }
+
+                return result;
             }
             catch (Exception ex)
             {

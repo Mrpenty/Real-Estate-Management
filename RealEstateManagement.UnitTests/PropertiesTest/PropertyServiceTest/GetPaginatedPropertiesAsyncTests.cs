@@ -43,7 +43,6 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.PropertyServiceTest
                 Id = 1,
                 Title = "Test Property",
                 Description = "Desc",
-                Type = "Apartment",
                 AddressId = 1,
                 Area = 50,
                 Bedrooms = 2,
@@ -94,7 +93,6 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.PropertyServiceTest
                 {
                     Id = i,
                     Title = $"P{i}",
-                    Type = "Apartment",
                     AddressId = i,
                     Area = 40 + i,
                     Bedrooms = 1 + i % 3,

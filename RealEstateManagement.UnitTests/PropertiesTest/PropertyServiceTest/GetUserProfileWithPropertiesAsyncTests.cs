@@ -64,7 +64,6 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.PropertyServiceTest
                     Id = 101,
                     Title = "Villa",
                     Description = "Nice Villa",
-                    Type = "House",
                     AddressId = 201,
                     Area = 150,
                     Bedrooms = 4,

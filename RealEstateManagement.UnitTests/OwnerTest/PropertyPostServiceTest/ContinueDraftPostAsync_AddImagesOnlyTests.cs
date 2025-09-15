@@ -38,7 +38,6 @@ namespace RealEstateManagement.UnitTests.OwnerTest.PropertyPostServiceTest
                 PostId = 5,
                 Title = "T",
                 Description = "D",
-                Type = "A",
                 Area = 50,
                 Bedrooms = 2,
                 Price = 1000,

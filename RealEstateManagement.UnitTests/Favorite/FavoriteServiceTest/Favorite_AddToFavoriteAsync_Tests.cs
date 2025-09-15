@@ -24,7 +24,7 @@ namespace RealEstateManagement.UnitTests.Favorite.FavoriteServiceTest
         public async Task ReturnsFalse_WhenRepositoryReturnsFalse()
         {
             var userId = 1;
-            var propertyId = 101;
+            var propertyId = 102;
 
             Repo.Setup(r => r.AddFavoritePropertyAsync(userId, propertyId)).ReturnsAsync(false);
 
@@ -35,13 +35,21 @@ namespace RealEstateManagement.UnitTests.Favorite.FavoriteServiceTest
         }
 
         [TestMethod]
-        public async Task PropagatesException_WhenRepositoryThrows()
+        public async Task ThrowsInvalidOperation_WhenPropertyAlreadyFavorited()
         {
-            Repo.Setup(r => r.AddFavoritePropertyAsync(1, 101))
-                .ThrowsAsync(new InvalidOperationException("DB error"));
+            var userId = 1;
+            var propertyId = 200;
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(
-                () => Svc.AddToFavoriteAsync(1, 101));
+            Repo.Setup(r => r.AddFavoritePropertyAsync(userId, propertyId))
+                .ReturnsAsync(false); // repo báo đã tồn tại
+
+            var ex = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+                () => Svc.AddToFavoriteAsync(userId, propertyId));
+
+            StringAssert.Contains(ex.Message, "already in favorites");
+            Repo.Verify(r => r.AddFavoritePropertyAsync(userId, propertyId), Times.Once);
         }
+
+
     }
 }

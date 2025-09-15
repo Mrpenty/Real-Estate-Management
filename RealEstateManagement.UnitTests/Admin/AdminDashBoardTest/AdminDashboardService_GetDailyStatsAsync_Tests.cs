@@ -46,28 +46,43 @@ namespace RealEstateManagement.UnitTests.Admin.AdminDashBoardTest
             VerifyErrorLogged(Logger, "Error getting daily stats", Times.Never());
             Repo.Verify(r => r.GetDailyStatsAsync(startDate, endDate), Times.Once());
         }
-
         [TestMethod]
-        public async Task GetDailyStatsAsync_LogsErrorAndThrows_WhenRepositoryFails()
+        public async Task GetDailyStatsAsync_LogsErrorAndThrows_WhenUnauthorized()
         {
-            // Arrange
             var startDate = new DateTime(2025, 1, 1);
             var endDate = new DateTime(2025, 1, 10);
 
-            var ex = new Exception("db fail");
+            var ex = new UnauthorizedAccessException("no permission");
 
             Repo.Setup(r => r.GetDailyStatsAsync(startDate, endDate))
                 .ThrowsAsync(ex);
 
-            // Act & Assert
-            var thrown = await Assert.ThrowsExceptionAsync<Exception>(() =>
+            var thrown = await Assert.ThrowsExceptionAsync<UnauthorizedAccessException>(() =>
                 Svc.GetDailyStatsAsync(startDate, endDate));
 
             Assert.AreEqual(ex, thrown);
 
-            // Đúng là có log lỗi
             VerifyErrorLogged(Logger, "Error getting daily stats", Times.Once());
             Repo.Verify(r => r.GetDailyStatsAsync(startDate, endDate), Times.Once());
+        }
+        [TestMethod]
+        public async Task GetDailyStatsAsync_LogsErrorAndThrows_WhenEndDateBeforeStartDate()
+        {
+            // Arrange
+            var startDate = new DateTime(2025, 1, 10);
+            var endDate = new DateTime(2025, 1, 1);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsExceptionAsync<ArgumentException>(() =>
+                Svc.GetDailyStatsAsync(startDate, endDate));
+
+            StringAssert.Contains(ex.Message, "endDate must not be earlier than startDate");
+
+            // Có log lỗi
+            VerifyErrorLogged(Logger, "Error getting daily stats", Times.Once());
+
+            // Repo KHÔNG được gọi
+            Repo.Verify(r => r.GetDailyStatsAsync(It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Never());
         }
     }
 }

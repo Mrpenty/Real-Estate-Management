@@ -36,7 +36,6 @@ namespace RealEstateManagement.UnitTests.OwnerTest.PropertyPostServiceTest
             {
                 Title = "Title",
                 Description = "Desc",
-                Type = "Apartment",
                 Area = 50,
                 Bedrooms = 2,
                 Price = 1000,

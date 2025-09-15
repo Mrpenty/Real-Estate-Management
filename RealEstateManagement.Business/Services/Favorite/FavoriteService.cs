@@ -22,7 +22,12 @@ namespace RealEstateManagement.Business.Services.Favorite
         }
         public async Task<bool> AddToFavoriteAsync(int userId, int propertyId)
         {
-            return await _repository.AddFavoritePropertyAsync(userId, propertyId);
+            var added = await _repository.AddFavoritePropertyAsync(userId, propertyId);
+            if (!added)
+            {
+                throw new InvalidOperationException("Property is already in favorites.");
+            }
+            return true;
         }
         public async Task<bool> RemoveFavoritePropertyAsync(int userId, int propertyId)
         {

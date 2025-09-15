@@ -27,7 +27,7 @@ namespace RealEstateManagement.Business.Services.Auth
         private readonly IMailService _mailService;
         private readonly ISmsService _smsService; 
         private readonly ILogger<AuthService> _logger;
-        private readonly IConfiguration _configuration;
+        private readonly IConfiguration _configuration; 
         private readonly WalletService _walletService;
         public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IHttpContextAccessor httpContextAccessor, ITokenRepository tokenRepository, IMailService mailService,ISmsService smsService, ILogger<AuthService> logger, IConfiguration configuration, WalletService walletService)
         {

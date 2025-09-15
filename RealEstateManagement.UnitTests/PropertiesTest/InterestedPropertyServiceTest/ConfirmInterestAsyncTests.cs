@@ -10,36 +10,76 @@ using RealEstateManagement.Business.Repositories.Chat.Messages;
 using RealEstateManagement.Business.Repositories.OwnerRepo;
 using RealEstateManagement.Business.Repositories.Properties;
 using RealEstateManagement.Data.Entity.User;
+using RealEstateManagement.Business.Services.Mail;
+using RealEstateManagement.Business.Services.NotificationService;
+using RealEstateManagement.Business.Services.User;
+using RealEstateManagement.Business.DTO.UserDTO;
 
 namespace RealEstateManagement.UnitTests.PropertiesTest.InterestedPropertyServiceTest
 {
 [TestClass]
 public class ConfirmInterestAsyncTests
 {
-    private Mock<IInterestedPropertyRepository> _repoMock;
-    private Mock<IPropertyPostRepository> _postRepoMock;
-    private Mock<IMessageRepository> _msgRepoMock;
-    private Mock<IRentalContractRepository> _contractRepoMock; // 👈 thêm mock
+        private Mock<IInterestedPropertyRepository> _repoMock = null!;
+        private Mock<IPropertyPostRepository> _postRepoMock = null!;
+        private Mock<IMessageRepository> _msgRepoMock = null!;
+        private Mock<IRentalContractRepository> _contractRepoMock = null!;
+        private Mock<INotificationService> _notiSvcMock = null!;
+        private Mock<IPropertyRepository> _propertyRepoMock = null!;
+        private Mock<IMailService> _mailSvcMock = null!;
+        private Mock<IProfileService> _profileSvcMock = null!;
 
-    private InterestedPropertyService _service;
+        private InterestedPropertyService _service = null!;
 
-    [TestInitialize]
-    public void Setup()
-    {
-        _repoMock = new Mock<IInterestedPropertyRepository>();
-        _postRepoMock = new Mock<IPropertyPostRepository>();
-        _msgRepoMock = new Mock<IMessageRepository>();
-        _contractRepoMock = new Mock<IRentalContractRepository>(); // 👈 khởi tạo
+        [TestInitialize]
+        public void Setup()
+        {
+            // Dùng Loose để không cần setup những call không đụng tới
+            _repoMock = new Mock<IInterestedPropertyRepository>(MockBehavior.Loose);
+            _postRepoMock = new Mock<IPropertyPostRepository>(MockBehavior.Loose);
+            _msgRepoMock = new Mock<IMessageRepository>(MockBehavior.Loose);
+            _contractRepoMock = new Mock<IRentalContractRepository>(MockBehavior.Loose);
+            _notiSvcMock = new Mock<INotificationService>(MockBehavior.Loose);
+            _propertyRepoMock = new Mock<IPropertyRepository>(MockBehavior.Loose);
+            _mailSvcMock = new Mock<IMailService>(MockBehavior.Loose);
+            _profileSvcMock = new Mock<IProfileService>(MockBehavior.Loose);
 
-        _service = new InterestedPropertyService(
-            _repoMock.Object,
-            _postRepoMock.Object,
-            _msgRepoMock.Object,
-            _contractRepoMock.Object // 👈 truyền vào constructor
-        );
-    }
+            // Nếu service có gửi mail/notify, trả về user giả có email để tránh null
+            _profileSvcMock
+                .Setup(p => p.GetUserBasicInfoAsync(It.IsAny<int>()))
+                .ReturnsAsync(new UserBasicInfoDto
+                {
+                    Id = 999,
+                    Name = "Test User",
+                    Email = "test@local"
+                });
 
-    [TestMethod]
+
+            // Nếu service gọi các hàm update/add, cho phép chạy trơn
+            _repoMock
+                .Setup(r => r.UpdateAsync(It.IsAny<InterestedProperty>()))
+                .Returns(Task.CompletedTask);
+
+            _repoMock
+                .Setup(r => r.DeleteAsync(It.IsAny<InterestedProperty>()))
+                .Returns(Task.CompletedTask);
+
+
+            _postRepoMock.Setup(p => p.UpdateAsync(It.IsAny<PropertyPost>())).Returns(Task.CompletedTask);
+
+            _service = new InterestedPropertyService(
+                _repoMock.Object,
+                _postRepoMock.Object,
+                _msgRepoMock.Object,
+                _contractRepoMock.Object,
+                _notiSvcMock.Object,
+                _propertyRepoMock.Object,
+                _mailSvcMock.Object,
+                _profileSvcMock.Object
+            );
+        }
+
+        [TestMethod]
     [ExpectedException(typeof(System.Exception))]
     public async Task Throws_When_NotFound()
     {

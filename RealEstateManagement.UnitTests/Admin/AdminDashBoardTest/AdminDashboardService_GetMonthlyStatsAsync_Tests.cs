@@ -34,17 +34,20 @@ namespace RealEstateManagement.UnitTests.Admin.AdminDashBoardTest
         }
 
         [TestMethod]
-        public async Task GetMonthlyStatsAsync_LogsErrorAndThrows_WhenRepositoryFails()
+        public async Task GetMonthlyStatsAsync_LogsErrorAndThrows_WhenRepositoryReturnsNull()
         {
             // Arrange
             var year = 2025;
-            var ex = new InvalidOperationException("db fail");
-            Repo.Setup(r => r.GetMonthlyStatsAsync(year)).ThrowsAsync(ex);
+            Repo.Setup(r => r.GetMonthlyStatsAsync(year)).ReturnsAsync((List<MonthlyStatsDTO>?)null);
 
             // Act & Assert
-            var thrown = await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => Svc.GetMonthlyStatsAsync(year));
-            Assert.AreSame(ex, thrown);
-            VerifyErrorLogged(Logger, "Error getting monthly stats", Times.Once());
+            var ex = await Assert.ThrowsExceptionAsync<InvalidOperationException>(() =>
+                Svc.GetMonthlyStatsAsync(year));
+
+            StringAssert.Contains(ex.Message, "Repository returned null");
+
+            VerifyErrorLogged(Logger, "Error getting monthly stats", Times.Exactly(2));
+
             Repo.Verify(r => r.GetMonthlyStatsAsync(year), Times.Once());
         }
     }

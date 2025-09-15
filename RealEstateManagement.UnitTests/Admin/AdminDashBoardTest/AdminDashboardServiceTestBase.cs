@@ -31,7 +31,7 @@ namespace RealEstateManagement.UnitTests.Admin.AdminDashBoardTest
                 (Func<It.IsAnyType, Exception, string>)It.IsAny<object>()))
             .Callback((LogLevel level, EventId id, object state, Exception? ex, Delegate formatter) =>
             {
-                var msg = formatter.DynamicInvoke(state, ex) as string;
+                var msg = formatter.DynamicInvoke(state, ex) as string;                                                                         
                 TestContext.WriteLine($"[LOG {level}] {msg}");
                 if (ex != null) TestContext.WriteLine($"[EXCEPTION] {ex.GetType().Name}: {ex.Message}");
             });

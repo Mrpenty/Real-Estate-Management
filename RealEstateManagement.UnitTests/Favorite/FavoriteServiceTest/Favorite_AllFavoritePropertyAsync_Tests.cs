@@ -35,7 +35,6 @@
 //                Id = 1,
 //                Title = "Nice House",
 //                Description = "Desc",
-//                Type = "House",              // nếu của bạn là enum, set enum tương ứng
 //                AddressId = 23,
 //                Area = 80,
 //                Bedrooms = 3,

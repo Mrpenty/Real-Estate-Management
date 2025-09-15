@@ -17,7 +17,6 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.PropertyServiceTest
                 Id = 1,
                 Title = "House A",
                 Description = "Nice house",
-                Type = "Apartment",
                 Price = 1000,
                 AddressId = 1,
                 Address = new Data.Entity.AddressEnity.Address { Id = 1, ProvinceId = 10, Province = new Data.Entity.AddressEnity.Province { Id = 10, Name = "HCM" } },
@@ -60,7 +59,6 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.PropertyServiceTest
                 Id = 2,
                 Title = "House B",
                 Description = "Test",
-                Type = "Villa",
                 Price = 2000,
                 AddressId = 2,
                 Address = null, // intentionally missing

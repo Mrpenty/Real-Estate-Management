@@ -53,19 +53,45 @@ namespace RealEstateManagement.UnitTests.ChatTest.MessageTest
         }
 
         [TestMethod]
-        public async Task PropagatesException_WhenRepositoryThrows()
+        public async Task CreatesMessageWithCorrectFields_AndReturnsCreated1()
         {
             var dto = new MessageDTO { ConversationId = 1, Content = "x" };
+            var senderId = 7;
+
+            Message captured = null!;
+            var created = new Message
+            {
+                Id = 123,
+                ConversationId = 1,
+                SenderId = senderId,
+                Content = "x",
+                SentAt = DateTime.UtcNow,
+                IsRead = false,
+                NotificationSent = false
+            };
 
             Repo.Setup(r => r.CreateAsync(It.IsAny<Message>()))
-                .ThrowsAsync(new InvalidOperationException("db error"));
+                .Callback<Message>(m => captured = m)
+                .ReturnsAsync(created);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(
-                () => Svc.SendMessageAsync(dto, 1));
+            var before = DateTime.UtcNow;
+            var result = await Svc.SendMessageAsync(dto, senderId);
+            var after = DateTime.UtcNow;
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(123, result.Id);
+
+            Assert.IsNotNull(captured);
+            Assert.AreEqual(1, captured.ConversationId);
+            Assert.AreEqual(7, captured.SenderId);
+            Assert.AreEqual("x", captured.Content);
+            Assert.IsFalse(captured.IsRead);
+            Assert.IsFalse(captured.NotificationSent);
+            Assert.IsTrue(captured.SentAt >= before && captured.SentAt <= after);
+
+            Repo.Verify(r => r.CreateAsync(It.IsAny<Message>()), Times.Once);
         }
 
-        // Lưu ý: hiện service không check null dto (sẽ NRE nếu truyền null).
-        // Nếu muốn, bạn có thể thêm guard trong service. Ở đây mình chỉ minh hoạ:
         [TestMethod]
         public async Task NullDto_CurrentImplementation_ThrowsNullReference()
         {

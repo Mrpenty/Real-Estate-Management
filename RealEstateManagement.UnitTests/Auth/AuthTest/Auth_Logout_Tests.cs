@@ -12,30 +12,29 @@ namespace RealEstateManagement.UnitTests.Auth.AuthTest
     public class Auth_Logout_Tests : AuthTestBase
     {
         [TestMethod]
-        public async Task Logout_Calls_DeleteTokenCookie_And_SignOut()
+        public async Task Logout_ClearsTokenCookie_AndSignsOut()
         {
             // Act
             await Svc.LogoutAsync();
 
-            // Assert
+            // Assert: xoá cookie và gọi SignOut
             TokenRepoMock.Verify(t => t.DeleteTokenCookie(HttpContext), Times.Once);
             SignInManagerMock.Verify(s => s.SignOutAsync(), Times.Once);
         }
 
         [TestMethod]
-        public async Task Logout_Still_SignsOut_When_HttpContext_Is_Null()
+        public async Task Logout_PropagatesException_WhenSignOutFails()
         {
-            // Arrange: giả lập không có HttpContext
-            HttpAccessorMock.SetupGet(h => h.HttpContext).Returns((HttpContext)null);
+            // Arrange
+            SignInManagerMock
+                .Setup(s => s.SignOutAsync())
+                .ThrowsAsync(new InvalidOperationException("failed"));
 
-            // Act
-            await Svc.LogoutAsync();
+            // Act + Assert
+            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => Svc.LogoutAsync());
 
-            // Assert
-            // Xác nhận vẫn cố gắng xóa cookie (tham số có thể null, dùng It.IsAny để không vướng nullable ref)
-            TokenRepoMock.Verify(t => t.DeleteTokenCookie(It.IsAny<HttpContext>()), Times.Once);
-            // Và luôn gọi SignOut
-            SignInManagerMock.Verify(s => s.SignOutAsync(), Times.Once);
+            // Cookie delete vẫn được gọi trước khi exception (tuỳ implement)
+            TokenRepoMock.Verify(t => t.DeleteTokenCookie(HttpContext), Times.Once);
         }
     }
 }
