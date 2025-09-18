@@ -88,26 +88,7 @@ namespace RealEstateManagement.UnitTests.OwnerTest.OwnerPropertyTest
             Assert.AreEqual("DB err", ex.Message);
             Db.Verify(d => d.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
-        [TestMethod]
-        public async Task Wrongly_ExpectTrue_WhenDaysInvalid()
-        {
-            // Arrange
-            var post = new PropertyPost
-            {
-                Id = 10,
-                LandlordId = 1,
-                Status = PropertyPost.PropertyPostStatus.Pending
-            };
-            var posts = new List<PropertyPost> { post };
 
-            Db.Setup(d => d.Set<PropertyPost>()).ReturnsDbSet(posts);
-            Db.Setup(d => d.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
-
-            // Act
-            var (ok, msg) = await Svc.ExtendPostAsync(postId: 10, days: 0, landlordId: 1); // days=0 là invalid
-
-            Assert.IsTrue(ok); 
-        }
 
 
     }

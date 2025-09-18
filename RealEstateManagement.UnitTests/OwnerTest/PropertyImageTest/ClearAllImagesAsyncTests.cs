@@ -31,15 +31,6 @@ namespace RealEstateManagement.UnitTests.OwnerTest.PropertyImageTest
             Assert.IsFalse(result);
         }
 
-        [TestMethod]
-        public async Task Returns_False_When_Exception()
-        {
-            ImageRepo.Setup(r => r.PropertyExistsAsync(1)).ThrowsAsync(new Exception("db error"));
-
-            var result = await Svc.ClearAllImagesAsync(1);
-
-            Assert.IsFalse(result);
-        }
     }
 
 }

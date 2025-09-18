@@ -1,5 +1,4 @@
-﻿// OwnerTest/RentalContractServiceTest/GetByPostIdAsyncTests.cs
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using RealEstateManagement.Business.DTO.PropertyOwnerDTO;
 using RealEstateManagement.Data.Entity;

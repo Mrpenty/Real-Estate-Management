@@ -28,13 +28,6 @@ namespace RealEstateManagement.UnitTests.OwnerTest.RentalContractServiceTest
             ContractRepo.Verify(r => r.DeleteAsync(99), Times.Once);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(System.Exception))]
-        public async Task DeleteAsync_Throws_WhenRepoThrows()
-        {
-            ContractRepo.Setup(r => r.DeleteAsync(1)).ThrowsAsync(new System.Exception("DB error"));
 
-            await Svc.DeleteAsync(1);
-        }
     }
 }

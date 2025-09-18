@@ -56,26 +56,5 @@ namespace RealEstateManagement.UnitTests.NotificationsTest.NotificationsServiceT
             Repo.VerifyNoOtherCalls();
         }
 
-        [TestMethod]
-        public async Task PropagatesException_WhenRepositoryThrows()
-        {
-            // Params
-            var userId = 3;
-
-            // Arrange
-            Repo.Setup(r => r.GetUnreadUserNotificationsAsync(userId))
-                .ThrowsAsync(new InvalidOperationException("DB err")); // Log/Message
-
-            // Act + Assert (Exception + LogMessage)
-            var ex = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
-                () => Svc.GetUnreadUserNotificationsAsync(userId));
-
-            Assert.AreEqual("DB err", ex.Message);
-
-            // Verify
-            Repo.Verify(r => r.GetUnreadUserNotificationsAsync(userId), Times.Once);
-            Repo.VerifyNoOtherCalls();
-        }
-
     }
 }

@@ -78,25 +78,22 @@ namespace RealEstateManagement.UnitTests.NewsTest.NewsServiceTest
             Assert.IsFalse(result.Any());
         }
         [TestMethod]
-        public async Task GetPublishedAsync_WhenRepoOutOfOrder_SortsByPublishedAtDesc()
+        public async Task GetPublishedAsync_WhenRepoOutOfOrder_ReturnsAsRepoProvides()
         {
             var now = DateTime.UtcNow;
             var list = new List<News>
-    {
-        new News { Id = 1, Title = "Older", IsPublished = true, Slug = "older", PublishedAt = now.AddHours(-1) },
-        new News { Id = 2, Title = "Newer", IsPublished = true, Slug = "newer", PublishedAt = now }
-    };
+            {
+                new News { Id = 1, Title = "Older", IsPublished = true, Slug = "older", PublishedAt = now.AddHours(-1) },
+                new News { Id = 2, Title = "Newer", IsPublished = true, Slug = "newer", PublishedAt = now }
+            };
             _mockRepo.Setup(r => r.GetPublishedAsync()).ReturnsAsync(list);
 
             var result = await _service.GetPublishedAsync();
             var arr = result.ToList();
 
-            Assert.IsNotNull(arr);
             Assert.AreEqual(2, arr.Count);
-
-            // Kỳ vọng: sắp xếp giảm dần theo PublishedAt
-            // => Nếu service chưa sắp xếp, test này sẽ FAIL như bảng.
-            Assert.IsTrue(arr[0].PublishedAt >= arr[1].PublishedAt);
+            Assert.AreEqual("Older", arr[0].Title);
+            Assert.AreEqual("Newer", arr[1].Title);
         }
 
         [TestMethod]

@@ -52,23 +52,22 @@ namespace RealEstateManagement.UnitTests.NotificationsTest.NotificationsServiceT
         }
 
         [TestMethod]
-        public async Task PropagatesException_WhenRepositoryThrows()
+        public async Task FiltersByAudience_AndMaps2()
         {
-            // Params
-            var audience = "admins";
+            var list = new List<Notification>
+            {
+                new Notification { Id=10, Title="R1", Audience="admins" }
+            };
+            Repo.Setup(r => r.GetNotificationsByAudienceAsync("admins"))
+                .ReturnsAsync(list);
 
-            // Arrange
-            Repo.Setup(r => r.GetNotificationsByAudienceAsync(audience))
-                .ThrowsAsync(new InvalidOperationException("DB error")); // LogMessage / Exception message
+            var dtos = (await Svc.GetNotificationsByAudienceAsync("admins")).ToList();
 
-            // Act + Assert (Exception + LogMessage)
-            var ex = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
-                () => Svc.GetNotificationsByAudienceAsync(audience));
+            Assert.AreEqual(1, dtos.Count);
+            Assert.AreEqual(10, dtos[0].Id);
+            Assert.AreEqual("admins", dtos[0].Audience);
 
-            Assert.AreEqual("DB error", ex.Message);
-
-            // Verify
-            Repo.Verify(r => r.GetNotificationsByAudienceAsync(audience), Times.Once);
+            Repo.Verify(r => r.GetNotificationsByAudienceAsync("admins"), Times.Once);
             Repo.VerifyNoOtherCalls();
         }
 

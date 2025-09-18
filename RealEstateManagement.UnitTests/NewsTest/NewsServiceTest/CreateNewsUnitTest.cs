@@ -36,20 +36,38 @@ namespace RealEstateManagement.UnitTests.NewsTest.NewsServiceTest
 
 
         [TestMethod]
-        public async Task CreateAsync_mockRepositorysitoryThrowsException_ThrowsException()
+        public async Task CreateAsync_WhenValidationFails_ThrowsValidationException()
         {
-            var newsCreateDto = new NewsCreateDto
+            // Arrange
+            var dto = new NewsCreateDto
             {
-                Title = "Title",
-                Content = "Content",
-                Summary = "Summary",
-                AuthorName = "A",
-                Source = "Source"
+                Title = "",   // để trống => invalid
+                Content = "Nội dung",
+                Summary = "Tóm tắt",
+                AuthorName = "Tác giả",
+                Source = "Nguồn"
             };
-            _mockNewsRepository.Setup(r => r.AddAsync(It.IsAny<News>())).ThrowsAsync(new InvalidOperationException("Database error"));
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => _newsService.CreateAsync(newsCreateDto));
+            var failures = new List<ValidationFailure>
+            {
+                new ValidationFailure("Title", "Title is required")
+            };
+
+            // Setup validator trả về lỗi
+            _mockValidator
+                .Setup(v => v.ValidateAsync(It.IsAny<NewsCreateDto>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new ValidationResult(failures));
+
+            // Act + Assert
+            var ex = await Assert.ThrowsExceptionAsync<ValidationException>(
+                () => _newsService.CreateAsync(dto));
+
+            StringAssert.Contains(ex.Message, "Title is required");
+
+            // Đảm bảo repository KHÔNG bị gọi khi validation fail
+            _mockNewsRepository.Verify(r => r.AddAsync(It.IsAny<News>()), Times.Never);
         }
+
         [TestMethod]
         public async Task CreateAsync_SetsIsPublishedFalseAndCreatedAtUtc()
         {
