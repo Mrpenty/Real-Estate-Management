@@ -2,7 +2,6 @@
 using Moq;
 using RealEstateManagement.Business.Services.Properties;
 using RealEstateManagement.Data.Entity.PropertyEntity;
-using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +13,13 @@ using RealEstateManagement.Business.Services.Mail;
 using RealEstateManagement.Business.Services.NotificationService;
 using RealEstateManagement.Business.Services.User;
 using RealEstateManagement.Business.DTO.UserDTO;
+using RealEstateManagement.Data.Entity;
 
 namespace RealEstateManagement.UnitTests.PropertiesTest.InterestedPropertyServiceTest
 {
-[TestClass]
-public class ConfirmInterestAsyncTests
-{
+    [TestClass]
+    public class ConfirmInterestAsyncTests
+    {
         private Mock<IInterestedPropertyRepository> _repoMock = null!;
         private Mock<IPropertyPostRepository> _postRepoMock = null!;
         private Mock<IMessageRepository> _msgRepoMock = null!;
@@ -34,7 +34,6 @@ public class ConfirmInterestAsyncTests
         [TestInitialize]
         public void Setup()
         {
-            // Dùng Loose để không cần setup những call không đụng tới
             _repoMock = new Mock<IInterestedPropertyRepository>(MockBehavior.Loose);
             _postRepoMock = new Mock<IPropertyPostRepository>(MockBehavior.Loose);
             _msgRepoMock = new Mock<IMessageRepository>(MockBehavior.Loose);
@@ -44,27 +43,12 @@ public class ConfirmInterestAsyncTests
             _mailSvcMock = new Mock<IMailService>(MockBehavior.Loose);
             _profileSvcMock = new Mock<IProfileService>(MockBehavior.Loose);
 
-            // Nếu service có gửi mail/notify, trả về user giả có email để tránh null
             _profileSvcMock
                 .Setup(p => p.GetUserBasicInfoAsync(It.IsAny<int>()))
-                .ReturnsAsync(new UserBasicInfoDto
-                {
-                    Id = 999,
-                    Name = "Test User",
-                    Email = "test@local"
-                });
+                .ReturnsAsync(new UserBasicInfoDto { Id = 999, Name = "Test User", Email = "test@local" });
 
-
-            // Nếu service gọi các hàm update/add, cho phép chạy trơn
-            _repoMock
-                .Setup(r => r.UpdateAsync(It.IsAny<InterestedProperty>()))
-                .Returns(Task.CompletedTask);
-
-            _repoMock
-                .Setup(r => r.DeleteAsync(It.IsAny<InterestedProperty>()))
-                .Returns(Task.CompletedTask);
-
-
+            _repoMock.Setup(r => r.UpdateAsync(It.IsAny<InterestedProperty>())).Returns(Task.CompletedTask);
+            _repoMock.Setup(r => r.DeleteAsync(It.IsAny<InterestedProperty>())).Returns(Task.CompletedTask);
             _postRepoMock.Setup(p => p.UpdateAsync(It.IsAny<PropertyPost>())).Returns(Task.CompletedTask);
 
             _service = new InterestedPropertyService(
@@ -80,70 +64,120 @@ public class ConfirmInterestAsyncTests
         }
 
         [TestMethod]
-    [ExpectedException(typeof(System.Exception))]
-    public async Task Throws_When_NotFound()
-    {
-        _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((InterestedProperty)null);
-        await _service.ConfirmInterestAsync(1, true, true);
-    }
+        [ExpectedException(typeof(System.Exception))]
+        public async Task Throws_When_NotFound()
+        {
+            _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((InterestedProperty)null!);
+            await _service.ConfirmInterestAsync(1, true, true);
+        }
 
-    [TestMethod]
-    public async Task Renter_Confirms_True_Changes_Status_To_WaitingForLandlord()
-    {
-        var ip = new InterestedProperty { Id = 1, Status = InterestedStatus.WaitingForRenterReply };
-        _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ip);
+        [TestMethod]
+        public async Task Renter_Confirms_True_Changes_Status_To_WaitingForLandlord()
+        {
+            var ip = new InterestedProperty
+            {
+                Id = 1,
+                PropertyId = 10,
+                Status = InterestedStatus.WaitingForRenterReply
+            };
 
-        var result = await _service.ConfirmInterestAsync(1, true, true);
+            _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ip);
 
-        Assert.IsTrue(result);
-        Assert.AreEqual(InterestedStatus.WaitingForLandlordReply, ip.Status);
-    }
+            // cần post có Landlord & LandlordId vì service dùng l.LandlordId và l.Landlord.Name
+            _postRepoMock.Setup(p => p.GetByPropertyIdAsync(10))
+                         .ReturnsAsync(new PropertyPost
+                         {
+                             Id = 1,
+                             PropertyId = 10,
+                             LandlordId = 123,
+                             Landlord = new ApplicationUser { Id = 123, Name = "Landlord A", Email = "ll@local" }
+                         });
 
-    [TestMethod]
-    public async Task Renter_Confirms_False_Sets_Status_None()
-    {
-        var ip = new InterestedProperty { Id = 1, Status = InterestedStatus.WaitingForRenterReply };
-        _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ip);
+            // cần property có Title & LandlordId vì service dùng t.Title và landlordId để gửi mail
+            _propertyRepoMock.Setup(p => p.GetPropertyByIdAsync(10))
+                             .ReturnsAsync(new Property { Id = 10, Title = "P1", LandlordId = 123 });
 
-        var result = await _service.ConfirmInterestAsync(1, true, false);
+            var result = await _service.ConfirmInterestAsync(1, isRenter: true, confirmed: true);
 
-        Assert.IsTrue(result);
-        Assert.AreEqual(InterestedStatus.None, ip.Status);
-    }
+            Assert.IsTrue(result);
+            Assert.AreEqual(InterestedStatus.WaitingForLandlordReply, ip.Status);
+        }
 
-    [TestMethod]
-    public async Task Landlord_Rejects_Sets_Status_LandlordRejected()
-    {
-        var ip = new InterestedProperty { Id = 1, Status = InterestedStatus.WaitingForLandlordReply };
-        _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ip);
+        [TestMethod]
+        public async Task Renter_Confirms_False_Sets_Status_None()
+        {
+            var ip = new InterestedProperty { Id = 1, Status = InterestedStatus.WaitingForRenterReply };
+            _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ip);
 
-        var result = await _service.ConfirmInterestAsync(1, false, false);
+            var result = await _service.ConfirmInterestAsync(1, isRenter: true, confirmed: false);
 
-        Assert.IsTrue(result);
-        Assert.AreEqual(InterestedStatus.LandlordRejected, ip.Status);
-    }
+            Assert.IsTrue(result);
+            Assert.AreEqual(InterestedStatus.None, ip.Status);
+        }
 
-    [TestMethod]
-    public async Task Landlord_Confirms_Sets_DealSuccess_And_Closes_Others()
-    {
-        var ip = new InterestedProperty { Id = 1, PropertyId = 10, Status = InterestedStatus.WaitingForLandlordReply };
-        var others = new List<InterestedProperty>
+        [TestMethod]
+        public async Task Landlord_Rejects_Sets_Status_LandlordRejected()
+        {
+            var ip = new InterestedProperty
+            {
+                Id = 1,
+                PropertyId = 10,
+                RenterId = 77,
+                Status = InterestedStatus.WaitingForLandlordReply,
+                Renter = new ApplicationUser { Id = 77, Name = "Renter A", Email = "renter@local" } // service dùng ip.Renter.Name trong email
+            };
+
+            _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ip);
+
+            // service dùng t.Title trong thông báo
+            _propertyRepoMock.Setup(p => p.GetPropertyByIdAsync(10))
+                             .ReturnsAsync(new Property { Id = 10, Title = "P1", LandlordId = 123 });
+
+            var result = await _service.ConfirmInterestAsync(1, isRenter: false, confirmed: false);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(InterestedStatus.LandlordRejected, ip.Status);
+        }
+
+        [TestMethod]
+        public async Task Landlord_Confirms_Sets_DealSuccess_And_Closes_Others()
+        {
+            var ip = new InterestedProperty
+            {
+                Id = 1,
+                PropertyId = 10,
+                RenterId = 77,
+                Status = InterestedStatus.WaitingForLandlordReply,
+                Renter = new ApplicationUser { Id = 77, Name = "Renter A", Email = "renter@example.com" }
+            };
+            var others = new List<InterestedProperty>
             {
                 new InterestedProperty { Id = 2, PropertyId = 10, Status = InterestedStatus.WaitingForRenterReply }
             };
 
-        _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ip);
-        _repoMock.Setup(r => r.GetByPropertyAsync(10)).ReturnsAsync(others);
+            _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(ip);
+            _repoMock.Setup(r => r.GetByPropertyAsync(10)).ReturnsAsync(others);
 
-        var post = new PropertyPost { Id = 1, PropertyId = 10 };
-        _postRepoMock.Setup(p => p.GetByPropertyIdAsync(10)).ReturnsAsync(post);
+            var post = new PropertyPost
+            {
+                Id = 1,
+                PropertyId = 10,
+                LandlordId = 123,
+                Landlord = new ApplicationUser { Id = 123, Name = "Landlord A", Email = "ll@local" }
+            };
+            _postRepoMock.Setup(p => p.GetByPropertyIdAsync(10)).ReturnsAsync(post);
 
-        var result = await _service.ConfirmInterestAsync(1, false, true);
+            _propertyRepoMock.Setup(p => p.GetPropertyByIdAsync(10))
+                             .ReturnsAsync(new Property { Id = 10, Title = "P1", LandlordId = 123 });
 
-        Assert.IsTrue(result);
-        Assert.AreEqual(InterestedStatus.DealSuccess, ip.Status);
-        Assert.AreEqual(PropertyPost.PropertyPostStatus.Rented, post.Status);
-        Assert.AreEqual(InterestedStatus.None, others.First().Status);
+            _contractRepoMock.Setup(c => c.GetByPostIdAsync(1)).ReturnsAsync((RentalContract)null);
+
+            var result = await _service.ConfirmInterestAsync(1, isRenter: false, confirmed: true);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(InterestedStatus.DealSuccess, ip.Status);
+            Assert.AreEqual(PropertyPost.PropertyPostStatus.Rented, post.Status);
+            Assert.AreEqual(InterestedStatus.None, others.First().Status);
+        }
     }
-}
 }

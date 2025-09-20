@@ -32,9 +32,9 @@ namespace RealEstateManagement.UnitTests.Reviews.ReviewServiceTest
         [TestMethod]
         public async Task ReturnFalse_When_NotFound()
         {
-            _repoMock.Setup(r => r.HardDeleteReviewAsync(5)).ReturnsAsync(false);
+            _repoMock.Setup(r => r.HardDeleteReviewAsync(1)).ReturnsAsync(false);
 
-            var result = await _service.DeleteReviewWhenReportResolvedAsync(5);
+            var result = await _service.DeleteReviewWhenReportResolvedAsync(1);
 
             Assert.IsFalse(result);
         }
@@ -48,18 +48,6 @@ namespace RealEstateManagement.UnitTests.Reviews.ReviewServiceTest
             var result = await _service.DeleteReviewWhenReportResolvedAsync(0);
 
             // Assert
-            Assert.IsFalse(result);
-        }
-        [TestMethod]
-        public async Task AlwaysFail_For_TestingPurpose()
-        {
-            // Arrange
-            _repoMock.Setup(r => r.HardDeleteReviewAsync(5)).ReturnsAsync(true);
-
-            // Act
-            var result = await _service.DeleteReviewWhenReportResolvedAsync(5);
-
-            // Assert (cố tình sai: result TRUE nhưng mình Assert False)
             Assert.IsFalse(result);
         }
 

@@ -68,12 +68,12 @@ namespace RealEstateManagement.UnitTests.PropertiesTest.InterestedPropertyServic
         [TestMethod]
         public async Task Deletes_When_Exists()
         {
-            var ip = new InterestedProperty { Id = 1, RenterId = 1, PropertyId = 1 };
+            var ip = new InterestedProperty { Id = 1, RenterId = 2, PropertyId = 1 };
 
-            _interestedRepoMock.Setup(r => r.GetByRenterAndPropertyAsync(1, 1))
+            _interestedRepoMock.Setup(r => r.GetByRenterAndPropertyAsync(2, 1))
                      .ReturnsAsync(ip);
 
-            var result = await _service.RemoveInterestAsync(1, 1);
+            var result = await _service.RemoveInterestAsync(2, 1);
 
             Assert.IsTrue(result);
             _interestedRepoMock.Verify(r => r.DeleteAsync(ip), Times.Once);

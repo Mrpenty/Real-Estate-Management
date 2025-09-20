@@ -41,8 +41,8 @@ namespace RealEstateManagement.UnitTests.Sliders.SliderServiceTest
 
             var result = await _svc.GetAllAsync();
 
-            Assert.IsNotNull(result);
-            CollectionAssert.AreEqual(data, new List<Slider>(result));
+            Assert.AreEqual(2, result.Count());
+            CollectionAssert.AreEqual(data, result.ToList());
             _repo.Verify(r => r.GetAsync(), Times.Once);
         }
     }

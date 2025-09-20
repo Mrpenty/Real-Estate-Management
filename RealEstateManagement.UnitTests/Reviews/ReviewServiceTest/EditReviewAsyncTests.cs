@@ -59,10 +59,10 @@ namespace RealEstateManagement.UnitTests.Reviews.ReviewServiceTest
         [TestMethod]
         public async Task Fail_When_TooLate()
         {
-            var review = new Review { Id = 1, RenterId = 99, CreatedAt = DateTime.Now.AddMinutes(-10) };
-            _repoMock.Setup(r => r.GetReviewByIdAsync(1)).ReturnsAsync(review);
+            var review = new Review { Id = 3, RenterId = 99, CreatedAt = DateTime.Now.AddMinutes(-10) };
+            _repoMock.Setup(r => r.GetReviewByIdAsync(3)).ReturnsAsync(review);
 
-            var (ok, msg) = await _service.EditReviewAsync(1, 99, "New");
+            var (ok, msg) = await _service.EditReviewAsync(3, 99, "New");
 
             Assert.IsFalse(ok);
             Assert.AreEqual("Chỉ được sửa trong 5 phút đầu.", msg);
@@ -71,12 +71,12 @@ namespace RealEstateManagement.UnitTests.Reviews.ReviewServiceTest
         [TestMethod]
         public async Task Success_UpdateReview()
         {
-            var review = new Review { Id = 1, RenterId = 99, CreatedAt = DateTime.Now };
-            _repoMock.Setup(r => r.GetReviewByIdAsync(1)).ReturnsAsync(review);
+            var review = new Review { Id = 2, RenterId = 99, CreatedAt = DateTime.Now };
+            _repoMock.Setup(r => r.GetReviewByIdAsync(2)).ReturnsAsync(review);
             _repoMock.Setup(r => r.UpdateReviewAsync(review)).Returns(Task.CompletedTask);
             _repoMock.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
 
-            var (ok, msg) = await _service.EditReviewAsync(1, 99, "Updated!");
+            var (ok, msg) = await _service.EditReviewAsync(2, 99, "Updated!");
 
             Assert.IsTrue(ok);
             Assert.AreEqual("Cập nhật thành công", msg);
